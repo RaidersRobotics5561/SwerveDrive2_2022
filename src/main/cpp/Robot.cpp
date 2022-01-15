@@ -17,7 +17,6 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/DriverStation.h>
 #include <frc/livewindow/LiveWindow.h>
-#include <frc/Spark.h>
 
 #include "Encoders.hpp"
 #include "Enums.hpp"
@@ -392,7 +391,7 @@ void Robot::AutonomousPeriodic()
     double driveforward = 0;
     double strafe = 0;
     double speen = 0;
-
+    // init all the movement values to 0
     Read_Encoders(V_RobotInit,
                   a_encoderFrontLeftSteer.GetVoltage(),
                   a_encoderFrontRightSteer.GetVoltage(),
@@ -430,7 +429,7 @@ void Robot::AutonomousPeriodic()
       {
         blinkin.Set(-0.27);
       }
-
+      // sets blinkin values to the codes for the alliance colors
     AutonDriveMain(&driveforward,
                    &strafe,
                    &speen,
@@ -439,7 +438,7 @@ void Robot::AutonomousPeriodic()
                    gyro_yawangledegrees,
                    theCoolerInteger,
                    V_RobotInit);
-
+    
     DriveControlMain(driveforward,
                      strafe,
                      speen,
@@ -525,7 +524,7 @@ void Robot::AutonomousPeriodic()
     frc::SmartDashboard::PutNumber("Robot Y", (V_M_RobotDisplacementY));
     frc::SmartDashboard::PutNumber("V_AutonState", V_autonState);
 
-    frc::Wait(C_ExeTime);
+    frc::Wait(units::second_t C_ExeTime);
   }
 
 
@@ -984,7 +983,7 @@ else
     
     frc::SmartDashboard::PutNumber("pipeline", pipeline0.GetDouble(0));
 
-    frc::Wait(C_ExeTime);
+    frc::Wait(units::second_t C_ExeTime);
 }
 
 

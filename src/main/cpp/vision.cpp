@@ -1,5 +1,5 @@
 #include "vision.hpp"
-
+#include <math.h>
 /******************************************************************************
  * Function:     visionInit
  *

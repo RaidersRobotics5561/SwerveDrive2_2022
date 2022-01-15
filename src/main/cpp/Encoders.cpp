@@ -38,16 +38,16 @@ void Read_Encoders(bool            L_RobotInit,
                    double          a_encoderFrontRightSteerVoltage,
                    double          a_encoderRearLeftSteerVoltage,
                    double          a_encoderRearRightSteerVoltage,
-                   rev::CANEncoder m_encoderFrontLeftSteer,
-                   rev::CANEncoder m_encoderFrontRightSteer,
-                   rev::CANEncoder m_encoderRearLeftSteer,
-                   rev::CANEncoder m_encoderRearRightSteer,
-                   rev::CANEncoder m_encoderFrontLeftDrive,
-                   rev::CANEncoder m_encoderFrontRightDrive,
-                   rev::CANEncoder m_encoderRearLeftDrive,
-                   rev::CANEncoder m_encoderRearRightDrive,
-                   rev::CANEncoder m_encoderTopShooter,
-                   rev::CANEncoder m_encoderBottomShooter)
+                   rev::SparkMaxRelativeEncoder m_encoderFrontLeftSteer,
+                   rev::SparkMaxRelativeEncoder m_encoderFrontRightSteer,
+                   rev::SparkMaxRelativeEncoder m_encoderRearLeftSteer,
+                   rev::SparkMaxRelativeEncoder m_encoderRearRightSteer,
+                   rev::SparkMaxRelativeEncoder m_encoderFrontLeftDrive,
+                   rev::SparkMaxRelativeEncoder m_encoderFrontRightDrive,
+                   rev::SparkMaxRelativeEncoder m_encoderRearLeftDrive,
+                   rev::SparkMaxRelativeEncoder m_encoderRearRightDrive,
+                   rev::SparkMaxRelativeEncoder m_encoderTopShooter,
+                   rev::SparkMaxRelativeEncoder m_encoderBottomShooter)
   {
   T_RobotCorner index;
 
