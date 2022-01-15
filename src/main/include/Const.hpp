@@ -1,5 +1,7 @@
 #include "Enums.hpp"
 const double C_ExeTime = 0.01;
+// const units::time::second C_ExeTime = 0.01;
+
 const double C_RadtoDeg = 57.2958;
 const double C_Deg2Rad = 0.017453292519943295;
 const double C_PI = 3.14159265358979;

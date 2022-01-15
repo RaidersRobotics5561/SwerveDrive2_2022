@@ -20,9 +20,9 @@ void GyroRobotInit()
       NavX = new AHRS(SPI::Port::kMXP);
     }
     catch(const std::exception e){
-      std::string err_string = "Error instantiating navX-MXP:  ";
-      err_string += e.what();
-      DriverStation::ReportError(err_string.c_str());
+      // std::string err_string = "Error instantiating navX-MXP:  ";
+      // err_string += e.what();
+      // DriverStation::ReportError(err_string.c_str());
     }
 }
 

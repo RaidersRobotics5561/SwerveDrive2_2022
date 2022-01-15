@@ -5,8 +5,8 @@
  *
  * Description:  This function sets up camera and lights.
  ******************************************************************************/
-void visionInit(std::shared_ptr<NetworkTable> ntTable0,
-                std::shared_ptr<NetworkTable> ntTable1,
+void visionInit(std::shared_ptr<nt::NetworkTable> ntTable0,
+                std::shared_ptr<nt::NetworkTable> ntTable1,
                 nt::NetworkTableInstance inst)
 {
     ntTable1->PutNumber("ledControl", 1);
@@ -19,8 +19,8 @@ void visionInit(std::shared_ptr<NetworkTable> ntTable0,
  *
  * Description:  This function turns on driver mode and turns off lights.
  ******************************************************************************/
-void visionOff(std::shared_ptr<NetworkTable> ntTable0,
-                std::shared_ptr<NetworkTable> ntTable1,
+void visionOff(std::shared_ptr<nt::NetworkTable> ntTable0,
+                std::shared_ptr<nt::NetworkTable> ntTable1,
                 nt::NetworkTableInstance inst,
                 bool ntStart1,
                 bool ntStart2,

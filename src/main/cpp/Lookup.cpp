@@ -254,39 +254,6 @@ double LookUp2D_Table(double const *L_X_Axis,
 
 
 /******************************************************************************
- * Function:     DesiredAutonLocation
- *
- * Description:  Determine the desired X/Y location based on the current time.
- ******************************************************************************/
-void DesiredAutonLocation(double  L_t_AutonTime,
-                          double *L_L_X_Location,
-                          double *L_L_Y_Location)
-  {
-  // double L_L_X_Loc = 0.0;
-  // double L_L_Y_Loc = 0.0;
-  // int L_i_X_AxisSize             = (int)(sizeof(K_t_AutonXY_PositionAxis) / sizeof(K_L_AutonX_Position[0]));
-  // int L_i_X_CalArraySize         = (int)(sizeof(K_L_AutonX_Position) / sizeof(K_L_AutonX_Position[0]));
-  // int L_i_Y_AxisSize             = (int)(sizeof(K_t_AutonXY_PositionAxis) / sizeof(K_L_AutonY_Position[0]));
-  // int L_i_Y_CalArraySize         = (int)(sizeof(K_L_AutonY_Position) / sizeof(K_L_AutonY_Position[0]));
-
-  // L_L_X_Loc = LookUp1D_Table(&K_t_AutonXY_PositionAxis[0],
-  //                            &K_L_AutonX_Position[0],
-  //                             L_i_X_AxisSize,
-  //                             L_i_X_CalArraySize,
-  //                             L_t_AutonTime);
-
-  // L_L_Y_Loc = LookUp1D_Table(&K_t_AutonXY_PositionAxis[0],
-  //                            &K_L_AutonY_Position[0],
-  //                             L_i_Y_AxisSize,
-  //                             L_i_Y_CalArraySize,
-  //                             L_t_AutonTime);
-
-  // *L_L_X_Location = L_L_X_Loc;
-  // *L_L_Y_Location = L_L_Y_Loc;
-  }
-
-
-/******************************************************************************
  * Function:     DesiredAutonLocation2
  *
  * Description:  Determine the desired X/Y location based on the current time.
@@ -481,6 +448,37 @@ void DesiredAutonLocation2(double  L_t_AutonTime,
   *L_L_Y_Location = L_L_Y_Loc;
   }
 
+/******************************************************************************
+ * Function:     DesiredAutonCmd
+ *
+ * Description:  Determine the desired X/Y location based on the current time.
+ ******************************************************************************/
+void DesiredAutonLocation(double  L_t_AutonTime,
+                          double *L_L_X_Location,
+                          double *L_L_Y_Location)
+  {
+  // double L_L_X_Loc = 0.0;
+  // double L_L_Y_Loc = 0.0;
+  // int L_i_X_AxisSize             = (int)(sizeof(K_t_AutonXY_PositionAxis) / sizeof(K_L_AutonX_Position[0]));
+  // int L_i_X_CalArraySize         = (int)(sizeof(K_L_AutonX_Position) / sizeof(K_L_AutonX_Position[0]));
+  // int L_i_Y_AxisSize             = (int)(sizeof(K_t_AutonXY_PositionAxis) / sizeof(K_L_AutonY_Position[0]));
+  // int L_i_Y_CalArraySize         = (int)(sizeof(K_L_AutonY_Position) / sizeof(K_L_AutonY_Position[0]));
+
+  // L_L_X_Loc = LookUp1D_Table(&K_t_AutonXY_PositionAxis[0],
+  //                            &K_L_AutonX_Position[0],
+  //                             L_i_X_AxisSize,
+  //                             L_i_X_CalArraySize,
+  //                             L_t_AutonTime);
+
+  // L_L_Y_Loc = LookUp1D_Table(&K_t_AutonXY_PositionAxis[0],
+  //                            &K_L_AutonY_Position[0],
+  //                             L_i_Y_AxisSize,
+  //                             L_i_Y_CalArraySize,
+  //                             L_t_AutonTime);
+
+  // *L_L_X_Location = L_L_X_Loc;
+  // *L_L_Y_Location = L_L_Y_Loc;
+  }
 
 /******************************************************************************
  * Function:     DesiredSpeed

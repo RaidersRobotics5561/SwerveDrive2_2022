@@ -30,7 +30,7 @@
 #include "AutoTarget.hpp"
 #include <frc/DigitalInput.h>
 
-#include "Utils/PIDConfig.hpp"
+// #include "Utils/PIDConfig.hpp"
 #include "Odometry.hpp"
 #include "Auton.hpp"
 
@@ -63,10 +63,10 @@ double V_AutoTargetBeltPower;
 
 bool   V_RobotInit;
 
-std::shared_ptr<NetworkTable> vision0;
-std::shared_ptr<NetworkTable> vision1;
-std::shared_ptr<NetworkTable> lidar;
-std::shared_ptr<NetworkTable> ledLight;
+std::shared_ptr<nt::NetworkTable> vision0;
+std::shared_ptr<nt::NetworkTable> vision1;
+std::shared_ptr<nt::NetworkTable> lidar;
+std::shared_ptr<nt::NetworkTable> ledLight;
 
 nt::NetworkTableInstance inst;
 nt::NetworkTableEntry driverMode0;
@@ -124,7 +124,7 @@ double V_M_RobotDisplacementY = 0;
 
 double V_elevatorValue = 0;
 
-PIDConfig UpperShooterPIDConfig {0.0008, 0.000001, 0.0006};
+// PIDConfig UpperShooterPIDConfig {0.0008, 0.000001, 0.0006};
 
 frc::DigitalInput ir_sensor{1};
 
@@ -162,7 +162,7 @@ void Robot::RobotInit() {
 
     GyroRobotInit();
 
-    compressor.SetClosedLoopControl(true);
+    // compressor.SetClosedLoopControl(true);
     inst = nt::NetworkTableInstance::Create();
     inst.StartClient("10.55.61.24");
     inst.StartDSClient();
@@ -307,7 +307,7 @@ void Robot::RobotPeriodic()
     // frc::SmartDashboard::PutNumber("lidarDistance", lidarDistance.GetDouble(0));
 
     #ifdef PID_DEBUG
-      UpperShooterPIDConfig.Debug("Upper Shooter PID Control");
+      // UpperShooterPIDConfig.Debug("Upper Shooter PID Control");
     #endif
 
     //Run Gyro readings when the robot starts
@@ -369,7 +369,7 @@ void Robot::AutonomousInit()
       V_M_RobotDisplacementX = 0;
       V_M_RobotDisplacementY = 0;
 
-      AutonDriveReset();
+      // AutonDriveReset();
 
       originalPosition = targetYaw0.GetDouble(0);
       vision0->PutNumber("pipeline", 0);
@@ -429,33 +429,300 @@ void Robot::AutonomousPeriodic()
       {
         blinkin.Set(-0.27);
       }
-      // sets blinkin values to the codes for the alliance colors
-    AutonDriveMain(&driveforward,
-                   &strafe,
-                   &speen,
-                   V_M_RobotDisplacementY,
-                   V_M_RobotDisplacementX,
-                   gyro_yawangledegrees,
-                   theCoolerInteger,
-                   V_RobotInit);
-    
-    DriveControlMain(driveforward,
-                     strafe,
-                     speen,
-                     0.20, //c_joyStick.GetRawAxis(3)
-                     V_autonTargetCmd,
-                     c_joyStick.GetRawButton(3),
-                     c_joyStick.GetRawButton(4),
-                     c_joyStick.GetRawButton(5),
-                     gyro_yawangledegrees,
-                     gyro_yawanglerad,
-                     targetYaw0.GetDouble(0),
-                     &V_WheelAngleFwd[0],
-                     &V_WheelAngleRev[0],
-                     &V_WS[0],
-                     &V_WA[0],
-                     &V_RobotInit,
-                     &V_autonTargetFin);
+
+      switch (theCoolerInteger)
+      {
+        case 1:
+          if(timeleft > 8)
+          {
+            V_ShooterSpeedDesiredFinalUpper = -1400;
+            V_ShooterSpeedDesiredFinalLower = -1250;
+            // V_ShooterSpeedDesiredFinalUpper = DesiredUpperBeamSpeed(distanceTarget);
+            // V_ShooterSpeedDesiredFinalLower = DesiredLowerBeamSpeed(distanceTarget);
+          }
+          else
+          {
+            V_ShooterSpeedDesiredFinalUpper = 0;
+            V_ShooterSpeedDesiredFinalLower = 0;
+          }
+          V_ShooterSpeedDesired[E_TopShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_TopShooter], 50);
+          V_ShooterSpeedDesired[E_BottomShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_BottomShooter], 50);
+
+          if(timeleft < 13 && timeleft > 8)
+          {
+            m_elevateDaBalls.Set(ControlMode::PercentOutput, 0.420);
+          }
+          else
+          {
+            m_elevateDaBalls.Set(ControlMode::PercentOutput, 0);
+          }
+
+          if(timeleft < 8 && timeleft > 4)
+          {
+            driveforward = (0.85);
+          }
+
+          break;
+
+        case 2:
+          if(timeleft > 10)
+          {
+            V_ShooterSpeedDesiredFinalUpper = DesiredUpperBeamSpeed(distanceTarget);
+            V_ShooterSpeedDesiredFinalLower = DesiredLowerBeamSpeed(distanceTarget);
+          }
+          else
+          {
+            V_ShooterSpeedDesiredFinalUpper = 0;
+            V_ShooterSpeedDesiredFinalLower = 0;
+          }
+          V_ShooterSpeedDesired[E_TopShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_TopShooter], 50);
+          V_ShooterSpeedDesired[E_BottomShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_BottomShooter], 50);
+
+          if(timeleft < 14.5 && timeleft > 10)
+          {
+            m_elevateDaBalls.Set(ControlMode::PercentOutput, 0.8);
+          }
+          else
+          {
+            m_elevateDaBalls.Set(ControlMode::PercentOutput, 0);
+          }
+
+          if(timeleft < 15 && timeleft > 10)
+          {
+            driveforward = (0.420);
+          }
+
+          break;
+        
+      case 3:
+      
+      if(V_autonState == 0)
+          {
+            driveforward = (1);
+            V_autonTimer += C_ExeTime;
+            if (V_autonTimer >= 2){
+              driveforward = (0);
+              V_autonState++;
+              V_autonTimer = 0;
+            }
+          }
+      else if(V_autonState == 1)
+          {
+            V_autonTargetCmd = true;
+            if (V_autonTargetFin == true){
+                V_autonTargetCmd = false;
+                V_autonTargetFin = false;
+                V_autonState++;
+            }
+          }
+      
+      else if(V_autonState == 2)
+          {
+            V_ShooterSpeedDesiredFinalUpper = DesiredUpperBeamSpeed(distanceTarget);
+            V_ShooterSpeedDesiredFinalLower = DesiredLowerBeamSpeed(distanceTarget);
+            V_ShooterSpeedDesired[E_TopShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_TopShooter], 50);
+            V_ShooterSpeedDesired[E_BottomShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_BottomShooter], 50);
+  
+              V_autonTimer += C_ExeTime;
+              if (V_autonTimer >= 1){
+              V_autonState++;
+              V_autonTimer = 0;
+              }
+          }
+      else if (V_autonState == 3){
+        V_elevatorValue = 0.8;
+        V_autonTimer += C_ExeTime;
+            if (V_autonTimer >= 1.5){
+              V_elevatorValue = 0;
+              V_autonState++;
+              V_autonTimer = 0;
+            }
+        }
+      if(V_autonState == 4)
+          {
+            strafe = (-1.0);
+            V_ShooterSpeedDesiredFinalUpper = 0;
+            V_ShooterSpeedDesiredFinalLower = 0;
+            V_ShooterSpeedDesired[E_TopShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_TopShooter], 50);
+            V_ShooterSpeedDesired[E_BottomShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_BottomShooter], 50);
+            V_autonTimer += C_ExeTime;
+            if (V_autonTimer >= 2){
+              strafe = (0);
+              V_autonState++;
+              V_autonTimer = 0;
+            }
+          }
+      else if(V_autonState == 5)
+          {
+            V_autonTargetCmd = true;
+            if (V_autonTargetFin == true){
+                V_autonTargetCmd = false;
+                V_autonTargetFin = false;
+                V_autonState++;
+            }
+          }
+      
+      else if(V_autonState == 6)
+          {
+            V_ShooterSpeedDesiredFinalUpper = DesiredUpperBeamSpeed(distanceTarget);
+            V_ShooterSpeedDesiredFinalLower = DesiredLowerBeamSpeed(distanceTarget);
+            V_ShooterSpeedDesired[E_TopShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_TopShooter], 50);
+            V_ShooterSpeedDesired[E_BottomShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_BottomShooter], 50);
+  
+              V_autonTimer += C_ExeTime;
+              if (V_autonTimer >= 1){
+              V_autonState++;
+              V_autonTimer = 0;
+              }
+          }
+      else if (V_autonState == 7){
+        V_elevatorValue = 0.8;
+        V_autonTimer += C_ExeTime;
+            if (V_autonTimer >= 1.5){
+              V_elevatorValue = 0;
+              V_autonState++;
+              V_autonTimer = 0;
+            }
+      }
+      if(V_autonState == 8)
+          {
+            V_ShooterSpeedDesiredFinalUpper = 0;
+            V_ShooterSpeedDesiredFinalLower = 0;
+            V_ShooterSpeedDesired[E_TopShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_TopShooter], 50);
+            V_ShooterSpeedDesired[E_BottomShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_BottomShooter], 50);
+            strafe = (1.0);
+            V_autonTimer += C_ExeTime;
+            if (V_autonTimer >= 2){
+              strafe = (0);
+              V_autonState++;
+              V_autonTimer = 0;
+            }
+          }
+      else if(V_autonState == 9)
+          {
+            V_autonTargetCmd = true;
+            if (V_autonTargetFin == true){
+                V_autonTargetCmd = false;
+                V_autonTargetFin = false;
+                V_autonState++;
+            }
+          }
+      
+      else if(V_autonState == 10)
+          {
+            V_ShooterSpeedDesiredFinalUpper = DesiredUpperBeamSpeed(distanceTarget);
+            V_ShooterSpeedDesiredFinalLower = DesiredLowerBeamSpeed(distanceTarget);
+            V_ShooterSpeedDesired[E_TopShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_TopShooter], 50);
+            V_ShooterSpeedDesired[E_BottomShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_BottomShooter], 50);
+  
+              V_autonTimer += C_ExeTime;
+              if (V_autonTimer >= 1){
+              V_autonState++;
+              V_autonTimer = 0;
+              }
+          }
+      else if (V_autonState == 11){
+        V_elevatorValue = 0.8;
+        V_autonTimer += C_ExeTime;
+            if (V_autonTimer >= 1.5){
+              V_elevatorValue = 0;
+              V_autonState++;
+              V_autonTimer = 0;
+            }
+         }
+     else if(V_autonState == 12)
+          {
+            V_ShooterSpeedDesiredFinalUpper = 0;
+            V_ShooterSpeedDesiredFinalLower = 0;
+            V_ShooterSpeedDesired[E_TopShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_TopShooter], 50);
+            V_ShooterSpeedDesired[E_BottomShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_BottomShooter], 50);
+            V_autonTimer += C_ExeTime;
+            if (V_autonTimer >= 1){
+              V_autonState++;
+              V_autonTimer = 0;
+            }
+          }
+     else if(V_autonState == 13){
+          speen = 1.0;
+          V_autonTimer += C_ExeTime;
+        if (V_autonTimer >= 3){
+              speen = 0.0;
+              V_autonState++;
+              V_autonTimer = 0;
+            }
+      }
+      break;
+
+      case 4:
+        AutonDriveMain(&driveforward,
+                       &strafe,
+                       &speen,
+                        V_M_RobotDisplacementY,
+                        V_M_RobotDisplacementX,
+                        gyro_yawangledegrees,
+                        0,
+                        V_RobotInit);
+
+      // case 5 is expirimental, do not use for any real driving
+      // probably works
+      case 5 :
+        GyroZero();
+        if(V_autonState == 0)
+          {
+            driveforward = (.7);
+            if (V_M_RobotDisplacementY <= -30.0){
+              driveforward = (0.0);
+              V_autonState++;
+              
+            }
+          }
+        else if(V_autonState == 1)
+          {
+            strafe = (.7);
+            if (V_M_RobotDisplacementX <= -30.0){
+              strafe = (0.0);
+              V_autonState++;
+            }
+          }
+        else if(V_autonState == 2)
+          {
+            driveforward = (-.7);
+            if (V_M_RobotDisplacementY >= 0.0){
+              driveforward = (0.0);
+              V_autonState++;
+            }
+          }
+        else if(V_autonState == 3)
+          {
+            strafe = (-.7);
+            if (V_M_RobotDisplacementX >= 0.0){
+              strafe = (0.0);
+            }
+          }
+      break;
+      }
+
+frc::SmartDashboard::PutNumber("V_ShooterSpeedDesiredFinalUpper", V_ShooterSpeedDesiredFinalUpper);
+frc::SmartDashboard::PutNumber("V_ShooterSpeedDesired[E_TopShooter]", V_ShooterSpeedDesired[E_TopShooter]);
+frc::SmartDashboard::PutNumber("V_AutonState", V_autonState);
+      DriveControlMain(driveforward,
+                       strafe,
+                       speen,
+                       c_joyStick.GetRawAxis(3),
+                       V_autonTargetCmd,
+                       c_joyStick.GetRawButton(3),
+                       c_joyStick.GetRawButton(4),
+                       c_joyStick.GetRawButton(5),
+                       gyro_yawangledegrees,
+                       gyro_yawanglerad,
+                       targetYaw0.GetDouble(0),
+                       &V_WheelAngleFwd[0],
+                       &V_WheelAngleRev[0],
+                       &V_WS[0],
+                       &V_WA[0],
+                       &V_RobotInit,
+                       &V_autonTargetFin);
+        
 
     for (index = E_FrontLeft;
          index < E_RobotCornerSz;
@@ -524,7 +791,7 @@ void Robot::AutonomousPeriodic()
     frc::SmartDashboard::PutNumber("Robot Y", (V_M_RobotDisplacementY));
     frc::SmartDashboard::PutNumber("V_AutonState", V_autonState);
 
-    frc::Wait(units::second_t C_ExeTime);
+    // frc::Wait(units::millisecond_t::value::1);
   }
 
 
@@ -983,7 +1250,7 @@ else
     
     frc::SmartDashboard::PutNumber("pipeline", pipeline0.GetDouble(0));
 
-    frc::Wait(units::second_t C_ExeTime);
+    // frc::Wait(units::second_t C_ExeTime);
 }
 
 

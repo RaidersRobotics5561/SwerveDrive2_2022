@@ -20,6 +20,8 @@
 
 #include <frc/DoubleSolenoid.h>
 #include <frc/Compressor.h>
+#include <networktables/NetworkTable.h>
+
 class Robot : public frc::TimedRobot {
  public:
   void RobotInit() override;
@@ -60,8 +62,6 @@ class Robot : public frc::TimedRobot {
   rev::SparkMaxPIDController m_topShooterpid = m_topShooterMotor.GetPIDController();
   rev::SparkMaxPIDController m_bottomShooterpid = m_bottomShooterMotor.GetPIDController();
   rev::SparkMaxPIDController m_liftpid          = m_liftMotor.GetPIDController();
-
-
 
   rev::SparkMaxRelativeEncoder m_encoderFrontLeftSteer  = m_frontLeftSteerMotor.GetEncoder();
   rev::SparkMaxRelativeEncoder m_encoderFrontLeftDrive  = m_frontLeftDriveMotor.GetEncoder();
