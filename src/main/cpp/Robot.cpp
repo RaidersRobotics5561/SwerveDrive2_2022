@@ -8,7 +8,7 @@
  * */
 
 //NOTE: Set this to TEST for testing of speeds and PID gains.  Set to COMP for competion
-#define COMP
+#define TEST
 //NOTE: Set this to allow Shuffleboard configuration of PIDConfig objects (Will override defaults)
 #define PID_DEBUG
 
@@ -124,6 +124,8 @@ double V_M_RobotDisplacementY = 0;
 
 double V_elevatorValue = 0;
 
+double V_testspeed = 0;
+
 // PIDConfig UpperShooterPIDConfig {0.0008, 0.000001, 0.0006};
 
 frc::DigitalInput ir_sensor{1};
@@ -190,6 +192,8 @@ void Robot::RobotInit() {
     lidarDistance         = lidar->GetEntry("lidarDistance");
 
  #ifdef TEST
+    frc::SmartDashboard::PutNumber("Speed Desired Top", V_testspeed);
+    frc::SmartDashboard::PutNumber("Speed Desired Bottom", V_testspeed);
     frc::SmartDashboard::PutNumber("Upper_P_Gx", 0);
     frc::SmartDashboard::PutNumber("Upper_I_Gx", 0);
     frc::SmartDashboard::PutNumber("Upper_D_Gx", 0);
@@ -1050,13 +1054,13 @@ void Robot::TeleopPeriodic()
       V_ShooterSpeedDesired[E_BottomShooter] = 0;
     }
 #endif
-#ifdef TEST
-    frc::SmartDashboard::PutNumber("Speed Desired Top", 0);
-    frc::SmartDashboard::PutNumber("Speed Desired Bottom", 0);
-    V_ShooterSpeedDesiredFinalUpper    = frc::SmartDashboard::GetNumber("Speed Desired Top", 0);
-    V_ShooterSpeedDesiredFinalLower = frc::SmartDashboard::GetNumber("Speed Desired Bottom", 0);
+#ifdef TEST 
+    V_testspeed = frc::SmartDashboard::GetNumber("Speed Desired",V_testspeed );
+    V_ShooterSpeedDesiredFinalUpper = V_testspeed;
+    V_ShooterSpeedDesiredFinalLower = V_testspeed;
     V_ShooterSpeedDesired[E_TopShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_TopShooter], 40);
     V_ShooterSpeedDesired[E_BottomShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_BottomShooter], 40);
+    
 
     double upper_P_Gx = frc::SmartDashboard::GetNumber("Upper_P_Gx", 0);
     double upper_I_Gx = frc::SmartDashboard::GetNumber("Upper_I_Gx", 0);
@@ -1250,7 +1254,7 @@ else
     
     frc::SmartDashboard::PutNumber("pipeline", pipeline0.GetDouble(0));
 
-    // frc::Wait(units::second_t C_ExeTime);
+    frc::Wait(0.01_s);
 }
 
 
