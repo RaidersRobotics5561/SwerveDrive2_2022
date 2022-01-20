@@ -125,6 +125,8 @@ double V_M_RobotDisplacementY = 0;
 double V_elevatorValue = 0;
 
 double V_testspeed = 0;
+double V_testIntake = 0;
+double V_testElevator = 0;
 
 // PIDConfig UpperShooterPIDConfig {0.0008, 0.000001, 0.0006};
 
@@ -142,7 +144,7 @@ void Robot::RobotInit() {
 //  m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
 //  m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
 //  frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
-
+    #ifndef TEST
     m_frontLeftSteerMotor.RestoreFactoryDefaults();
     m_frontLeftDriveMotor.RestoreFactoryDefaults();
     m_frontRightSteerMotor.RestoreFactoryDefaults();
@@ -156,11 +158,15 @@ void Robot::RobotInit() {
     m_liftMotor.RestoreFactoryDefaults();
 
     m_liftMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
-    
+    #endif
 
     V_RobotInit = true;
     V_M_RobotDisplacementY = 0;
     V_M_RobotDisplacementX = 0;
+
+    //m_conveyDaBalls2 {17};
+    //m_intake2 {18};
+    //m_elevateDaBalls2
 
     GyroRobotInit();
 
@@ -192,6 +198,11 @@ void Robot::RobotInit() {
     lidarDistance         = lidar->GetEntry("lidarDistance");
 
  #ifdef TEST
+    V_testIntake = 0;
+    V_testElevator = 0;
+    V_testspeed = 0;
+    frc::SmartDashboard::PutNumber("Intake Power",V_testIntake);
+    frc::SmartDashboard::PutNumber("Elevator Power",V_testElevator);
     frc::SmartDashboard::PutNumber("Speed Desired Top", V_testspeed);
     frc::SmartDashboard::PutNumber("Speed Desired Bottom", V_testspeed);
     frc::SmartDashboard::PutNumber("Upper_P_Gx", 0);
@@ -1055,9 +1066,13 @@ void Robot::TeleopPeriodic()
     }
 #endif
 #ifdef TEST 
-    V_testspeed = frc::SmartDashboard::GetNumber("Speed Desired",V_testspeed );
+
+    V_testIntake = frc::SmartDashboard::GetNumber("Intake Power",V_testIntake);
+    V_testElevator = frc::SmartDashboard::GetNumber("Elevator Power",V_testElevator);
+
+    V_testspeed = frc::SmartDashboard::GetNumber("Speed Desired",V_testspeed);
     V_ShooterSpeedDesiredFinalUpper = V_testspeed;
-    V_ShooterSpeedDesiredFinalLower = V_testspeed;
+    V_ShooterSpeedDesiredFinalLower = -V_testspeed;
     V_ShooterSpeedDesired[E_TopShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_TopShooter], 40);
     V_ShooterSpeedDesired[E_BottomShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_BottomShooter], 40);
     
@@ -1148,12 +1163,14 @@ else
 }
 #endif
 #ifdef TEST
+    // m_elevateDaBalls2.Set(ControlMode::PercentOutput, V_testElevator);
+    // m_intake2.Set(ControlMode::PercentOutput, V_testIntake);
     m_topShooterpid.SetReference(V_ShooterSpeedDesired[E_TopShooter], rev::ControlType::kVelocity);
     m_bottomShooterpid.SetReference(V_ShooterSpeedDesired[E_BottomShooter], rev::ControlType::kVelocity);
 #endif
 
 
-
+#ifndef TEST
     m_fortuneWheel.Set(ControlMode::PercentOutput, L_FortuneMotor);
 
     m_frontLeftDriveMotor.Set(V_WheelSpeedCmnd[E_FrontLeft]);
@@ -1253,8 +1270,8 @@ else
     }
     
     frc::SmartDashboard::PutNumber("pipeline", pipeline0.GetDouble(0));
-
-    frc::Wait(0.01_s);
+#endif
+    frc::Wait(0.001_s);
 }
 
 

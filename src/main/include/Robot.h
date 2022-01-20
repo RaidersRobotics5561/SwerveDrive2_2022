@@ -37,27 +37,36 @@ class Robot : public frc::TimedRobot {
   frc::AnalogInput a_encoderRearLeftSteer{3};
   frc::AnalogInput a_encoderRearRightSteer{0};
 
-  rev::CANSparkMax m_frontLeftSteerMotor {frontLeftSteerDeviceID,  rev::CANSparkMax::MotorType::kBrushless};
+  // rev::CANSparkMax m_frontLeftSteerMotor {frontLeftSteerDeviceID,  rev::CANSparkMax::MotorType::kBrushless};
+    rev::CANSparkMax m_frontLeftSteerMotor {17,  rev::CANSparkMax::MotorType::kBrushless};
+
   rev::CANSparkMax m_frontLeftDriveMotor {frontLeftDriveDeviceID,  rev::CANSparkMax::MotorType::kBrushless};
   rev::CANSparkMax m_frontRightSteerMotor{frontRightSteerDeviceID, rev::CANSparkMax::MotorType::kBrushless};
   rev::CANSparkMax m_frontRightDriveMotor{frontRightDriveDeviceID, rev::CANSparkMax::MotorType::kBrushless};
   rev::CANSparkMax m_rearLeftSteerMotor  {rearLeftSteerDeviceID,   rev::CANSparkMax::MotorType::kBrushless};
-  rev::CANSparkMax m_rearLeftDriveMotor  {rearLeftDriveDeviceID,   rev::CANSparkMax::MotorType::kBrushless};
+  // rev::CANSparkMax m_rearLeftDriveMotor  {rearLeftDriveDeviceID,   rev::CANSparkMax::MotorType::kBrushless};
+  rev::CANSparkMax m_rearLeftDriveMotor  {16,   rev::CANSparkMax::MotorType::kBrushless};
+
   rev::CANSparkMax m_rearRightSteerMotor {rearRightSteerDeviceID,  rev::CANSparkMax::MotorType::kBrushless};
   rev::CANSparkMax m_rearRightDriveMotor {rearRightDriveDeviceID,  rev::CANSparkMax::MotorType::kBrushless};
   rev::CANSparkMax m_topShooterMotor     {topShooterID,  rev::CANSparkMax::MotorType::kBrushless};
   rev::CANSparkMax m_bottomShooterMotor  {bottomShooterID,  rev::CANSparkMax::MotorType::kBrushless};
   rev::CANSparkMax m_liftMotor           {liftID,                  rev::CANSparkMax::MotorType::kBrushless};
 
+
+
   VictorSPX m_conveyDaBalls {12};
   VictorSPX m_fortuneWheel {13};
-  VictorSPX m_intake {15};
-  VictorSPX m_elevateDaBalls {16};
+  VictorSPX m_intake {14};
+  VictorSPX m_elevateDaBalls {15};
 
-  frc::Compressor compressor {14, frc::PneumaticsModuleType::CTREPCM};
+  ctre::phoenix::motorcontrol::can::TalonSRX m_intake2 {1};
+  ctre::phoenix::motorcontrol::can::TalonSRX m_elevateDaBalls2 {6};
 
-  frc::DoubleSolenoid lift {14,frc::PneumaticsModuleType::CTREPCM, 0, 1};
-  frc::DoubleSolenoid intake {14,frc::PneumaticsModuleType::CTREPCM, 2, 3};
+  // frc::Compressor compressor {14, frc::PneumaticsModuleType::CTREPCM};
+
+  // frc::DoubleSolenoid lift {14,frc::PneumaticsModuleType::CTREPCM, 0, 1};
+  // frc::DoubleSolenoid intake {14,frc::PneumaticsModuleType::CTREPCM, 2, 3};
   
   rev::SparkMaxPIDController m_topShooterpid = m_topShooterMotor.GetPIDController();
   rev::SparkMaxPIDController m_bottomShooterpid = m_bottomShooterMotor.GetPIDController();
