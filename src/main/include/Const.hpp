@@ -1,6 +1,8 @@
 #include "Enums.hpp"
+#include <units/time.h>
+
 const double C_ExeTime = 0.01;
-// const units::time::second C_ExeTime = 0.01;
+const units::second_t C_ExeTime_t = 0.01_s;
 
 const double C_RadtoDeg = 57.2958;
 const double C_Deg2Rad = 0.017453292519943295;

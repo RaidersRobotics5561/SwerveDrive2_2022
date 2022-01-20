@@ -30,7 +30,7 @@
 #include "AutoTarget.hpp"
 #include <frc/DigitalInput.h>
 
-// #include "Utils/PIDConfig.hpp"
+#include "Utils/PIDConfig.hpp"
 #include "Odometry.hpp"
 #include "Auton.hpp"
 
@@ -163,10 +163,6 @@ void Robot::RobotInit() {
     V_RobotInit = true;
     V_M_RobotDisplacementY = 0;
     V_M_RobotDisplacementX = 0;
-
-    //m_conveyDaBalls2 {17};
-    //m_intake2 {18};
-    //m_elevateDaBalls2
 
     GyroRobotInit();
 
@@ -402,7 +398,7 @@ void Robot::AutonomousInit()
 void Robot::AutonomousPeriodic()
   {
     T_RobotCorner index;
-    double timeleft = frc::DriverStation::GetInstance().GetMatchTime();
+    double timeleft = frc::Timer::GetMatchTime().value();
     double driveforward = 0;
     double strafe = 0;
     double speen = 0;
@@ -806,7 +802,7 @@ frc::SmartDashboard::PutNumber("V_AutonState", V_autonState);
     frc::SmartDashboard::PutNumber("Robot Y", (V_M_RobotDisplacementY));
     frc::SmartDashboard::PutNumber("V_AutonState", V_autonState);
 
-    // frc::Wait(units::millisecond_t::value::1);
+    frc::Wait(C_ExeTime_t);
   }
 
 
@@ -1163,8 +1159,8 @@ else
 }
 #endif
 #ifdef TEST
-    // m_elevateDaBalls2.Set(ControlMode::PercentOutput, V_testElevator);
-    // m_intake2.Set(ControlMode::PercentOutput, V_testIntake);
+    m_elevateDaBalls2.Set(ControlMode::PercentOutput, V_testElevator);
+    m_intake2.Set(ControlMode::PercentOutput, V_testIntake);
     m_topShooterpid.SetReference(V_ShooterSpeedDesired[E_TopShooter], rev::ControlType::kVelocity);
     m_bottomShooterpid.SetReference(V_ShooterSpeedDesired[E_BottomShooter], rev::ControlType::kVelocity);
 #endif
@@ -1271,7 +1267,7 @@ else
     
     frc::SmartDashboard::PutNumber("pipeline", pipeline0.GetDouble(0));
 #endif
-    frc::Wait(0.001_s);
+    frc::Wait(C_ExeTime_t);
 }
 
 
