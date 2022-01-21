@@ -68,9 +68,9 @@ class Robot : public frc::TimedRobot {
   // frc::DoubleSolenoid lift {14,frc::PneumaticsModuleType::CTREPCM, 0, 1};
   // frc::DoubleSolenoid intake {14,frc::PneumaticsModuleType::CTREPCM, 2, 3};
   
-  rev::SparkMaxPIDController m_topShooterpid = m_topShooterMotor.GetPIDController();
-  rev::SparkMaxPIDController m_bottomShooterpid = m_bottomShooterMotor.GetPIDController();
-  rev::SparkMaxPIDController m_liftpid          = m_liftMotor.GetPIDController();
+  // rev::SparkMaxPIDController m_topShooterpid = m_topShooterMotor.GetPIDController();
+  // rev::SparkMaxPIDController m_bottomShooterpid = m_bottomShooterMotor.GetPIDController();
+  // rev::SparkMaxPIDController m_liftpid          = m_liftMotor.GetPIDController();
 
   rev::SparkMaxRelativeEncoder m_encoderFrontLeftSteer  = m_frontLeftSteerMotor.GetEncoder();
   rev::SparkMaxRelativeEncoder m_encoderFrontLeftDrive  = m_frontLeftDriveMotor.GetEncoder();

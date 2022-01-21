@@ -242,19 +242,19 @@ void Robot::RobotInit() {
     double lower_Max = 1;
     double lower_Min = -1;
 
-    m_topShooterpid.SetP(upper_P_Gx);
-    m_topShooterpid.SetI(upper_I_Gx);
-    m_topShooterpid.SetD(upper_D_Gx);
-    m_topShooterpid.SetIZone(upper_I_Zone);
-    m_topShooterpid.SetFF(upper_FF);
-    m_topShooterpid.SetOutputRange(upper_Min, upper_Max);
+    // m_topShooterpid.SetP(upper_P_Gx);
+    // m_topShooterpid.SetI(upper_I_Gx);
+    // m_topShooterpid.SetD(upper_D_Gx);
+    // m_topShooterpid.SetIZone(upper_I_Zone);
+    // m_topShooterpid.SetFF(upper_FF);
+    // m_topShooterpid.SetOutputRange(upper_Min, upper_Max);
 
-    m_bottomShooterpid.SetP(lower_P_Gx);
-    m_bottomShooterpid.SetI(lower_I_Gx);
-    m_bottomShooterpid.SetD(lower_D_Gx);
-    m_bottomShooterpid.SetIZone(lower_I_Zone);
-    m_bottomShooterpid.SetFF(lower_FF);
-    m_bottomShooterpid.SetOutputRange(lower_Min, lower_Max);
+    // m_bottomShooterpid.SetP(lower_P_Gx);
+    // m_bottomShooterpid.SetI(lower_I_Gx);
+    // m_bottomShooterpid.SetD(lower_D_Gx);
+    // m_bottomShooterpid.SetIZone(lower_I_Zone);
+    // m_bottomShooterpid.SetFF(lower_FF);
+    // m_bottomShooterpid.SetOutputRange(lower_Min, lower_Max);
 
     // m_liftpid.SetP(kP);
     // m_liftpid.SetI(kI);
@@ -770,8 +770,8 @@ frc::SmartDashboard::PutNumber("V_AutonState", V_autonState);
                                              K_WheelSpeedPID_Gx[E_Max_Ll]);
       }
 
-    m_topShooterpid.SetReference(V_ShooterSpeedDesired[E_TopShooter], rev::ControlType::kVelocity);
-    m_bottomShooterpid.SetReference(V_ShooterSpeedDesired[E_BottomShooter], rev::ControlType::kVelocity);
+    // m_topShooterpid.SetReference(V_ShooterSpeedDesired[E_TopShooter], rev::ControlType::kVelocity);
+    // m_bottomShooterpid.SetReference(V_ShooterSpeedDesired[E_BottomShooter], rev::ControlType::kVelocity);
 
     m_frontLeftDriveMotor.Set(V_WheelSpeedCmnd[E_FrontLeft]);
     m_frontRightDriveMotor.Set(V_WheelSpeedCmnd[E_FrontRight]);
@@ -1081,19 +1081,19 @@ void Robot::TeleopPeriodic()
 
 
 
-    m_topShooterpid.SetP(V_upper_P_Gx);
-    m_topShooterpid.SetI(V_upper_I_Gx);
-    m_topShooterpid.SetD(V_upper_D_Gx);
-    m_topShooterpid.SetIZone(V_upper_I_Zone);
-    m_topShooterpid.SetFF(V_upper_FF);
-    m_topShooterpid.SetOutputRange(V_upper_Min, V_upper_Max);
+    // m_topShooterpid.SetP(V_upper_P_Gx);
+    // m_topShooterpid.SetI(V_upper_I_Gx);
+    // m_topShooterpid.SetD(V_upper_D_Gx);
+    // m_topShooterpid.SetIZone(V_upper_I_Zone);
+    // m_topShooterpid.SetFF(V_upper_FF);
+    // m_topShooterpid.SetOutputRange(V_upper_Min, V_upper_Max);
 
-    m_bottomShooterpid.SetP(V_upper_P_Gx);
-    m_bottomShooterpid.SetI(V_upper_I_Gx);
-    m_bottomShooterpid.SetD(V_upper_D_Gx);
-    m_bottomShooterpid.SetIZone(V_upper_I_Zone);
-    m_bottomShooterpid.SetFF(V_upper_FF);
-    m_bottomShooterpid.SetOutputRange(V_upper_Min, V_upper_Max);
+    // m_bottomShooterpid.SetP(V_upper_P_Gx);
+    // m_bottomShooterpid.SetI(V_upper_I_Gx);
+    // m_bottomShooterpid.SetD(V_upper_D_Gx);
+    // m_bottomShooterpid.SetIZone(V_upper_I_Zone);
+    // m_bottomShooterpid.SetFF(V_upper_FF);
+    // m_bottomShooterpid.SetOutputRange(V_upper_Min, V_upper_Max);
     #endif
 
 
@@ -1151,8 +1151,12 @@ else
 #ifdef TEST
     m_elevateDaBalls2.Set(ControlMode::PercentOutput, V_testElevator);
     m_intake2.Set(ControlMode::PercentOutput, V_testIntake);
-    m_topShooterpid.SetReference(V_ShooterSpeedDesired[E_TopShooter], rev::ControlType::kVelocity);
-    m_bottomShooterpid.SetReference(V_ShooterSpeedDesired[E_BottomShooter], rev::ControlType::kVelocity);
+    // m_topShooterpid.SetReference(V_ShooterSpeedDesired[E_TopShooter], rev::ControlType::kVelocity);
+    // m_bottomShooterpid.SetReference(V_ShooterSpeedDesired[E_BottomShooter], rev::ControlType::kVelocity);
+    //  m_topShooterpid.SetReference(V_testspeed, rev::ControlType::kVelocity);
+    // m_bottomShooterpid.SetReference(-V_testspeed, rev::ControlType::kVelocity);
+    m_topShooterMotor.Set(V_testspeed);
+    m_bottomShooterMotor.Set(-V_testspeed);
 #endif
 
 
