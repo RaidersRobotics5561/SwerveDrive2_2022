@@ -124,13 +124,13 @@ double V_elevatorValue = 0;
 double V_testspeed = 0;
 double V_testIntake = 0;
 double V_testElevator = 0;
-double V_P_Gx = 0;
-double V_I_Gx = 0;
-double V_D_Gx = 0;
+double V_P_Gx = 0.00005;
+double V_I_Gx = 0.000001;
+double V_D_Gx = 0.000002;
 double V_I_Zone = 0;
 double V_FF = 0;
-double V_Max = 0;
-double V_Min = 0;
+double V_Max = 1;
+double V_Min = -1;
 // PIDConfig UpperShooterPIDConfig {0.0008, 0.000001, 0.0006};
 
 frc::DigitalInput ir_sensor{1};
@@ -174,6 +174,7 @@ void Robot::RobotInit() {
     inst.StartDSClient();
 
     vision0  = inst.GetTable("chameleon-vision/goal");
+    vision1  = inst.GetTable("chameleon-vision/ColorWheel");
     lidar    = inst.GetTable("lidar");
     ledLight = inst.GetTable("ledLight");
 
@@ -201,13 +202,13 @@ void Robot::RobotInit() {
     frc::SmartDashboard::PutNumber("Intake Power",V_testIntake);
     frc::SmartDashboard::PutNumber("Elevator Power",V_testElevator);
     frc::SmartDashboard::PutNumber("Speed Desired", V_testspeed);
-    frc::SmartDashboard::PutNumber("P_Gx", 0);
-    frc::SmartDashboard::PutNumber("I_Gx", 0);
-    frc::SmartDashboard::PutNumber("D_Gx", 0);
+    frc::SmartDashboard::PutNumber("P_Gx", .00005);
+    frc::SmartDashboard::PutNumber("I_Gx", .000001);
+    frc::SmartDashboard::PutNumber("D_Gx", .000002);
     frc::SmartDashboard::PutNumber("I_Zone", 0);
     frc::SmartDashboard::PutNumber("FF", 0);
-    frc::SmartDashboard::PutNumber("Max_Limit", 0);
-    frc::SmartDashboard::PutNumber("Min_Limit", 0);
+    frc::SmartDashboard::PutNumber("Max_Limit", 1);
+    frc::SmartDashboard::PutNumber("Min_Limit", -1);
 
 #endif
 
@@ -221,14 +222,6 @@ void Robot::RobotInit() {
     V_ShooterSpeedCurr[E_TopShooter] = 0;
     V_ShooterSpeedCurr[E_BottomShooter] = 0;
 
-  //PID Controls for shooter
-    double P_Gx = .00005;
-    double I_Gx = .000001;
-    double D_Gx = .000002;
-    double I_Zone = 0;
-    double FF = 0;
-    double Max = 1;
-    double Min = -1;
 
     // double lower_P_Gx = .0008;
     // double lower_I_Gx = .000001;
@@ -238,19 +231,19 @@ void Robot::RobotInit() {
     // double lower_Max = 1;
     // double lower_Min = -1;
 
-    // m_topShooterpid.SetP(upper_P_Gx);
-    // m_topShooterpid.SetI(upper_I_Gx);
-    // m_topShooterpid.SetD(upper_D_Gx);
-    // m_topShooterpid.SetIZone(upper_I_Zone);
-    // m_topShooterpid.SetFF(upper_FF);
-    // m_topShooterpid.SetOutputRange(upper_Min, upper_Max);
+    m_topShooterpid.SetP(V_P_Gx);
+    m_topShooterpid.SetI(V_I_Gx);
+    m_topShooterpid.SetD(V_D_Gx);
+    m_topShooterpid.SetIZone(V_I_Zone);
+    m_topShooterpid.SetFF(V_FF);
+    m_topShooterpid.SetOutputRange(V_Min, V_Max);
 
-    // m_bottomShooterpid.SetP(lower_P_Gx);
-    // m_bottomShooterpid.SetI(lower_I_Gx);
-    // m_bottomShooterpid.SetD(lower_D_Gx);
-    // m_bottomShooterpid.SetIZone(lower_I_Zone);
-    // m_bottomShooterpid.SetFF(lower_FF);
-    // m_bottomShooterpid.SetOutputRange(lower_Min, lower_Max);
+    m_bottomShooterpid.SetP(V_P_Gx);
+    m_bottomShooterpid.SetI(V_I_Gx);
+    m_bottomShooterpid.SetD(V_D_Gx);
+    m_bottomShooterpid.SetIZone(V_I_Zone);
+    m_bottomShooterpid.SetFF(V_FF);
+    m_bottomShooterpid.SetOutputRange(V_Min, V_Max);
 
     // m_liftpid.SetP(kP);
     // m_liftpid.SetI(kI);
@@ -766,8 +759,8 @@ frc::SmartDashboard::PutNumber("V_AutonState", V_autonState);
                                              K_WheelSpeedPID_Gx[E_Max_Ll]);
       }
 
-    // m_topShooterpid.SetReference(V_ShooterSpeedDesired[E_TopShooter], rev::ControlType::kVelocity);
-    // m_bottomShooterpid.SetReference(V_ShooterSpeedDesired[E_BottomShooter], rev::ControlType::kVelocity);
+    m_topShooterpid.SetReference(V_ShooterSpeedDesired[E_TopShooter], rev::ControlType::kVelocity);
+    m_bottomShooterpid.SetReference(V_ShooterSpeedDesired[E_BottomShooter], rev::ControlType::kVelocity);
 
     m_frontLeftDriveMotor.Set(V_WheelSpeedCmnd[E_FrontLeft]);
     m_frontRightDriveMotor.Set(V_WheelSpeedCmnd[E_FrontRight]);
