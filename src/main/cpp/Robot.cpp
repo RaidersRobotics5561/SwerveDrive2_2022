@@ -24,7 +24,6 @@
 //#include "ColorSensor.hpp"
 #include "Gyro.hpp"
 #include "Lookup.hpp"
-#include "WheelOfFortune.hpp"
 #include "vision.hpp"
 #include "DriveControl.hpp"
 #include "AutoTarget.hpp"
@@ -870,8 +869,6 @@ void Robot::TeleopInit()
 void Robot::TeleopPeriodic()
   {
   T_RobotCorner         index;
-  double                L_FortuneMotor;
-  // T_WheelOfFortuneColor L_Color;
 
   double timeleft = frc::DriverStation::GetInstance().GetMatchTime();
 
@@ -880,11 +877,6 @@ void Robot::TeleopPeriodic()
     blinkin.Set(-0.89);
   }
 
-  //L_Color = ColorSensor(false);
-  L_FortuneMotor = WheelOfFortune (//L_Color,
-                                   c_joyStick2.GetRawButton(2),
-                                   c_joyStick2.GetRawButton(4),
-                                   c_joyStick2.GetRawButton(3));
 
   Read_Encoders(V_RobotInit,
                 a_encoderFrontLeftSteer.GetVoltage(),
@@ -1160,7 +1152,6 @@ else
 
 
 #ifndef TEST
-    m_fortuneWheel.Set(ControlMode::PercentOutput, L_FortuneMotor);
 
     m_frontLeftDriveMotor.Set(V_WheelSpeedCmnd[E_FrontLeft]);
     m_frontRightDriveMotor.Set(V_WheelSpeedCmnd[E_FrontRight]);
