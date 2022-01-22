@@ -202,9 +202,9 @@ void Robot::RobotInit() {
     frc::SmartDashboard::PutNumber("Intake Power",V_testIntake);
     frc::SmartDashboard::PutNumber("Elevator Power",V_testElevator);
     frc::SmartDashboard::PutNumber("Speed Desired", V_testspeed);
-    frc::SmartDashboard::PutNumber("P_Gx", .00005);
-    frc::SmartDashboard::PutNumber("I_Gx", .000001);
-    frc::SmartDashboard::PutNumber("D_Gx", .000002);
+    frc::SmartDashboard::PutNumber("P_Gx", 0.0008);
+    frc::SmartDashboard::PutNumber("I_Gx", 0.000001);
+    frc::SmartDashboard::PutNumber("D_Gx", 0.000025);
     frc::SmartDashboard::PutNumber("I_Zone", 0);
     frc::SmartDashboard::PutNumber("FF", 0);
     frc::SmartDashboard::PutNumber("Max_Limit", 1);
