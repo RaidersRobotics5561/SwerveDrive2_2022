@@ -56,7 +56,6 @@ class Robot : public frc::TimedRobot {
 
 
   VictorSPX m_conveyDaBalls {12};
-  VictorSPX m_fortuneWheel {13};
   VictorSPX m_intake {14};
   VictorSPX m_elevateDaBalls {15};
 

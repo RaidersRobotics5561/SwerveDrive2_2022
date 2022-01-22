@@ -169,7 +169,6 @@ void Robot::RobotInit() {
 
     GyroRobotInit();
 
-    // compressor.SetClosedLoopControl(true);
     inst = nt::NetworkTableInstance::Create();
     inst.StartClient("10.55.61.24");
     inst.StartDSClient();
@@ -222,9 +221,10 @@ void Robot::RobotInit() {
     V_ShooterSpeedCurr[E_TopShooter] = 0;
     V_ShooterSpeedCurr[E_BottomShooter] = 0;
 
-    double P_Gx = .0008;
+  //PID Controls for shooter
+    double P_Gx = .00005;
     double I_Gx = .000001;
-    double D_Gx = .0006;
+    double D_Gx = .000002;
     double I_Zone = 0;
     double FF = 0;
     double Max = 1;
