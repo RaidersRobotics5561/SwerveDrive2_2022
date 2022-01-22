@@ -21,7 +21,6 @@
 #include "Encoders.hpp"
 #include "Enums.hpp"
 #include "control_pid.hpp"
-//#include "ColorSensor.hpp"
 #include "Gyro.hpp"
 #include "Lookup.hpp"
 #include "vision.hpp"
@@ -176,7 +175,6 @@ void Robot::RobotInit() {
     inst.StartDSClient();
 
     vision0  = inst.GetTable("chameleon-vision/goal");
-    vision1  = inst.GetTable("chameleon-vision/ColorWheel");
     lidar    = inst.GetTable("lidar");
     ledLight = inst.GetTable("ledLight");
 
