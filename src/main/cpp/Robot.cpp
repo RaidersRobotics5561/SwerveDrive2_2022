@@ -34,7 +34,6 @@
 #include "Odometry.hpp"
 #include "Auton.hpp"
 
-// T_WheelOfFortuneColor V_ColorWheelColor;
 
 // double desiredAngle;
 // double rotateDeBounce;
@@ -127,13 +126,13 @@ double V_elevatorValue = 0;
 double V_testspeed = 0;
 double V_testIntake = 0;
 double V_testElevator = 0;
-double V_upper_P_Gx = 0;
-double V_upper_I_Gx = 0;
-double V_upper_D_Gx = 0;
-double V_upper_I_Zone = 0;
-double V_upper_FF = 0;
-double V_upper_Max = 0;
-double V_upper_Min = 0;
+double V_P_Gx = 0;
+double V_I_Gx = 0;
+double V_D_Gx = 0;
+double V_I_Zone = 0;
+double V_FF = 0;
+double V_Max = 0;
+double V_Min = 0;
 // PIDConfig UpperShooterPIDConfig {0.0008, 0.000001, 0.0006};
 
 frc::DigitalInput ir_sensor{1};
@@ -206,13 +205,13 @@ void Robot::RobotInit() {
     frc::SmartDashboard::PutNumber("Intake Power",V_testIntake);
     frc::SmartDashboard::PutNumber("Elevator Power",V_testElevator);
     frc::SmartDashboard::PutNumber("Speed Desired", V_testspeed);
-    frc::SmartDashboard::PutNumber("Upper_P_Gx", 0);
-    frc::SmartDashboard::PutNumber("Upper_I_Gx", 0);
-    frc::SmartDashboard::PutNumber("Upper_D_Gx", 0);
-    frc::SmartDashboard::PutNumber("Upper_I_Zone", 0);
-    frc::SmartDashboard::PutNumber("Upper_FF", 0);
-    frc::SmartDashboard::PutNumber("Upper_Max_Limit", 0);
-    frc::SmartDashboard::PutNumber("Upper_Min_Limit", 0);
+    frc::SmartDashboard::PutNumber("P_Gx", 0);
+    frc::SmartDashboard::PutNumber("I_Gx", 0);
+    frc::SmartDashboard::PutNumber("D_Gx", 0);
+    frc::SmartDashboard::PutNumber("I_Zone", 0);
+    frc::SmartDashboard::PutNumber("FF", 0);
+    frc::SmartDashboard::PutNumber("Max_Limit", 0);
+    frc::SmartDashboard::PutNumber("Min_Limit", 0);
 
 #endif
 
@@ -226,21 +225,21 @@ void Robot::RobotInit() {
     V_ShooterSpeedCurr[E_TopShooter] = 0;
     V_ShooterSpeedCurr[E_BottomShooter] = 0;
 
-    double upper_P_Gx = .0008;
-    double upper_I_Gx = .000001;
-    double upper_D_Gx = .0006;
-    double upper_I_Zone = 0;
-    double upper_FF = 0;
-    double upper_Max = 1;
-    double upper_Min = -1;
+    double P_Gx = .0008;
+    double I_Gx = .000001;
+    double D_Gx = .0006;
+    double I_Zone = 0;
+    double FF = 0;
+    double Max = 1;
+    double Min = -1;
 
-    double lower_P_Gx = .0008;
-    double lower_I_Gx = .000001;
-    double lower_D_Gx = .0006;
-    double lower_I_Zone = 0;
-    double lower_FF = 0;
-    double lower_Max = 1;
-    double lower_Min = -1;
+    // double lower_P_Gx = .0008;
+    // double lower_I_Gx = .000001;
+    // double lower_D_Gx = .0006;
+    // double lower_I_Zone = 0;
+    // double lower_FF = 0;
+    // double lower_Max = 1;
+    // double lower_Min = -1;
 
     // m_topShooterpid.SetP(upper_P_Gx);
     // m_topShooterpid.SetI(upper_I_Gx);
@@ -1071,29 +1070,29 @@ void Robot::TeleopPeriodic()
     V_ShooterSpeedDesired[E_BottomShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_BottomShooter], 40);
     
 
-    V_upper_P_Gx = frc::SmartDashboard::GetNumber("Upper_P_Gx", V_upper_P_Gx);
-    V_upper_I_Gx = frc::SmartDashboard::GetNumber("Upper_I_Gx", V_upper_I_Gx);
-    V_upper_D_Gx = frc::SmartDashboard::GetNumber("Upper_D_Gx", V_upper_D_Gx);
-    V_upper_I_Zone = frc::SmartDashboard::GetNumber("Upper_I_Zone", V_upper_I_Zone);
-    V_upper_FF = frc::SmartDashboard::GetNumber("Upper_FF", V_upper_FF);
-    V_upper_Max = frc::SmartDashboard::GetNumber("Upper_Max_Limit", V_upper_Max);
-    V_upper_Min = frc::SmartDashboard::GetNumber("Upper_Min_Limit", V_upper_Min);
+    V_P_Gx = frc::SmartDashboard::GetNumber("P_Gx", V_P_Gx);
+    V_I_Gx = frc::SmartDashboard::GetNumber("I_Gx", V_I_Gx);
+    V_D_Gx = frc::SmartDashboard::GetNumber("D_Gx", V_D_Gx);
+    V_I_Zone = frc::SmartDashboard::GetNumber("I_Zone", V_I_Zone);
+    V_FF = frc::SmartDashboard::GetNumber("FF", V_FF);
+    V_Max = frc::SmartDashboard::GetNumber("Max_Limit", V_Max);
+    V_Min = frc::SmartDashboard::GetNumber("Min_Limit", V_Min);
 
 
 
-    // m_topShooterpid.SetP(V_upper_P_Gx);
-    // m_topShooterpid.SetI(V_upper_I_Gx);
-    // m_topShooterpid.SetD(V_upper_D_Gx);
-    // m_topShooterpid.SetIZone(V_upper_I_Zone);
-    // m_topShooterpid.SetFF(V_upper_FF);
-    // m_topShooterpid.SetOutputRange(V_upper_Min, V_upper_Max);
+    m_topShooterpid.SetP(V_P_Gx);
+    m_topShooterpid.SetI(V_I_Gx);
+    m_topShooterpid.SetD(V_D_Gx);
+    m_topShooterpid.SetIZone(V_I_Zone);
+    m_topShooterpid.SetFF(V_FF);
+    m_topShooterpid.SetOutputRange(V_Min, V_Max);
 
-    // m_bottomShooterpid.SetP(V_upper_P_Gx);
-    // m_bottomShooterpid.SetI(V_upper_I_Gx);
-    // m_bottomShooterpid.SetD(V_upper_D_Gx);
-    // m_bottomShooterpid.SetIZone(V_upper_I_Zone);
-    // m_bottomShooterpid.SetFF(V_upper_FF);
-    // m_bottomShooterpid.SetOutputRange(V_upper_Min, V_upper_Max);
+    m_bottomShooterpid.SetP(V_P_Gx);
+    m_bottomShooterpid.SetI(V_I_Gx);
+    m_bottomShooterpid.SetD(V_D_Gx);
+    m_bottomShooterpid.SetIZone(V_I_Zone);
+    m_bottomShooterpid.SetFF(V_FF);
+    m_bottomShooterpid.SetOutputRange(V_Min, V_Max);
     #endif
 
 
@@ -1153,10 +1152,10 @@ else
     m_intake2.Set(ControlMode::PercentOutput, V_testIntake);
     // m_topShooterpid.SetReference(V_ShooterSpeedDesired[E_TopShooter], rev::ControlType::kVelocity);
     // m_bottomShooterpid.SetReference(V_ShooterSpeedDesired[E_BottomShooter], rev::ControlType::kVelocity);
-    //  m_topShooterpid.SetReference(V_testspeed, rev::ControlType::kVelocity);
-    // m_bottomShooterpid.SetReference(-V_testspeed, rev::ControlType::kVelocity);
-    m_topShooterMotor.Set(V_testspeed);
-    m_bottomShooterMotor.Set(-V_testspeed);
+      m_topShooterpid.SetReference(V_testspeed, rev::ControlType::kVelocity);
+     m_bottomShooterpid.SetReference(-V_testspeed, rev::ControlType::kVelocity);
+    // m_topShooterMotor.Set(V_testspeed);
+    // m_bottomShooterMotor.Set(-V_testspeed);
 #endif
 
 
