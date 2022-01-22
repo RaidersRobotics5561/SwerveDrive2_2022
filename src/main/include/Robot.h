@@ -63,10 +63,6 @@ class Robot : public frc::TimedRobot {
   ctre::phoenix::motorcontrol::can::TalonSRX m_intake2 {1};
   ctre::phoenix::motorcontrol::can::TalonSRX m_elevateDaBalls2 {6};
 
-  // frc::Compressor compressor {14, frc::PneumaticsModuleType::CTREPCM};
-
-  // frc::DoubleSolenoid lift {14,frc::PneumaticsModuleType::CTREPCM, 0, 1};
-  // frc::DoubleSolenoid intake {14,frc::PneumaticsModuleType::CTREPCM, 2, 3};
   
    rev::SparkMaxPIDController m_topShooterpid = m_topShooterMotor.GetPIDController();
    rev::SparkMaxPIDController m_bottomShooterpid = m_bottomShooterMotor.GetPIDController();

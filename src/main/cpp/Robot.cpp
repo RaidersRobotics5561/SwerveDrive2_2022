@@ -1171,33 +1171,6 @@ else
     // m_rearLeftSteerMotor.Set(0);
     // m_rearRightSteerMotor.Set(0);
 
-    //Pneumatic Lift
-    if(c_joyStick2.GetRawButton(6))
-    {
-      lift.Set(frc::DoubleSolenoid::Value::kReverse);
-      //go up
-    }
-    else if(c_joyStick2.GetRawButton(5))
-    {
-      lift.Set(frc::DoubleSolenoid::Value::kForward);
-      //go down
-    }
-    else
-    {
-      lift.Set(frc::DoubleSolenoid::Value::kOff);
-    }
-
-    //Intake Control
-//    if(c_joyStick2.GetRawButton(2))
-//    {
-//      intake.Set(frc::DoubleSolenoid::Value::kForward);
-//      m_intake.Set(ControlMode::PercentOutput, 0.5);
-//    }
-//    else
-//    {
-//      intake.Set(frc::DoubleSolenoid::Value::kOff);
-//      m_intake.Set(ControlMode::PercentOutput, 0);
-//    }
 
     bool activeBeamSensor = ir_sensor.Get();
     // frc::SmartDashboard::PutBoolean("ir beam", activeBeamSensor);
