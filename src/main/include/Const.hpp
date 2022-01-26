@@ -12,7 +12,10 @@ const double C_Tau = 6.28318530717958647;
 static const int frontLeftSteerDeviceID = 1, frontLeftDriveDeviceID = 2, frontRightSteerDeviceID = 4, frontRightDriveDeviceID = 3;
 static const int rearLeftSteerDeviceID  = 5, rearLeftDriveDeviceID  = 6, rearRightSteerDeviceID  = 7, rearRightDriveDeviceID  = 8;
 static const int rightShooterID = 10, leftShooterID = 9;
-static const int liftID = 11;
+static const int C_liftYD_ID = 11;
+static const int C_liftXD_ID = 12;
+static const int C_elevatorID = 13;
+static const int C_intakeID = 14;
 
 const double K_ReductionRatio = 8.31;
 const double K_WheelCircufrence = 12.566; // Circumferance of wheel, in inches

@@ -158,9 +158,11 @@ void Robot::RobotInit() {
     m_rearRightDriveMotor.RestoreFactoryDefaults();
     m_rightShooterMotor.RestoreFactoryDefaults();
     m_leftShooterMotor.RestoreFactoryDefaults();
-    m_liftMotor.RestoreFactoryDefaults();
+    m_liftMotorYD.RestoreFactoryDefaults();
+    m_liftMotorXD.RestoreFactoryDefaults();
 
-    m_liftMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
+    m_liftMotorYD.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
+    m_liftMotorXD.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
     #endif
 
     V_RobotInit = true;
@@ -245,12 +247,19 @@ void Robot::RobotInit() {
     m_leftShooterpid.SetFF(V_FF);
     m_leftShooterpid.SetOutputRange(V_Min, V_Max);
 
-    // m_liftpid.SetP(kP);
-    // m_liftpid.SetI(kI);
-    // m_liftpid.SetD(kD);
-    // m_liftpid.SetIZone(kIz);
-    // m_liftpid.SetFF(kFF);
-    // m_liftpid.SetOutputRange(kMinOutput, kMaxOutput);
+    // m_liftpidYD.SetP(kP);
+    // m_liftpidYD.SetI(kI);
+    // m_liftpidYD.SetD(kD);
+    // m_liftpidYD.SetIZone(kIz);
+    // m_liftpidYD.SetFF(kFF);
+    // m_liftpidYD.SetOutputRange(kMinOutput, kMaxOutput);
+
+    // m_liftpidXD.SetP(kP);
+    // m_liftpidXD.SetI(kI);
+    // m_liftpidXD.SetD(kD);
+    // m_liftpidXD.SetIZone(kIz);
+    // m_liftpidXD.SetFF(kFF);
+    // m_liftpidXD.SetOutputRange(kMinOutput, kMaxOutput);
 
     // frc::SmartDashboard::PutNumber("P Gain", kP);
     // frc::SmartDashboard::PutNumber("I Gain", kI);
@@ -274,8 +283,8 @@ void Robot::RobotInit() {
  ******************************************************************************/
 void Robot::RobotPeriodic()
 {
-  // frc::SmartDashboard::PutNumber("Postion", m_encoderLift.GetPosition());
-
+  // frc::SmartDashboard::PutNumber("Postion_YD", m_encoderLiftYD.GetPosition());
+  // frc::SmartDashboard::PutNumber("Postion_XD", m_encoderLiftXD.GetPosition());
     /*
       Finds distance from robot to specified target.
       Numerator depends upon camera height relative to target for target distance,
@@ -1082,37 +1091,38 @@ void Robot::TeleopPeriodic()
 
 
 
-    // frc::SmartDashboard::PutNumber("Postion", m_encoderLift.GetPosition());
+    // frc::SmartDashboard::PutNumber("Postion_YD", m_encoderLiftYD.GetPosition());
+    // frc::SmartDashboard::PutNumber("Postion_XD", m_encoderLiftXD.GetPosition());
 
     // if(c_joyStick2.GetRawAxis(3) > 0.1)
     // {
-    //   if(m_encoderLift.GetPosition() > -480)
+    //   if(m_encoderLiftYD.GetPosition() > -480)
     //   {
-    //     m_liftMotor.Set(c_joyStick2.GetRawAxis(3) * -1.0);
+    //     m_liftMotorYD.Set(c_joyStick2.GetRawAxis(3) * -1.0);
     //   }
     //   else
     //   {
-    //     m_liftMotor.Set(0);
+    //     m_liftMotorYD.Set(0);
     //   }
     // }
     // else if (c_joyStick2.GetRawAxis(2) > 0.1)
     // {
-    //   if(m_encoderLift.GetPosition() < -30)
+    //   if(m_encoderLiftYD.GetPosition() < -30)
     //   {
-    //     m_liftMotor.Set(c_joyStick2.GetRawAxis(2) * 1.0);
+    //     m_liftMotorYD.Set(c_joyStick2.GetRawAxis(2) * 1.0);
     //   }
     //   else
     //   {
-    //     m_liftMotor.Set(0);
+    //     m_liftMotorYD.Set(0);
     //   }
     // }
     // else if(c_joyStick2.GetRawButton(6))
     // {
-    //   m_liftMotor.Set(0.025);
+    //   m_liftMotorYD.Set(0.025);
     // }
     // else
     // {
-    //   m_liftMotor.Set(0);
+    //   m_liftMotorYD.Set(0);
     // }
 
     // frc::SmartDashboard::PutNumber("Upper Velocity", m_encoderrightShooter.GetVelocity());
@@ -1131,8 +1141,8 @@ else
 }
 #endif
 #ifdef TEST
-    m_elevateDaBalls2.Set(ControlMode::PercentOutput, V_testElevator);
-    m_intake2.Set(ControlMode::PercentOutput, V_testIntake);
+    m_elevateDaBalls.Set(ControlMode::PercentOutput, V_testElevator);
+    m_intake.Set(ControlMode::PercentOutput, V_testIntake);
     // m_rightShooterpid.SetReference(V_ShooterSpeedDesired[E_rightShooter], rev::ControlType::kVelocity);
     // m_leftShooterpid.SetReference(V_ShooterSpeedDesired[E_leftShooter], rev::ControlType::kVelocity);
       m_rightShooterpid.SetReference(V_testspeed, rev::ControlType::kVelocity);
