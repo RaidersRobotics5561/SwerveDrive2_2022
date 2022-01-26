@@ -212,8 +212,8 @@ void Robot::RobotInit() {
 
 #endif
 
-    // frc::SmartDashboard::PutNumber("Speed Desired Top", 0);
-    // frc::SmartDashboard::PutNumber("Speed Desired Bottom", 0);
+    // frc::SmartDashboard::PutNumber("Speed Desired Right", 0);
+    // frc::SmartDashboard::PutNumber("Speed Desired Left", 0);
 
     frc::SmartDashboard::PutNumber("cooler int", 1);
 
@@ -1172,23 +1172,19 @@ else
     {
       if(activeBeamSensor)
       {
-        m_conveyDaBalls.Set(ControlMode::PercentOutput, -0.5);
         m_elevateDaBalls.Set(ControlMode::PercentOutput, 1);
       }
       else
       {
-        m_conveyDaBalls.Set(ControlMode::PercentOutput, 0);
         m_elevateDaBalls.Set(ControlMode::PercentOutput, 1);
       }    
     }
     else if(c_joyStick2.GetRawButton(2))
     {
       m_elevateDaBalls.Set(ControlMode::PercentOutput, -0.420);
-      m_conveyDaBalls.Set(ControlMode::PercentOutput, 0.420);
     }
     else
     {
-      m_conveyDaBalls.Set(ControlMode::PercentOutput, 0);
       m_elevateDaBalls.Set(ControlMode::PercentOutput, 0);
     }
     
