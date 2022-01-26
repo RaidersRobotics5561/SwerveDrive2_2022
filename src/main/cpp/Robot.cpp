@@ -156,8 +156,8 @@ void Robot::RobotInit() {
     m_rearLeftDriveMotor.RestoreFactoryDefaults();
     m_rearRightSteerMotor.RestoreFactoryDefaults();
     m_rearRightDriveMotor.RestoreFactoryDefaults();
-    m_topShooterMotor.RestoreFactoryDefaults();
-    m_bottomShooterMotor.RestoreFactoryDefaults();
+    m_rightShooterMotor.RestoreFactoryDefaults();
+    m_leftShooterMotor.RestoreFactoryDefaults();
     m_liftMotor.RestoreFactoryDefaults();
 
     m_liftMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
@@ -202,13 +202,13 @@ void Robot::RobotInit() {
     frc::SmartDashboard::PutNumber("Intake Power",V_testIntake);
     frc::SmartDashboard::PutNumber("Elevator Power",V_testElevator);
     frc::SmartDashboard::PutNumber("Speed Desired", V_testspeed);
-    frc::SmartDashboard::PutNumber("P_Gx", 0.0008);
-    frc::SmartDashboard::PutNumber("I_Gx", 0.000001);
-    frc::SmartDashboard::PutNumber("D_Gx", 0.000025);
-    frc::SmartDashboard::PutNumber("I_Zone", 0);
-    frc::SmartDashboard::PutNumber("FF", 0);
-    frc::SmartDashboard::PutNumber("Max_Limit", 1);
-    frc::SmartDashboard::PutNumber("Min_Limit", -1);
+    frc::SmartDashboard::PutNumber("P_Gx", V_P_Gx);
+    frc::SmartDashboard::PutNumber("I_Gx", V_I_Gx);
+    frc::SmartDashboard::PutNumber("D_Gx", V_D_Gx);
+    frc::SmartDashboard::PutNumber("I_Zone", V_I_Zone);
+    frc::SmartDashboard::PutNumber("FF", V_FF);
+    frc::SmartDashboard::PutNumber("Max_Limit", V_Max);
+    frc::SmartDashboard::PutNumber("Min_Limit", V_Min);
 
 #endif
 
@@ -217,10 +217,10 @@ void Robot::RobotInit() {
 
     frc::SmartDashboard::PutNumber("cooler int", 1);
 
-    V_ShooterSpeedDesired[E_TopShooter] = 0;
-    V_ShooterSpeedDesired[E_BottomShooter] = 0;
-    V_ShooterSpeedCurr[E_TopShooter] = 0;
-    V_ShooterSpeedCurr[E_BottomShooter] = 0;
+    V_ShooterSpeedDesired[E_rightShooter] = 0;
+    V_ShooterSpeedDesired[E_leftShooter] = 0;
+    V_ShooterSpeedCurr[E_rightShooter] = 0;
+    V_ShooterSpeedCurr[E_leftShooter] = 0;
 
 
     // double lower_P_Gx = .0008;
@@ -231,19 +231,19 @@ void Robot::RobotInit() {
     // double lower_Max = 1;
     // double lower_Min = -1;
 
-    m_topShooterpid.SetP(V_P_Gx);
-    m_topShooterpid.SetI(V_I_Gx);
-    m_topShooterpid.SetD(V_D_Gx);
-    m_topShooterpid.SetIZone(V_I_Zone);
-    m_topShooterpid.SetFF(V_FF);
-    m_topShooterpid.SetOutputRange(V_Min, V_Max);
+    m_rightShooterpid.SetP(V_P_Gx);
+    m_rightShooterpid.SetI(V_I_Gx);
+    m_rightShooterpid.SetD(V_D_Gx);
+    m_rightShooterpid.SetIZone(V_I_Zone);
+    m_rightShooterpid.SetFF(V_FF);
+    m_rightShooterpid.SetOutputRange(V_Min, V_Max);
 
-    m_bottomShooterpid.SetP(V_P_Gx);
-    m_bottomShooterpid.SetI(V_I_Gx);
-    m_bottomShooterpid.SetD(V_D_Gx);
-    m_bottomShooterpid.SetIZone(V_I_Zone);
-    m_bottomShooterpid.SetFF(V_FF);
-    m_bottomShooterpid.SetOutputRange(V_Min, V_Max);
+    m_leftShooterpid.SetP(V_P_Gx);
+    m_leftShooterpid.SetI(V_I_Gx);
+    m_leftShooterpid.SetD(V_D_Gx);
+    m_leftShooterpid.SetIZone(V_I_Zone);
+    m_leftShooterpid.SetFF(V_FF);
+    m_leftShooterpid.SetOutputRange(V_Min, V_Max);
 
     // m_liftpid.SetP(kP);
     // m_liftpid.SetI(kI);
@@ -330,8 +330,8 @@ void Robot::AutonomousInit()
     V_autonTimer = 0;
     V_autonState = 0;
     V_elevatorValue = 0;
-    V_ShooterSpeedDesired[E_TopShooter] = 0;
-    V_ShooterSpeedDesired[E_BottomShooter] = 0;
+    V_ShooterSpeedDesired[E_rightShooter] = 0;
+    V_ShooterSpeedDesired[E_leftShooter] = 0;
       int index;
       V_RobotInit = true;
       // visionInit(vision0, ledLight, inst);
@@ -403,8 +403,8 @@ void Robot::AutonomousPeriodic()
                   m_encoderFrontRightDrive,
                   m_encoderRearLeftDrive,
                   m_encoderRearRightDrive,
-                  m_encoderTopShooter,
-                  m_encoderBottomShooter);
+                  m_encoderrightShooter,
+                  m_encoderleftShooter);
  
     DtrmnSwerveBotLocation(V_RobotInit,
                            gyro_yawanglerad,
@@ -443,8 +443,8 @@ void Robot::AutonomousPeriodic()
             V_ShooterSpeedDesiredFinalUpper = 0;
             V_ShooterSpeedDesiredFinalLower = 0;
           }
-          V_ShooterSpeedDesired[E_TopShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_TopShooter], 50);
-          V_ShooterSpeedDesired[E_BottomShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_BottomShooter], 50);
+          V_ShooterSpeedDesired[E_rightShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_rightShooter], 50);
+          V_ShooterSpeedDesired[E_leftShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_leftShooter], 50);
 
           if(timeleft < 13 && timeleft > 8)
           {
@@ -473,8 +473,8 @@ void Robot::AutonomousPeriodic()
             V_ShooterSpeedDesiredFinalUpper = 0;
             V_ShooterSpeedDesiredFinalLower = 0;
           }
-          V_ShooterSpeedDesired[E_TopShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_TopShooter], 50);
-          V_ShooterSpeedDesired[E_BottomShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_BottomShooter], 50);
+          V_ShooterSpeedDesired[E_rightShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_rightShooter], 50);
+          V_ShooterSpeedDesired[E_leftShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_leftShooter], 50);
 
           if(timeleft < 14.5 && timeleft > 10)
           {
@@ -518,8 +518,8 @@ void Robot::AutonomousPeriodic()
           {
             V_ShooterSpeedDesiredFinalUpper = DesiredUpperBeamSpeed(distanceTarget);
             V_ShooterSpeedDesiredFinalLower = DesiredLowerBeamSpeed(distanceTarget);
-            V_ShooterSpeedDesired[E_TopShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_TopShooter], 50);
-            V_ShooterSpeedDesired[E_BottomShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_BottomShooter], 50);
+            V_ShooterSpeedDesired[E_rightShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_rightShooter], 50);
+            V_ShooterSpeedDesired[E_leftShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_leftShooter], 50);
   
               V_autonTimer += C_ExeTime;
               if (V_autonTimer >= 1){
@@ -541,8 +541,8 @@ void Robot::AutonomousPeriodic()
             strafe = (-1.0);
             V_ShooterSpeedDesiredFinalUpper = 0;
             V_ShooterSpeedDesiredFinalLower = 0;
-            V_ShooterSpeedDesired[E_TopShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_TopShooter], 50);
-            V_ShooterSpeedDesired[E_BottomShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_BottomShooter], 50);
+            V_ShooterSpeedDesired[E_rightShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_rightShooter], 50);
+            V_ShooterSpeedDesired[E_leftShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_leftShooter], 50);
             V_autonTimer += C_ExeTime;
             if (V_autonTimer >= 2){
               strafe = (0);
@@ -564,8 +564,8 @@ void Robot::AutonomousPeriodic()
           {
             V_ShooterSpeedDesiredFinalUpper = DesiredUpperBeamSpeed(distanceTarget);
             V_ShooterSpeedDesiredFinalLower = DesiredLowerBeamSpeed(distanceTarget);
-            V_ShooterSpeedDesired[E_TopShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_TopShooter], 50);
-            V_ShooterSpeedDesired[E_BottomShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_BottomShooter], 50);
+            V_ShooterSpeedDesired[E_rightShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_rightShooter], 50);
+            V_ShooterSpeedDesired[E_leftShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_leftShooter], 50);
   
               V_autonTimer += C_ExeTime;
               if (V_autonTimer >= 1){
@@ -586,8 +586,8 @@ void Robot::AutonomousPeriodic()
           {
             V_ShooterSpeedDesiredFinalUpper = 0;
             V_ShooterSpeedDesiredFinalLower = 0;
-            V_ShooterSpeedDesired[E_TopShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_TopShooter], 50);
-            V_ShooterSpeedDesired[E_BottomShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_BottomShooter], 50);
+            V_ShooterSpeedDesired[E_rightShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_rightShooter], 50);
+            V_ShooterSpeedDesired[E_leftShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_leftShooter], 50);
             strafe = (1.0);
             V_autonTimer += C_ExeTime;
             if (V_autonTimer >= 2){
@@ -610,8 +610,8 @@ void Robot::AutonomousPeriodic()
           {
             V_ShooterSpeedDesiredFinalUpper = DesiredUpperBeamSpeed(distanceTarget);
             V_ShooterSpeedDesiredFinalLower = DesiredLowerBeamSpeed(distanceTarget);
-            V_ShooterSpeedDesired[E_TopShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_TopShooter], 50);
-            V_ShooterSpeedDesired[E_BottomShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_BottomShooter], 50);
+            V_ShooterSpeedDesired[E_rightShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_rightShooter], 50);
+            V_ShooterSpeedDesired[E_leftShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_leftShooter], 50);
   
               V_autonTimer += C_ExeTime;
               if (V_autonTimer >= 1){
@@ -632,8 +632,8 @@ void Robot::AutonomousPeriodic()
           {
             V_ShooterSpeedDesiredFinalUpper = 0;
             V_ShooterSpeedDesiredFinalLower = 0;
-            V_ShooterSpeedDesired[E_TopShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_TopShooter], 50);
-            V_ShooterSpeedDesired[E_BottomShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_BottomShooter], 50);
+            V_ShooterSpeedDesired[E_rightShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_rightShooter], 50);
+            V_ShooterSpeedDesired[E_leftShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_leftShooter], 50);
             V_autonTimer += C_ExeTime;
             if (V_autonTimer >= 1){
               V_autonState++;
@@ -701,7 +701,7 @@ void Robot::AutonomousPeriodic()
       }
 
 frc::SmartDashboard::PutNumber("V_ShooterSpeedDesiredFinalUpper", V_ShooterSpeedDesiredFinalUpper);
-frc::SmartDashboard::PutNumber("V_ShooterSpeedDesired[E_TopShooter]", V_ShooterSpeedDesired[E_TopShooter]);
+frc::SmartDashboard::PutNumber("V_ShooterSpeedDesired[E_rightShooter]", V_ShooterSpeedDesired[E_rightShooter]);
 frc::SmartDashboard::PutNumber("V_AutonState", V_autonState);
       DriveControlMain(driveforward,
                        strafe,
@@ -759,8 +759,8 @@ frc::SmartDashboard::PutNumber("V_AutonState", V_autonState);
                                              K_WheelSpeedPID_Gx[E_Max_Ll]);
       }
 
-    m_topShooterpid.SetReference(V_ShooterSpeedDesired[E_TopShooter], rev::ControlType::kVelocity);
-    m_bottomShooterpid.SetReference(V_ShooterSpeedDesired[E_BottomShooter], rev::ControlType::kVelocity);
+    m_rightShooterpid.SetReference(V_ShooterSpeedDesired[E_rightShooter], rev::ControlType::kVelocity);
+    m_leftShooterpid.SetReference(V_ShooterSpeedDesired[E_leftShooter], rev::ControlType::kVelocity);
 
     m_frontLeftDriveMotor.Set(V_WheelSpeedCmnd[E_FrontLeft]);
     m_frontRightDriveMotor.Set(V_WheelSpeedCmnd[E_FrontRight]);
@@ -882,8 +882,8 @@ void Robot::TeleopPeriodic()
                 m_encoderFrontRightDrive,
                 m_encoderRearLeftDrive,
                 m_encoderRearRightDrive,
-                m_encoderTopShooter,
-                m_encoderBottomShooter);
+                m_encoderrightShooter,
+                m_encoderleftShooter);
 
   DtrmnSwerveBotLocation(V_RobotInit,
                          gyro_yawanglerad,
@@ -1027,18 +1027,18 @@ void Robot::TeleopPeriodic()
       }
 
       V_AutoShootEnable = true;
-      V_ShooterSpeedDesired[E_TopShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_TopShooter], 50);
-      V_ShooterSpeedDesired[E_BottomShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_BottomShooter], 50);
+      V_ShooterSpeedDesired[E_rightShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_rightShooter], 50);
+      V_ShooterSpeedDesired[E_leftShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_leftShooter], 50);
     }
     else if(fabs(c_joyStick2.GetRawAxis(5)) > .05 || fabs(c_joyStick2.GetRawAxis(1)) > .05)
     {
-      V_ShooterSpeedDesired[E_TopShooter] = c_joyStick2.GetRawAxis(1);
-      V_ShooterSpeedDesired[E_BottomShooter] = c_joyStick2.GetRawAxis(5);
+      V_ShooterSpeedDesired[E_rightShooter] = c_joyStick2.GetRawAxis(1);
+      V_ShooterSpeedDesired[E_leftShooter] = c_joyStick2.GetRawAxis(5);
     } 
     else 
     {
-      V_ShooterSpeedDesired[E_TopShooter] = 0;
-      V_ShooterSpeedDesired[E_BottomShooter] = 0;
+      V_ShooterSpeedDesired[E_rightShooter] = 0;
+      V_ShooterSpeedDesired[E_leftShooter] = 0;
     }
 #endif
 #ifdef TEST 
@@ -1049,8 +1049,8 @@ void Robot::TeleopPeriodic()
     V_testspeed = frc::SmartDashboard::GetNumber("Speed Desired",V_testspeed);
     V_ShooterSpeedDesiredFinalUpper = V_testspeed;
     V_ShooterSpeedDesiredFinalLower = -V_testspeed;
-    V_ShooterSpeedDesired[E_TopShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_TopShooter], 40);
-    V_ShooterSpeedDesired[E_BottomShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_BottomShooter], 40);
+    V_ShooterSpeedDesired[E_rightShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_rightShooter], 40);
+    V_ShooterSpeedDesired[E_leftShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_leftShooter], 40);
     
 
     V_P_Gx = frc::SmartDashboard::GetNumber("P_Gx", V_P_Gx);
@@ -1063,19 +1063,19 @@ void Robot::TeleopPeriodic()
 
 
 
-    m_topShooterpid.SetP(V_P_Gx);
-    m_topShooterpid.SetI(V_I_Gx);
-    m_topShooterpid.SetD(V_D_Gx);
-    m_topShooterpid.SetIZone(V_I_Zone);
-    m_topShooterpid.SetFF(V_FF);
-    m_topShooterpid.SetOutputRange(V_Min, V_Max);
+    m_rightShooterpid.SetP(V_P_Gx);
+    m_rightShooterpid.SetI(V_I_Gx);
+    m_rightShooterpid.SetD(V_D_Gx);
+    m_rightShooterpid.SetIZone(V_I_Zone);
+    m_rightShooterpid.SetFF(V_FF);
+    m_rightShooterpid.SetOutputRange(V_Min, V_Max);
 
-    m_bottomShooterpid.SetP(V_P_Gx);
-    m_bottomShooterpid.SetI(V_I_Gx);
-    m_bottomShooterpid.SetD(V_D_Gx);
-    m_bottomShooterpid.SetIZone(V_I_Zone);
-    m_bottomShooterpid.SetFF(V_FF);
-    m_bottomShooterpid.SetOutputRange(V_Min, V_Max);
+    m_leftShooterpid.SetP(V_P_Gx);
+    m_leftShooterpid.SetI(V_I_Gx);
+    m_leftShooterpid.SetD(V_D_Gx);
+    m_leftShooterpid.SetIZone(V_I_Zone);
+    m_leftShooterpid.SetFF(V_FF);
+    m_leftShooterpid.SetOutputRange(V_Min, V_Max);
     #endif
 
 
@@ -1115,30 +1115,30 @@ void Robot::TeleopPeriodic()
     //   m_liftMotor.Set(0);
     // }
 
-    // frc::SmartDashboard::PutNumber("Upper Velocity", m_encoderTopShooter.GetVelocity());
-    // frc::SmartDashboard::PutNumber("Lower Velocity", m_encoderBottomShooter.GetVelocity());
+    // frc::SmartDashboard::PutNumber("Upper Velocity", m_encoderrightShooter.GetVelocity());
+    // frc::SmartDashboard::PutNumber("Lower Velocity", m_encoderleftShooter.GetVelocity());
 
 #ifdef COMP
 if (V_AutoShootEnable == true)
 {
-    m_topShooterpid.SetReference(V_ShooterSpeedDesired[E_TopShooter], rev::ControlType::kVelocity);
-    m_bottomShooterpid.SetReference(V_ShooterSpeedDesired[E_BottomShooter], rev::ControlType::kVelocity);
+    m_rightShooterpid.SetReference(V_ShooterSpeedDesired[E_rightShooter], rev::ControlType::kVelocity);
+    m_leftShooterpid.SetReference(V_ShooterSpeedDesired[E_leftShooter], rev::ControlType::kVelocity);
 }
 else 
 {
-   m_topShooterMotor.Set(V_ShooterSpeedDesired[E_TopShooter]);
-    m_bottomShooterMotor.Set(V_ShooterSpeedDesired[E_BottomShooter]);
+   m_rightShooterMotor.Set(V_ShooterSpeedDesired[E_rightShooter]);
+    m_leftShooterMotor.Set(V_ShooterSpeedDesired[E_leftShooter]);
 }
 #endif
 #ifdef TEST
     m_elevateDaBalls2.Set(ControlMode::PercentOutput, V_testElevator);
     m_intake2.Set(ControlMode::PercentOutput, V_testIntake);
-    // m_topShooterpid.SetReference(V_ShooterSpeedDesired[E_TopShooter], rev::ControlType::kVelocity);
-    // m_bottomShooterpid.SetReference(V_ShooterSpeedDesired[E_BottomShooter], rev::ControlType::kVelocity);
-      m_topShooterpid.SetReference(V_testspeed, rev::ControlType::kVelocity);
-     m_bottomShooterpid.SetReference(-V_testspeed, rev::ControlType::kVelocity);
-    // m_topShooterMotor.Set(V_testspeed);
-    // m_bottomShooterMotor.Set(-V_testspeed);
+    // m_rightShooterpid.SetReference(V_ShooterSpeedDesired[E_rightShooter], rev::ControlType::kVelocity);
+    // m_leftShooterpid.SetReference(V_ShooterSpeedDesired[E_leftShooter], rev::ControlType::kVelocity);
+      m_rightShooterpid.SetReference(V_testspeed, rev::ControlType::kVelocity);
+     m_leftShooterpid.SetReference(-V_testspeed, rev::ControlType::kVelocity);
+    // m_rightShooterMotor.Set(V_testspeed);
+    // m_leftShooterMotor.Set(-V_testspeed);
 #endif
 
 

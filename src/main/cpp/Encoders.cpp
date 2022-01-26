@@ -46,8 +46,8 @@ void Read_Encoders(bool            L_RobotInit,
                    rev::SparkMaxRelativeEncoder m_encoderFrontRightDrive,
                    rev::SparkMaxRelativeEncoder m_encoderRearLeftDrive,
                    rev::SparkMaxRelativeEncoder m_encoderRearRightDrive,
-                   rev::SparkMaxRelativeEncoder m_encoderTopShooter,
-                   rev::SparkMaxRelativeEncoder m_encoderBottomShooter)
+                   rev::SparkMaxRelativeEncoder m_encoderrightShooter,
+                   rev::SparkMaxRelativeEncoder m_encoderleftShooter)
   {
   T_RobotCorner index;
 
@@ -162,10 +162,10 @@ void Read_Encoders(bool            L_RobotInit,
   V_WheelVelocity[E_RearRight]  = ((m_encoderRearRightDrive.GetVelocity()  / K_ReductionRatio) / 60) * K_WheelCircufrence;
   V_WheelVelocity[E_RearLeft]   = ((m_encoderRearLeftDrive.GetVelocity()   / K_ReductionRatio) / 60) * K_WheelCircufrence;
 
-  V_ShooterSpeedCurr[E_TopShooter]    = (m_encoderTopShooter.GetVelocity()    * K_ShooterWheelRotation[E_TopShooter]);
-  V_ShooterSpeedCurr[E_BottomShooter] = (m_encoderBottomShooter.GetVelocity() * K_ShooterWheelRotation[E_BottomShooter]);
-  frc::SmartDashboard::PutNumber("Top speed current", m_encoderTopShooter.GetVelocity());
-  frc::SmartDashboard::PutNumber("Bottom speed current", m_encoderBottomShooter.GetVelocity());
+  V_ShooterSpeedCurr[E_rightShooter]    = (m_encoderrightShooter.GetVelocity()    * K_ShooterWheelRotation[E_rightShooter]);
+  V_ShooterSpeedCurr[E_leftShooter] = (m_encoderleftShooter.GetVelocity() * K_ShooterWheelRotation[E_leftShooter]);
+  frc::SmartDashboard::PutNumber("Top speed current", m_encoderrightShooter.GetVelocity());
+  frc::SmartDashboard::PutNumber("Bottom speed current", m_encoderleftShooter.GetVelocity());
   }
 
 /******************************************************************************

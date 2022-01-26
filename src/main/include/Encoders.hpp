@@ -13,8 +13,8 @@ void Read_Encoders(bool L_RobotInit,
                    rev::SparkMaxRelativeEncoder m_encoderFrontRightDrive,
                    rev::SparkMaxRelativeEncoder m_encoderRearLeftDrive,
                    rev::SparkMaxRelativeEncoder m_encoderRearRightDrive,
-                   rev::SparkMaxRelativeEncoder m_encoderTopShooter,
-                   rev::SparkMaxRelativeEncoder m_encoderBottomShooter);
+                   rev::SparkMaxRelativeEncoder m_encoderrightShooter,
+                   rev::SparkMaxRelativeEncoder m_encoderleftShooter);
 
 double DtrmnEncoderRelativeToCmnd(double L_JoystickCmnd,
                                   double L_EncoderReading);

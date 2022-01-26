@@ -10,14 +10,14 @@
 class ShooterConfig
 {
     public:
-        PIDConfig topShooterPIDConfig;
-        PIDConfig bottomShooterPIDConfig;
+        PIDConfig rightShooterPIDConfig;
+        PIDConfig leftShooterPIDConfig;
         double TopDesiredSpeed;
         double BottomDesiredSpeed;
 
         ShooterConfig();
 
-        ShooterConfig(PIDConfig TopShooterPIDConfig, PIDConfig BottomShooterPIDConfig);
+        ShooterConfig(PIDConfig rightShooterPIDConfig, PIDConfig leftShooterPIDConfig);
 
         void Debug(std::string TabName);
     private:
@@ -27,18 +27,18 @@ class ShooterConfig
 
 ShooterConfig::ShooterConfig(){}
 
-ShooterConfig::ShooterConfig(PIDConfig TopShooterPIDConfig, PIDConfig BottomShooterPIDConfig)
+ShooterConfig::ShooterConfig(PIDConfig rightShooterPIDConfig, PIDConfig leftShooterPIDConfig)
 {
-    topShooterPIDConfig = TopShooterPIDConfig;
-    bottomShooterPIDConfig = BottomShooterPIDConfig;
+    rightShooterPIDConfig = rightShooterPIDConfig;
+    leftShooterPIDConfig = leftShooterPIDConfig;
 }
 
 void ShooterConfig::Debug(std::string TabName)
 {
     static auto& Tab = frc::Shuffleboard::GetTab(TabName);
 
-    topShooterPIDConfig.Debug("(Top PID)"+TabName);
-    bottomShooterPIDConfig.Debug("(Bottom PID)"+TabName);
+    rightShooterPIDConfig.Debug("(Top PID)"+TabName);
+    leftShooterPIDConfig.Debug("(Bottom PID)"+TabName);
 
     if(!init)
     {

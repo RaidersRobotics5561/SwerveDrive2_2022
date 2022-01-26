@@ -11,7 +11,7 @@ const double C_Tau = 6.28318530717958647;
 
 static const int frontLeftSteerDeviceID = 1, frontLeftDriveDeviceID = 2, frontRightSteerDeviceID = 4, frontRightDriveDeviceID = 3;
 static const int rearLeftSteerDeviceID  = 5, rearLeftDriveDeviceID  = 6, rearRightSteerDeviceID  = 7, rearRightDriveDeviceID  = 8;
-static const int topShooterID = 10, bottomShooterID = 9;
+static const int rightShooterID = 10, leftShooterID = 9;
 static const int liftID = 11;
 
 const double K_ReductionRatio = 8.31;
@@ -21,8 +21,8 @@ const double C_L = 0.5969;
 const double C_W = 0.5969;
 const double C_R = 0.8441;
 
-const double K_ShooterWheelRotation[E_RoboShooter] = {5.12517590321455,     // E_TopShooter    2.5555555555555555555555555555555555555555555555 * 2 * C_PI * 0.3191858136047229930278045677412
-                                                      3.84388192741092};    // E_BottomShooter 2.5555555555555555555555555555555555555555555555 * 2 * C_PI *0.2393893602035422447708534258059
+const double K_ShooterWheelRotation[E_RoboShooter] = {5.12517590321455,     // E_rightShooter    2.5555555555555555555555555555555555555555555555 * 2 * C_PI * 0.3191858136047229930278045677412
+                                                      3.84388192741092};    // E_leftShooter 2.5555555555555555555555555555555555555555555555 * 2 * C_PI *0.2393893602035422447708534258059
 
 // owo
 
