@@ -16,6 +16,7 @@ static const int C_liftYD_ID = 11;
 static const int C_liftXD_ID = 12;
 static const int C_elevatorID = 13;
 static const int C_intakeID = 14;
+const double K_SteerMotorCurrentLimit = 25;
 
 const double K_ReductionRatio = 8.31;
 const double K_WheelCircufrence = 12.566; // Circumferance of wheel, in inches
