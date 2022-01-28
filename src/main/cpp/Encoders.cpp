@@ -33,7 +33,7 @@ double V_Cnt_WheelDeltaDistanceInit[E_RobotCornerSz];
  *
  * Description:  Run all of the encoder decoding logic.
  ******************************************************************************/
-void Read_Encoders(bool            L_RobotInit,
+void Read_Encoders(bool           *L_RobotInit,
                    double          a_encoderFrontLeftSteerVoltage,
                    double          a_encoderFrontRightSteerVoltage,
                    double          a_encoderRearLeftSteerVoltage,
@@ -53,17 +53,22 @@ void Read_Encoders(bool            L_RobotInit,
 
 //L_RobotInit = true;  // For calibration only!
 
-  if (L_RobotInit == true)
+  if (*L_RobotInit == true)
     {
     V_WheelAngleRaw[E_FrontLeft]  = a_encoderFrontLeftSteerVoltage * 72 - K_WheelOffsetAngle[E_FrontLeft];
     V_WheelAngleRaw[E_FrontRight] = a_encoderFrontRightSteerVoltage * 72 - K_WheelOffsetAngle[E_FrontRight];
     V_WheelAngleRaw[E_RearLeft]   = a_encoderRearLeftSteerVoltage * 72 - K_WheelOffsetAngle[E_RearLeft];
     V_WheelAngleRaw[E_RearRight]  = a_encoderRearRightSteerVoltage * 72 - K_WheelOffsetAngle[E_RearRight];
 
-    V_WheelRelativeAngleRawOffset[E_FrontLeft] = m_encoderFrontLeftSteer.GetPosition();
-    V_WheelRelativeAngleRawOffset[E_FrontRight] = m_encoderFrontRightSteer.GetPosition();
-    V_WheelRelativeAngleRawOffset[E_RearLeft] = m_encoderRearLeftSteer.GetPosition();
-    V_WheelRelativeAngleRawOffset[E_RearRight] = m_encoderRearRightSteer.GetPosition();
+    V_WheelRelativeAngleRawOffset[E_FrontLeft] = V_WheelAngleRaw[E_FrontLeft];
+    V_WheelRelativeAngleRawOffset[E_FrontRight] = V_WheelAngleRaw[E_FrontRight];
+    V_WheelRelativeAngleRawOffset[E_RearLeft] = V_WheelAngleRaw[E_RearLeft];
+    V_WheelRelativeAngleRawOffset[E_RearRight] = V_WheelAngleRaw[E_RearRight];
+
+    // V_WheelRelativeAngleRawOffset[E_FrontLeft] = m_encoderFrontLeftSteer.GetPosition();
+    // V_WheelRelativeAngleRawOffset[E_FrontRight] = m_encoderFrontRightSteer.GetPosition();
+    // V_WheelRelativeAngleRawOffset[E_RearLeft] = m_encoderRearLeftSteer.GetPosition();
+    // V_WheelRelativeAngleRawOffset[E_RearRight] = m_encoderRearRightSteer.GetPosition();
 
       for (index = E_FrontLeft;
            index < E_RobotCornerSz;
@@ -128,7 +133,9 @@ void Read_Encoders(bool            L_RobotInit,
   frc::SmartDashboard::PutNumber("V_WheelAngleRaw Rear Left", V_WheelAngleRaw[E_RearLeft]);
   frc::SmartDashboard::PutNumber("V_WheelAngleRaw Rear Right", V_WheelAngleRaw[E_RearRight]);
 
-  if (L_RobotInit == false)
+  frc::SmartDashboard::PutNumber("encoder_rear_right_steer", m_encoderRearRightSteer.GetPosition());
+
+  if (*L_RobotInit == false)
     {  
        V_Cnt_WheelDeltaDistanceCurr[E_FrontLeft] = m_encoderFrontLeftDrive.GetPosition() - V_Cnt_WheelDeltaDistanceInit[E_FrontLeft];
        V_Cnt_WheelDeltaDistanceCurr[E_FrontRight] = m_encoderFrontRightDrive.GetPosition() - V_Cnt_WheelDeltaDistanceInit[E_FrontRight];
@@ -166,6 +173,7 @@ void Read_Encoders(bool            L_RobotInit,
   V_ShooterSpeedCurr[E_leftShooter] = (m_encoderleftShooter.GetVelocity() * K_ShooterWheelRotation[E_leftShooter]);
   frc::SmartDashboard::PutNumber("Top speed current", m_encoderrightShooter.GetVelocity());
   frc::SmartDashboard::PutNumber("Bottom speed current", m_encoderleftShooter.GetVelocity());
+  frc::SmartDashboard::PutBoolean("init?", *L_RobotInit);
   }
 
 /******************************************************************************

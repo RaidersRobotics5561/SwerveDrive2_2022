@@ -84,7 +84,10 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,
          L_Index < E_RobotCornerSz;
          L_Index = T_RobotCorner(int(L_Index) + 1))
       {
+      L_WA[L_Index] = -20 * K_WheelOffsetAngle[L_Index];
+      L_WS[L_Index] = 0;
       V_WheelAngleArb[L_Index] = L_WheelAngleFwd[L_Index]; // We do this for initialization in order to allow the PID control to control to the correct forward angle at startup
+      
        if (fabs(V_WheelAngleArb[L_Index]) > K_InitAngle)
          {
          L_Init = true;

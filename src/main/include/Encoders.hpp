@@ -1,6 +1,6 @@
 #include "Enums.hpp"
 
-void Read_Encoders(bool L_RobotInit,
+void Read_Encoders(bool *L_RobotInit,
                    double a_encoderFrontLeftSteerVoltage,
                    double a_encoderFrontRightSteerVoltage,
                    double a_encoderRearLeftSteerVoltage,
