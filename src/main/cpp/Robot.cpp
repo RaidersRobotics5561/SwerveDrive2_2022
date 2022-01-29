@@ -9,6 +9,7 @@
 
 //NOTE: Set this to TEST for testing of speeds and PID gains.  Set to COMP for competion
 #define TEST
+#define PHOTON
 //NOTE: Set this to allow Shuffleboard configuration of PIDConfig objects (Will override defaults)
 #define PID_DEBUG
 
@@ -31,7 +32,7 @@
 #include "Utils/PIDConfig.hpp"
 #include "Odometry.hpp"
 #include "Auton.hpp"
-
+#include <photonlib/PhotonCamera.h>
 
 // double desiredAngle;
 // double rotateDeBounce;
@@ -66,6 +67,9 @@ std::shared_ptr<nt::NetworkTable> lidar;
 std::shared_ptr<nt::NetworkTable> ledLight;
 
 nt::NetworkTableInstance inst;
+
+nt::NetworkTableInstance tsni;
+
 nt::NetworkTableEntry driverMode0;
 nt::NetworkTableEntry pipeline0;
 nt::NetworkTableEntry targetYaw0;
@@ -79,6 +83,10 @@ nt::NetworkTableEntry targetPose1;
 nt::NetworkTableEntry latency1;
 nt::NetworkTableEntry lidarDistance;
 nt::NetworkTableEntry ledControl;
+
+//nt::NetworkTableInstance tsni;
+
+
 
 double       distanceTarget;
 double       distanceBall;
@@ -191,6 +199,19 @@ void Robot::RobotInit() {
     inst = nt::NetworkTableInstance::Create();
     inst.StartClient("10.55.61.24");
     inst.StartDSClient();
+
+  #ifdef PHOTON
+
+  tsni = nt::NetworkTableInstance::Create();  
+  tsni.StartClientTeam(5561);
+    photonlib::PhotonCamera tsni{"camera"};
+    photonlib::PhotonPipelineResult result = tsni.GetLatestResult();
+    bool TargetAquired = result.HasTargets();
+
+    frc::SmartDashboard::PutBoolean("Has Target?", TargetAquired);
+  #endif
+
+
 
     vision0  = inst.GetTable("chameleon-vision/goal");
     vision1  = inst.GetTable("chameleon-vision/ColorWheel");
@@ -415,6 +436,8 @@ void Robot::RobotPeriodic()
     // blinkin.Set(frc::SmartDashboard::GetNumber("Blinkin code", 0));
 }
 
+
+ 
 
 /******************************************************************************
  * Function:     AutonomousInit
