@@ -25,12 +25,14 @@ const double C_L = 0.5969;
 const double C_W = 0.5969;
 const double C_R = 0.8441;
 
+const double C_VoltageToAngle = 72;
+
 const double K_ShooterWheelRotation[E_RoboShooter] = {5.12517590321455,     // E_rightShooter    2.5555555555555555555555555555555555555555555555 * 2 * C_PI * 0.3191858136047229930278045677412
                                                       3.84388192741092};    // E_leftShooter 2.5555555555555555555555555555555555555555555555 * 2 * C_PI *0.2393893602035422447708534258059
 
 // owo
 
-const double K_InitAngle = 1.4; // This is the absolute angle that all of the wheels need to be sitting at before allowing the robot to exit init
+const double K_InitAngle = 2.6; // This is the absolute angle that all of the wheels need to be sitting at before allowing the robot to exit init
 const double K_WheelOffsetAngle[E_RobotCornerSz] = {75.234367,   // E_FrontLeft
                                                     90.615225,   // E_FrontRight 152  104.6 
                                                     12.041014,   // E_RearLeft

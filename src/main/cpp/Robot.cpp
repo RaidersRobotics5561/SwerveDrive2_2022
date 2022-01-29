@@ -106,6 +106,7 @@ double       V_ShooterSpeedDesiredFinalLower;
 
 double SpeedRecommend;
 int theCoolerInteger;
+bool V_InitPrev;
 
 double PDP_Current_UpperShooter = 0;
 double PDP_Current_LowerShooter = 0;
@@ -147,6 +148,7 @@ double V_Drive_I_Zone = 0;
 double V_Drive_FF = 0;
 double V_Drive_Max = 1;
 double V_Drive_Min = -1;
+
 
 // PIDConfig UpperShooterPIDConfig {0.0008, 0.000001, 0.0006};
 
@@ -213,6 +215,9 @@ void Robot::RobotInit() {
 
     ledControl            = ledLight->GetEntry("ledControl");
     lidarDistance         = lidar->GetEntry("lidarDistance");
+  
+
+    
 
  #ifdef COMP
     V_testIntake = 0;
@@ -435,7 +440,17 @@ void Robot::AutonomousInit()
       V_RobotInit = true;
       // visionInit(vision0, ledLight, inst);
       GyroZero();
-      
+
+      Init_Delta_Angle(&V_Delta_Angle[0],
+                      a_encoderFrontLeftSteer.GetVoltage(),
+                      a_encoderFrontRightSteer.GetVoltage(),
+                      a_encoderRearLeftSteer.GetVoltage(),
+                      a_encoderRearRightSteer.GetVoltage(),
+                      m_encoderFrontLeftSteer,
+                      m_encoderFrontRightSteer,
+                      m_encoderRearLeftSteer,
+                      m_encoderRearRightSteer);
+
       for (index = E_FrontLeft;
            index < E_RobotCornerSz;
            index = T_RobotCorner(int(index) + 1))
@@ -818,7 +833,8 @@ frc::SmartDashboard::PutNumber("V_AutonState", V_autonState);
                        &V_WS[0],
                        &V_WA[0],
                        &V_RobotInit,
-                       &V_autonTargetFin);
+                       &V_autonTargetFin,
+                       &V_Delta_Angle[0]);
         
 
     for (index = E_FrontLeft;
@@ -917,10 +933,15 @@ void Robot::TeleopInit()
   m_rearLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
   m_frontLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
 
-  m_encoderFrontLeftSteer.SetPosition(0);
-  m_encoderFrontRightSteer.SetPosition(0);
-  m_encoderRearLeftSteer.SetPosition(0);
-  m_encoderRearRightSteer.SetPosition(0);
+  Init_Delta_Angle(&V_Delta_Angle[0],
+                   a_encoderFrontLeftSteer.GetVoltage(),
+                   a_encoderFrontRightSteer.GetVoltage(),
+                   a_encoderRearLeftSteer.GetVoltage(),
+                   a_encoderRearRightSteer.GetVoltage(),
+                   m_encoderFrontLeftSteer,
+                   m_encoderFrontRightSteer,
+                   m_encoderRearLeftSteer,
+                   m_encoderRearRightSteer);
 
   for (index = E_FrontLeft;
        index < E_RobotCornerSz;
@@ -973,6 +994,21 @@ void Robot::TeleopPeriodic()
   }
 
 
+   if (V_InitPrev == true && V_RobotInit == false){
+      m_frontLeftSteerMotor.Set(0);
+      m_frontRightSteerMotor.Set(0);
+      m_rearLeftSteerMotor.Set(0);
+      m_rearRightSteerMotor.Set(0);
+      Init_Delta_Angle(&V_Delta_Angle[0],
+                      a_encoderFrontLeftSteer.GetVoltage(),
+                      a_encoderFrontRightSteer.GetVoltage(),
+                      a_encoderRearLeftSteer.GetVoltage(),
+                      a_encoderRearRightSteer.GetVoltage(),
+                      m_encoderFrontLeftSteer,
+                      m_encoderFrontRightSteer,
+                      m_encoderRearLeftSteer,
+                      m_encoderRearRightSteer);
+      }
   Read_Encoders(&V_RobotInit,
                 a_encoderFrontLeftSteer.GetVoltage(),
                 a_encoderFrontRightSteer.GetVoltage(),
@@ -1020,7 +1056,10 @@ void Robot::TeleopPeriodic()
                    &V_WS[0],
                    &V_WA[0],
                    &V_RobotInit,
-                   &V_autonTargetFin);
+                   &V_autonTargetFin,
+                   &V_Delta_Angle[0]);
+
+
 
   //PDP top shooter port 13
   //PDP bottom shooter port 12
@@ -1354,15 +1393,15 @@ else
     // m_rearLeftSteerMotor.Set(V_WheelAngleCmnd[E_RearLeft] * (-1));
     // m_rearRightSteerMotor.Set(V_WheelAngleCmnd[E_RearRight] * (-1));
 
-    // m_frontLeftSteerMotorPID.SetReference(V_WA[E_FrontLeft], rev::ControlType::kPosition);
-    // m_frontRightSteerMotorPID.SetReference(V_WA[E_FrontRight], rev::ControlType::kPosition);
-    // m_rearLeftSteerMotorPID.SetReference(V_WA[E_RearLeft], rev::ControlType::kPosition);
-    // m_rearRightSteerMotorPID.SetReference(V_WA[E_RearRight], rev::ControlType::kPosition);
+    m_frontLeftSteerMotorPID.SetReference(V_WA[E_FrontLeft], rev::ControlType::kPosition);
+    m_frontRightSteerMotorPID.SetReference(V_WA[E_FrontRight], rev::ControlType::kPosition);
+    m_rearLeftSteerMotorPID.SetReference(V_WA[E_RearLeft], rev::ControlType::kPosition);
+    m_rearRightSteerMotorPID.SetReference(V_WA[E_RearRight], rev::ControlType::kPosition);
 
-    m_frontLeftSteerMotor.Set(0);
-    m_frontRightSteerMotor.Set(0);
-    m_rearLeftSteerMotor.Set(0);
-    m_rearRightSteerMotor.Set(0);
+    // m_frontLeftSteerMotor.Set(0);
+    // m_frontRightSteerMotor.Set(0);
+    // m_rearLeftSteerMotor.Set(0);
+    // m_rearRightSteerMotor.Set(0);
 
 
     bool activeBeamSensor = ir_sensor.Get();
@@ -1411,6 +1450,7 @@ else
     
     frc::SmartDashboard::PutNumber("pipeline", pipeline0.GetDouble(0));
 #endif
+    V_InitPrev = V_RobotInit;
     frc::Wait(C_ExeTime_t);
 }
 

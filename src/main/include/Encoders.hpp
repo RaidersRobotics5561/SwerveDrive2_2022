@@ -1,5 +1,15 @@
 #include "Enums.hpp"
 
+void Init_Delta_Angle(double           *L_Delta_Angle,
+                      double          a_encoderFrontLeftSteerVoltage,
+                      double          a_encoderFrontRightSteerVoltage,
+                      double          a_encoderRearLeftSteerVoltage,
+                      double          a_encoderRearRightSteerVoltage,
+                      rev::SparkMaxRelativeEncoder m_encoderFrontLeftSteer,
+                      rev::SparkMaxRelativeEncoder m_encoderFrontRightSteer,
+                      rev::SparkMaxRelativeEncoder m_encoderRearLeftSteer,
+                      rev::SparkMaxRelativeEncoder m_encoderRearRightSteer);
+
 void Read_Encoders(bool *L_RobotInit,
                    double a_encoderFrontLeftSteerVoltage,
                    double a_encoderFrontRightSteerVoltage,
@@ -33,4 +43,5 @@ double DtrmnEncoderRelativeToCmnd(double L_JoystickCmnd,
  extern double V_M_WheelDeltaDistance[E_RobotCornerSz];
  extern double V_Cnt_WheelDeltaDistanceCurr[E_RobotCornerSz];
  extern double V_Cnt_WheelDeltaDistancePrev[E_RobotCornerSz];
+ extern double V_Delta_Angle[E_RobotCornerSz];
  

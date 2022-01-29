@@ -27,7 +27,36 @@ double V_Cnt_WheelDeltaDistanceCurr[E_RobotCornerSz]; // Prev distance wheel mov
 double V_Cnt_WheelDeltaDistancePrev[E_RobotCornerSz]; // Prev distance wheel moved, loop to loop, in Counts
 double V_ShooterSpeedCurr[E_RoboShooter];
 double V_Cnt_WheelDeltaDistanceInit[E_RobotCornerSz];
+double V_Delta_Angle[E_RobotCornerSz]; // The delta of the angle needed to align the wheels when the robot inits
 
+/******************************************************************************
+ * Function:     Init_Delta_Angle
+ *
+ * Description:  Stores the delta value for wheel angles.
+ ******************************************************************************/
+void Init_Delta_Angle(double           *L_Delta_Angle,
+                      double          a_encoderFrontLeftSteerVoltage,
+                      double          a_encoderFrontRightSteerVoltage,
+                      double          a_encoderRearLeftSteerVoltage,
+                      double          a_encoderRearRightSteerVoltage,
+                      rev::SparkMaxRelativeEncoder m_encoderFrontLeftSteer,
+                      rev::SparkMaxRelativeEncoder m_encoderFrontRightSteer,
+                      rev::SparkMaxRelativeEncoder m_encoderRearLeftSteer,
+                      rev::SparkMaxRelativeEncoder m_encoderRearRightSteer)
+  {
+  L_Delta_Angle[E_FrontLeft]  = a_encoderFrontLeftSteerVoltage * C_VoltageToAngle - K_WheelOffsetAngle[E_FrontLeft];
+  L_Delta_Angle[E_FrontRight] = a_encoderFrontRightSteerVoltage * C_VoltageToAngle - K_WheelOffsetAngle[E_FrontRight];
+  L_Delta_Angle[E_RearLeft]   = a_encoderRearLeftSteerVoltage * C_VoltageToAngle - K_WheelOffsetAngle[E_RearLeft];
+  L_Delta_Angle[E_RearRight]  = a_encoderRearRightSteerVoltage * C_VoltageToAngle - K_WheelOffsetAngle[E_RearRight];
+
+  m_encoderFrontLeftSteer.SetPosition(0);
+  m_encoderFrontRightSteer.SetPosition(0);
+  m_encoderRearLeftSteer.SetPosition(0);
+  m_encoderRearRightSteer.SetPosition(0);
+
+  frc::SmartDashboard::PutNumber("Right rear aelta dngle", L_Delta_Angle[E_RearRight]);
+  frc::SmartDashboard::PutNumber("Left rear aelta dngle", L_Delta_Angle[E_RearLeft]);
+  }
 /******************************************************************************
  * Function:     Read_Encoders
  *
@@ -55,10 +84,12 @@ void Read_Encoders(bool           *L_RobotInit,
 
   if (*L_RobotInit == true)
     {
-    V_WheelAngleRaw[E_FrontLeft]  = a_encoderFrontLeftSteerVoltage * 72 - K_WheelOffsetAngle[E_FrontLeft];
-    V_WheelAngleRaw[E_FrontRight] = a_encoderFrontRightSteerVoltage * 72 - K_WheelOffsetAngle[E_FrontRight];
-    V_WheelAngleRaw[E_RearLeft]   = a_encoderRearLeftSteerVoltage * 72 - K_WheelOffsetAngle[E_RearLeft];
-    V_WheelAngleRaw[E_RearRight]  = a_encoderRearRightSteerVoltage * 72 - K_WheelOffsetAngle[E_RearRight];
+    V_WheelAngleRaw[E_FrontLeft]  = a_encoderFrontLeftSteerVoltage * C_VoltageToAngle - K_WheelOffsetAngle[E_FrontLeft];
+    V_WheelAngleRaw[E_FrontRight] = a_encoderFrontRightSteerVoltage * C_VoltageToAngle - K_WheelOffsetAngle[E_FrontRight];
+    V_WheelAngleRaw[E_RearLeft]   = a_encoderRearLeftSteerVoltage * C_VoltageToAngle - K_WheelOffsetAngle[E_RearLeft];
+    V_WheelAngleRaw[E_RearRight]  = a_encoderRearRightSteerVoltage * C_VoltageToAngle - K_WheelOffsetAngle[E_RearRight];
+
+
 
     V_WheelRelativeAngleRawOffset[E_FrontLeft] = V_WheelAngleRaw[E_FrontLeft];
     V_WheelRelativeAngleRawOffset[E_FrontRight] = V_WheelAngleRaw[E_FrontRight];
