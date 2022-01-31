@@ -5,7 +5,7 @@
   Author: 5561
 
   Changes:
-  2021-02-28 -> Bata
+  2021-02-28 -> Beta
  */
 
 #include "Robot.h"

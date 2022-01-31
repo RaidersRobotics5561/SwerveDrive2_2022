@@ -1,5 +1,5 @@
 /*
- * Team 5561 2020 Code
+ * Team 5561 2022 Code
  *
  * This code runs the 2020 robot which is capable of the following:
  * - Swerve Drive (beta 02/10/2020)
@@ -747,9 +747,6 @@ void Robot::AutonomousPeriodic()
       break;
       }
 
-frc::SmartDashboard::PutNumber("V_ShooterSpeedDesiredFinalUpper", V_ShooterSpeedDesiredFinalUpper);
-frc::SmartDashboard::PutNumber("V_ShooterSpeedDesired[E_rightShooter]", V_ShooterSpeedDesired[E_rightShooter]);
-frc::SmartDashboard::PutNumber("V_AutonState", V_autonState);
       DriveControlMain(driveforward,
                        strafe,
                        speen,
@@ -832,6 +829,9 @@ frc::SmartDashboard::PutNumber("V_AutonState", V_autonState);
     m_elevateDaBalls.Set(ControlMode::PercentOutput, V_elevatorValue);
 
     /* Output to the dashboard: */
+    frc::SmartDashboard::PutNumber("V_ShooterSpeedDesiredFinalUpper", V_ShooterSpeedDesiredFinalUpper);
+    frc::SmartDashboard::PutNumber("V_ShooterSpeedDesired[E_rightShooter]", V_ShooterSpeedDesired[E_rightShooter]);
+    frc::SmartDashboard::PutNumber("V_AutonState", V_autonState);
     frc::SmartDashboard::PutNumber("Robot X", (V_M_RobotDisplacementX));
     frc::SmartDashboard::PutNumber("Robot Y", (V_M_RobotDisplacementY));
     frc::SmartDashboard::PutNumber("V_AutonState", V_autonState);
