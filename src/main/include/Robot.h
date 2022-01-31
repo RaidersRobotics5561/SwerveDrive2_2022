@@ -59,17 +59,6 @@ class Robot : public frc::TimedRobot {
   rev::SparkMaxPIDController m_leftShooterpid = m_leftShooterMotor.GetPIDController();
   rev::SparkMaxPIDController m_liftpidYD         = m_liftMotorYD.GetPIDController();
   rev::SparkMaxPIDController m_liftpidXD          = m_liftMotorXD.GetPIDController();
-  rev::SparkMaxPIDController m_frontLeftSteerMotorPID          = m_frontLeftSteerMotor.GetPIDController();
-  rev::SparkMaxPIDController m_frontLeftDriveMotorPID          = m_frontLeftDriveMotor.GetPIDController();
-  rev::SparkMaxPIDController m_frontRightSteerMotorPID         = m_frontRightSteerMotor.GetPIDController();
-  rev::SparkMaxPIDController m_frontRightDriveMotorPID         = m_frontRightDriveMotor.GetPIDController();
-  rev::SparkMaxPIDController m_rearLeftSteerMotorPID           = m_rearLeftSteerMotor.GetPIDController();
-  rev::SparkMaxPIDController m_rearLeftDriveMotorPID           = m_rearLeftDriveMotor.GetPIDController();
-  rev::SparkMaxPIDController m_rearRightSteerMotorPID          = m_rearRightSteerMotor.GetPIDController();
-  rev::SparkMaxPIDController m_rearRightDriveMotorPID          = m_rearRightDriveMotor.GetPIDController();
-
-  
-
   rev::SparkMaxRelativeEncoder m_encoderFrontLeftSteer  = m_frontLeftSteerMotor.GetEncoder();
   rev::SparkMaxRelativeEncoder m_encoderFrontLeftDrive  = m_frontLeftDriveMotor.GetEncoder();
   rev::SparkMaxRelativeEncoder m_encoderFrontRightSteer = m_frontRightSteerMotor.GetEncoder();

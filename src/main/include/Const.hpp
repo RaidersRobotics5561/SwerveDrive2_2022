@@ -1,8 +1,21 @@
 #include "Enums.hpp"
 #include <units/time.h>
+#include <units/angle.h>
+#include <units/length.h>
 
 const double C_ExeTime = 0.01;
 const units::second_t C_ExeTime_t = 0.01_s;
+
+  const units::meter_t CAMERA_HEIGHT = 24_in;
+  const units::meter_t TARGET_HEIGHT = 5_ft;
+  // Angle between horizontal and the camera.
+
+  const units::radian_t CAMERA_PITCH = 0_deg;
+
+
+  // How far from the target we want to be
+
+  const units::meter_t GOAL_RANGE_METERS = 3_ft;
 
 const double C_RadtoDeg = 57.2958;
 const double C_Deg2Rad = 0.017453292519943295;
@@ -17,6 +30,8 @@ static const int C_liftXD_ID = 12;
 static const int C_elevatorID = 13;
 static const int C_intakeID = 14;
 const double K_SteerMotorCurrentLimit = 25;
+static const double C_VoltageToAngle = 72.0; // Gain that converts the measured voltage of the absolute encoder to an equivalent angle in degrees.
+
 
 const double K_ReductionRatio = 8.31;
 const double K_WheelCircufrence = 12.566; // Circumferance of wheel, in inches
@@ -25,14 +40,12 @@ const double C_L = 0.5969;
 const double C_W = 0.5969;
 const double C_R = 0.8441;
 
-const double C_VoltageToAngle = 72;
-
 const double K_ShooterWheelRotation[E_RoboShooter] = {5.12517590321455,     // E_rightShooter    2.5555555555555555555555555555555555555555555555 * 2 * C_PI * 0.3191858136047229930278045677412
                                                       3.84388192741092};    // E_leftShooter 2.5555555555555555555555555555555555555555555555 * 2 * C_PI *0.2393893602035422447708534258059
 
 // owo
 
-const double K_InitAngle = 2.6; // This is the absolute angle that all of the wheels need to be sitting at before allowing the robot to exit init
+const double K_InitAngle = 1.4; // This is the absolute angle that all of the wheels need to be sitting at before allowing the robot to exit init
 const double K_WheelOffsetAngle[E_RobotCornerSz] = {75.234367,   // E_FrontLeft
                                                     90.615225,   // E_FrontRight 152  104.6 
                                                     12.041014,   // E_RearLeft
