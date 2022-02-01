@@ -31,6 +31,7 @@
 #include "Utils/PIDConfig.hpp"
 #include "Odometry.hpp"
 #include "Auton.hpp"
+#include <units/length.h>
 
 
 // double desiredAngle;
@@ -359,7 +360,21 @@ void Robot::RobotPeriodic()
     Gyro();
     frc::SmartDashboard::PutNumber("gyro angle", gyro_yawangledegrees);
     theCoolerInteger = frc::SmartDashboard::GetNumber("cooler int", 1);
-      
+    
+    // photonlib::PhotonPipelineResult result = camera.GetLatestResult();
+
+    // units::meter_t range;
+    // if (result.HasTargets())
+    //   {
+    //   // First calculate range
+    //   range = photonlib::PhotonUtils::CalculateDistanceToTarget(CAMERA_HEIGHT,
+    //                                                                            TARGET_HEIGHT,
+    //                                                                            CAMERA_PITCH,
+    //                                                                            units::degree_t{result.GetBestTarget().GetPitch()});
+    //   }
+
+    // double L_Range = range.value();
+    // frc::SmartDashboard::PutNumber("RANGE", L_Range);
     // blinkin.Set(frc::SmartDashboard::GetNumber("Blinkin code", 0));
 }
 

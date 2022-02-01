@@ -22,6 +22,9 @@
 #include <frc/Compressor.h>
 #include <networktables/NetworkTable.h>
 
+#include <photonlib/PhotonCamera.h>
+#include <photonlib/PhotonUtils.h>
+
 class Robot : public frc::TimedRobot {
  public:
   void RobotInit() override;
@@ -59,6 +62,7 @@ class Robot : public frc::TimedRobot {
   rev::SparkMaxPIDController m_leftShooterpid = m_leftShooterMotor.GetPIDController();
   rev::SparkMaxPIDController m_liftpidYD         = m_liftMotorYD.GetPIDController();
   rev::SparkMaxPIDController m_liftpidXD          = m_liftMotorXD.GetPIDController();
+
   rev::SparkMaxRelativeEncoder m_encoderFrontLeftSteer  = m_frontLeftSteerMotor.GetEncoder();
   rev::SparkMaxRelativeEncoder m_encoderFrontLeftDrive  = m_frontLeftDriveMotor.GetEncoder();
   rev::SparkMaxRelativeEncoder m_encoderFrontRightSteer = m_frontRightSteerMotor.GetEncoder();
@@ -67,15 +71,17 @@ class Robot : public frc::TimedRobot {
   rev::SparkMaxRelativeEncoder m_encoderRearLeftDrive   = m_rearLeftDriveMotor.GetEncoder();
   rev::SparkMaxRelativeEncoder m_encoderRearRightSteer  = m_rearRightSteerMotor.GetEncoder();
   rev::SparkMaxRelativeEncoder m_encoderRearRightDrive  = m_rearRightDriveMotor.GetEncoder();
-  rev::SparkMaxRelativeEncoder m_encoderrightShooter      = m_rightShooterMotor.GetEncoder();
-  rev::SparkMaxRelativeEncoder m_encoderleftShooter   = m_leftShooterMotor.GetEncoder();
-  rev::SparkMaxRelativeEncoder m_encoderLiftYD            = m_liftMotorYD.GetEncoder();
-  rev::SparkMaxRelativeEncoder m_encoderLiftXD            = m_liftMotorXD.GetEncoder();
+  rev::SparkMaxRelativeEncoder m_encoderrightShooter    = m_rightShooterMotor.GetEncoder();
+  rev::SparkMaxRelativeEncoder m_encoderleftShooter     = m_leftShooterMotor.GetEncoder();
+  rev::SparkMaxRelativeEncoder m_encoderLiftYD          = m_liftMotorYD.GetEncoder();
+  rev::SparkMaxRelativeEncoder m_encoderLiftXD          = m_liftMotorXD.GetEncoder();
   frc::Joystick c_joyStick{0};
   frc::Joystick c_joyStick2{1};
 
   frc::PowerDistribution PDP {0, frc::PowerDistribution::ModuleType::kCTRE};
 
+  photonlib::PhotonCamera camera{"photonvision"};
+  
   double Upper_P_Gx = 0, Upper_I_Gx = 0, Upper_D_Gx = 0, Upper_I_Zone = 0, Upper_FF = 0, Upper_Max = 1, Upper_Min = -1;
   double Lower_P_Gx = 0, Lower_I_Gx = 0, Lower_D_Gx = 0, Lower_I_Zone = 0, Lower_FF = 0, Lower_Max = 1, Lower_Min = -1;
   double kP = 0.1, kI = 1e-4, kD = 1, kIz = 0, kFF = 0, kMaxOutput = 1, kMinOutput = -1;
