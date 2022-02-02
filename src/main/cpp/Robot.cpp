@@ -33,6 +33,7 @@
 #include "Odometry.hpp"
 #include "Auton.hpp"
 #include <photonlib/PhotonCamera.h>
+#include <photonlib/PhotonUtils.h>
 
 // double desiredAngle;
 // double rotateDeBounce;
@@ -202,38 +203,47 @@ void Robot::RobotInit() {
 
   #ifdef PHOTON
 
-  tsni = nt::NetworkTableInstance::Create();  
-  tsni.StartClientTeam(5561);
+  // tsni = nt::NetworkTableInstance::Create();  
+  
+    tsni.StartClientTeam(5561);
     photonlib::PhotonCamera tsni{"camera"};
     photonlib::PhotonPipelineResult result = tsni.GetLatestResult();
+
     bool TargetAquired = result.HasTargets();
 
+    photonlib::PhotonTrackedTarget target = result.GetBestTarget();
+
+    double PhotonYaw = target.GetYaw();
+
     frc::SmartDashboard::PutBoolean("Has Target?", TargetAquired);
+    frc::SmartDashboard::PutNumber("Target Yaw", PhotonYaw);
+
+
   #endif
 
 
 
-    vision0  = inst.GetTable("chameleon-vision/goal");
-    vision1  = inst.GetTable("chameleon-vision/ColorWheel");
-    lidar    = inst.GetTable("lidar");
-    ledLight = inst.GetTable("ledLight");
+    // vision0  = inst.GetTable("chameleon-vision/goal");
+    // vision1  = inst.GetTable("chameleon-vision/ColorWheel");
+    // lidar    = inst.GetTable("lidar");
+    // ledLight = inst.GetTable("ledLight");
 
 
-    driverMode0           = vision0->GetEntry("driverMode");
-    pipeline0             = vision0->GetEntry("pipeline");
-    targetPitch0          = vision0->GetEntry("targetPitch");
-    targetYaw0            = vision0->GetEntry("targetYaw");
-    targetPose0           = vision0->GetEntry("targetpose");
-    latency0              = vision0->GetEntry("latency");
+    // driverMode0           = vision0->GetEntry("driverMode");
+    // pipeline0             = vision0->GetEntry("pipeline");
+    // targetPitch0          = vision0->GetEntry("targetPitch");
+    // targetYaw0            = vision0->GetEntry("targetYaw");
+    // targetPose0           = vision0->GetEntry("targetpose");
+    // latency0              = vision0->GetEntry("latency");
 
-    driverMode1           = vision1->GetEntry("driverMode");
-    targetPitch1          = vision1->GetEntry("targetPitch");
-    targetYaw1            = vision1->GetEntry("targetYaw");
-    targetPose1           = vision1->GetEntry("targetpose");
-    latency1              = vision1->GetEntry("latency");
+    // driverMode1           = vision1->GetEntry("driverMode");
+    // targetPitch1          = vision1->GetEntry("targetPitch");
+    // targetYaw1            = vision1->GetEntry("targetYaw");
+    // targetPose1           = vision1->GetEntry("targetpose");
+    // latency1              = vision1->GetEntry("latency");
 
-    ledControl            = ledLight->GetEntry("ledControl");
-    lidarDistance         = lidar->GetEntry("lidarDistance");
+    // ledControl            = ledLight->GetEntry("ledControl");
+    // lidarDistance         = lidar->GetEntry("lidarDistance");
 
  #ifdef TEST
     V_testIntake = 0;
@@ -434,6 +444,30 @@ void Robot::RobotPeriodic()
     theCoolerInteger = frc::SmartDashboard::GetNumber("cooler int", 1);
       
     // blinkin.Set(frc::SmartDashboard::GetNumber("Blinkin code", 0));
+
+ #ifdef PHOTON
+
+  // tsni = nt::NetworkTableInstance::Create();  
+  
+    tsni.StartClientTeam(5561);
+    photonlib::PhotonCamera tsni{"camera"};
+    photonlib::PhotonPipelineResult result = tsni.GetLatestResult();
+
+    bool TargetAquired = result.HasTargets();
+    
+    photonlib::PhotonTrackedTarget target = result.GetBestTarget();
+
+    double PhotonYaw = target.GetYaw();
+
+    frc::SmartDashboard::PutBoolean("Has Target?", TargetAquired);
+    frc::SmartDashboard::PutNumber("Target Yaw", PhotonYaw);
+
+
+  #endif
+
+
+
+
 }
 
 
