@@ -26,6 +26,7 @@
 #include "vision.hpp"
 #include "DriveControl.hpp"
 #include "AutoTarget.hpp"
+//#include "Lift.hpp"
 #include <frc/DigitalInput.h>
 
 #include "Utils/PIDConfig.hpp"

@@ -6,6 +6,8 @@
 const double C_ExeTime = 0.01;
 const units::second_t C_ExeTime_t = 0.01_s;
 
+const double C_End_game_time = 30;
+
   const units::meter_t CAMERA_HEIGHT = 24_in;
   const units::meter_t TARGET_HEIGHT = 5_ft;
   // Angle between horizontal and the camera.
