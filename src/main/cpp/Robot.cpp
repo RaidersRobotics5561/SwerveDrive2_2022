@@ -13,7 +13,6 @@
 //NOTE: Set this to allow Shuffleboard configuration of PIDConfig objects (Will override defaults)
 #define PID_DEBUG
 #define SPIKE
-#define PIXY
 
 #include "Robot.h"
 #include <iostream>
@@ -487,10 +486,10 @@ void Robot::RobotPeriodic()
       BottomIndex = 2; // 2 is the index for a blue ball
     }
     
-    Cam2.SetPipelineIndex(BottomIndex);
+    Cam2.SetPipelineIndex(BottomIndex); // set the pipeline to whatever the logic gave
     frc::SmartDashboard::PutBoolean("Bottom Has Target?", BottomTargetAquired);
     frc::SmartDashboard::PutNumber("Bottom Yaw", BottomYaw);
-    // frc::SmartDashboard::PutNumber("Bottom Index", BottomIndex);
+    frc::SmartDashboard::PutNumber("Bottom Index", BottomIndex); 
   #endif
 
 
@@ -1451,14 +1450,9 @@ else
     
     frc::SmartDashboard::PutNumber("pipeline", pipeline0.GetDouble(0));
 #endif
-#ifdef PIXY
-
-
-
-#endif
 #ifdef SPIKE
   
- DIO0.Set(LightOff);
+ DIO0.Set(LightOff); //set the DIO0 signal
   
 #endif
     frc::Wait(C_ExeTime_t);
