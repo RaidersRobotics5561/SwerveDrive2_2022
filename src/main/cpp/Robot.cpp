@@ -169,7 +169,8 @@ double V_Drive_I_Zone = 0;
 double V_Drive_FF = 0;
 double V_Drive_Max = 1;
 double V_Drive_Min = -1;
-bool   LightOff = true;
+bool   LightOff = true; //the polarities are funny, true = off
+
 // PIDConfig UpperShooterPIDConfig {0.0008, 0.000001, 0.0006};
 
 frc::DigitalInput ir_sensor{1};
@@ -451,21 +452,23 @@ void Robot::RobotPeriodic()
 
   #ifdef PHOTON
 
-  // Cam1 = nt::NetworkTableInstance::Create();  
     Cam2.StartClientTeam(5561);
     Cam1.StartClientTeam(5561);
+
+    // first Camera is cam1 for auto target
     photonlib::PhotonCamera Cam1{"Top"};
     photonlib::PhotonPipelineResult result = Cam1.GetLatestResult();
+  
+    TargetAquired = result.HasTargets(); //returns true if the camera has a target
 
-    TargetAquired = result.HasTargets();
+    photonlib::PhotonTrackedTarget target = result.GetBestTarget(); //gets the best target
 
-    photonlib::PhotonTrackedTarget target = result.GetBestTarget();
+    PhotonYaw = target.GetYaw(); // Yaw of the best target
 
-    PhotonYaw = target.GetYaw();
-
-    frc::SmartDashboard::PutBoolean("Has Target?", TargetAquired);
+    frc::SmartDashboard::PutBoolean("Has Target?", TargetAquired); //puts those new values to dashboard
     frc::SmartDashboard::PutNumber("Target Yaw", PhotonYaw);
 
+    // second camera for cargo detection
     photonlib::PhotonCamera Cam2{"Bottom"};
     photonlib::PhotonPipelineResult resultBottom = Cam2.GetLatestResult();
 
@@ -473,17 +476,15 @@ void Robot::RobotPeriodic()
     BottomTargetAquired = resultBottom.HasTargets();
     BottomYaw = targetBottom.GetYaw();
 
-    BottomIndex;
-
     L_AllianceColor = frc::DriverStation::GetInstance().GetAlliance();
 
     if (L_AllianceColor == frc::DriverStation::Alliance::kRed){
-      BottomIndex = 1;
+      BottomIndex = 1; // 1 is the index for a red ball
 
     }
     else if (L_AllianceColor == frc::DriverStation::Alliance::kBlue)
     {
-      BottomIndex = 2;
+      BottomIndex = 2; // 2 is the index for a blue ball
     }
     
     Cam2.SetPipelineIndex(BottomIndex);
