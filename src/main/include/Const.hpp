@@ -47,6 +47,26 @@ const double K_ShooterWheelRotation[E_RoboShooter] = {5.12517590321455,     // E
 
 // owo
 
+const double K_lift_max_YD = 60.25; //distance from floor to mid rung (60.25 inches)
+const double K_lift_mid_YD = 9.42069; //a middle height- below the rungs
+const double K_lift_min_YD = 0; //it crunch
+const double K_lift_rungs_YD = 15.375; //distance from rung to rung (15.375 inches)
+const double K_lift_rate_up_YD = 0.001; //RampTo slope for lift up
+const double K_lift_rate_down_YD = -0.001; //RampTo slope for lift down
+const double K_lift_deadband_YD = 0.5; //it's a deadband for the y lift yeah
+
+const double K_lift_max_XD = 24; //distance between bars (24 inches)
+const double K_lift_mid_XD = 12; //mid distance between bars (12 inches)
+const double K_lift_rate_forward_XD = 0.001; //RampTo slope for lift forward
+const double K_lift_rate_backward_XD = -0.001; //RampTo slope for lift backward
+const double K_lift_min_XD = 0; //we don't want XD to move cuz it's a loser
+const double K_lift_deadband_XD = 0.5; //it's a deadband for the x lift yeah
+
+const double K_gyro_angle_lift = -10; //robert is tilting
+const double K_gyro_deadband = 2;
+const double K_deadband_timer = 0.5; //keep the deadband for a certain amount of time
+
+
 const double K_InitAngle = 1.4; // This is the absolute angle that all of the wheels need to be sitting at before allowing the robot to exit init
 const double K_WheelOffsetAngle[E_RobotCornerSz] = {75.234367,   // E_FrontLeft
                                                     90.615225,   // E_FrontRight 152  104.6 

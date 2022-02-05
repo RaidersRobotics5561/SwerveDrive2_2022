@@ -58,13 +58,14 @@ typedef enum T_Lift_State
   E_S1_initialize_Up_YD,
   E_S2_lift_down_YD,
   E_S3_move_forward_XD,
-  E_S4_stretch__up_YD,
+  E_S4_stretch_up_YD,
   E_S5_more_forward_XD,
-  E_S6_lift_down_again_YD,
+  E_S6_lift_up_more_YD,
   E_S7_move_back_XD,
   E_S8_more_down_some_YD,
   E_S9_back_rest_XD,
-  E_S10_final_YD
+  E_S10_final_YD,
+  E_S11_Stop
 } T_Lift_State;
 
 #endif
