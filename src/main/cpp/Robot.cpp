@@ -28,6 +28,7 @@
 #include "AutoTarget.hpp"
 //#include "Lift.hpp"
 #include <frc/DigitalInput.h>
+#include "Driver_inputs.hpp"
 
 #include "Utils/PIDConfig.hpp"
 #include "Odometry.hpp"
@@ -150,6 +151,7 @@ double V_Drive_FF = 0;
 double V_Drive_Max = 1;
 double V_Drive_Min = -1;
 
+T_Lift_State V_Lift_state = E_S0_BEGONE;
 
 // PIDConfig UpperShooterPIDConfig {0.0008, 0.000001, 0.0006};
 
@@ -923,6 +925,7 @@ void Robot::TeleopInit()
 void Robot::TeleopPeriodic()
   {
   T_RobotCorner         index;
+  bool L_Driver_lift_control = false;
 
   double timeleft = frc::DriverStation::GetInstance().GetMatchTime();
 
@@ -931,6 +934,8 @@ void Robot::TeleopPeriodic()
     blinkin.Set(-0.89);
   }
 
+  Joystick_robot_mapping(c_joyStick2.GetRawButton(1),
+                           &L_Driver_lift_control); 
 
   Read_Encoders(V_RobotInit,
                 a_encoderFrontLeftSteer.GetVoltage(),
@@ -981,17 +986,6 @@ void Robot::TeleopPeriodic()
                    &V_RobotInit,
                    &V_autonTargetFin);
 
-  //PDP top shooter port 13
-  //PDP bottom shooter port 12
-//  PDP_Current_UpperShooter = PDP.GetCurrent(13);
-//  PDP_Current_LowerShooter = PDP.GetCurrent(12);
-//  if(abs(PDP_Current_LowerShooter - PDP_Current_LowerShooter_last) > 2 || abs(PDP_Current_UpperShooter - PDP_Current_UpperShooter_last) > 2)
-//  {
-//    BallsShot += 1;
-//  }
-//  PDP_Current_UpperShooter_last = PDP_Current_UpperShooter;
-//  PDP_Current_LowerShooter_last = PDP_Current_LowerShooter;
-
 
     for (index = E_FrontLeft;
          index < E_RobotCornerSz;
@@ -1029,7 +1023,15 @@ void Robot::TeleopPeriodic()
                                              K_WheelSpeedPID_Gx[E_Max_Ul],
                                              K_WheelSpeedPID_Gx[E_Max_Ll]);
       }
-    //Ws1: fr, Ws2: fl, ws3: rl, ws4: rr
+
+      V_Lift_state = Lift_Control_Dictator(L_Driver_lift_control,
+                                            timeleft,
+                                            V_Lift_state,
+                                            L_lift_measured_position_YD,
+                                            L_lift_measured_position_XD,
+                                    double       *L_lift_command_YD,
+                                    double       *L_lift_command_XD,
+                                    double        L_gyro_yawangledegrees);
 
     frc::SmartDashboard::PutNumber("Gyro Angle Deg", gyro_yawangledegrees);
     frc::SmartDashboard::PutNumber("WA_FR", V_WA[E_FrontRight]);
