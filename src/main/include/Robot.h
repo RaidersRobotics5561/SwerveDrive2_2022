@@ -21,6 +21,8 @@
 #include <frc/DoubleSolenoid.h>
 #include <frc/Compressor.h>
 #include <networktables/NetworkTable.h>
+#include <frc/DigitalOutput.h>
+
 
 class Robot : public frc::TimedRobot {
  public:
@@ -36,6 +38,8 @@ class Robot : public frc::TimedRobot {
   frc::AnalogInput a_encoderFrontRightSteer{1};
   frc::AnalogInput a_encoderRearLeftSteer{3};
   frc::AnalogInput a_encoderRearRightSteer{0};
+
+  frc::DigitalOutput DIO0{0};
 
   rev::CANSparkMax m_frontLeftSteerMotor {frontLeftSteerDeviceID,  rev::CANSparkMax::MotorType::kBrushless};
   rev::CANSparkMax m_frontLeftDriveMotor {frontLeftDriveDeviceID,  rev::CANSparkMax::MotorType::kBrushless};

@@ -12,12 +12,15 @@
 #define PHOTON
 //NOTE: Set this to allow Shuffleboard configuration of PIDConfig objects (Will override defaults)
 #define PID_DEBUG
+#define SPIKE
+#define PIXY
 
 #include "Robot.h"
 #include <iostream>
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/DriverStation.h>
 #include <frc/livewindow/LiveWindow.h>
+
 
 #include "Encoders.hpp"
 #include "Enums.hpp"
@@ -28,6 +31,7 @@
 #include "DriveControl.hpp"
 #include "AutoTarget.hpp"
 #include <frc/DigitalInput.h>
+#include <frc/DigitalOutput.h>
 
 #include "Utils/PIDConfig.hpp"
 #include "Odometry.hpp"
@@ -69,7 +73,8 @@ std::shared_ptr<nt::NetworkTable> ledLight;
 
 nt::NetworkTableInstance inst;
 
-nt::NetworkTableInstance tsni;
+nt::NetworkTableInstance Cam1;
+nt::NetworkTableInstance Cam2;
 
 nt::NetworkTableEntry driverMode0;
 nt::NetworkTableEntry pipeline0;
@@ -85,7 +90,15 @@ nt::NetworkTableEntry latency1;
 nt::NetworkTableEntry lidarDistance;
 nt::NetworkTableEntry ledControl;
 
-//nt::NetworkTableInstance tsni;
+//nt::NetworkTableInstance Cam1;
+#ifdef PHOTON
+bool TargetAquired;
+double PhotonYaw;
+bool BottomTargetAquired;
+double BottomYaw;
+int BottomIndex;
+
+#endif
 
 
 
@@ -156,7 +169,7 @@ double V_Drive_I_Zone = 0;
 double V_Drive_FF = 0;
 double V_Drive_Max = 1;
 double V_Drive_Min = -1;
-
+bool   LightOff = true;
 // PIDConfig UpperShooterPIDConfig {0.0008, 0.000001, 0.0006};
 
 frc::DigitalInput ir_sensor{1};
@@ -203,22 +216,12 @@ void Robot::RobotInit() {
 
   #ifdef PHOTON
 
-  // tsni = nt::NetworkTableInstance::Create();  
-  
-    tsni.StartClientTeam(5561);
-    photonlib::PhotonCamera tsni{"camera"};
-    photonlib::PhotonPipelineResult result = tsni.GetLatestResult();
-
-    bool TargetAquired = result.HasTargets();
-
-    photonlib::PhotonTrackedTarget target = result.GetBestTarget();
-
-    double PhotonYaw = target.GetYaw();
-
     frc::SmartDashboard::PutBoolean("Has Target?", TargetAquired);
     frc::SmartDashboard::PutNumber("Target Yaw", PhotonYaw);
 
-
+    frc::SmartDashboard::PutBoolean("Bottom Has Target?", BottomTargetAquired);
+    frc::SmartDashboard::PutNumber("Bottom Yaw", BottomYaw);
+    frc::SmartDashboard::PutNumber("Bottom Index", BottomIndex);
   #endif
 
 
@@ -445,26 +448,49 @@ void Robot::RobotPeriodic()
       
     // blinkin.Set(frc::SmartDashboard::GetNumber("Blinkin code", 0));
 
- #ifdef PHOTON
 
-  // tsni = nt::NetworkTableInstance::Create();  
-  
-    tsni.StartClientTeam(5561);
-    photonlib::PhotonCamera tsni{"camera"};
-    photonlib::PhotonPipelineResult result = tsni.GetLatestResult();
+  #ifdef PHOTON
 
-    bool TargetAquired = result.HasTargets();
-    
+  // Cam1 = nt::NetworkTableInstance::Create();  
+    Cam2.StartClientTeam(5561);
+    Cam1.StartClientTeam(5561);
+    photonlib::PhotonCamera Cam1{"Top"};
+    photonlib::PhotonPipelineResult result = Cam1.GetLatestResult();
+
+    TargetAquired = result.HasTargets();
+
     photonlib::PhotonTrackedTarget target = result.GetBestTarget();
 
-    double PhotonYaw = target.GetYaw();
+    PhotonYaw = target.GetYaw();
 
     frc::SmartDashboard::PutBoolean("Has Target?", TargetAquired);
     frc::SmartDashboard::PutNumber("Target Yaw", PhotonYaw);
 
+    photonlib::PhotonCamera Cam2{"Bottom"};
+    photonlib::PhotonPipelineResult resultBottom = Cam2.GetLatestResult();
 
+    photonlib::PhotonTrackedTarget targetBottom = resultBottom.GetBestTarget();
+    BottomTargetAquired = resultBottom.HasTargets();
+    BottomYaw = targetBottom.GetYaw();
+
+    BottomIndex;
+
+    L_AllianceColor = frc::DriverStation::GetInstance().GetAlliance();
+
+    if (L_AllianceColor == frc::DriverStation::Alliance::kRed){
+      BottomIndex = 1;
+
+    }
+    else if (L_AllianceColor == frc::DriverStation::Alliance::kBlue)
+    {
+      BottomIndex = 2;
+    }
+    
+    Cam2.SetPipelineIndex(BottomIndex);
+    frc::SmartDashboard::PutBoolean("Bottom Has Target?", BottomTargetAquired);
+    frc::SmartDashboard::PutNumber("Bottom Yaw", BottomYaw);
+    // frc::SmartDashboard::PutNumber("Bottom Index", BottomIndex);
   #endif
-
 
 
 
@@ -571,6 +597,7 @@ void Robot::AutonomousPeriodic()
 
     L_AllianceColor = frc::DriverStation::GetInstance().GetAlliance();
       
+
     if(L_AllianceColor == frc::DriverStation::Alliance::kRed)
       {
         blinkin.Set(-0.17);
@@ -958,7 +985,7 @@ frc::SmartDashboard::PutNumber("V_AutonState", V_autonState);
 void Robot::TeleopInit()
   {
   int index;
-
+  
   V_RobotInit = true;
   m_frontLeftSteerMotor.RestoreFactoryDefaults();
   m_frontLeftDriveMotor.RestoreFactoryDefaults();
@@ -1005,6 +1032,16 @@ void Robot::TeleopInit()
       V_M_RobotDisplacementX = 0;
       V_M_RobotDisplacementY = 0;
       BallsShot = 0;
+
+
+  
+  #ifdef SPIKE
+  frc::SmartDashboard::PutBoolean("LightOff", LightOff);
+
+
+  #endif
+
+ 
 }
 
 
@@ -1074,55 +1111,7 @@ void Robot::TeleopPeriodic()
                    &V_RobotInit,
                    &V_autonTargetFin);
 
-  //PDP top shooter port 13
-  //PDP bottom shooter port 12
-//  PDP_Current_UpperShooter = PDP.GetCurrent(13);
-//  PDP_Current_LowerShooter = PDP.GetCurrent(12);
-//  if(abs(PDP_Current_LowerShooter - PDP_Current_LowerShooter_last) > 2 || abs(PDP_Current_UpperShooter - PDP_Current_UpperShooter_last) > 2)
-//  {
-//    BallsShot += 1;
-//  }
-//  PDP_Current_UpperShooter_last = PDP_Current_UpperShooter;
-//  PDP_Current_LowerShooter_last = PDP_Current_LowerShooter;
 
-
-    // for (index = E_FrontLeft;
-    //      index < E_RobotCornerSz;
-    //      index = T_RobotCorner(int(index) + 1))
-    //   {
-    //   V_WheelAngleCmnd[index] =  Control_PID( V_WA[index],
-    //                                           V_WheelAngleArb[index],
-    //                                          &V_WheelAngleError[index],
-    //                                          &V_WheelAngleIntegral[index],
-    //                                           K_WheelAnglePID_Gx[E_P_Gx],
-    //                                           K_WheelAnglePID_Gx[E_I_Gx],
-    //                                           K_WheelAnglePID_Gx[E_D_Gx],
-    //                                           K_WheelAnglePID_Gx[E_P_Ul],
-    //                                           K_WheelAnglePID_Gx[E_P_Ll],
-    //                                           K_WheelAnglePID_Gx[E_I_Ul],
-    //                                           K_WheelAnglePID_Gx[E_I_Ll],
-    //                                           K_WheelAnglePID_Gx[E_D_Ul],
-    //                                           K_WheelAnglePID_Gx[E_D_Ll],
-    //                                           K_WheelAnglePID_Gx[E_Max_Ul],
-    //                                           K_WheelAnglePID_Gx[E_Max_Ll]);
-
-    //   V_WheelSpeedCmnd[index] = Control_PID( V_WS[index],
-    //                                          V_WheelVelocity[index],
-    //                                         &V_WheelSpeedError[index],
-    //                                         &V_WheelSpeedIntergral[index],
-    //                                          K_WheelSpeedPID_Gx[E_P_Gx],
-    //                                          K_WheelSpeedPID_Gx[E_I_Gx],
-    //                                          K_WheelSpeedPID_Gx[E_D_Gx],
-    //                                          K_WheelSpeedPID_Gx[E_P_Ul],
-    //                                          K_WheelSpeedPID_Gx[E_P_Ll],
-    //                                          K_WheelSpeedPID_Gx[E_I_Ul],
-    //                                          K_WheelSpeedPID_Gx[E_I_Ll],
-    //                                          K_WheelSpeedPID_Gx[E_D_Ul],
-    //                                          K_WheelSpeedPID_Gx[E_D_Ll],
-    //                                          K_WheelSpeedPID_Gx[E_Max_Ul],
-    //                                          K_WheelSpeedPID_Gx[E_Max_Ll]);
-    //   }
-    //Ws1: fr, Ws2: fl, ws3: rl, ws4: rr
 
     frc::SmartDashboard::PutNumber("Gyro Angle Deg", gyro_yawangledegrees);
     frc::SmartDashboard::PutNumber("WA_FR", V_WA[E_FrontRight]);
@@ -1232,7 +1221,7 @@ void Robot::TeleopPeriodic()
     V_Drive_FF = frc::SmartDashboard::GetNumber("FF_Drive", V_Drive_FF);
     V_Drive_Max = frc::SmartDashboard::GetNumber("Max_Limit_Drive", V_Drive_Max);
     V_Drive_Min = frc::SmartDashboard::GetNumber("Min_Limit_Drive", V_Drive_Min);
-
+    LightOff = frc::SmartDashboard::GetBoolean("LightOff", LightOff);
 
 
     m_rightShooterpid.SetP(V_P_Gx);
@@ -1461,7 +1450,24 @@ else
     
     frc::SmartDashboard::PutNumber("pipeline", pipeline0.GetDouble(0));
 #endif
+#ifdef PIXY
+
+
+
+#endif
+#ifdef SPIKE
+  
+ DIO0.Set(LightOff);
+  
+#endif
     frc::Wait(C_ExeTime_t);
+
+
+
+
+
+
+
 }
 
 
