@@ -26,7 +26,7 @@
 #include "vision.hpp"
 #include "DriveControl.hpp"
 #include "AutoTarget.hpp"
-//#include "Lift.hpp"
+#include "Lift.hpp"
 #include <frc/DigitalInput.h>
 #include "Driver_inputs.hpp"
 
@@ -1027,11 +1027,11 @@ void Robot::TeleopPeriodic()
       V_Lift_state = Lift_Control_Dictator(L_Driver_lift_control,
                                             timeleft,
                                             V_Lift_state,
-                                            L_lift_measured_position_YD,
-                                            L_lift_measured_position_XD,
-                                    double       *L_lift_command_YD,
-                                    double       *L_lift_command_XD,
-                                    double        L_gyro_yawangledegrees);
+                                            V_lift_measured_position_YD,
+                                            V_lift_measured_position_XD,
+                                            &V_lift_command_YD,
+                                            &V_lift_command_XD,
+                                            V_gyro_yawangledegrees);
 
     frc::SmartDashboard::PutNumber("Gyro Angle Deg", gyro_yawangledegrees);
     frc::SmartDashboard::PutNumber("WA_FR", V_WA[E_FrontRight]);

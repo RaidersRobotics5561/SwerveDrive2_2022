@@ -11,6 +11,12 @@
 
 #include "Enums.hpp"
 
+extern double V_lift_measured_position_YD;
+extern double V_lift_measured_position_XD;
+extern double V_lift_command_YD;
+extern double V_lift_command_XD;
+extern double V_gyro_yawangledegrees;
+
  T_Lift_State Lift_Control_Dictator(bool          L_driver_button,
                                     double        L_game_time,
                                     T_Lift_State  L_current_state,

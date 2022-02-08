@@ -28,7 +28,14 @@ bool V_init_state = false;
 double V_stop_positon_XD = 0;
 double V_timer_owo = 0;
 int L_stateControl = 0;
+bool urMomGay = true;
 bool V_criteria_met = false;
+
+double V_lift_measured_position_YD = 0;
+double V_lift_measured_position_XD = 0;
+double V_lift_command_YD = 0;
+double V_lift_command_XD = 0;
+double V_gyro_yawangledegrees = 0;
 
 /******************************************************************************
  * Function:     Lift_Control_Dictator
@@ -452,8 +459,7 @@ switch (L_current_state)
 /******************************************************************************
  * Function:       S11_Stop
  *
- * Description:  State 11: Hold the robot at it's final postion as state machine ends 
- *                         or prepares to go through the 2nd time.
+ * Description:  State 11: Hold the robot at it's final postion as state machine ends.
  ******************************************************************************/
  bool S11_Stop(double         L_lift_measured_position_YD,
                    double         L_lift_measured_position_XD,
