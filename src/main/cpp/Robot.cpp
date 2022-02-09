@@ -1,5 +1,5 @@
 /*
- * Team 5561 2020 Code
+ * Team 5561 2022 Code
  *
  * This code runs the 2020 robot which is capable of the following:
  * - Swerve Drive (beta 02/10/2020)
@@ -28,12 +28,13 @@
 #include "DriveControl.hpp"
 #include "AutoTarget.hpp"
 #include <frc/DigitalInput.h>
-
+#include <units/length.h>
 #include "Utils/PIDConfig.hpp"
 #include "Odometry.hpp"
 #include "Auton.hpp"
 #include <photonlib/PhotonCamera.h>
 #include <photonlib/PhotonUtils.h>
+
 
 // double desiredAngle;
 // double rotateDeBounce;
@@ -141,8 +142,8 @@ double V_FF = 0;
 double V_Max = 1;
 double V_Min = -1;
 
-double V_Steer_P_Gx = 0.00005;
-double V_Steer_I_Gx = 0.000001;
+double V_Steer_P_Gx = 0.90000;
+double V_Steer_I_Gx = 0.000000;
 double V_Steer_D_Gx = 0.000002;
 double V_Steer_I_Zone = 0;
 double V_Steer_FF = 0;
@@ -156,6 +157,7 @@ double V_Drive_I_Zone = 0;
 double V_Drive_FF = 0;
 double V_Drive_Max = 1;
 double V_Drive_Min = -1;
+
 
 // PIDConfig UpperShooterPIDConfig {0.0008, 0.000001, 0.0006};
 
@@ -173,7 +175,7 @@ void Robot::RobotInit() {
 //  m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
 //  m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
 //  frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
-    #ifndef TEST
+    #ifdef COMP
     m_frontLeftSteerMotor.RestoreFactoryDefaults();
     m_frontLeftDriveMotor.RestoreFactoryDefaults();
     m_frontRightSteerMotor.RestoreFactoryDefaults();
@@ -236,16 +238,13 @@ void Robot::RobotInit() {
     // targetPose0           = vision0->GetEntry("targetpose");
     // latency0              = vision0->GetEntry("latency");
 
-    // driverMode1           = vision1->GetEntry("driverMode");
-    // targetPitch1          = vision1->GetEntry("targetPitch");
-    // targetYaw1            = vision1->GetEntry("targetYaw");
-    // targetPose1           = vision1->GetEntry("targetpose");
-    // latency1              = vision1->GetEntry("latency");
+    ledControl            = ledLight->GetEntry("ledControl");
+    lidarDistance         = lidar->GetEntry("lidarDistance");
+  
 
-    // ledControl            = ledLight->GetEntry("ledControl");
-    // lidarDistance         = lidar->GetEntry("lidarDistance");
+    
 
- #ifdef TEST
+ #ifdef COMP
     V_testIntake = 0;
     V_testElevator = 0;
     V_testspeed = 0;
@@ -311,62 +310,6 @@ void Robot::RobotInit() {
     m_leftShooterpid.SetIZone(V_I_Zone);
     m_leftShooterpid.SetFF(V_FF);
     m_leftShooterpid.SetOutputRange(V_Min, V_Max);
-
-    m_frontLeftSteerMotorPID.SetP(V_Steer_P_Gx);
-    m_frontLeftSteerMotorPID.SetI(V_Steer_I_Gx);
-    m_frontLeftSteerMotorPID.SetD(V_Steer_D_Gx);
-    m_frontLeftSteerMotorPID.SetIZone(V_Steer_I_Zone);
-    m_frontLeftSteerMotorPID.SetFF(V_Steer_FF);
-    m_frontLeftSteerMotorPID.SetOutputRange(V_Steer_Min, V_Steer_Max);
-
-    m_frontLeftDriveMotorPID.SetP(V_Drive_P_Gx);
-    m_frontLeftDriveMotorPID.SetI(V_Drive_I_Gx);
-    m_frontLeftDriveMotorPID.SetD(V_Drive_D_Gx);
-    m_frontLeftDriveMotorPID.SetIZone(V_Drive_I_Zone);
-    m_frontLeftDriveMotorPID.SetFF(V_Drive_FF);
-    m_frontLeftDriveMotorPID.SetOutputRange(V_Drive_Min, V_Drive_Max);
-
-    m_frontRightSteerMotorPID.SetP(V_Steer_P_Gx);
-    m_frontRightSteerMotorPID.SetI(V_Steer_I_Gx);
-    m_frontRightSteerMotorPID.SetD(V_Steer_D_Gx);
-    m_frontRightSteerMotorPID.SetIZone(V_Steer_I_Zone);
-    m_frontRightSteerMotorPID.SetFF(V_Steer_FF);
-    m_frontRightSteerMotorPID.SetOutputRange(V_Steer_Min, V_Steer_Max);
-
-    m_frontRightDriveMotorPID.SetP(V_Drive_P_Gx);
-    m_frontRightDriveMotorPID.SetI(V_Drive_I_Gx);
-    m_frontRightDriveMotorPID.SetD(V_Drive_D_Gx);
-    m_frontRightDriveMotorPID.SetIZone(V_Drive_I_Zone);
-    m_frontRightDriveMotorPID.SetFF(V_Drive_FF);
-    m_frontRightDriveMotorPID.SetOutputRange(V_Drive_Min, V_Drive_Max);
-
-    m_rearLeftSteerMotorPID.SetP(V_Steer_P_Gx);
-    m_rearLeftSteerMotorPID.SetI(V_Steer_I_Gx);
-    m_rearLeftSteerMotorPID.SetD(V_Steer_D_Gx);
-    m_rearLeftSteerMotorPID.SetIZone(V_Steer_I_Zone);
-    m_rearLeftSteerMotorPID.SetFF(V_Steer_FF);
-    m_rearLeftSteerMotorPID.SetOutputRange(V_Steer_Min, V_Steer_Max);
-
-    m_rearLeftDriveMotorPID.SetP(V_Drive_P_Gx);
-    m_rearLeftDriveMotorPID.SetI(V_Drive_I_Gx);
-    m_rearLeftDriveMotorPID.SetD(V_Drive_D_Gx);
-    m_rearLeftDriveMotorPID.SetIZone(V_Drive_I_Zone);
-    m_rearLeftDriveMotorPID.SetFF(V_Drive_FF);
-    m_rearLeftDriveMotorPID.SetOutputRange(V_Drive_Min, V_Drive_Max);
-
-    m_rearRightSteerMotorPID.SetP(V_Steer_P_Gx);
-    m_rearRightSteerMotorPID.SetI(V_Steer_I_Gx);
-    m_rearRightSteerMotorPID.SetD(V_Steer_D_Gx);
-    m_rearRightSteerMotorPID.SetIZone(V_Steer_I_Zone);
-    m_rearRightSteerMotorPID.SetFF(V_Steer_FF);
-    m_rearRightSteerMotorPID.SetOutputRange(V_Steer_Min, V_Steer_Max);
-
-    m_rearRightDriveMotorPID.SetP(V_Drive_P_Gx);
-    m_rearRightDriveMotorPID.SetI(V_Drive_I_Gx);
-    m_rearRightDriveMotorPID.SetD(V_Drive_D_Gx);
-    m_rearRightDriveMotorPID.SetIZone(V_Drive_I_Zone);
-    m_rearRightDriveMotorPID.SetFF(V_Drive_FF);
-    m_rearRightDriveMotorPID.SetOutputRange(V_Drive_Min, V_Drive_Max);
 
     // m_liftpidYD.SetP(kP);
     // m_liftpidYD.SetI(kI);
@@ -442,7 +385,21 @@ void Robot::RobotPeriodic()
     Gyro();
     frc::SmartDashboard::PutNumber("gyro angle", gyro_yawangledegrees);
     theCoolerInteger = frc::SmartDashboard::GetNumber("cooler int", 1);
-      
+    
+    // photonlib::PhotonPipelineResult result = camera.GetLatestResult();
+
+    // units::meter_t range;
+    // if (result.HasTargets())
+    //   {
+    //   // First calculate range
+    //   range = photonlib::PhotonUtils::CalculateDistanceToTarget(CAMERA_HEIGHT,
+    //                                                                            TARGET_HEIGHT,
+    //                                                                            CAMERA_PITCH,
+    //                                                                            units::degree_t{result.GetBestTarget().GetPitch()});
+    //   }
+
+    // double L_Range = range.value();
+    // frc::SmartDashboard::PutNumber("RANGE", L_Range);
     // blinkin.Set(frc::SmartDashboard::GetNumber("Blinkin code", 0));
 
  #ifdef PHOTON
@@ -856,9 +813,6 @@ void Robot::AutonomousPeriodic()
       break;
       }
 
-frc::SmartDashboard::PutNumber("V_ShooterSpeedDesiredFinalUpper", V_ShooterSpeedDesiredFinalUpper);
-frc::SmartDashboard::PutNumber("V_ShooterSpeedDesired[E_rightShooter]", V_ShooterSpeedDesired[E_rightShooter]);
-frc::SmartDashboard::PutNumber("V_AutonState", V_autonState);
       DriveControlMain(driveforward,
                        strafe,
                        speen,
@@ -941,6 +895,9 @@ frc::SmartDashboard::PutNumber("V_AutonState", V_autonState);
     m_elevateDaBalls.Set(ControlMode::PercentOutput, V_elevatorValue);
 
     /* Output to the dashboard: */
+    frc::SmartDashboard::PutNumber("V_ShooterSpeedDesiredFinalUpper", V_ShooterSpeedDesiredFinalUpper);
+    frc::SmartDashboard::PutNumber("V_ShooterSpeedDesired[E_rightShooter]", V_ShooterSpeedDesired[E_rightShooter]);
+    frc::SmartDashboard::PutNumber("V_AutonState", V_autonState);
     frc::SmartDashboard::PutNumber("Robot X", (V_M_RobotDisplacementX));
     frc::SmartDashboard::PutNumber("Robot Y", (V_M_RobotDisplacementY));
     frc::SmartDashboard::PutNumber("V_AutonState", V_autonState);
@@ -1086,42 +1043,42 @@ void Robot::TeleopPeriodic()
 //  PDP_Current_LowerShooter_last = PDP_Current_LowerShooter;
 
 
-    // for (index = E_FrontLeft;
-    //      index < E_RobotCornerSz;
-    //      index = T_RobotCorner(int(index) + 1))
-    //   {
-    //   V_WheelAngleCmnd[index] =  Control_PID( V_WA[index],
-    //                                           V_WheelAngleArb[index],
-    //                                          &V_WheelAngleError[index],
-    //                                          &V_WheelAngleIntegral[index],
-    //                                           K_WheelAnglePID_Gx[E_P_Gx],
-    //                                           K_WheelAnglePID_Gx[E_I_Gx],
-    //                                           K_WheelAnglePID_Gx[E_D_Gx],
-    //                                           K_WheelAnglePID_Gx[E_P_Ul],
-    //                                           K_WheelAnglePID_Gx[E_P_Ll],
-    //                                           K_WheelAnglePID_Gx[E_I_Ul],
-    //                                           K_WheelAnglePID_Gx[E_I_Ll],
-    //                                           K_WheelAnglePID_Gx[E_D_Ul],
-    //                                           K_WheelAnglePID_Gx[E_D_Ll],
-    //                                           K_WheelAnglePID_Gx[E_Max_Ul],
-    //                                           K_WheelAnglePID_Gx[E_Max_Ll]);
+    for (index = E_FrontLeft;
+         index < E_RobotCornerSz;
+         index = T_RobotCorner(int(index) + 1))
+      {
+      V_WheelAngleCmnd[index] =  Control_PID( V_WA[index],
+                                              V_WheelAngleArb[index],
+                                             &V_WheelAngleError[index],
+                                             &V_WheelAngleIntegral[index],
+                                              K_WheelAnglePID_Gx[E_P_Gx],
+                                              K_WheelAnglePID_Gx[E_I_Gx],
+                                              K_WheelAnglePID_Gx[E_D_Gx],
+                                              K_WheelAnglePID_Gx[E_P_Ul],
+                                              K_WheelAnglePID_Gx[E_P_Ll],
+                                              K_WheelAnglePID_Gx[E_I_Ul],
+                                              K_WheelAnglePID_Gx[E_I_Ll],
+                                              K_WheelAnglePID_Gx[E_D_Ul],
+                                              K_WheelAnglePID_Gx[E_D_Ll],
+                                              K_WheelAnglePID_Gx[E_Max_Ul],
+                                              K_WheelAnglePID_Gx[E_Max_Ll]);
 
-    //   V_WheelSpeedCmnd[index] = Control_PID( V_WS[index],
-    //                                          V_WheelVelocity[index],
-    //                                         &V_WheelSpeedError[index],
-    //                                         &V_WheelSpeedIntergral[index],
-    //                                          K_WheelSpeedPID_Gx[E_P_Gx],
-    //                                          K_WheelSpeedPID_Gx[E_I_Gx],
-    //                                          K_WheelSpeedPID_Gx[E_D_Gx],
-    //                                          K_WheelSpeedPID_Gx[E_P_Ul],
-    //                                          K_WheelSpeedPID_Gx[E_P_Ll],
-    //                                          K_WheelSpeedPID_Gx[E_I_Ul],
-    //                                          K_WheelSpeedPID_Gx[E_I_Ll],
-    //                                          K_WheelSpeedPID_Gx[E_D_Ul],
-    //                                          K_WheelSpeedPID_Gx[E_D_Ll],
-    //                                          K_WheelSpeedPID_Gx[E_Max_Ul],
-    //                                          K_WheelSpeedPID_Gx[E_Max_Ll]);
-    //   }
+      V_WheelSpeedCmnd[index] = Control_PID( V_WS[index],
+                                             V_WheelVelocity[index],
+                                            &V_WheelSpeedError[index],
+                                            &V_WheelSpeedIntergral[index],
+                                             K_WheelSpeedPID_Gx[E_P_Gx],
+                                             K_WheelSpeedPID_Gx[E_I_Gx],
+                                             K_WheelSpeedPID_Gx[E_D_Gx],
+                                             K_WheelSpeedPID_Gx[E_P_Ul],
+                                             K_WheelSpeedPID_Gx[E_P_Ll],
+                                             K_WheelSpeedPID_Gx[E_I_Ul],
+                                             K_WheelSpeedPID_Gx[E_I_Ll],
+                                             K_WheelSpeedPID_Gx[E_D_Ul],
+                                             K_WheelSpeedPID_Gx[E_D_Ll],
+                                             K_WheelSpeedPID_Gx[E_Max_Ul],
+                                             K_WheelSpeedPID_Gx[E_Max_Ll]);
+      }
     //Ws1: fr, Ws2: fl, ws3: rl, ws4: rr
 
     frc::SmartDashboard::PutNumber("Gyro Angle Deg", gyro_yawangledegrees);
@@ -1197,7 +1154,8 @@ void Robot::TeleopPeriodic()
       V_ShooterSpeedDesired[E_leftShooter] = 0;
     }
 #endif
-#ifdef TEST 
+
+#ifdef COMP 
 
     V_testIntake = frc::SmartDashboard::GetNumber("Intake Power",V_testIntake);
     V_testElevator = frc::SmartDashboard::GetNumber("Elevator Power",V_testElevator);
@@ -1248,62 +1206,6 @@ void Robot::TeleopPeriodic()
     m_leftShooterpid.SetIZone(V_I_Zone);
     m_leftShooterpid.SetFF(V_FF);
     m_leftShooterpid.SetOutputRange(V_Min, V_Max);
-
-    m_frontLeftSteerMotorPID.SetP(V_Steer_P_Gx);
-    m_frontLeftSteerMotorPID.SetI(V_Steer_I_Gx);
-    m_frontLeftSteerMotorPID.SetD(V_Steer_D_Gx);
-    m_frontLeftSteerMotorPID.SetIZone(V_Steer_I_Zone);
-    m_frontLeftSteerMotorPID.SetFF(V_Steer_FF);
-    m_frontLeftSteerMotorPID.SetOutputRange(V_Steer_Min, V_Steer_Max);
-
-    m_frontLeftDriveMotorPID.SetP(V_Drive_P_Gx);
-    m_frontLeftDriveMotorPID.SetI(V_Drive_I_Gx);
-    m_frontLeftDriveMotorPID.SetD(V_Drive_D_Gx);
-    m_frontLeftDriveMotorPID.SetIZone(V_Drive_I_Zone);
-    m_frontLeftDriveMotorPID.SetFF(V_Drive_FF);
-    m_frontLeftDriveMotorPID.SetOutputRange(V_Drive_Min, V_Drive_Max);
-
-    m_frontRightSteerMotorPID.SetP(V_Steer_P_Gx);
-    m_frontRightSteerMotorPID.SetI(V_Steer_I_Gx);
-    m_frontRightSteerMotorPID.SetD(V_Steer_D_Gx);
-    m_frontRightSteerMotorPID.SetIZone(V_Steer_I_Zone);
-    m_frontRightSteerMotorPID.SetFF(V_Steer_FF);
-    m_frontRightSteerMotorPID.SetOutputRange(V_Steer_Min, V_Steer_Max);
-
-    m_frontRightDriveMotorPID.SetP(V_Drive_P_Gx);
-    m_frontRightDriveMotorPID.SetI(V_Drive_I_Gx);
-    m_frontRightDriveMotorPID.SetD(V_Drive_D_Gx);
-    m_frontRightDriveMotorPID.SetIZone(V_Drive_I_Zone);
-    m_frontRightDriveMotorPID.SetFF(V_Drive_FF);
-    m_frontRightDriveMotorPID.SetOutputRange(V_Drive_Min, V_Drive_Max);
-
-    m_rearLeftSteerMotorPID.SetP(V_Steer_P_Gx);
-    m_rearLeftSteerMotorPID.SetI(V_Steer_I_Gx);
-    m_rearLeftSteerMotorPID.SetD(V_Steer_D_Gx);
-    m_rearLeftSteerMotorPID.SetIZone(V_Steer_I_Zone);
-    m_rearLeftSteerMotorPID.SetFF(V_Steer_FF);
-    m_rearLeftSteerMotorPID.SetOutputRange(V_Steer_Min, V_Steer_Max);
-
-    m_rearLeftDriveMotorPID.SetP(V_Drive_P_Gx);
-    m_rearLeftDriveMotorPID.SetI(V_Drive_I_Gx);
-    m_rearLeftDriveMotorPID.SetD(V_Drive_D_Gx);
-    m_rearLeftDriveMotorPID.SetIZone(V_Drive_I_Zone);
-    m_rearLeftDriveMotorPID.SetFF(V_Drive_FF);
-    m_rearLeftDriveMotorPID.SetOutputRange(V_Drive_Min, V_Drive_Max);
-
-    m_rearRightSteerMotorPID.SetP(V_Steer_P_Gx);
-    m_rearRightSteerMotorPID.SetI(V_Steer_I_Gx);
-    m_rearRightSteerMotorPID.SetD(V_Steer_D_Gx);
-    m_rearRightSteerMotorPID.SetIZone(V_Steer_I_Zone);
-    m_rearRightSteerMotorPID.SetFF(V_Steer_FF);
-    m_rearRightSteerMotorPID.SetOutputRange(V_Steer_Min, V_Steer_Max);
-
-    m_rearRightDriveMotorPID.SetP(V_Drive_P_Gx);
-    m_rearRightDriveMotorPID.SetI(V_Drive_I_Gx);
-    m_rearRightDriveMotorPID.SetD(V_Drive_D_Gx);
-    m_rearRightDriveMotorPID.SetIZone(V_Drive_I_Zone);
-    m_rearRightDriveMotorPID.SetFF(V_Drive_FF);
-    m_rearRightDriveMotorPID.SetOutputRange(V_Drive_Min, V_Drive_Max);
     #endif
 
 
@@ -1359,7 +1261,8 @@ else
     m_leftShooterMotor.Set(V_ShooterSpeedDesired[E_leftShooter]);
 }
 #endif
-#ifdef TEST
+
+#ifdef COMP
     m_elevateDaBalls.Set(ControlMode::PercentOutput, V_testElevator);
     m_intake.Set(ControlMode::PercentOutput, V_testIntake);
     // m_rightShooterpid.SetReference(V_ShooterSpeedDesired[E_rightShooter], rev::ControlType::kVelocity);
@@ -1369,45 +1272,35 @@ else
     // m_rightShooterMotor.Set(V_testspeed);
     // m_leftShooterMotor.Set(-V_testspeed);
 
-    m_frontLeftDriveMotorPID.SetReference(V_WS[E_FrontLeft], rev::ControlType::kVelocity);
-    m_frontRightDriveMotorPID.SetReference(V_WS[E_FrontRight], rev::ControlType::kVelocity);
-    m_rearLeftDriveMotorPID.SetReference(V_WS[E_RearLeft], rev::ControlType::kVelocity);
-    m_rearRightDriveMotorPID.SetReference(V_WS[E_RearRight], rev::ControlType::kVelocity);
+    // m_frontLeftDriveMotorPID.SetReference(V_WS[E_FrontLeft], rev::ControlType::kVelocity);
+    // m_frontRightDriveMotorPID.SetReference(V_WS[E_FrontRight], rev::ControlType::kVelocity);
+    // m_rearLeftDriveMotorPID.SetReference(V_WS[E_RearLeft], rev::ControlType::kVelocity);
+    // m_rearRightDriveMotorPID.SetReference(V_WS[E_RearRight], rev::ControlType::kVelocity);
 
-    m_frontLeftSteerMotorPID.SetReference(V_WA[E_FrontLeft], rev::ControlType::kPosition);
-    m_frontRightSteerMotorPID.SetReference(V_WA[E_FrontRight], rev::ControlType::kPosition);
-    m_rearLeftSteerMotorPID.SetReference(V_WA[E_RearLeft], rev::ControlType::kPosition);
-    m_rearRightSteerMotorPID.SetReference(V_WA[E_RearRight], rev::ControlType::kPosition);
+    // m_frontLeftSteerMotorPID.SetReference(V_WA[E_FrontLeft], rev::ControlType::kPosition);
+    // m_frontRightSteerMotorPID.SetReference(V_WA[E_FrontRight], rev::ControlType::kPosition);
+    // m_rearLeftSteerMotorPID.SetReference(V_WA[E_RearLeft], rev::ControlType::kPosition);
+    // m_rearRightSteerMotorPID.SetReference(V_WA[E_RearRight], rev::ControlType::kPosition);
 
 #endif
 
 
 #ifdef COMP
 
-    // m_frontLeftDriveMotor.Set(V_WheelSpeedCmnd[E_FrontLeft]);
-    // m_frontRightDriveMotor.Set(V_WheelSpeedCmnd[E_FrontRight]);
-    // m_rearLeftDriveMotor.Set(V_WheelSpeedCmnd[E_RearLeft]);
-    // m_rearRightDriveMotor.Set(V_WheelSpeedCmnd[E_RearRight]);
-
-    m_frontLeftDriveMotorPID.SetReference(V_WS[E_FrontLeft], rev::ControlType::kVelocity);
-    m_frontRightDriveMotorPID.SetReference(V_WS[E_FrontRight], rev::ControlType::kVelocity);
-    m_rearLeftDriveMotorPID.SetReference(V_WS[E_RearLeft], rev::ControlType::kVelocity);
-    m_rearRightDriveMotorPID.SetReference(V_WS[E_RearRight], rev::ControlType::kVelocity);
+    m_frontLeftDriveMotor.Set(V_WheelSpeedCmnd[E_FrontLeft]);
+    m_frontRightDriveMotor.Set(V_WheelSpeedCmnd[E_FrontRight]);
+    m_rearLeftDriveMotor.Set(V_WheelSpeedCmnd[E_RearLeft]);
+    m_rearRightDriveMotor.Set(V_WheelSpeedCmnd[E_RearRight]);
 
     // m_frontLeftDriveMotor.Set(0);
     // m_frontRightDriveMotor.Set(0);
     // m_rearLeftDriveMotor.Set(0);
     // m_rearRightDriveMotor.Set(0);
 
-    // m_frontLeftSteerMotor.Set(V_WheelAngleCmnd[E_FrontLeft] * (-1));
-    // m_frontRightSteerMotor.Set(V_WheelAngleCmnd[E_FrontRight] * (-1));
-    // m_rearLeftSteerMotor.Set(V_WheelAngleCmnd[E_RearLeft] * (-1));
-    // m_rearRightSteerMotor.Set(V_WheelAngleCmnd[E_RearRight] * (-1));
-
-    m_frontLeftSteerMotorPID.SetReference(V_WA[E_FrontLeft], rev::ControlType::kPosition);
-    m_frontRightSteerMotorPID.SetReference(V_WA[E_FrontRight], rev::ControlType::kPosition);
-    m_rearLeftSteerMotorPID.SetReference(V_WA[E_RearLeft], rev::ControlType::kPosition);
-    m_rearRightSteerMotorPID.SetReference(V_WA[E_RearRight], rev::ControlType::kPosition);
+    m_frontLeftSteerMotor.Set(V_WheelAngleCmnd[E_FrontLeft] * (-1));
+    m_frontRightSteerMotor.Set(V_WheelAngleCmnd[E_FrontRight] * (-1));
+    m_rearLeftSteerMotor.Set(V_WheelAngleCmnd[E_RearLeft] * (-1));
+    m_rearRightSteerMotor.Set(V_WheelAngleCmnd[E_RearRight] * (-1));
 
     // m_frontLeftSteerMotor.Set(0);
     // m_frontRightSteerMotor.Set(0);
