@@ -1,8 +1,21 @@
 #include "Enums.hpp"
 #include <units/time.h>
+#include <units/angle.h>
+#include <units/length.h>
 
 const double C_ExeTime = 0.01;
 const units::second_t C_ExeTime_t = 0.01_s;
+
+  const units::meter_t CAMERA_HEIGHT = 24_in;
+  const units::meter_t TARGET_HEIGHT = 5_ft;
+  // Angle between horizontal and the camera.
+
+  const units::radian_t CAMERA_PITCH = 0_deg;
+
+
+  // How far from the target we want to be
+
+  const units::meter_t GOAL_RANGE_METERS = 3_ft;
 
 const double C_RadtoDeg = 57.2958;
 const double C_Deg2Rad = 0.017453292519943295;
@@ -17,6 +30,8 @@ static const int C_liftXD_ID = 12;
 static const int C_elevatorID = 13;
 static const int C_intakeID = 14;
 const double K_SteerMotorCurrentLimit = 25;
+static const double C_VoltageToAngle = 72.0; // Gain that converts the measured voltage of the absolute encoder to an equivalent angle in degrees.
+
 
 const double K_ReductionRatio = 8.31;
 const double K_WheelCircufrence = 12.566; // Circumferance of wheel, in inches

@@ -85,6 +85,7 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,
          L_Index = T_RobotCorner(int(L_Index) + 1))
       {
       V_WheelAngleArb[L_Index] = L_WheelAngleFwd[L_Index]; // We do this for initialization in order to allow the PID control to control to the correct forward angle at startup
+      
        if (fabs(V_WheelAngleArb[L_Index]) > K_InitAngle)
          {
          L_Init = true;
@@ -177,7 +178,7 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,
       L_RotateErrorCalc = 0;
       }
     
-    // frc::SmartDashboard::PutNumber("L_RotateErrorCalc", L_RotateErrorCalc);
+     frc::SmartDashboard::PutNumber("L_RotateErrorCalc", L_RotateErrorCalc);
 
     if ((V_b_DriveStraight == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime) ||
         (rotateMode        == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime) || 
