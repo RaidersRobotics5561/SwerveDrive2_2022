@@ -92,7 +92,7 @@ nt::NetworkTableEntry ledControl;
 //nt::NetworkTableInstance Cam1;
 #ifdef PHOTON
 bool TargetAquired;
-double PhotonYaw;
+double TopYaw;
 bool BottomTargetAquired;
 double BottomYaw;
 int BottomIndex;
@@ -168,7 +168,7 @@ double V_Drive_I_Zone = 0;
 double V_Drive_FF = 0;
 double V_Drive_Max = 1;
 double V_Drive_Min = -1;
-bool   LightOff = true; //the polarities are funny, true = off
+bool   LightOff; //the polarities are funny, true = off
 
 // PIDConfig UpperShooterPIDConfig {0.0008, 0.000001, 0.0006};
 
@@ -217,7 +217,7 @@ void Robot::RobotInit() {
   #ifdef PHOTON
 
     frc::SmartDashboard::PutBoolean("Has Target?", TargetAquired);
-    frc::SmartDashboard::PutNumber("Target Yaw", PhotonYaw);
+    frc::SmartDashboard::PutNumber("Target Yaw", TopYaw);
 
     frc::SmartDashboard::PutBoolean("Bottom Has Target?", BottomTargetAquired);
     frc::SmartDashboard::PutNumber("Bottom Yaw", BottomYaw);
@@ -396,6 +396,11 @@ void Robot::RobotInit() {
 
 
     // frc::SmartDashboard::PutNumber("Blinkin code", 0);
+
+  #ifdef SPIKE
+  LightOff = true; // light should be off on robot init
+  #endif
+
 }
 
 
@@ -456,16 +461,25 @@ void Robot::RobotPeriodic()
 
     // first Camera is cam1 for auto target
     photonlib::PhotonCamera Cam1{"Top"};
-    photonlib::PhotonPipelineResult result = Cam1.GetLatestResult();
+    photonlib::PhotonPipelineResult resultTop = Cam1.GetLatestResult();
   
-    TargetAquired = result.HasTargets(); //returns true if the camera has a target
+    TargetAquired = resultTop.HasTargets(); //returns true if the camera has a target
 
-    photonlib::PhotonTrackedTarget target = result.GetBestTarget(); //gets the best target
+    photonlib::PhotonTrackedTarget targetTop = resultTop.GetBestTarget(); //gets the best target
 
-    PhotonYaw = target.GetYaw(); // Yaw of the best target
+    TopYaw = targetTop.GetYaw(); // Yaw of the best target
 
-    frc::SmartDashboard::PutBoolean("Has Target?", TargetAquired); //puts those new values to dashboard
-    frc::SmartDashboard::PutNumber("Target Yaw", PhotonYaw);
+    frc::SmartDashboard::PutBoolean("Top Target?", TargetAquired); //puts those new values to dashboard
+    frc::SmartDashboard::PutNumber("Top Yaw", TopYaw);
+    
+    units::meter_t TopRange = photonlib::PhotonUtils::CalculateDistanceToTarget(
+          CAMERA_HEIGHT1, TARGET_HEIGHT1, CAMERA_PITCH1,
+          units::degree_t{resultTop.GetBestTarget().GetPitch()});
+
+    double TopRangeDouble = TopRange.value();
+
+      frc::SmartDashboard::PutNumber("Top Range", TopRangeDouble);
+
 
     // second camera for cargo detection
     photonlib::PhotonCamera Cam2{"Bottom"};
@@ -486,10 +500,14 @@ void Robot::RobotPeriodic()
       BottomIndex = 2; // 2 is the index for a blue ball
     }
     
+
+    
+
     Cam2.SetPipelineIndex(BottomIndex); // set the pipeline to whatever the logic gave
     frc::SmartDashboard::PutBoolean("Bottom Has Target?", BottomTargetAquired);
     frc::SmartDashboard::PutNumber("Bottom Yaw", BottomYaw);
     frc::SmartDashboard::PutNumber("Bottom Index", BottomIndex); 
+    
   #endif
 
 
