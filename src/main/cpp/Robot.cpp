@@ -926,6 +926,11 @@ void Robot::TeleopPeriodic()
   {
   T_RobotCorner         index;
   bool L_Driver_lift_control = false;
+  bool L_Driver_zero_gyro = false;
+  bool L_Driver_stops_shooter = false;
+  bool L_Driver_auto_setspeed_shooter = false;
+  bool L_Driver_elevator_up = false;
+  bool L_Driver_elevator_down = false;
 
   double timeleft = frc::DriverStation::GetInstance().GetMatchTime();
 
@@ -934,8 +939,18 @@ void Robot::TeleopPeriodic()
     blinkin.Set(-0.89);
   }
 
-  Joystick_robot_mapping(c_joyStick2.GetRawButton(1),
-                           &L_Driver_lift_control); 
+  Joystick_robot_mapping(    c_joyStick2.GetRawButton(1),
+                            &L_Driver_elevator_up,
+                             c_joyStick2.GetRawButton(2),
+                            &L_Driver_elevator_down,
+                             c_joyStick2.GetRawButton(3), //change later
+                            &L_Driver_lift_control,
+                             c_joyStick2.GetRawButton(7),
+                            &L_Driver_stops_shooter,
+                             c_joyStick2.GetRawButton(8),
+                            &L_Driver_auto_setspeed_shooter,
+                             c_joyStick.GetRawButton(7),
+                            &L_Driver_zero_gyro); 
 
   Read_Encoders(V_RobotInit,
                 a_encoderFrontLeftSteer.GetVoltage(),
@@ -1051,13 +1066,13 @@ void Robot::TeleopPeriodic()
     // frc::SmartDashboard::PutNumber("Recommended Speed", SpeedRecommend);
 
     //NOTE  Zero Gyro
-    if(c_joyStick.GetRawButton(7))
+    if(L_Driver_zero_gyro)
     {
       GyroZero();
     }
 
   #ifdef COMP
-   if (c_joyStick2.GetRawButton(7))
+   if (L_Driver_stops_shooter)
    {
      V_AutoShootEnable = false;
      V_ShooterSpeedDesiredFinalUpper = 0;
@@ -1067,7 +1082,7 @@ void Robot::TeleopPeriodic()
     if ((c_joyStick2.GetPOV() == 180) || 
         (c_joyStick2.GetPOV() == 270) || 
         (c_joyStick2.GetPOV() == 0)   || 
-        (c_joyStick2.GetRawButton(8)) || 
+        (L_Driver_auto_setspeed_shooter) || 
         (V_AutoShootEnable == true))
     {
       if ((c_joyStick2.GetPOV() == 180))
@@ -1085,7 +1100,7 @@ void Robot::TeleopPeriodic()
        V_ShooterSpeedDesiredFinalUpper = -200;
        V_ShooterSpeedDesiredFinalLower = -200;
       }
-      else if (c_joyStick2.GetRawButton(8))
+      else if (L_Driver_auto_setspeed_shooter)
       {
         V_ShooterSpeedDesiredFinalUpper = DesiredUpperBeamSpeed(distanceTarget);
         V_ShooterSpeedDesiredFinalLower = DesiredLowerBeamSpeed(distanceTarget);
@@ -1263,7 +1278,7 @@ else
     bool activeBeamSensor = ir_sensor.Get();
     // frc::SmartDashboard::PutBoolean("ir beam", activeBeamSensor);
 
-    if(c_joyStick2.GetRawButton(1))
+    if(L_Driver_elevator_up)
     {
       if(activeBeamSensor)
       {
@@ -1274,7 +1289,7 @@ else
         m_elevateDaBalls.Set(ControlMode::PercentOutput, 1);
       }    
     }
-    else if(c_joyStick2.GetRawButton(2))
+    else if(L_Driver_elevator_down)
     {
       m_elevateDaBalls.Set(ControlMode::PercentOutput, -0.420);
     }
