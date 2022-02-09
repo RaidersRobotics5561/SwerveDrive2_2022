@@ -37,5 +37,5 @@ const units::radian_t CAMERA_PITCH1 = 45_deg; // camera on a 45 degree tilt
 
 // constants for bottom ball cam
 // const units::meter_t CAMERA_HEIGHT1 = 
-const units::meter_t TARGET_HEIGHT1 = .12_m; // radius of the ball in cm
+const units::meter_t TARGET_HEIGHT2 = .12_m; // radius of the ball in cm
 // const units::radian_t CAMERA_PITCH1 = 
