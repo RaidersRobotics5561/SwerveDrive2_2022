@@ -228,20 +228,6 @@ void Robot::RobotInit() {
   #endif
 
 
-
-    // vision0  = inst.GetTable("chameleon-vision/goal");
-    // vision1  = inst.GetTable("chameleon-vision/ColorWheel");
-    // lidar    = inst.GetTable("lidar");
-    // ledLight = inst.GetTable("ledLight");
-
-
-    // driverMode0           = vision0->GetEntry("driverMode");
-    // pipeline0             = vision0->GetEntry("pipeline");
-    // targetPitch0          = vision0->GetEntry("targetPitch");
-    // targetYaw0            = vision0->GetEntry("targetYaw");
-    // targetPose0           = vision0->GetEntry("targetpose");
-    // latency0              = vision0->GetEntry("latency");
-
     ledControl            = ledLight->GetEntry("ledControl");
     lidarDistance         = lidar->GetEntry("lidarDistance");
   
@@ -356,36 +342,7 @@ void Robot::RobotInit() {
  ******************************************************************************/
 void Robot::RobotPeriodic()
 {
-  // frc::SmartDashboard::PutNumber("Postion_YD", m_encoderLiftYD.GetPosition());
-  // frc::SmartDashboard::PutNumber("Postion_XD", m_encoderLiftXD.GetPosition());
-    /*
-      Finds distance from robot to specified target.
-      Numerator depends upon camera height relative to target for target distance,
-      and camera height relative to ground for ball distance.
-      Make sure it's in meters.
-    */
-   if(pipeline0.GetDouble(0) == 1)
-   {
-     distanceTarget     = 124.8 / tan((targetPitch0.GetDouble(0) + 15) * (C_Deg2Rad));
-   }
-   else
-   {
-     distanceTarget     = 157.8 / tan((targetPitch0.GetDouble(0) + 15) * (C_Deg2Rad));
-   }
-   
-    //  distanceBall       = 47  / tan((targetPitch1.GetDouble(0)) * (-deg2rad));
-
-    //Finds robot's distance from target's center view.
-     distanceFromTargetCenter = (distanceTarget * sin((90 - targetYaw0.GetDouble(0)) * C_Deg2Rad) - 28.17812754);
-    //  distanceFromBallCenter   = distanceBall   * sin((90 - targetYaw1.GetDouble(0)) * deg2rad);
-
-    // frc::SmartDashboard::PutBoolean("testboolean", testboolean);
-    frc::SmartDashboard::PutNumber("distanceTarget", distanceTarget);
-    // frc::SmartDashboard::PutNumber("distanceFromTargetCenter", distanceFromTargetCenter);
-    frc::SmartDashboard::PutNumber("targetYaw", targetYaw0.GetDouble(0));
-    // frc::SmartDashboard::PutNumber("targetPitch", targetPitch0.GetDouble(1));
-    // frc::SmartDashboard::PutNumber("lidarDistance", lidarDistance.GetDouble(0));
-
+  
     #ifdef PID_DEBUG
       // UpperShooterPIDConfig.Debug("Upper Shooter PID Control");
     #endif
@@ -394,21 +351,7 @@ void Robot::RobotPeriodic()
     Gyro();
     frc::SmartDashboard::PutNumber("gyro angle", gyro_yawangledegrees);
     theCoolerInteger = frc::SmartDashboard::GetNumber("cooler int", 1);
-    
-    // photonlib::PhotonPipelineResult result = camera.GetLatestResult();
-
-    // units::meter_t range;
-    // if (result.HasTargets())
-    //   {
-    //   // First calculate range
-    //   range = photonlib::PhotonUtils::CalculateDistanceToTarget(CAMERA_HEIGHT,
-    //                                                                            TARGET_HEIGHT,
-    //                                                                            CAMERA_PITCH,
-    //                                                                            units::degree_t{result.GetBestTarget().GetPitch()});
-    //   }
-
-    // double L_Range = range.value();
-    // frc::SmartDashboard::PutNumber("RANGE", L_Range);
+   
     // blinkin.Set(frc::SmartDashboard::GetNumber("Blinkin code", 0));
 
 
@@ -527,10 +470,6 @@ void Robot::AutonomousInit()
 
       // AutonDriveReset();
 
-      originalPosition = targetYaw0.GetDouble(0);
-      vision0->PutNumber("pipeline", 0);
-      vision1->PutBoolean("driverMode", true);
-      inst.Flush();    
   }
 
 
