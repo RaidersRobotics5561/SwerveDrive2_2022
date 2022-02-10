@@ -9,7 +9,7 @@
 
 //NOTE: Set this to TEST for testing of speeds and PID gains.  Set to COMP for competion
 #define TEST
-#define PHOTON
+// #define PHOTON
 //NOTE: Set this to allow Shuffleboard configuration of PIDConfig objects (Will override defaults)
 #define PID_DEBUG
 #define SPIKE
@@ -74,8 +74,8 @@ std::shared_ptr<nt::NetworkTable> ledLight;
 
 nt::NetworkTableInstance inst;
 
-nt::NetworkTableInstance Cam1;
-nt::NetworkTableInstance Cam2;
+// nt::NetworkTableInstance Cam1;
+// nt::NetworkTableInstance Cam2;
 
 nt::NetworkTableEntry driverMode0;
 nt::NetworkTableEntry pipeline0;
@@ -92,14 +92,6 @@ nt::NetworkTableEntry lidarDistance;
 nt::NetworkTableEntry ledControl;
 
 //nt::NetworkTableInstance Cam1;
-#ifdef PHOTON
-bool TargetAquired;
-double TopYaw;
-bool BottomTargetAquired;
-double BottomYaw;
-int BottomIndex;
-
-#endif
 
 
 
@@ -186,6 +178,7 @@ frc::DriverStation::Alliance L_AllianceColor;
  * Description:  Called during initialization of the robot.
  ******************************************************************************/
 void Robot::RobotInit() {
+    VisionDashboard();
 //  m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
 //  m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
 //  frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
@@ -217,15 +210,6 @@ void Robot::RobotInit() {
     inst.StartClient("10.55.61.24");
     inst.StartDSClient();
 
-  #ifdef PHOTON
-
-    frc::SmartDashboard::PutBoolean("Has Target?", TargetAquired);
-    frc::SmartDashboard::PutNumber("Target Yaw", TopYaw);
-
-    frc::SmartDashboard::PutBoolean("Bottom Has Target?", BottomTargetAquired);
-    frc::SmartDashboard::PutNumber("Bottom Yaw", BottomYaw);
-    frc::SmartDashboard::PutNumber("Bottom Index", BottomIndex);
-  #endif
 
 
     ledControl            = ledLight->GetEntry("ledControl");
@@ -342,7 +326,7 @@ void Robot::RobotInit() {
  ******************************************************************************/
 void Robot::RobotPeriodic()
 {
-  
+    
     #ifdef PID_DEBUG
       // UpperShooterPIDConfig.Debug("Upper Shooter PID Control");
     #endif
@@ -354,62 +338,7 @@ void Robot::RobotPeriodic()
    
     // blinkin.Set(frc::SmartDashboard::GetNumber("Blinkin code", 0));
 
-
-  #ifdef PHOTON
-
-    Cam2.StartClientTeam(5561);
-    Cam1.StartClientTeam(5561);
-
-    // first Camera is cam1 for auto target
-    photonlib::PhotonCamera Cam1{"Top"};
-    photonlib::PhotonPipelineResult resultTop = Cam1.GetLatestResult();
-  
-    TargetAquired = resultTop.HasTargets(); //returns true if the camera has a target
-
-    photonlib::PhotonTrackedTarget targetTop = resultTop.GetBestTarget(); //gets the best target
-
-    TopYaw = targetTop.GetYaw(); // Yaw of the best target
-
-    frc::SmartDashboard::PutBoolean("Top Target?", TargetAquired); //puts those new values to dashboard
-    frc::SmartDashboard::PutNumber("Top Yaw", TopYaw);
-    
-    units::meter_t TopRange = photonlib::PhotonUtils::CalculateDistanceToTarget(
-          CAMERA_HEIGHT1, TARGET_HEIGHT1, CAMERA_PITCH1,
-          units::degree_t{resultTop.GetBestTarget().GetPitch()});
-
-    double TopRangeDouble = TopRange.value();
-
-      frc::SmartDashboard::PutNumber("Top Range", TopRangeDouble);
-
-
-    // second camera for cargo detection
-    photonlib::PhotonCamera Cam2{"Bottom"};
-    photonlib::PhotonPipelineResult resultBottom = Cam2.GetLatestResult();
-
-    photonlib::PhotonTrackedTarget targetBottom = resultBottom.GetBestTarget();
-    BottomTargetAquired = resultBottom.HasTargets();
-    BottomYaw = targetBottom.GetYaw();
-
-    L_AllianceColor = frc::DriverStation::GetInstance().GetAlliance();
-
-    if (L_AllianceColor == frc::DriverStation::Alliance::kRed){
-      BottomIndex = 1; // 1 is the index for a red ball
-
-    }
-    else if (L_AllianceColor == frc::DriverStation::Alliance::kBlue)
-    {
-      BottomIndex = 2; // 2 is the index for a blue ball
-    }
-    
-
-    
-
-    Cam2.SetPipelineIndex(BottomIndex); // set the pipeline to whatever the logic gave
-    frc::SmartDashboard::PutBoolean("Bottom Has Target?", BottomTargetAquired);
-    frc::SmartDashboard::PutNumber("Bottom Yaw", BottomYaw);
-    frc::SmartDashboard::PutNumber("Bottom Index", BottomIndex); 
-    
-  #endif
+  void VisionRun();
 
 
 

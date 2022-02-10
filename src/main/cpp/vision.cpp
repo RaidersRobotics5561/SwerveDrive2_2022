@@ -1,114 +1,92 @@
+#include "Robot.h"
+#include <iostream>
+#include <frc/smartdashboard/SmartDashboard.h>
+#include <frc/DriverStation.h>
+#include <frc/livewindow/LiveWindow.h>
 #include "vision.hpp"
 #include <math.h>
-/******************************************************************************
- * Function:     visionInit
- *
- * Description:  This function sets up camera and lights.
- ******************************************************************************/
-void visionInit(std::shared_ptr<nt::NetworkTable> ntTable0,
-                std::shared_ptr<nt::NetworkTable> ntTable1,
-                nt::NetworkTableInstance inst)
-{
-    ntTable1->PutNumber("ledControl", 1);
-    ntTable0->PutBoolean("driverMode", false);
-    inst.Flush();
+#include <photonlib/PhotonCamera.h>
+#include <photonlib/PhotonUtils.h>
+#include <units/length.h>
+// all our favorite variables
+bool TargetAquired;
+double TopYaw;
+bool BottomTargetAquired;
+double BottomYaw;
+int BottomIndex;
+frc::DriverStation::Alliance AllianceColor;
+// our favorite networktables
+nt::NetworkTableInstance Cam1;
+nt::NetworkTableInstance Cam2;
+
+void VisionDashboard(){
+
+// puts all our favorite variables to the dashboard, all this stuff happens once on init
+    frc::SmartDashboard::PutBoolean("Has Target?", TargetAquired);
+    frc::SmartDashboard::PutNumber("Target Yaw", TopYaw);
+
+    frc::SmartDashboard::PutBoolean("Bottom Has Target?", BottomTargetAquired);
+    frc::SmartDashboard::PutNumber("Bottom Yaw", BottomYaw);
+    frc::SmartDashboard::PutNumber("Bottom Index", BottomIndex);
+
 }
 
-/******************************************************************************
- * Function:     visionOff
- *
- * Description:  This function turns on driver mode and turns off lights.
- ******************************************************************************/
-void visionOff(std::shared_ptr<nt::NetworkTable> ntTable0,
-                std::shared_ptr<nt::NetworkTable> ntTable1,
-                nt::NetworkTableInstance inst,
-                bool ntStart1,
-                bool ntStart2,
-                bool ntVisionAngle,
-                bool ntVisionDistance)
-{
-    ntTable1->PutNumber("ledControl", 5);
-    ntTable0->PutBoolean("driverMode", true);
-    inst.Flush();
-    ntStart1 = false; ntStart2 = false;
-    ntVisionAngle = false;
-    ntVisionDistance = false;
-}
-    
-/******************************************************************************
- * Function:     visionRun
- *
- * Description:  This function toggles vision loop.
- ******************************************************************************/
-void visionRun(nt::NetworkTableEntry ntEntry,
-              double ntDistance,
-              int targetChoose,
-              bool ntVisionAngle,
-              bool ntVisionDistance,
-              double ntDesiredAngle,
-              double ntDesiredDistance)
-{
-    int autonChoose;
-    
-      switch (targetChoose)
-      {
-          case 0:
-            if (abs(ntEntry.GetDouble(0)) > 1)
-            {
-                autonChoose = 1;
-            }
-            if (abs(ntEntry.GetDouble(0)) < 1)
-            {
-                autonChoose = 2;
-            }
-            break;
+//actual vision things:
+void VisionRun(){
 
-          case 1:
-            if (abs(ntEntry.GetDouble(0)) > 5)
-            {
-                autonChoose = 0;
-            }
-            else if (abs(ntEntry.GetDouble(0)) > 1)
-            {
-                ntVisionDistance = false;
-                autonChoose = 1;
-            }
-            if (abs(ntEntry.GetDouble(0)) < 1)
-            {
-                autonChoose = 2;
-            }
-            break;
-      }
-      
-      switch (autonChoose)
-      {
-          case 0:
-            if (ntVisionDistance == false)
-            {
-                ntDesiredDistance = floor(ntDistance);
-                ntVisionDistance  = true;
-            }
-            // if (visionRequest == true)
-            // {
-            //     visionRequest = false;
-            //     activeVisionDistance0 = false;
-            // }
-            break;
-          
-          case 1:
-            if (ntVisionAngle == false)
-            {
-                ntDesiredAngle = (0.9 * ntEntry.GetDouble(0));
-                ntVisionAngle  = true;
-            }
-            // if (visionRequest == true)
-            // {
-            //     visionRequest = false;
-            //     activeVisionDistance0 = false;
-            // }
-            break;
-          
-          case 2:
-            break;
-      }
+    Cam2.StartClientTeam(5561);
+    Cam1.StartClientTeam(5561);
+
+    // first Camera is cam1 for auto target
+    photonlib::PhotonCamera Cam1{"Top"};
+    photonlib::PhotonPipelineResult resultTop = Cam1.GetLatestResult();
+  
+    TargetAquired = resultTop.HasTargets(); //returns true if the camera has a target
+
+    photonlib::PhotonTrackedTarget targetTop = resultTop.GetBestTarget(); //gets the best target
+
+    TopYaw = targetTop.GetYaw(); // Yaw of the best target
+
+    frc::SmartDashboard::PutBoolean("Top Target?", TargetAquired); //puts those new values to dashboard
+    frc::SmartDashboard::PutNumber("Top Yaw", TopYaw);
+    
+    units::meter_t TopRange = photonlib::PhotonUtils::CalculateDistanceToTarget(
+          CAMERA_HEIGHT1, TARGET_HEIGHT1, CAMERA_PITCH1,
+          units::degree_t{resultTop.GetBestTarget().GetPitch()}); // first 3 variables are constants from vision.hpp
+
+    double TopRangeDouble = TopRange.value();
+
+      frc::SmartDashboard::PutNumber("Top Range", TopRangeDouble);
+
+
+    // second camera for cargo detection
+    photonlib::PhotonCamera Cam2{"Bottom"};
+    photonlib::PhotonPipelineResult resultBottom = Cam2.GetLatestResult();
+
+    photonlib::PhotonTrackedTarget targetBottom = resultBottom.GetBestTarget();
+    BottomTargetAquired = resultBottom.HasTargets();
+    BottomYaw = targetBottom.GetYaw();
+
+    AllianceColor = frc::DriverStation::GetInstance().GetAlliance();
+
+    // gets flag from the driver station to choose between alliance colors
+    if (AllianceColor == frc::DriverStation::Alliance::kRed){
+      BottomIndex = 1; // 1 is the index for a red ball
+
+    }
+    else if (AllianceColor == frc::DriverStation::Alliance::kBlue)
+    {
+      BottomIndex = 2; // 2 is the index for a blue ball
+    }
+    
+
+    Cam2.SetPipelineIndex(BottomIndex);
+     // set the pipeline to whatever the logic gave
+
+
+    frc::SmartDashboard::PutBoolean("Bottom Has Target?", BottomTargetAquired);
+    frc::SmartDashboard::PutNumber("Bottom Yaw", BottomYaw);
+    frc::SmartDashboard::PutNumber("Bottom Index", BottomIndex); 
+    
+
 }
