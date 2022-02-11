@@ -931,6 +931,8 @@ void Robot::TeleopPeriodic()
   bool L_Driver_auto_setspeed_shooter = false;
   bool L_Driver_elevator_up = false;
   bool L_Driver_elevator_down = false;
+  bool L_Driver_right_shooter_desired_speed = false;
+  bool L_Driver_left_shooter_desired_speed = false;
 
   double timeleft = frc::DriverStation::GetInstance().GetMatchTime();
 
@@ -950,7 +952,11 @@ void Robot::TeleopPeriodic()
                              c_joyStick2.GetRawButton(8),
                             &L_Driver_auto_setspeed_shooter,
                              c_joyStick.GetRawButton(7),
-                            &L_Driver_zero_gyro); 
+                            &L_Driver_zero_gyro,
+                             c_joyStick2.GetRawAxis(1),
+                            &L_Driver_right_shooter_desired_speed,
+                             c_joyStick2.GetRawAxis(5),
+                            &L_Driver_left_shooter_desired_speed);
 
   Read_Encoders(V_RobotInit,
                 a_encoderFrontLeftSteer.GetVoltage(),
@@ -1112,8 +1118,8 @@ void Robot::TeleopPeriodic()
     }
     else if(fabs(c_joyStick2.GetRawAxis(5)) > .05 || fabs(c_joyStick2.GetRawAxis(1)) > .05)
     {
-      V_ShooterSpeedDesired[E_rightShooter] = c_joyStick2.GetRawAxis(1);
-      V_ShooterSpeedDesired[E_leftShooter] = c_joyStick2.GetRawAxis(5);
+      V_ShooterSpeedDesired[E_rightShooter] = L_Driver_right_shooter_desired_speed;
+      V_ShooterSpeedDesired[E_leftShooter] =  L_Driver_left_shooter_desired_speed;
     } 
     else 
     {
