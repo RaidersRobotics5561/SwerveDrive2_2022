@@ -60,22 +60,14 @@ double V_WheelSpeedIntergral[E_RobotCornerSz];
 
 double V_ShooterSpeedDesired[E_RoboShooter];
 
-double V_AutoTargetAngle;
-double V_AutoTargetUpperRollerSpd;
-double V_AutoTargetLowerRollerSpd;
-double V_AutoTargetBeltPower;
+
 
 bool   V_RobotInit;
 
-std::shared_ptr<nt::NetworkTable> vision0;
-std::shared_ptr<nt::NetworkTable> vision1;
-std::shared_ptr<nt::NetworkTable> lidar;
-std::shared_ptr<nt::NetworkTable> ledLight;
+
 
 nt::NetworkTableInstance inst;
 
-// nt::NetworkTableInstance Cam1;
-// nt::NetworkTableInstance Cam2;
 
 nt::NetworkTableEntry driverMode0;
 nt::NetworkTableEntry pipeline0;
@@ -90,8 +82,6 @@ nt::NetworkTableEntry targetPose1;
 nt::NetworkTableEntry latency1;
 nt::NetworkTableEntry lidarDistance;
 nt::NetworkTableEntry ledControl;
-
-//nt::NetworkTableInstance Cam1;
 
 
 
@@ -212,8 +202,6 @@ void Robot::RobotInit() {
 
 
 
-    ledControl            = ledLight->GetEntry("ledControl");
-    lidarDistance         = lidar->GetEntry("lidarDistance");
   
 
     
