@@ -957,6 +957,14 @@ void Robot::TeleopPeriodic()
                             &L_Driver_right_shooter_desired_speed,
                              c_joyStick2.GetRawAxis(5),
                             &L_Driver_left_shooter_desired_speed);
+  double L_WheelAngle = a_wheelAngleEncoderLF.Get().value();
+  double L_WheelAngleRoll = 0;
+  L_WheelAngle = L_WheelAngle * 360;
+  L_WheelAngleRoll = std::fmod(L_WheelAngle, 360);
+  double L_Freq = a_wheelAngleEncoderLF.GetFrequency();
+  frc::SmartDashboard::PutNumber("Wheel Test Angle", (L_WheelAngle));
+  frc::SmartDashboard::PutNumber("Wheel Test Angle Roll", (L_WheelAngleRoll));
+  frc::SmartDashboard::PutNumber("Wheel Test Freq", ((double)L_Freq));
 
   Read_Encoders(V_RobotInit,
                 a_encoderFrontLeftSteer.GetVoltage(),

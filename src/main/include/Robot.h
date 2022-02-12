@@ -22,6 +22,8 @@
 #include <frc/Compressor.h>
 #include <networktables/NetworkTable.h>
 
+#include <frc/DutyCycleEncoder.h>
+
 #include <photonlib/PhotonCamera.h>
 #include <photonlib/PhotonUtils.h>
 
@@ -39,6 +41,8 @@ class Robot : public frc::TimedRobot {
   frc::AnalogInput a_encoderFrontRightSteer{1};
   frc::AnalogInput a_encoderRearLeftSteer{3};
   frc::AnalogInput a_encoderRearRightSteer{0};
+
+  frc::DutyCycleEncoder a_wheelAngleEncoderLF {0};
 
   rev::CANSparkMax m_frontLeftSteerMotor {frontLeftSteerDeviceID,  rev::CANSparkMax::MotorType::kBrushless};
   rev::CANSparkMax m_frontLeftDriveMotor {frontLeftDriveDeviceID,  rev::CANSparkMax::MotorType::kBrushless};
