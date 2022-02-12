@@ -1,10 +1,10 @@
 #include "Enums.hpp"
 
 void Read_Encoders(bool L_RobotInit,
-                   double a_encoderFrontLeftSteerVoltage,
-                   double a_encoderFrontRightSteerVoltage,
-                   double a_encoderRearLeftSteerVoltage,
-                   double a_encoderRearRightSteerVoltage,
+                   double          L_encoderWheelAngleFrontLeftRaw,
+                   double          L_encoderWheelAngleFrontRightRaw,
+                   double          L_encoderWheelAngleRearLeftRaw,
+                   double          L_encoderWheelAngleRearRightRaw,
                    rev::SparkMaxRelativeEncoder m_encoderFrontLeftSteer,
                    rev::SparkMaxRelativeEncoder m_encoderFrontRightSteer,
                    rev::SparkMaxRelativeEncoder m_encoderRearLeftSteer,

@@ -37,12 +37,15 @@ class Robot : public frc::TimedRobot {
   void TeleopPeriodic() override;
   void TestPeriodic() override;
 
-  frc::AnalogInput a_encoderFrontLeftSteer{2};
-  frc::AnalogInput a_encoderFrontRightSteer{1};
-  frc::AnalogInput a_encoderRearLeftSteer{3};
-  frc::AnalogInput a_encoderRearRightSteer{0};
+  // frc::AnalogInput a_encoderFrontLeftSteer{2};
+  // frc::AnalogInput a_encoderFrontRightSteer{1};
+  // frc::AnalogInput a_encoderRearLeftSteer{3};
+  // frc::AnalogInput a_encoderRearRightSteer{0};
 
-  frc::DutyCycleEncoder a_wheelAngleEncoderLF {0};
+  frc::DutyCycleEncoder a_encoderWheelAngleFrontLeft {2};
+  frc::DutyCycleEncoder a_encoderWheelAngleFrontRight {1};
+  frc::DutyCycleEncoder a_encoderWheelAngleRearLeft {3};
+  frc::DutyCycleEncoder a_encoderWheelAngleRearRight {0};
 
   rev::CANSparkMax m_frontLeftSteerMotor {frontLeftSteerDeviceID,  rev::CANSparkMax::MotorType::kBrushless};
   rev::CANSparkMax m_frontLeftDriveMotor {frontLeftDriveDeviceID,  rev::CANSparkMax::MotorType::kBrushless};

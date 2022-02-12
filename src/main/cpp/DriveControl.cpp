@@ -91,6 +91,7 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,
          L_Init = true;
          }
       }
+      L_Init = false;
       V_Deg_DesiredAngPrev = L_GyroAngleDegrees;
     }
 

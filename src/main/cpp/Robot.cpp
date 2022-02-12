@@ -155,10 +155,11 @@ T_Lift_State V_Lift_state = E_S0_BEGONE;
 
 // PIDConfig UpperShooterPIDConfig {0.0008, 0.000001, 0.0006};
 
-frc::DigitalInput ir_sensor{1};
+frc::DigitalInput ir_sensor{5};
 
-frc::Spark blinkin {0};
+frc::Spark blinkin {4};
 frc::DriverStation::Alliance L_AllianceColor;
+
 
 /******************************************************************************
  * Function:     RobotInit
@@ -456,10 +457,10 @@ void Robot::AutonomousPeriodic()
     double speen = 0;
     // init all the movement values to 0
     Read_Encoders(V_RobotInit,
-                  a_encoderFrontLeftSteer.GetVoltage(),
-                  a_encoderFrontRightSteer.GetVoltage(),
-                  a_encoderRearLeftSteer.GetVoltage(),
-                  a_encoderRearRightSteer.GetVoltage(),
+                  a_encoderWheelAngleFrontLeft.Get().value(),
+                  a_encoderWheelAngleFrontRight.Get().value(),
+                  a_encoderWheelAngleRearLeft.Get().value(),
+                  a_encoderWheelAngleRearRight.Get().value(),
                   m_encoderFrontLeftSteer,
                   m_encoderFrontRightSteer,
                   m_encoderRearLeftSteer,
@@ -883,6 +884,11 @@ void Robot::TeleopInit()
   m_rearLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
   m_frontLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
 
+  m_encoderFrontRightSteer.SetPosition(0);
+  m_encoderFrontLeftSteer.SetPosition(0);
+  m_encoderRearRightSteer.SetPosition(0);
+  m_encoderRearLeftSteer.SetPosition(0);
+
   for (index = E_FrontLeft;
        index < E_RobotCornerSz;
        index = T_RobotCorner(int(index) + 1))
@@ -957,20 +963,14 @@ void Robot::TeleopPeriodic()
                             &L_Driver_right_shooter_desired_speed,
                              c_joyStick2.GetRawAxis(5),
                             &L_Driver_left_shooter_desired_speed);
-  double L_WheelAngle = a_wheelAngleEncoderLF.Get().value();
-  double L_WheelAngleRoll = 0;
-  L_WheelAngle = L_WheelAngle * 360;
-  L_WheelAngleRoll = std::fmod(L_WheelAngle, 360);
-  double L_Freq = a_wheelAngleEncoderLF.GetFrequency();
-  frc::SmartDashboard::PutNumber("Wheel Test Angle", (L_WheelAngle));
-  frc::SmartDashboard::PutNumber("Wheel Test Angle Roll", (L_WheelAngleRoll));
-  frc::SmartDashboard::PutNumber("Wheel Test Freq", ((double)L_Freq));
+
+// a_encoderWheelAngleFrontRight.
 
   Read_Encoders(V_RobotInit,
-                a_encoderFrontLeftSteer.GetVoltage(),
-                a_encoderFrontRightSteer.GetVoltage(),
-                a_encoderRearLeftSteer.GetVoltage(),
-                a_encoderRearRightSteer.GetVoltage(),
+                a_encoderWheelAngleFrontLeft.Get().value(),
+                a_encoderWheelAngleFrontRight.Get().value(),
+                a_encoderWheelAngleRearLeft.Get().value(),
+                a_encoderWheelAngleRearRight.Get().value(),
                 m_encoderFrontLeftSteer,
                 m_encoderFrontRightSteer,
                 m_encoderRearLeftSteer,
@@ -1268,25 +1268,27 @@ else
 
 #ifdef COMP
 
-    m_frontLeftDriveMotor.Set(V_WheelSpeedCmnd[E_FrontLeft]);
-    m_frontRightDriveMotor.Set(V_WheelSpeedCmnd[E_FrontRight]);
-    m_rearLeftDriveMotor.Set(V_WheelSpeedCmnd[E_RearLeft]);
-    m_rearRightDriveMotor.Set(V_WheelSpeedCmnd[E_RearRight]);
+    // m_frontLeftDriveMotor.Set(V_WheelSpeedCmnd[E_FrontLeft]);
+    // m_frontRightDriveMotor.Set(V_WheelSpeedCmnd[E_FrontRight]);
+    // m_rearLeftDriveMotor.Set(V_WheelSpeedCmnd[E_RearLeft]);
+    // m_rearRightDriveMotor.Set(V_WheelSpeedCmnd[E_RearRight]);
 
-    // m_frontLeftDriveMotor.Set(0);
-    // m_frontRightDriveMotor.Set(0);
-    // m_rearLeftDriveMotor.Set(0);
-    // m_rearRightDriveMotor.Set(0);
+    m_frontLeftDriveMotor.Set(0);
+    m_frontRightDriveMotor.Set(0);
+    m_rearLeftDriveMotor.Set(0);
+    m_rearRightDriveMotor.Set(0);
 
-    m_frontLeftSteerMotor.Set(V_WheelAngleCmnd[E_FrontLeft] * (-1));
-    m_frontRightSteerMotor.Set(V_WheelAngleCmnd[E_FrontRight] * (-1));
-    m_rearLeftSteerMotor.Set(V_WheelAngleCmnd[E_RearLeft] * (-1));
-    m_rearRightSteerMotor.Set(V_WheelAngleCmnd[E_RearRight] * (-1));
+    // m_frontLeftSteerMotor.Set(V_WheelAngleCmnd[E_FrontLeft]);
+    m_frontRightSteerMotor.Set(-V_WheelAngleCmnd[E_FrontRight]);
+    // m_rearLeftSteerMotor.Set(V_WheelAngleCmnd[E_RearLeft]);
+    // m_rearRightSteerMotor.Set(V_WheelAngleCmnd[E_RearRight]);
 
-    // m_frontLeftSteerMotor.Set(0);
+    frc::SmartDashboard::PutNumber("wheelAngleCmd Front right", V_WheelAngleCmnd[E_FrontRight]);
+
+    m_frontLeftSteerMotor.Set(0);
     // m_frontRightSteerMotor.Set(0);
-    // m_rearLeftSteerMotor.Set(0);
-    // m_rearRightSteerMotor.Set(0);
+    m_rearLeftSteerMotor.Set(0);
+    m_rearRightSteerMotor.Set(0);
 
 
     bool activeBeamSensor = ir_sensor.Get();
@@ -1334,6 +1336,7 @@ else
     }
     
     frc::SmartDashboard::PutNumber("pipeline", pipeline0.GetDouble(0));
+    
 #endif
     frc::Wait(C_ExeTime_t);
 }

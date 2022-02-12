@@ -32,7 +32,7 @@ static const int C_liftXD_ID = 12;
 static const int C_elevatorID = 13;
 static const int C_intakeID = 14;
 const double K_SteerMotorCurrentLimit = 25;
-static const double C_VoltageToAngle = 72.0; // Gain that converts the measured voltage of the absolute encoder to an equivalent angle in degrees.
+static const double C_EncoderToAngle = 360; // Raw output of PWM encoder to degrees
 
 
 const double K_ReductionRatio = 8.31;
@@ -68,10 +68,15 @@ const double K_deadband_timer = 0.5; //keep the deadband for a certain amount of
 
 
 const double K_InitAngle = 1.4; // This is the absolute angle that all of the wheels need to be sitting at before allowing the robot to exit init
-const double K_WheelOffsetAngle[E_RobotCornerSz] = {75.234367,   // E_FrontLeft
-                                                    90.615225,   // E_FrontRight 152  104.6 
-                                                    12.041014,   // E_RearLeft
-                                                    144.580063}; // E_RearRight 180.703106  144.580063
+const double K_WheelOffsetAngle[E_RobotCornerSz] = {165.527239,   // E_FrontLeft
+                                                    128.487963,   // E_FrontRight 152  104.6 
+                                                    33.112801,   // E_RearLeft
+                                                    246.813891}; // E_RearRight 180.703106  144.580063
+
+                                                    // 169.420,   // E_FrontLeft
+                                                    // 128.487963,   // E_FrontRight 152  104.6 
+                                                    // 33.112801,   // E_RearLeft
+                                                    // 247.656102}; // E_RearRight
 
 const double K_WheelMaxSpeed = 200; // This is the max allowed speed for the wheels
 
@@ -80,8 +85,8 @@ const double K_WheelAnglePID_Gx[E_PID_CalSz] = { 0.007,     // P Gx
                                                  0.0000005, // D Gx
                                                  0.4,       // P UL
                                                 -0.4,       // P LL
-                                                 0.12,      // I UL
-                                                -0.12,      // I LL
+                                                 0.1000,      // I UL
+                                                -0.1000,      // I LL
                                                  0.5,       // D UL
                                                 -0.5,       // D LL
                                                  0.9,       // Max upper
