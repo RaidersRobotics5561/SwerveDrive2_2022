@@ -65,8 +65,6 @@ double V_AutoTargetUpperRollerSpd;
 double V_AutoTargetLowerRollerSpd;
 double V_AutoTargetBeltPower;
 
-bool   V_RobotInit;
-
 double       distanceTarget;
 double       distanceBall;
 double       distanceFromTargetCenter;
@@ -114,7 +112,6 @@ void Robot::RobotInit() {
     m_liftMotorYD.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
     m_liftMotorXD.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
 
-    V_RobotInit = true;
     V_M_RobotDisplacementY = 0;
     V_M_RobotDisplacementX = 0;
 
@@ -265,7 +262,6 @@ void Robot::RobotPeriodic()
  ******************************************************************************/
 void Robot::AutonomousInit()
   { 
-    V_RobotInit = true;
     V_RobotState = E_Auton;
     V_autonTargetCmd = false;
     V_autonTargetFin = false;
@@ -275,7 +271,10 @@ void Robot::AutonomousInit()
       
       
       GyroZero();
-      EncodersInit();
+      EncodersInit(a_encoderWheelAngleFrontLeft.Get().value(),
+                   a_encoderWheelAngleFrontRight.Get().value(),
+                   a_encoderWheelAngleRearLeft.Get().value(),
+                   a_encoderWheelAngleRearRight.Get().value());
       DriveControlInit();
       BallHandlerInit();
       AutonDriveReset();
@@ -306,12 +305,7 @@ void Robot::AutonomousPeriodic()
     double strafe = 0;
     double speen = 0;
 
-    Read_Encoders(V_RobotInit,
-                  a_encoderWheelAngleFrontLeft.Get().value(),
-                  a_encoderWheelAngleFrontRight.Get().value(),
-                  a_encoderWheelAngleRearLeft.Get().value(),
-                  a_encoderWheelAngleRearRight.Get().value(),
-                  m_encoderFrontLeftSteer,
+    Read_Encoders(m_encoderFrontLeftSteer,
                   m_encoderFrontRightSteer,
                   m_encoderRearLeftSteer,
                   m_encoderRearRightSteer,
@@ -322,8 +316,7 @@ void Robot::AutonomousPeriodic()
                   m_encoderrightShooter,
                   m_encoderleftShooter);
  
-    DtrmnSwerveBotLocation(V_RobotInit,
-                           gyro_yawanglerad,
+    DtrmnSwerveBotLocation(gyro_yawanglerad,
                            &V_Rad_WheelAngleFwd[0],
                            &V_M_WheelDeltaDistance[0],
                            &V_M_RobotDisplacementX,
@@ -346,7 +339,6 @@ void Robot::AutonomousPeriodic()
                      &V_WheelAngleRev[0],
                      &V_WheelSpeedCmnd[0],
                      &V_WheelAngleCmnd[0],
-                     &V_RobotInit,
                      &V_autonTargetFin,
                       V_RobotState);
 
@@ -375,7 +367,6 @@ void Robot::AutonomousPeriodic()
  ******************************************************************************/
 void Robot::TeleopInit()
   {
-  V_RobotInit = true;
   V_RobotState = E_Teleop;
 
   m_frontLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
@@ -388,7 +379,11 @@ void Robot::TeleopInit()
   m_encoderRearRightSteer.SetPosition(0);
   m_encoderRearLeftSteer.SetPosition(0);
 
-  EncodersInit();
+  EncodersInit(a_encoderWheelAngleFrontLeft.Get().value(),
+               a_encoderWheelAngleFrontRight.Get().value(),
+               a_encoderWheelAngleRearLeft.Get().value(),
+               a_encoderWheelAngleRearRight.Get().value());
+
   DriveControlInit();
   BallHandlerInit();
   gyro_yawangledegrees = 0;
@@ -434,12 +429,7 @@ void Robot::TeleopPeriodic()
                              c_joyStick2.GetRawAxis(5),
                             &L_Driver_left_shooter_desired_speed);
 
-  Read_Encoders(V_RobotInit,
-                a_encoderWheelAngleFrontLeft.Get().value(),
-                a_encoderWheelAngleFrontRight.Get().value(),
-                a_encoderWheelAngleRearLeft.Get().value(),
-                a_encoderWheelAngleRearRight.Get().value(),
-                m_encoderFrontLeftSteer,
+  Read_Encoders(m_encoderFrontLeftSteer,
                 m_encoderFrontRightSteer,
                 m_encoderRearLeftSteer,
                 m_encoderRearRightSteer,
@@ -450,31 +440,29 @@ void Robot::TeleopPeriodic()
                 m_encoderrightShooter,
                 m_encoderleftShooter);
 
-  DtrmnSwerveBotLocation(V_RobotInit,
-                         gyro_yawanglerad,
+  DtrmnSwerveBotLocation(gyro_yawanglerad,
                          &V_Rad_WheelAngleFwd[0],
                          &V_M_WheelDeltaDistance[0],
                          &V_M_RobotDisplacementX,
                          &V_M_RobotDisplacementY);
 
-  DriveControlMain(c_joyStick.GetRawAxis(1),
-                   c_joyStick.GetRawAxis(0),
-                   c_joyStick.GetRawAxis(4),
-                   c_joyStick.GetRawAxis(3),
-                   c_joyStick.GetRawButton(1),
-                   c_joyStick.GetRawButton(3),
-                   c_joyStick.GetRawButton(4),
-                   c_joyStick.GetRawButton(5),
-                   gyro_yawangledegrees,
-                   gyro_yawanglerad,
-                   targetYaw0.GetDouble(0),
+  DriveControlMain( c_joyStick.GetRawAxis(1),
+                    c_joyStick.GetRawAxis(0),
+                    c_joyStick.GetRawAxis(4),
+                    c_joyStick.GetRawAxis(3),
+                    c_joyStick.GetRawButton(1),
+                    c_joyStick.GetRawButton(3),
+                    c_joyStick.GetRawButton(4),
+                    c_joyStick.GetRawButton(5),
+                    gyro_yawangledegrees,
+                    gyro_yawanglerad,
+                    targetYaw0.GetDouble(0),
                    &V_WheelAngleFwd[0],
                    &V_WheelAngleRev[0],
                    &V_WheelSpeedCmnd[0],
                    &V_WheelAngleCmnd[0],
-                   &V_RobotInit,
                    &V_autonTargetFin,
-                   V_RobotState);
+                    V_RobotState);
 
   V_Lift_state = Lift_Control_Dictator(L_Driver_lift_control,
                                        timeleft,

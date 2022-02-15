@@ -18,12 +18,7 @@
  extern double V_M_WheelDeltaDistance[E_RobotCornerSz];
  extern double V_WheelAngleConverted[E_RobotCornerSz];
  
- void Read_Encoders(bool L_RobotInit,
-                   double          L_encoderWheelAngleFrontLeftRaw,
-                   double          L_encoderWheelAngleFrontRightRaw,
-                   double          L_encoderWheelAngleRearLeftRaw,
-                   double          L_encoderWheelAngleRearRightRaw,
-                   rev::SparkMaxRelativeEncoder m_encoderFrontLeftSteer,
+ void Read_Encoders(rev::SparkMaxRelativeEncoder m_encoderFrontLeftSteer,
                    rev::SparkMaxRelativeEncoder m_encoderFrontRightSteer,
                    rev::SparkMaxRelativeEncoder m_encoderRearLeftSteer,
                    rev::SparkMaxRelativeEncoder m_encoderRearRightSteer,
@@ -37,4 +32,7 @@
 double DtrmnEncoderRelativeToCmnd(double L_JoystickCmnd,
                                   double L_EncoderReading);
 
-void EncodersInit(void);
+void EncodersInit(double          L_encoderWheelAngleFrontLeftRaw,
+                  double          L_encoderWheelAngleFrontRightRaw,
+                  double          L_encoderWheelAngleRearLeftRaw,
+                  double          L_encoderWheelAngleRearRightRaw);

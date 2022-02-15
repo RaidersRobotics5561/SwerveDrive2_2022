@@ -100,7 +100,6 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,
                       double             *L_WheelAngleRev,
                       double             *L_WheelSpeedCmnd,
                       double             *L_WheelAngleCmnd,
-                      bool               *L_RobotInit,
                       bool               *L_TargetFin,
                       T_RobotState        L_RobotState)
   {
@@ -119,7 +118,6 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,
   double L_WA[E_RobotCornerSz];
   double L_WS[E_RobotCornerSz];
   double L_RotateErrorCalc;
-  bool   L_Init = *L_RobotInit;
   double L_JoyStick1Axis1Y_Scaled;
   double L_JoyStick1Axis1X_Scaled;
   double L_JoyStick1Axis2X_Scaled;
@@ -138,35 +136,10 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,
       L_JoyStick1Axis2X_Scaled = -L_JoyStick1Axis2X;
     }
 
-  /* Let's start by zeroing the desired angle and speed */
-  // if (L_Init == true)
-  //   {
-  //   L_Init = false;
-  //   for (L_Index = E_FrontLeft;
-  //        L_Index < E_RobotCornerSz;
-  //        L_Index = T_RobotCorner(int(L_Index) + 1))
-  //     {
-  //     V_WheelAngleArb[L_Index] = L_WheelAngleFwd[L_Index]; // We do this for initialization in order to allow the PID control to control to the correct forward angle at startup
-      
-  //      if (fabs(V_WheelAngleArb[L_Index]) > K_InitAngle)
-  //        {
-  //        L_Init = true;
-  //        }
-  //     }
-  //     L_Init = false;
-  //     V_Deg_DesiredAngPrev = L_GyroAngleDegrees;
-  //   }
-
-  L_Init = false;
-
-  /* Check to see if we are in initialization.
-   * If not, we can do normal control. */
-  if (L_Init == false)
-    {
-    /* Let's place a deadband around the joystick readings */
-    V_FWD = L_JoyStick1Axis1Y_Scaled * -1;
-    V_STR = L_JoyStick1Axis1X_Scaled;
-    V_RCW = L_JoyStick1Axis2X_Scaled;
+  /* Let's place a deadband around the joystick readings */
+  V_FWD = L_JoyStick1Axis1Y_Scaled * -1;
+  V_STR = L_JoyStick1Axis1X_Scaled;
+  V_RCW = L_JoyStick1Axis2X_Scaled;
 
    //turning rotatemode on/off & setting desired angle
     if ((fabs(L_JoyStick1Axis1Y_Scaled) > 0) ||
@@ -364,7 +337,6 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,
           L_WS[L_Index] *= (-1); // Need to flip sign of drive wheel to account for reverse direction
         }
       }
-    }
 
   /* Output the wheel speed and angle targets along with init state: */
     for (L_Index = E_FrontLeft;
@@ -404,7 +376,6 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,
                                                K_WheelSpeedPID_Gx[E_Max_Ul],
                                                K_WheelSpeedPID_Gx[E_Max_Ll]);
       }
-    *L_RobotInit = L_Init;
 
     V_Deg_DesiredAngPrev = desiredAngle;
 
