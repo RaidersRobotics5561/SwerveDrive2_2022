@@ -15,3 +15,5 @@ void AutonDriveMain(double *L_Pct_JoyStickFwdRev,
                     double  L_Deg_GyroAngleDeg,
                     int     L_int_AutonSelection,
                     bool    L_b_RobotInit);
+
+void AutonDriveMain(void);

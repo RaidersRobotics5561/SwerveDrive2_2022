@@ -14,10 +14,11 @@
 
 double V_WheelAngleRaw[E_RobotCornerSz]; 
 double V_WheelAngle[E_RobotCornerSz];
+double V_WheelAngleConverted[E_RobotCornerSz]; // This is the wheel angle coming from the NEO and processed to only be from 0 - 360
 double V_WheelAngleFwd[E_RobotCornerSz]; // This is the wheel angle as if the wheel were going to be driven in a forward direction, in degrees
 double V_Rad_WheelAngleFwd[E_RobotCornerSz]; // This is the wheel angle as if the wheel were going to be driven in a forward direction, in radians
 double V_WheelAngleRev[E_RobotCornerSz]; // This is the wheel angle as if the wheel were going to be driven in a reverse direction
-double V_WheelAngleArb[E_RobotCornerSz]; // This is the arbitrated wheel angle that is used in the PID controller
+
 double V_WheelAnglePrev[E_RobotCornerSz];
 double V_WheelAngleLoop[E_RobotCornerSz];
 double V_WheelRelativeAngleRawOffset[E_RobotCornerSz];
@@ -29,6 +30,37 @@ double V_ShooterSpeedCurr[E_RoboShooter];
 double V_Cnt_WheelDeltaDistanceInit[E_RobotCornerSz];
 double V_Delta_Angle[E_RobotCornerSz]; // The delta of the angle needed to align the wheels when the robot inits
 
+
+/******************************************************************************
+ * Function:     Read_Encoders
+ *
+ * Description:  Run all of the encoder decoding logic.
+ ******************************************************************************/
+void EncodersInit()
+  {
+    T_RobotCorner L_Index;
+
+    for (L_Index = E_FrontLeft;
+         L_Index < E_RobotCornerSz;
+         L_Index = T_RobotCorner(int(L_Index) + 1))
+      {
+        V_WheelRelativeAngleRawOffset[L_Index] = 0;
+        V_WheelAngleFwd[L_Index] = 0;
+        V_Rad_WheelAngleFwd[L_Index] = 0;
+        V_WheelVelocity[L_Index] = 0;
+        V_M_WheelDeltaDistance[L_Index] = 0;
+        V_Cnt_WheelDeltaDistanceCurr[L_Index] = 0;
+
+        /* Probably not needed: */
+        V_WheelAngleRaw[L_Index] = 0;
+        V_WheelAnglePrev[L_Index] = 0;
+        V_WheelAngleLoop[L_Index] = 0;
+        V_Cnt_WheelDeltaDistancePrev[L_Index] = 0;
+      }
+    
+    V_ShooterSpeedCurr[E_rightShooter] = 0;
+    V_ShooterSpeedCurr[E_leftShooter] = 0;
+  }
 
 /******************************************************************************
  * Function:     Read_Encoders
@@ -62,10 +94,10 @@ void Read_Encoders(bool            L_RobotInit,
     // V_WheelAngleRaw[E_RearLeft]   = std::fmod((fabs(L_encoderWheelAngleRearLeftRaw) * C_EncoderToAngle), 360);
     // V_WheelAngleRaw[E_RearRight]  = std::fmod((fabs(L_encoderWheelAngleRearRightRaw) * C_EncoderToAngle), 360);
 
-    V_WheelAngleRaw[E_FrontLeft]  = (L_encoderWheelAngleFrontLeftRaw * C_EncoderToAngle) - K_WheelOffsetAngle[E_FrontLeft];
-    V_WheelAngleRaw[E_FrontRight] = (L_encoderWheelAngleFrontRightRaw * C_EncoderToAngle) - K_WheelOffsetAngle[E_FrontRight];
-    V_WheelAngleRaw[E_RearLeft]   = (L_encoderWheelAngleRearLeftRaw * C_EncoderToAngle) - K_WheelOffsetAngle[E_RearLeft];
-    V_WheelAngleRaw[E_RearRight]  = (L_encoderWheelAngleRearRightRaw * C_EncoderToAngle) - K_WheelOffsetAngle[E_RearRight];
+    V_WheelAngleRaw[E_FrontLeft]  = std::fmod((L_encoderWheelAngleFrontLeftRaw * C_EncoderToAngle), 360) - K_WheelOffsetAngle[E_FrontLeft];
+    V_WheelAngleRaw[E_FrontRight] = std::fmod((L_encoderWheelAngleFrontRightRaw * C_EncoderToAngle), 360) - K_WheelOffsetAngle[E_FrontRight];
+    V_WheelAngleRaw[E_RearLeft]   = std::fmod((L_encoderWheelAngleRearLeftRaw * C_EncoderToAngle), 360) - K_WheelOffsetAngle[E_RearLeft];
+    V_WheelAngleRaw[E_RearRight]  = std::fmod((L_encoderWheelAngleRearRightRaw * C_EncoderToAngle), 360) - K_WheelOffsetAngle[E_RearRight];
 
     // V_WheelAngleRaw[E_FrontLeft]  = (L_encoderWheelAngleFrontLeftRaw * C_EncoderToAngle) - K_WheelOffsetAngle[E_FrontLeft];
     // V_WheelAngleRaw[E_FrontRight] = (L_encoderWheelAngleFrontRightRaw * C_EncoderToAngle) - K_WheelOffsetAngle[E_FrontRight];
@@ -77,30 +109,30 @@ void Read_Encoders(bool            L_RobotInit,
     // V_WheelRelativeAngleRawOffset[E_RearLeft] = V_WheelAngleRaw[E_RearLeft];
     // V_WheelRelativeAngleRawOffset[E_RearRight] = V_WheelAngleRaw[E_RearRight];
 
-    V_WheelRelativeAngleRawOffset[E_FrontLeft] = m_encoderFrontLeftSteer.GetPosition();
+    V_WheelRelativeAngleRawOffset[E_FrontLeft] = V_WheelAngleRaw[E_FrontLeft];
     V_WheelRelativeAngleRawOffset[E_FrontRight] = V_WheelAngleRaw[E_FrontRight];
-    V_WheelRelativeAngleRawOffset[E_RearLeft] = m_encoderRearLeftSteer.GetPosition();
-    V_WheelRelativeAngleRawOffset[E_RearRight] = m_encoderRearRightSteer.GetPosition();
+    V_WheelRelativeAngleRawOffset[E_RearLeft] = V_WheelAngleRaw[E_RearLeft];
+    V_WheelRelativeAngleRawOffset[E_RearRight] = V_WheelAngleRaw[E_RearRight];
 
-      for (index = E_FrontLeft;
-           index < E_RobotCornerSz;
-           index = T_RobotCorner(int(index) + 1))
-        {
-        if(abs(V_WheelAnglePrev[index]) >= 330 || abs(V_WheelAnglePrev[index] <= 30 ))
-         {
-          if(V_WheelAnglePrev[index] >= 330 && V_WheelAngleRaw[index] <= 30)
-           {
-            V_WheelAngleLoop[index] += 1;
-            }
-          else if (V_WheelAnglePrev[index] <= 30 && V_WheelAngleRaw[index] >= 330)
-           {
-            V_WheelAngleLoop[index] -= 1;
-           }
-          }
-          V_WheelAngleFwd[index] = (V_WheelAngleLoop[index] * 360) + V_WheelAngleRaw[index];
+      // for (index = E_FrontLeft;
+      //      index < E_RobotCornerSz;
+      //      index = T_RobotCorner(int(index) + 1))
+      //   {
+      //   if(abs(V_WheelAnglePrev[index]) >= 330 || abs(V_WheelAnglePrev[index] <= 30 ))
+      //    {
+      //     if(V_WheelAnglePrev[index] >= 330 && V_WheelAngleRaw[index] <= 30)
+      //      {
+      //       V_WheelAngleLoop[index] += 1;
+      //       }
+      //     else if (V_WheelAnglePrev[index] <= 30 && V_WheelAngleRaw[index] >= 330)
+      //      {
+      //       V_WheelAngleLoop[index] -= 1;
+      //      }
+      //     }
+      //     V_WheelAngleFwd[index] = (V_WheelAngleLoop[index] * 360) + V_WheelAngleRaw[index];
 
-          V_WheelAnglePrev[index] = V_WheelAngleRaw[index];
-        }
+      //     V_WheelAnglePrev[index] = V_WheelAngleRaw[index];
+      //   }
         V_Cnt_WheelDeltaDistanceInit[E_FrontLeft] = m_encoderFrontLeftDrive.GetPosition();
         V_Cnt_WheelDeltaDistanceInit[E_FrontRight] = m_encoderFrontRightDrive.GetPosition();
         V_Cnt_WheelDeltaDistanceInit[E_RearRight] = m_encoderRearRightDrive.GetPosition();
@@ -108,17 +140,17 @@ void Read_Encoders(bool            L_RobotInit,
     }
   else
     {
-    V_WheelAngleFwd[E_FrontLeft]  = fmod(((m_encoderFrontLeftSteer.GetPosition()) * 30), 360) +  V_WheelRelativeAngleRawOffset[E_FrontLeft];
-    V_WheelAngleFwd[E_FrontRight] = fmod(((m_encoderFrontRightSteer.GetPosition()) * 30), 360) +  V_WheelRelativeAngleRawOffset[E_FrontRight];
-    V_WheelAngleFwd[E_RearLeft]   = fmod(((m_encoderRearLeftSteer.GetPosition()) * 30), 360) + V_WheelRelativeAngleRawOffset[E_RearLeft];
-    V_WheelAngleFwd[E_RearRight]  = fmod(((m_encoderRearRightSteer.GetPosition()) * 30), 360) + V_WheelRelativeAngleRawOffset[E_RearRight];
-
-
+    V_WheelAngleConverted[E_FrontLeft]  = fmod((m_encoderFrontLeftSteer.GetPosition()  * K_SteerDriveReductionRatio + V_WheelRelativeAngleRawOffset[E_FrontLeft]),  360);
+    V_WheelAngleConverted[E_FrontRight] = fmod((m_encoderFrontRightSteer.GetPosition() * K_SteerDriveReductionRatio + V_WheelRelativeAngleRawOffset[E_FrontRight]), 360);
+    V_WheelAngleConverted[E_RearLeft]   = fmod((m_encoderRearLeftSteer.GetPosition()   * K_SteerDriveReductionRatio + V_WheelRelativeAngleRawOffset[E_RearLeft]),   360);
+    V_WheelAngleConverted[E_RearRight]  = fmod((m_encoderRearRightSteer.GetPosition()  * K_SteerDriveReductionRatio + V_WheelRelativeAngleRawOffset[E_RearRight]),  360);
 
     for (index = E_FrontLeft;
          index < E_RobotCornerSz;
          index = T_RobotCorner(int(index) + 1))
       {
+      V_WheelAngleFwd[index] = V_WheelAngleConverted[index];
+
       if (V_WheelAngleFwd[index] > 180)
         {
         V_WheelAngleFwd[index] -= 360;
@@ -140,14 +172,9 @@ void Read_Encoders(bool            L_RobotInit,
       }
     }
 
-  frc::SmartDashboard::PutNumber("V_WheelAngleRaw Front Left", V_WheelAngleRaw[E_FrontLeft]);
-  frc::SmartDashboard::PutNumber("V_WheelAngleRaw Front Right", V_WheelAngleRaw[E_FrontRight]);
-  frc::SmartDashboard::PutNumber("V_WheelAngleRaw Rear Left", V_WheelAngleRaw[E_RearLeft]);
-  frc::SmartDashboard::PutNumber("V_WheelAngleRaw Rear Right", V_WheelAngleRaw[E_RearRight]);
-
-  frc::SmartDashboard::PutNumber("V_WheelAngleForward Front Right", V_WheelAngleFwd[E_FrontRight]);
-
-  frc::SmartDashboard::PutNumber("encoder_front_right_steer", m_encoderFrontRightSteer.GetPosition());
+  frc::SmartDashboard::PutNumber("FL Angle From Center", V_WheelAngleRaw[E_FrontLeft]);
+  frc::SmartDashboard::PutNumber("FL Angle Fwd", V_WheelAngleFwd[E_FrontLeft]);
+  frc::SmartDashboard::PutNumber("FL NEO Encoder Processed", V_WheelAngleConverted[E_FrontLeft]);
 
   if (L_RobotInit == false)
     {  
@@ -176,8 +203,6 @@ void Read_Encoders(bool            L_RobotInit,
       V_Rad_WheelAngleFwd[index] = V_WheelAngleFwd[index] * (C_PI/180);
       }
 
-  frc::SmartDashboard::PutNumber("Wheel Front Left", ((V_Cnt_WheelDeltaDistanceCurr[E_FrontLeft] / K_ReductionRatio) / 60) * K_WheelCircufrence);
-
   V_WheelVelocity[E_FrontLeft]  = ((m_encoderFrontLeftDrive.GetVelocity()  / K_ReductionRatio) / 60) * K_WheelCircufrence;
   V_WheelVelocity[E_FrontRight] = ((m_encoderFrontRightDrive.GetVelocity() / K_ReductionRatio) / 60) * K_WheelCircufrence;
   V_WheelVelocity[E_RearRight]  = ((m_encoderRearRightDrive.GetVelocity()  / K_ReductionRatio) / 60) * K_WheelCircufrence;
@@ -185,8 +210,6 @@ void Read_Encoders(bool            L_RobotInit,
 
   V_ShooterSpeedCurr[E_rightShooter]    = (m_encoderrightShooter.GetVelocity()    * K_ShooterWheelRotation[E_rightShooter]);
   V_ShooterSpeedCurr[E_leftShooter] = (m_encoderleftShooter.GetVelocity() * K_ShooterWheelRotation[E_leftShooter]);
-  frc::SmartDashboard::PutNumber("Top speed current", m_encoderrightShooter.GetVelocity());
-  frc::SmartDashboard::PutNumber("Bottom speed current", m_encoderleftShooter.GetVelocity());
   frc::SmartDashboard::PutBoolean("init?", L_RobotInit);
   }
 

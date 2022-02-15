@@ -23,6 +23,7 @@
 #include "Lift.hpp"
 #include "Lift_sub_functions.hpp"
 
+T_Lift_State V_Lift_state = E_S0_BEGONE;
 int V_lift_counter = 0;
 bool V_init_state = false;
 double V_stop_positon_XD = 0;

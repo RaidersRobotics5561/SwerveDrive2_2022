@@ -3,8 +3,8 @@
 #include <units/angle.h>
 #include <units/length.h>
 
-const double C_ExeTime = 0.01;
-const units::second_t C_ExeTime_t = 0.01_s;
+const double C_ExeTime = 0.02; // Set to match the the default controller loop time of 20 ms
+const units::second_t C_ExeTime_t = 0.02_s; // Set to match the the default controller loop time of 20 ms
 
 const double C_End_game_time = 30;
 
@@ -35,6 +35,7 @@ const double K_SteerMotorCurrentLimit = 25;
 static const double C_EncoderToAngle = 360; // Raw output of PWM encoder to degrees
 
 
+const double K_SteerDriveReductionRatio = 30; //30:1
 const double K_ReductionRatio = 8.31;
 const double K_WheelCircufrence = 12.566; // Circumferance of wheel, in inches
 
@@ -45,7 +46,6 @@ const double C_R = 0.8441;
 const double K_ShooterWheelRotation[E_RoboShooter] = {5.12517590321455,     // E_rightShooter    2.5555555555555555555555555555555555555555555555 * 2 * C_PI * 0.3191858136047229930278045677412
                                                       3.84388192741092};    // E_leftShooter 2.5555555555555555555555555555555555555555555555 * 2 * C_PI *0.2393893602035422447708534258059
 
-// owo
 
 const double K_lift_max_YD = 60.25; //distance from floor to mid rung (60.25 inches)
 const double K_lift_mid_YD = 9.42069; //a middle height- below the rungs
@@ -68,7 +68,7 @@ const double K_deadband_timer = 0.5; //keep the deadband for a certain amount of
 
 
 const double K_InitAngle = 1.4; // This is the absolute angle that all of the wheels need to be sitting at before allowing the robot to exit init
-const double K_WheelOffsetAngle[E_RobotCornerSz] = {165.527239,   // E_FrontLeft
+const double K_WheelOffsetAngle[E_RobotCornerSz] = {169.527239,   // E_FrontLeft
                                                     128.487963,   // E_FrontRight 152  104.6 
                                                     33.112801,   // E_RearLeft
                                                     246.813891}; // E_RearRight 180.703106  144.580063

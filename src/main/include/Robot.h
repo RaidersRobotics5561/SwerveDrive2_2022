@@ -6,6 +6,7 @@
 #include <string>
 
 #include <frc/AnalogInput.h>
+#include <frc/DigitalInput.h>
 #include <frc/drive/DifferentialDrive.h>
 #include <frc/Joystick.h>
 #include <frc/smartdashboard/SendableChooser.h>
@@ -58,17 +59,19 @@ class Robot : public frc::TimedRobot {
 
   rev::CANSparkMax m_rightShooterMotor     {rightShooterID,  rev::CANSparkMax::MotorType::kBrushless};
   rev::CANSparkMax m_leftShooterMotor  {leftShooterID,  rev::CANSparkMax::MotorType::kBrushless};
+
   rev::CANSparkMax m_liftMotorYD         {C_liftYD_ID,                  rev::CANSparkMax::MotorType::kBrushless};
   rev::CANSparkMax m_liftMotorXD         {C_liftXD_ID,                  rev::CANSparkMax::MotorType::kBrushless};
 
   ctre::phoenix::motorcontrol::can::TalonSRX m_intake {C_intakeID};
-  ctre::phoenix::motorcontrol::can::TalonSRX m_elevateDaBalls {C_elevatorID};
+  ctre::phoenix::motorcontrol::can::TalonSRX m_elevator {C_elevatorID};
 
   
   rev::SparkMaxPIDController m_rightShooterpid = m_rightShooterMotor.GetPIDController();
-  rev::SparkMaxPIDController m_leftShooterpid = m_leftShooterMotor.GetPIDController();
-  rev::SparkMaxPIDController m_liftpidYD         = m_liftMotorYD.GetPIDController();
-  rev::SparkMaxPIDController m_liftpidXD          = m_liftMotorXD.GetPIDController();
+  rev::SparkMaxPIDController m_leftShooterpid  = m_leftShooterMotor.GetPIDController();
+
+  rev::SparkMaxPIDController m_liftpidYD       = m_liftMotorYD.GetPIDController();
+  rev::SparkMaxPIDController m_liftpidXD       = m_liftMotorXD.GetPIDController();
 
   rev::SparkMaxRelativeEncoder m_encoderFrontLeftSteer  = m_frontLeftSteerMotor.GetEncoder();
   rev::SparkMaxRelativeEncoder m_encoderFrontLeftDrive  = m_frontLeftDriveMotor.GetEncoder();
@@ -82,6 +85,11 @@ class Robot : public frc::TimedRobot {
   rev::SparkMaxRelativeEncoder m_encoderleftShooter     = m_leftShooterMotor.GetEncoder();
   rev::SparkMaxRelativeEncoder m_encoderLiftYD          = m_liftMotorYD.GetEncoder();
   rev::SparkMaxRelativeEncoder m_encoderLiftXD          = m_liftMotorXD.GetEncoder();
+
+  frc::DigitalInput ir_sensor{5};
+
+  frc::Spark blinkin {4};
+
   frc::Joystick c_joyStick{0};
   frc::Joystick c_joyStick2{1};
 
