@@ -93,6 +93,19 @@ bool V_autonTargetFin = false;
 double V_M_RobotDisplacementX = 0;
 double V_M_RobotDisplacementY = 0;
 
+double V_XD_Test = 0;
+double V_YD_Test = 0;
+double V_Intake_Test = 0;
+double V_Elevator_Test = 0;
+
+double V_P_Gx = 0;
+double V_I_Gx = 0;
+double V_D_Gx = 0;
+double V_I_Zone = 0;
+double V_FF = 0;
+double V_Max = 0;
+double V_Min = 0;
+
 T_RobotState V_RobotState;
 
 
@@ -142,6 +155,14 @@ void Robot::RobotInit() {
 
     ledControl            = ledLight->GetEntry("ledControl");
     lidarDistance         = lidar->GetEntry("lidarDistance");
+
+    frc::SmartDashboard::PutNumber("P_Gx", V_P_Gx);
+    frc::SmartDashboard::PutNumber("I_Gx", V_I_Gx);
+    frc::SmartDashboard::PutNumber("D_Gx", V_D_Gx);
+    frc::SmartDashboard::PutNumber("I_Zone", V_I_Zone);
+    frc::SmartDashboard::PutNumber("FF", V_FF);
+    frc::SmartDashboard::PutNumber("Max_Limit", V_Max);
+    frc::SmartDashboard::PutNumber("Min_Limit", V_Min);
   
  #ifdef COMP
     // V_testIntake = 0;
@@ -305,7 +326,11 @@ void Robot::AutonomousPeriodic()
     double strafe = 0;
     double speen = 0;
 
-    Read_Encoders(m_encoderFrontLeftSteer,
+    Read_Encoders(a_encoderWheelAngleFrontLeft.Get().value(),
+               a_encoderWheelAngleFrontRight.Get().value(),
+               a_encoderWheelAngleRearLeft.Get().value(),
+               a_encoderWheelAngleRearRight.Get().value(),
+               m_encoderFrontLeftSteer,
                   m_encoderFrontRightSteer,
                   m_encoderRearLeftSteer,
                   m_encoderRearRightSteer,
@@ -391,6 +416,26 @@ void Robot::TeleopInit()
   V_AutoShootEnable = false;
   V_M_RobotDisplacementX = 0;
   V_M_RobotDisplacementY = 0;
+
+  frc::SmartDashboard::PutNumber("XD Lift", V_XD_Test);
+  frc::SmartDashboard::PutNumber("YD Lift", V_YD_Test);
+  frc::SmartDashboard::PutNumber("Intake", V_Intake_Test);
+  frc::SmartDashboard::PutNumber("Elevator", V_Elevator_Test);
+
+    V_P_Gx = frc::SmartDashboard::GetNumber("P_Gx", V_P_Gx);
+    V_I_Gx = frc::SmartDashboard::GetNumber("I_Gx", V_I_Gx);
+    V_D_Gx = frc::SmartDashboard::GetNumber("D_Gx", V_D_Gx);
+    V_I_Zone = frc::SmartDashboard::GetNumber("I_Zone", V_I_Zone);
+    V_FF = frc::SmartDashboard::GetNumber("FF", V_FF);
+    V_Max = frc::SmartDashboard::GetNumber("Max_Limit", V_Max);
+    V_Min = frc::SmartDashboard::GetNumber("Min_Limit", V_Min);
+
+    m_liftpidYD.SetP(V_P_Gx);
+    m_liftpidYD.SetI(V_I_Gx);
+    m_liftpidYD.SetD(V_D_Gx);
+    m_liftpidYD.SetIZone(V_I_Zone);
+    m_liftpidYD.SetFF(V_FF);
+    m_liftpidYD.SetOutputRange(V_Min, V_Max);
 }
 
 
@@ -429,7 +474,11 @@ void Robot::TeleopPeriodic()
                              c_joyStick2.GetRawAxis(5),
                             &L_Driver_left_shooter_desired_speed);
 
-  Read_Encoders(m_encoderFrontLeftSteer,
+  Read_Encoders(a_encoderWheelAngleFrontLeft.Get().value(),
+               a_encoderWheelAngleFrontRight.Get().value(),
+               a_encoderWheelAngleRearLeft.Get().value(),
+               a_encoderWheelAngleRearRight.Get().value(),
+               m_encoderFrontLeftSteer,
                 m_encoderFrontRightSteer,
                 m_encoderRearLeftSteer,
                 m_encoderRearRightSteer,
@@ -480,37 +529,42 @@ void Robot::TeleopPeriodic()
   
   frc::SmartDashboard::PutNumber("wheelAngleCmd Front Left", V_WheelAngleCmnd[E_FrontLeft]);
 
+  V_XD_Test = frc::SmartDashboard::GetNumber("XD Lift", V_XD_Test);
+  V_YD_Test = frc::SmartDashboard::GetNumber("YD Lift", V_YD_Test);
+  V_Intake_Test = frc::SmartDashboard::GetNumber("Intake", V_Intake_Test);
+  V_Elevator_Test = frc::SmartDashboard::GetNumber("Elevator", V_Elevator_Test);
+
   // Motor output commands:
     m_frontLeftDriveMotor.Set(V_WheelSpeedCmnd[E_FrontLeft]);
-    // m_frontRightDriveMotor.Set(V_WheelSpeedCmnd[E_FrontRight]);
-    // m_rearLeftDriveMotor.Set(V_WheelSpeedCmnd[E_RearLeft]);
-    // m_rearRightDriveMotor.Set(V_WheelSpeedCmnd[E_RearRight]);
+    m_frontRightDriveMotor.Set(V_WheelSpeedCmnd[E_FrontRight]);
+    m_rearLeftDriveMotor.Set(V_WheelSpeedCmnd[E_RearLeft]);
+    m_rearRightDriveMotor.Set(V_WheelSpeedCmnd[E_RearRight]);
 
     // m_frontLeftDriveMotor.Set(0);
-    m_frontRightDriveMotor.Set(0);
-    m_rearLeftDriveMotor.Set(0);
-    m_rearRightDriveMotor.Set(0);
+    // m_frontRightDriveMotor.Set(0);
+    // m_rearLeftDriveMotor.Set(0);
+    // m_rearRightDriveMotor.Set(0);
 
     m_frontLeftSteerMotor.Set(V_WheelAngleCmnd[E_FrontLeft]);
-    // m_frontRightSteerMotor.Set(V_WheelAngleCmnd[E_FrontRight]);
-    // m_rearLeftSteerMotor.Set(V_WheelAngleCmnd[E_RearLeft]);
-    // m_rearRightSteerMotor.Set(V_WheelAngleCmnd[E_RearRight]);
+    m_frontRightSteerMotor.Set(V_WheelAngleCmnd[E_FrontRight]);
+    m_rearLeftSteerMotor.Set(V_WheelAngleCmnd[E_RearLeft]);
+    m_rearRightSteerMotor.Set(V_WheelAngleCmnd[E_RearRight]);
 
     // m_frontLeftSteerMotor.Set(0);
-    m_frontRightSteerMotor.Set(0);
-    m_rearLeftSteerMotor.Set(0);
-    m_rearRightSteerMotor.Set(0);
+    // m_frontRightSteerMotor.Set(0);
+    // m_rearLeftSteerMotor.Set(0);
+    // m_rearRightSteerMotor.Set(0);
 
     m_rightShooterpid.SetReference(0, rev::ControlType::kVelocity);
     m_leftShooterpid.SetReference(-0, rev::ControlType::kVelocity);
 
-    m_intake.Set(ControlMode::PercentOutput, 0);
-    m_elevator.Set(ControlMode::PercentOutput, 0);
+    m_intake.Set(ControlMode::PercentOutput, c_joyStick.GetRawAxis(2)); //must be positive (don't be a fool)
+    m_elevator.Set(ControlMode::PercentOutput, V_Elevator_Test);
 
     // m_liftpidYD.SetReference(V_lift_command_YD, rev::ControlType::kPosition);
     // m_liftpidXD.SetReference(V_lift_command_XD, rev::ControlType::kPosition);
-    m_liftpidYD.SetReference(0, rev::ControlType::kVelocity); // This is temporary.  We actually want to use position, but need to force this off temporarily
-    m_liftpidXD.SetReference(0, rev::ControlType::kVelocity); // This is temporary.  We actually want to use position, but need to force this off temporarily
+    m_liftpidYD.SetReference(V_YD_Test, rev::ControlType::kPosition); // positive is up
+    m_liftpidXD.SetReference(V_XD_Test, rev::ControlType::kPosition); // This is temporary.  We actually want to use position, but need to force this off temporarily
 }
 
 
