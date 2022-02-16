@@ -1,166 +1,90 @@
+#include "Robot.h"
+#include <iostream>
+#include <frc/smartdashboard/SmartDashboard.h>
+#include <frc/DriverStation.h>
+#include <frc/livewindow/LiveWindow.h>
 #include "vision.hpp"
 #include <math.h>
-/******************************************************************************
- * Function:     visionInit
- *
- * Description:  This function sets up camera and lights.
- ******************************************************************************/
-void visionInit(std::shared_ptr<nt::NetworkTable> ntTable0,
-                std::shared_ptr<nt::NetworkTable> ntTable1,
-                nt::NetworkTableInstance inst)
-{
-    ntTable1->PutNumber("ledControl", 1);
-    ntTable0->PutBoolean("driverMode", false);
-    inst.Flush();
+#include <photonlib/PhotonCamera.h>
+#include <photonlib/PhotonUtils.h>
+#include <units/length.h>
+// all our favorite variables
+bool TargetAquired;
+double TopYaw;
+bool BottomTargetAquired;
+double BottomYaw;
+int BottomIndex;
+frc::DriverStation::Alliance AllianceColor;
+// our favorite networktables
+nt::NetworkTableInstance Cam1;
+nt::NetworkTableInstance Cam2;
+
+void VisionDashboard(){
+
+// puts all our favorite variables to the dashboard, all this stuff happens once on init
+    frc::SmartDashboard::PutBoolean("Has Target?", TargetAquired);
+    frc::SmartDashboard::PutNumber("Target Yaw", TopYaw);
+
+    frc::SmartDashboard::PutBoolean("Bottom Has Target?", BottomTargetAquired);
+    frc::SmartDashboard::PutNumber("Bottom Yaw", BottomYaw);
+    frc::SmartDashboard::PutNumber("Bottom Index", BottomIndex);
+
 }
 
-/******************************************************************************
- * Function:     visionOff
- *
- * Description:  This function turns on driver mode and turns off lights.
- ******************************************************************************/
-void visionOff(std::shared_ptr<nt::NetworkTable> ntTable0,
-                std::shared_ptr<nt::NetworkTable> ntTable1,
-                nt::NetworkTableInstance inst,
-                bool ntStart1,
-                bool ntStart2,
-                bool ntVisionAngle,
-                bool ntVisionDistance)
-{
-    ntTable1->PutNumber("ledControl", 5);
-    ntTable0->PutBoolean("driverMode", true);
-    inst.Flush();
-    ntStart1 = false; ntStart2 = false;
-    ntVisionAngle = false;
-    ntVisionDistance = false;
-}
+//actual vision things:
+void VisionRun(){
+
+    Cam2.StartClientTeam(5561);
+    Cam1.StartClientTeam(5561);
+
+    // first Camera is cam1 for auto target
+    photonlib::PhotonCamera Cam1{"Top"};
+    photonlib::PhotonPipelineResult resultTop = Cam1.GetLatestResult();
+  
+    TargetAquired = resultTop.HasTargets(); //returns true if the camera has a target
+
+    photonlib::PhotonTrackedTarget targetTop = resultTop.GetBestTarget(); //gets the best target
+
+    TopYaw = targetTop.GetYaw(); // Yaw of the best target
+
+    frc::SmartDashboard::PutBoolean("Top Target?", TargetAquired); //puts those new values to dashboard
+    frc::SmartDashboard::PutNumber("Top Yaw", TopYaw);
     
-/******************************************************************************
- * Function:     visionRun
- *
- * Description:  This function toggles vision loop.
- ******************************************************************************/
-void visionRun(nt::NetworkTableEntry ntEntry,
-              double ntDistance,
-              int targetChoose,
-              bool ntVisionAngle,
-              bool ntVisionDistance,
-              double ntDesiredAngle,
-              double ntDesiredDistance)
-{
-    int autonChoose;
+    units::meter_t TopRange = photonlib::PhotonUtils::CalculateDistanceToTarget(
+          CAMERA_HEIGHT1, TARGET_HEIGHT1, CAMERA_PITCH1,
+          units::degree_t{resultTop.GetBestTarget().GetPitch()}); // first 3 variables are constants from vision.hpp
+
+    double TopRangeDouble = TopRange.value();
+
+      frc::SmartDashboard::PutNumber("Top Range", TopRangeDouble);
+
+
+    // second camera for cargo detection
+    photonlib::PhotonCamera Cam2{"Bottom"};
+    photonlib::PhotonPipelineResult resultBottom = Cam2.GetLatestResult();
+
+    photonlib::PhotonTrackedTarget targetBottom = resultBottom.GetBestTarget();
+    BottomTargetAquired = resultBottom.HasTargets();
+    BottomYaw = targetBottom.GetYaw();
+
+    AllianceColor = frc::DriverStation::GetInstance().GetAlliance();
+
+    // gets flag from the driver station to choose between alliance colors
+    if (AllianceColor == frc::DriverStation::Alliance::kRed){
+      BottomIndex = 1; // 1 is the index for a red ball
+
+    }
+    else if (AllianceColor == frc::DriverStation::Alliance::kBlue)
+    {
+      BottomIndex = 2; // 2 is the index for a blue ball
+    }
     
-      switch (targetChoose)
-      {
-          case 0:
-            if (abs(ntEntry.GetDouble(0)) > 1)
-            {
-                autonChoose = 1;
-            }
-            if (abs(ntEntry.GetDouble(0)) < 1)
-            {
-                autonChoose = 2;
-            }
-            break;
 
-          case 1:
-            if (abs(ntEntry.GetDouble(0)) > 5)
-            {
-                autonChoose = 0;
-            }
-            else if (abs(ntEntry.GetDouble(0)) > 1)
-            {
-                ntVisionDistance = false;
-                autonChoose = 1;
-            }
-            if (abs(ntEntry.GetDouble(0)) < 1)
-            {
-                autonChoose = 2;
-            }
-            break;
-      }
-      
-      switch (autonChoose)
-      {
-          case 0:
-            if (ntVisionDistance == false)
-            {
-                ntDesiredDistance = floor(ntDistance);
-                ntVisionDistance  = true;
-            }
-            // if (visionRequest == true)
-            // {
-            //     visionRequest = false;
-            //     activeVisionDistance0 = false;
-            // }
-            break;
-          
-          case 1:
-            if (ntVisionAngle == false)
-            {
-                ntDesiredAngle = (0.9 * ntEntry.GetDouble(0));
-                ntVisionAngle  = true;
-            }
-            // if (visionRequest == true)
-            // {
-            //     visionRequest = false;
-            //     activeVisionDistance0 = false;
-            // }
-            break;
-          
-          case 2:
-            break;
-      }
+    Cam2.SetPipelineIndex(BottomIndex);
+     // set the pipeline to whatever the logic gave
 
-//ToDo: Biggs - Not sure if this is still needed??  This was in Robot.cpp
-    // if(c_joyStick2.GetPOV() == 90 && V_pipelinecounterLatch == false)
-    // { 
-    //   pipelineCounter++;
-    //   int pipelineChecker = (pipelineCounter % 2);
-    //   if(pipelineChecker != 0)
-    //   {
-    //     vision0->PutNumber("pipeline", 1);
-    //     inst.Flush();
-    //   }
-    //   else
-    //   {
-    //     vision0->PutNumber("pipeline", 0);
-    //     inst.Flush();
-    //   }
-    //   V_pipelinecounterLatch = true;
-    // }
-    // else if(c_joyStick2.GetPOV() != 90)
-    // {
-    //   V_pipelinecounterLatch = false;
-    // }
+
+    frc::SmartDashboard::PutBoolean("Bottom Has Target?", BottomTargetAquired);
+    frc::SmartDashboard::PutNumber("Bottom Yaw", BottomYaw);
+    frc::SmartDashboard::PutNumber("Bottom Index", BottomIndex); 
     
-    // frc::SmartDashboard::PutNumber("pipeline", pipeline0.GetDouble(0));
-
-        /*
-      Finds distance from robot to specified target.
-      Numerator depends upon camera height relative to target for target distance,
-      and camera height relative to ground for ball distance.
-      Make sure it's in meters.
-    */
-//    if(pipeline0.GetDouble(0) == 1)
-//    {
-//      distanceTarget     = 124.8 / tan((targetPitch0.GetDouble(0) + 15) * (C_Deg2Rad));
-//    }
-//    else
-//    {
-//      distanceTarget     = 157.8 / tan((targetPitch0.GetDouble(0) + 15) * (C_Deg2Rad));
-//    }
-   
-//     //  distanceBall       = 47  / tan((targetPitch1.GetDouble(0)) * (-deg2rad));
-
-//     //Finds robot's distance from target's center view.
-//      distanceFromTargetCenter = (distanceTarget * sin((90 - targetYaw0.GetDouble(0)) * C_Deg2Rad) - 28.17812754);
-//     //  distanceFromBallCenter   = distanceBall   * sin((90 - targetYaw1.GetDouble(0)) * deg2rad);
-
-//     // frc::SmartDashboard::PutBoolean("testboolean", testboolean);
-//     frc::SmartDashboard::PutNumber("distanceTarget", distanceTarget);
-//     // frc::SmartDashboard::PutNumber("distanceFromTargetCenter", distanceFromTargetCenter);
-//     frc::SmartDashboard::PutNumber("targetYaw", targetYaw0.GetDouble(0));
-//     // frc::SmartDashboard::PutNumber("targetPitch", targetPitch0.GetDouble(1));
-//     // frc::SmartDashboard::PutNumber("lidarDistance", lidarDistance.GetDouble(0));
-}
