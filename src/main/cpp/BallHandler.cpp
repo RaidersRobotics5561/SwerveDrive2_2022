@@ -28,13 +28,13 @@ double       V_ShooterSpeedDesiredFinalLower;
 double V_testspeed = 0;
 double V_testIntake = 0;
 double V_testElevator = 0;
-double V_P_Gx = 0.00005;
-double V_I_Gx = 0.000001;
-double V_D_Gx = 0.000002;
-double V_I_Zone = 0;
-double V_FF = 0;
-double V_Max = 1;
-double V_Min = -1;
+// double V_P_Gx = 0.00005;
+// double V_I_Gx = 0.000001;
+// double V_D_Gx = 0.000002;
+// double V_I_Zone = 0;
+// double V_FF = 0;
+// double V_Max = 1;
+// double V_Min = -1;
 
 
 /******************************************************************************

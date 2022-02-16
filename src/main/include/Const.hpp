@@ -241,6 +241,20 @@ const double K_DesiredSpeedLowerBeam[6] = {-1150,
 //                                            -2400,
 //                                            -3100};
 
+const double K_LiftYD_PID[E_PID_CalSz] = { 0.07,   // P Gx
+                                           0.0,   // I Gx
+                                           0.0,    // D Gx
+                                           0.9,    // P UL
+                                          -0.9,    // P LL
+                                           0.5,    // I UL
+                                          -0.5,    // I LL
+                                           0.2,    // D UL
+                                          -0.2,    // D LL
+                                           1.0,    // Max upper
+                                          -1.0};   // Max lower
+
+
+
 // This is the amount of time that we will wait to make sure we are at the correct location
 const double K_RotateDebounceTime = 0.06;  
 

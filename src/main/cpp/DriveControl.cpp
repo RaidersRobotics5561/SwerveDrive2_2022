@@ -87,8 +87,8 @@ void DriveControlInit()
  ******************************************************************************/
 void DriveControlMain(double              L_JoyStick1Axis1Y,
                       double              L_JoyStick1Axis1X,
-                      double              L_JoyStick1Axis2X,
-                      double              L_JoyStick1Axis3,
+                      double              L_JoyStick1Axis2X,//rotate the robot joystick
+                      double              L_JoyStick1Axis3, //extra speed trigger
                       bool                L_JoyStick1Button1,
                       double              L_JoyStick1Button3,
                       double              L_JoyStick1Button4,
@@ -133,7 +133,7 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,
     {
       L_JoyStick1Axis1Y_Scaled = L_JoyStick1Axis1Y;
       L_JoyStick1Axis1X_Scaled = -L_JoyStick1Axis1X;
-      L_JoyStick1Axis2X_Scaled = -L_JoyStick1Axis2X;
+      L_JoyStick1Axis2X_Scaled = L_JoyStick1Axis2X;
     }
 
   /* Let's place a deadband around the joystick readings */
@@ -263,10 +263,15 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,
     L_WS[E_RearLeft]   = pow((L_A * L_A + L_D * L_D), 0.5);
     L_WS[E_RearRight]  = pow((L_A * L_A + L_C * L_C), 0.5);
 
-    L_WA[E_FrontRight] = atan2(L_B, L_C) *180/C_PI;
-    L_WA[E_FrontLeft]  = atan2(L_B, L_D) *180/C_PI;
-    L_WA[E_RearLeft]   = atan2(L_A, L_D) *180/C_PI;
-    L_WA[E_RearRight]  = atan2(L_A, L_C) *180/C_PI;
+    // L_WA[E_FrontRight] = atan2(L_B, L_C) *180/C_PI;
+    // L_WA[E_FrontLeft]  = atan2(L_B, L_D) *180/C_PI;
+    // L_WA[E_RearLeft]   = atan2(L_A, L_D) *180/C_PI;
+    // L_WA[E_RearRight]  = atan2(L_A, L_C) *180/C_PI;
+
+    L_WA[E_FrontRight] = atan2(L_B, L_D) *180/C_PI;
+    L_WA[E_FrontLeft]  = atan2(L_B, L_C) *180/C_PI;
+    L_WA[E_RearLeft]   = atan2(L_A, L_C) *180/C_PI;
+    L_WA[E_RearRight]  = atan2(L_A, L_D) *180/C_PI;
 
     L_Max = L_WS[E_FrontRight];
 
@@ -380,4 +385,7 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,
     V_Deg_DesiredAngPrev = desiredAngle;
 
     frc::SmartDashboard::PutNumber("FL Angle Used for PID", V_WheelAngleArb[E_FrontLeft]);
+    frc::SmartDashboard::PutNumber("L_WA_FWD", L_WheelAngleRev[E_FrontLeft]);
+    frc::SmartDashboard::PutNumber("L_WA_REV", L_WheelAngleFwd[E_FrontLeft]);
+    frc::SmartDashboard::PutNumber("L_WA_REV", L_WheelAngleRev[E_FrontLeft]);
   }

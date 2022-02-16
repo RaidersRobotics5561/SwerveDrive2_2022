@@ -66,7 +66,11 @@ void EncodersInit(double          L_encoderWheelAngleFrontLeftRaw,
  *
  * Description:  Run all of the encoder decoding logic.
  ******************************************************************************/
-void Read_Encoders(rev::SparkMaxRelativeEncoder m_encoderFrontLeftSteer,
+void Read_Encoders(double          L_encoderWheelAngleFrontLeftRaw,
+                  double          L_encoderWheelAngleFrontRightRaw,
+                  double          L_encoderWheelAngleRearLeftRaw,
+                  double          L_encoderWheelAngleRearRightRaw,
+                   rev::SparkMaxRelativeEncoder m_encoderFrontLeftSteer,
                    rev::SparkMaxRelativeEncoder m_encoderFrontRightSteer,
                    rev::SparkMaxRelativeEncoder m_encoderRearLeftSteer,
                    rev::SparkMaxRelativeEncoder m_encoderRearRightSteer,
@@ -79,10 +83,15 @@ void Read_Encoders(rev::SparkMaxRelativeEncoder m_encoderFrontLeftSteer,
   {
   T_RobotCorner index;
 
-  V_WheelAngleConverted[E_FrontLeft]  = fmod((m_encoderFrontLeftSteer.GetPosition()  * K_SteerDriveReductionRatio + V_WheelRelativeAngleRawOffset[E_FrontLeft]),  360);
-  V_WheelAngleConverted[E_FrontRight] = fmod((m_encoderFrontRightSteer.GetPosition() * K_SteerDriveReductionRatio + V_WheelRelativeAngleRawOffset[E_FrontRight]), 360);
-  V_WheelAngleConverted[E_RearLeft]   = fmod((m_encoderRearLeftSteer.GetPosition()   * K_SteerDriveReductionRatio + V_WheelRelativeAngleRawOffset[E_RearLeft]),   360);
-  V_WheelAngleConverted[E_RearRight]  = fmod((m_encoderRearRightSteer.GetPosition()  * K_SteerDriveReductionRatio + V_WheelRelativeAngleRawOffset[E_RearRight]),  360);
+  // V_WheelAngleConverted[E_FrontLeft]  = fmod((m_encoderFrontLeftSteer.GetPosition()  * K_SteerDriveReductionRatio + V_WheelRelativeAngleRawOffset[E_FrontLeft]),  360);
+  // V_WheelAngleConverted[E_FrontRight] = fmod((m_encoderFrontRightSteer.GetPosition() * K_SteerDriveReductionRatio + V_WheelRelativeAngleRawOffset[E_FrontRight]), 360);
+  // V_WheelAngleConverted[E_RearLeft]   = fmod((m_encoderRearLeftSteer.GetPosition()   * K_SteerDriveReductionRatio + V_WheelRelativeAngleRawOffset[E_RearLeft]),   360);
+  // V_WheelAngleConverted[E_RearRight]  = fmod((m_encoderRearRightSteer.GetPosition()  * K_SteerDriveReductionRatio + V_WheelRelativeAngleRawOffset[E_RearRight]),  360);
+
+  V_WheelAngleConverted[E_FrontLeft]  = std::fmod((L_encoderWheelAngleFrontLeftRaw  * C_EncoderToAngle), 360) - K_WheelOffsetAngle[E_FrontLeft];
+  V_WheelAngleConverted[E_FrontRight] = std::fmod((L_encoderWheelAngleFrontRightRaw * C_EncoderToAngle), 360) - K_WheelOffsetAngle[E_FrontRight];
+  V_WheelAngleConverted[E_RearLeft]   = std::fmod((L_encoderWheelAngleRearLeftRaw   * C_EncoderToAngle), 360) - K_WheelOffsetAngle[E_RearLeft];
+  V_WheelAngleConverted[E_RearRight]  = std::fmod((L_encoderWheelAngleRearRightRaw  * C_EncoderToAngle), 360) - K_WheelOffsetAngle[E_RearRight];
 
   V_Cnt_WheelDeltaDistanceCurr[E_FrontLeft]  = m_encoderFrontLeftDrive.GetPosition()  - V_Cnt_WheelDeltaDistanceInit[E_FrontLeft];
   V_Cnt_WheelDeltaDistanceCurr[E_FrontRight] = m_encoderFrontRightDrive.GetPosition() - V_Cnt_WheelDeltaDistanceInit[E_FrontRight];
