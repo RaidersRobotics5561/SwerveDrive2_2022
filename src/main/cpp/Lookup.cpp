@@ -91,10 +91,8 @@ double LookUp1D_Table(const double *L_X_Axis,
 /******************************************************************************
  * Function:     RampTo
  *
- * Description:  Function to determine the roller speed, aka the "special
- *               beam cannon".  This is a function of distance out from the
- *               target and the angle of the robot relative to the target.
- ******************************************************************************/
+ * Description:  Function to ramp to a certain motor speed/postition
+ *****************************************************************************/
 double RampTo(double  L_Final,
               double  L_Current,
               double  L_Slope)

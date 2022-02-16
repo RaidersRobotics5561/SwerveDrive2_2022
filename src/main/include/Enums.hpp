@@ -19,13 +19,13 @@ typedef enum T_RobotCorner
   E_RobotCornerSz
 } T_RobotCorner;
 
+
 typedef enum T_RoboShooter
 {
   E_rightShooter,
   E_leftShooter,
   E_RoboShooter
 } T_RoboShooter;
-
 
 
 typedef enum T_PID_Cal
@@ -44,6 +44,7 @@ typedef enum T_PID_Cal
   E_PID_CalSz
 } T_PID_Cal;
 
+
 typedef enum T_AutoTargetStates
 {
   E_NotActive,
@@ -51,5 +52,30 @@ typedef enum T_AutoTargetStates
   E_MoveBallsToRollers,
   E_AutoTargetStatesSz
 } T_AutoTargetStates;
+
+
+typedef enum T_Lift_State
+{
+  E_S0_BEGONE,
+  E_S1_initialize_Up_YD,
+  E_S2_lift_down_YD,
+  E_S3_move_forward_XD,
+  E_S4_stretch_up_YD,
+  E_S5_more_forward_XD,
+  E_S6_lift_up_more_YD,
+  E_S7_move_back_XD,
+  E_S8_more_down_some_YD,
+  E_S9_back_rest_XD,
+  E_S10_final_YD,
+  E_S11_Stop
+} T_Lift_State;
+
+
+typedef enum T_RobotState
+{
+  E_Init,
+  E_Auton,
+  E_Teleop
+} T_RobotState;
 
 #endif

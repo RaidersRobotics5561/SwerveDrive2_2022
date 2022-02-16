@@ -3,8 +3,10 @@
 #include <units/angle.h>
 #include <units/length.h>
 
-const double C_ExeTime = 0.01;
-const units::second_t C_ExeTime_t = 0.01_s;
+const double C_ExeTime = 0.02; // Set to match the the default controller loop time of 20 ms
+const units::second_t C_ExeTime_t = 0.02_s; // Set to match the the default controller loop time of 20 ms
+
+const double C_End_game_time = 30;
 
   const units::meter_t CAMERA_HEIGHT = 24_in;
   const units::meter_t TARGET_HEIGHT = 5_ft;
@@ -30,9 +32,10 @@ static const int C_liftXD_ID = 12;
 static const int C_elevatorID = 13;
 static const int C_intakeID = 14;
 const double K_SteerMotorCurrentLimit = 25;
-static const double C_VoltageToAngle = 72.0; // Gain that converts the measured voltage of the absolute encoder to an equivalent angle in degrees.
+static const double C_EncoderToAngle = 360; // Raw output of PWM encoder to degrees
 
 
+const double K_SteerDriveReductionRatio = 30; //30:1
 const double K_ReductionRatio = 8.31;
 const double K_WheelCircufrence = 12.566; // Circumferance of wheel, in inches
 
@@ -43,13 +46,37 @@ const double C_R = 0.8441;
 const double K_ShooterWheelRotation[E_RoboShooter] = {5.12517590321455,     // E_rightShooter    2.5555555555555555555555555555555555555555555555 * 2 * C_PI * 0.3191858136047229930278045677412
                                                       3.84388192741092};    // E_leftShooter 2.5555555555555555555555555555555555555555555555 * 2 * C_PI *0.2393893602035422447708534258059
 
-// owo
+
+const double K_lift_max_YD = 60.25; //distance from floor to mid rung (60.25 inches)
+const double K_lift_mid_YD = 9.42069; //a middle height- below the rungs
+const double K_lift_min_YD = 0; //it crunch
+const double K_lift_rungs_YD = 15.375; //distance from rung to rung (15.375 inches)
+const double K_lift_rate_up_YD = 0.001; //RampTo slope for lift up
+const double K_lift_rate_down_YD = -0.001; //RampTo slope for lift down
+const double K_lift_deadband_YD = 0.5; //it's a deadband for the y lift yeah
+
+const double K_lift_max_XD = 24; //distance between bars (24 inches)
+const double K_lift_mid_XD = 12; //mid distance between bars (12 inches)
+const double K_lift_rate_forward_XD = 0.001; //RampTo slope for lift forward
+const double K_lift_rate_backward_XD = -0.001; //RampTo slope for lift backward
+const double K_lift_min_XD = 0; //we don't want XD to move cuz it's a loser
+const double K_lift_deadband_XD = 0.5; //it's a deadband for the x lift yeah
+
+const double K_gyro_angle_lift = -10; //robert is tilting
+const double K_gyro_deadband = 2;
+const double K_deadband_timer = 0.5; //keep the deadband for a certain amount of time
+
 
 const double K_InitAngle = 1.4; // This is the absolute angle that all of the wheels need to be sitting at before allowing the robot to exit init
-const double K_WheelOffsetAngle[E_RobotCornerSz] = {75.234367,   // E_FrontLeft
-                                                    90.615225,   // E_FrontRight 152  104.6 
-                                                    12.041014,   // E_RearLeft
-                                                    144.580063}; // E_RearRight 180.703106  144.580063
+const double K_WheelOffsetAngle[E_RobotCornerSz] = {169.527239,   // E_FrontLeft
+                                                    128.487963,   // E_FrontRight 152  104.6 
+                                                    33.112801,   // E_RearLeft
+                                                    246.813891}; // E_RearRight 180.703106  144.580063
+
+                                                    // 169.420,   // E_FrontLeft
+                                                    // 128.487963,   // E_FrontRight 152  104.6 
+                                                    // 33.112801,   // E_RearLeft
+                                                    // 247.656102}; // E_RearRight
 
 const double K_WheelMaxSpeed = 200; // This is the max allowed speed for the wheels
 
@@ -58,8 +85,8 @@ const double K_WheelAnglePID_Gx[E_PID_CalSz] = { 0.007,     // P Gx
                                                  0.0000005, // D Gx
                                                  0.4,       // P UL
                                                 -0.4,       // P LL
-                                                 0.12,      // I UL
-                                                -0.12,      // I LL
+                                                 0.1000,      // I UL
+                                                -0.1000,      // I LL
                                                  0.5,       // D UL
                                                 -0.5,       // D LL
                                                  0.9,       // Max upper

@@ -35,6 +35,12 @@ void Gyro() {
 
   double gyro_currentyaw = (double)NavX->GetYaw();
   //Check to see if gyro angle flips over 180 or -180
+  
+  // if(L_Driver_zero_gyro)
+  // {
+  //   GyroZero();
+  // }
+
   if(175 <= abs(gyro_angleprev))
   {
     if(gyro_angleprev < 0 && gyro_currentyaw > 0)
