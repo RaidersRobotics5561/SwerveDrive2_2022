@@ -22,6 +22,8 @@
 #include <frc/DoubleSolenoid.h>
 #include <frc/Compressor.h>
 #include <networktables/NetworkTable.h>
+#include <frc/DigitalOutput.h>
+
 
 #include <frc/DutyCycleEncoder.h>
 
@@ -47,6 +49,8 @@ class Robot : public frc::TimedRobot {
   frc::DutyCycleEncoder a_encoderWheelAngleFrontRight {1};
   frc::DutyCycleEncoder a_encoderWheelAngleRearLeft {3};
   frc::DutyCycleEncoder a_encoderWheelAngleRearRight {0};
+
+  frc::DigitalOutput DIO0{0};
 
   rev::CANSparkMax m_frontLeftSteerMotor {frontLeftSteerDeviceID,  rev::CANSparkMax::MotorType::kBrushless};
   rev::CANSparkMax m_frontLeftDriveMotor {frontLeftDriveDeviceID,  rev::CANSparkMax::MotorType::kBrushless};

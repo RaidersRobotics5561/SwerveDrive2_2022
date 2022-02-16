@@ -8,15 +8,18 @@
  * */
 
 //NOTE: Set this to TEST for testing of speeds and PID gains.  Set to COMP for competion
-#define COMP
+#define TEST
+// #define PHOTON
 //NOTE: Set this to allow Shuffleboard configuration of PIDConfig objects (Will override defaults)
 #define PID_DEBUG
+#define SPIKE
 
 #include "Robot.h"
 #include <iostream>
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/DriverStation.h>
 #include <frc/livewindow/LiveWindow.h>
+
 
 #include "Encoders.hpp"
 #include "BallHandler.hpp"
@@ -28,20 +31,26 @@
 #include "vision.hpp"
 #include "DriveControl.hpp"
 #include "AutoTarget.hpp"
+
+#include <frc/DigitalInput.h>
+#include <frc/DigitalOutput.h>
+#include "Lift.hpp"
+#include "Driver_inputs.hpp"
 #include "Lift.hpp"
 #include "Driver_inputs.hpp"
 
+#include <units/length.h>
 #include "Utils/PIDConfig.hpp"
 #include "Odometry.hpp"
 #include "Auton.hpp"
-#include <units/length.h>
+#include <photonlib/PhotonCamera.h>
+#include <photonlib/PhotonUtils.h>
 
-std::shared_ptr<nt::NetworkTable> vision0;
-std::shared_ptr<nt::NetworkTable> vision1;
-std::shared_ptr<nt::NetworkTable> lidar;
-std::shared_ptr<nt::NetworkTable> ledLight;
+
 
 nt::NetworkTableInstance inst;
+
+
 nt::NetworkTableEntry driverMode0;
 nt::NetworkTableEntry pipeline0;
 nt::NetworkTableEntry targetYaw0;
@@ -55,6 +64,7 @@ nt::NetworkTableEntry targetPose1;
 nt::NetworkTableEntry latency1;
 nt::NetworkTableEntry lidarDistance;
 nt::NetworkTableEntry ledControl;
+
 
 frc::DriverStation::Alliance V_AllianceColor;
 
@@ -93,6 +103,7 @@ bool V_autonTargetFin = false;
 double V_M_RobotDisplacementX = 0;
 double V_M_RobotDisplacementY = 0;
 
+bool   LightOff; //the polarities are funny, true = off
 T_RobotState V_RobotState;
 
 
@@ -105,7 +116,11 @@ T_RobotState V_RobotState;
  * Description:  Called during initialization of the robot.
  ******************************************************************************/
 void Robot::RobotInit() {
+
+    VisionDashboard();
+
     V_RobotState = E_Init;
+
 //  m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
 //  m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
 //  frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
@@ -121,27 +136,8 @@ void Robot::RobotInit() {
     inst.StartClient("10.55.61.24");
     inst.StartDSClient();
 
-    vision0  = inst.GetTable("chameleon-vision/goal");
-    vision1  = inst.GetTable("chameleon-vision/ColorWheel");
-    lidar    = inst.GetTable("lidar");
-    ledLight = inst.GetTable("ledLight");
 
 
-    driverMode0           = vision0->GetEntry("driverMode");
-    pipeline0             = vision0->GetEntry("pipeline");
-    targetPitch0          = vision0->GetEntry("targetPitch");
-    targetYaw0            = vision0->GetEntry("targetYaw");
-    targetPose0           = vision0->GetEntry("targetpose");
-    latency0              = vision0->GetEntry("latency");
-
-    driverMode1           = vision1->GetEntry("driverMode");
-    targetPitch1          = vision1->GetEntry("targetPitch");
-    targetYaw1            = vision1->GetEntry("targetYaw");
-    targetPose1           = vision1->GetEntry("targetpose");
-    latency1              = vision1->GetEntry("latency");
-
-    ledControl            = ledLight->GetEntry("ledControl");
-    lidarDistance         = lidar->GetEntry("lidarDistance");
   
  #ifdef COMP
     // V_testIntake = 0;
@@ -231,6 +227,11 @@ void Robot::RobotInit() {
 
 
     // frc::SmartDashboard::PutNumber("Blinkin code", 0);
+
+  #ifdef SPIKE
+  LightOff = true; // light should be off on robot init
+  #endif
+
 }
 
 
@@ -242,17 +243,21 @@ void Robot::RobotInit() {
  ******************************************************************************/
 void Robot::RobotPeriodic()
 {
-  // frc::SmartDashboard::PutNumber("Postion_YD", m_encoderLiftYD.GetPosition());
-  // frc::SmartDashboard::PutNumber("Postion_XD", m_encoderLiftXD.GetPosition());
 
     #ifdef PID_DEBUG
       // UpperShooterPIDConfig.Debug("Upper Shooter PID Control");
     #endif
 
     //Run Gyro readings when the robot starts
+
+
+  void VisionRun();
     // Gyro();
+
 }
 
+
+ 
 
 /******************************************************************************
  * Function:     AutonomousInit
@@ -282,6 +287,9 @@ void Robot::AutonomousInit()
       gyro_yawanglerad = 0;
       V_M_RobotDisplacementX = 0;
       V_M_RobotDisplacementY = 0;
+
+
+      // AutonDriveReset();
 
       
       // visionInit(vision0, ledLight, inst);
@@ -321,7 +329,7 @@ void Robot::AutonomousPeriodic()
                            &V_M_WheelDeltaDistance[0],
                            &V_M_RobotDisplacementX,
                            &V_M_RobotDisplacementY);
-
+  
     AutonDriveMain();
 
     DriveControlMain( driveforward,
@@ -341,6 +349,7 @@ void Robot::AutonomousPeriodic()
                      &V_WheelAngleCmnd[0],
                      &V_autonTargetFin,
                       V_RobotState);
+
 
     // m_rightShooterpid.SetReference(V_ShooterSpeedDesired[E_rightShooter], rev::ControlType::kVelocity);
     // m_leftShooterpid.SetReference(V_ShooterSpeedDesired[E_leftShooter], rev::ControlType::kVelocity);
@@ -367,12 +376,14 @@ void Robot::AutonomousPeriodic()
  ******************************************************************************/
 void Robot::TeleopInit()
   {
+
   V_RobotState = E_Teleop;
 
   m_frontLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
   m_frontRightSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
   m_rearLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
   m_frontLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
+
 
   m_encoderFrontRightSteer.SetPosition(0);
   m_encoderFrontLeftSteer.SetPosition(0);
@@ -459,6 +470,8 @@ void Robot::TeleopPeriodic()
                     targetYaw0.GetDouble(0),
                    &V_WheelAngleFwd[0],
                    &V_WheelAngleRev[0],
+
+                   
                    &V_WheelSpeedCmnd[0],
                    &V_WheelAngleCmnd[0],
                    &V_autonTargetFin,
@@ -497,6 +510,7 @@ void Robot::TeleopPeriodic()
     // m_rearRightSteerMotor.Set(V_WheelAngleCmnd[E_RearRight]);
 
     // m_frontLeftSteerMotor.Set(0);
+
     m_frontRightSteerMotor.Set(0);
     m_rearLeftSteerMotor.Set(0);
     m_rearRightSteerMotor.Set(0);
@@ -511,6 +525,7 @@ void Robot::TeleopPeriodic()
     // m_liftpidXD.SetReference(V_lift_command_XD, rev::ControlType::kPosition);
     m_liftpidYD.SetReference(0, rev::ControlType::kVelocity); // This is temporary.  We actually want to use position, but need to force this off temporarily
     m_liftpidXD.SetReference(0, rev::ControlType::kVelocity); // This is temporary.  We actually want to use position, but need to force this off temporarily
+
 }
 
 
