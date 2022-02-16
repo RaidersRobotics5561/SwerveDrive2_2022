@@ -103,7 +103,6 @@ bool V_autonTargetFin = false;
 double V_M_RobotDisplacementX = 0;
 double V_M_RobotDisplacementY = 0;
 
-<<<<<<< HEAD
 double V_XD_Test = 0;
 double V_YD_Test = 0;
 double V_Intake_Test = 0;
@@ -117,9 +116,8 @@ double V_FF = 0;
 double V_Max = 0;
 double V_Min = 0;
 
-=======
 bool   LightOff; //the polarities are funny, true = off
->>>>>>> 22a8f9581d4a8ae605f75d83e6a7c129cdbfb4cb
+
 T_RobotState V_RobotState;
 
 
@@ -152,18 +150,6 @@ void Robot::RobotInit() {
     inst.StartClient("10.55.61.24");
     inst.StartDSClient();
 
-
-
-<<<<<<< HEAD
-    driverMode1           = vision1->GetEntry("driverMode");
-    targetPitch1          = vision1->GetEntry("targetPitch");
-    targetYaw1            = vision1->GetEntry("targetYaw");
-    targetPose1           = vision1->GetEntry("targetpose");
-    latency1              = vision1->GetEntry("latency");
-
-    ledControl            = ledLight->GetEntry("ledControl");
-    lidarDistance         = lidar->GetEntry("lidarDistance");
-
     frc::SmartDashboard::PutNumber("P_Gx", V_P_Gx);
     frc::SmartDashboard::PutNumber("I_Gx", V_I_Gx);
     frc::SmartDashboard::PutNumber("D_Gx", V_D_Gx);
@@ -171,8 +157,6 @@ void Robot::RobotInit() {
     frc::SmartDashboard::PutNumber("FF", V_FF);
     frc::SmartDashboard::PutNumber("Max_Limit", V_Max);
     frc::SmartDashboard::PutNumber("Min_Limit", V_Min);
-=======
->>>>>>> 22a8f9581d4a8ae605f75d83e6a7c129cdbfb4cb
   
  #ifdef COMP
     // V_testIntake = 0;
@@ -324,14 +308,7 @@ void Robot::AutonomousInit()
       V_M_RobotDisplacementY = 0;
 
 
-      // AutonDriveReset();
-
-      
-      // visionInit(vision0, ledLight, inst);
-      originalPosition = targetYaw0.GetDouble(0);
-      vision0->PutNumber("pipeline", 0);
-      vision1->PutBoolean("driverMode", true);
-      inst.Flush();    
+      // AutonDriveReset();  
   }
 
 
@@ -578,16 +555,10 @@ void Robot::TeleopPeriodic()
     m_rearRightSteerMotor.Set(V_WheelAngleCmnd[E_RearRight]);
 
     // m_frontLeftSteerMotor.Set(0);
-<<<<<<< HEAD
     // m_frontRightSteerMotor.Set(0);
     // m_rearLeftSteerMotor.Set(0);
     // m_rearRightSteerMotor.Set(0);
-=======
 
-    m_frontRightSteerMotor.Set(0);
-    m_rearLeftSteerMotor.Set(0);
-    m_rearRightSteerMotor.Set(0);
->>>>>>> 22a8f9581d4a8ae605f75d83e6a7c129cdbfb4cb
 
     m_rightShooterpid.SetReference(0, rev::ControlType::kVelocity);
     m_leftShooterpid.SetReference(-0, rev::ControlType::kVelocity);
@@ -597,14 +568,10 @@ void Robot::TeleopPeriodic()
 
     // m_liftpidYD.SetReference(V_lift_command_YD, rev::ControlType::kPosition);
     // m_liftpidXD.SetReference(V_lift_command_XD, rev::ControlType::kPosition);
-<<<<<<< HEAD
+
     m_liftpidYD.SetReference(V_YD_Test, rev::ControlType::kPosition); // positive is up
     m_liftpidXD.SetReference(V_XD_Test, rev::ControlType::kPosition); // This is temporary.  We actually want to use position, but need to force this off temporarily
-=======
-    m_liftpidYD.SetReference(0, rev::ControlType::kVelocity); // This is temporary.  We actually want to use position, but need to force this off temporarily
-    m_liftpidXD.SetReference(0, rev::ControlType::kVelocity); // This is temporary.  We actually want to use position, but need to force this off temporarily
 
->>>>>>> 22a8f9581d4a8ae605f75d83e6a7c129cdbfb4cb
 }
 
 
