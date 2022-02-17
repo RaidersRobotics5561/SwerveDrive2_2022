@@ -47,19 +47,19 @@ const double K_ShooterWheelRotation[E_RoboShooter] = {5.12517590321455,     // E
                                                       3.84388192741092};    // E_leftShooter 2.5555555555555555555555555555555555555555555555 * 2 * C_PI *0.2393893602035422447708534258059
 
 
-const double K_lift_max_YD = 60.25; //distance from floor to mid rung (60.25 inches)
-const double K_lift_mid_YD = 9.42069; //a middle height- below the rungs
+const double K_lift_max_YD = 207; //distance from floor to mid rung (60.25 inches)
+const double K_lift_mid_YD = 20; //lift YD is aligned with lift XD
 const double K_lift_min_YD = 0; //it crunch
 const double K_lift_rungs_YD = 15.375; //distance from rung to rung (15.375 inches)
 const double K_lift_rate_up_YD = 0.001; //RampTo slope for lift up
 const double K_lift_rate_down_YD = -0.001; //RampTo slope for lift down
 const double K_lift_deadband_YD = 0.5; //it's a deadband for the y lift yeah
 
-const double K_lift_max_XD = 24; //distance between bars (24 inches)
-const double K_lift_mid_XD = 12; //mid distance between bars (12 inches)
+const double K_lift_max_XD = 135; //distance between bars (24 inches)
+const double K_lift_mid_XD = 30; //lift XD is aligned with lift YD
+const double K_lift_min_XD = 0; //we don't want XD to move cuz it's a loser
 const double K_lift_rate_forward_XD = 0.001; //RampTo slope for lift forward
 const double K_lift_rate_backward_XD = -0.001; //RampTo slope for lift backward
-const double K_lift_min_XD = 0; //we don't want XD to move cuz it's a loser
 const double K_lift_deadband_XD = 0.5; //it's a deadband for the x lift yeah
 
 const double K_gyro_angle_lift = -10; //robert is tilting
@@ -241,15 +241,28 @@ const double K_DesiredSpeedLowerBeam[6] = {-1150,
 //                                            -2400,
 //                                            -3100};
 
-const double K_LiftYD_PID[E_PID_CalSz] = { 0.07,   // P Gx
-                                           0.0,   // I Gx
+const double K_LiftYD_PID[E_PID_CalSz] = { 0.1,   // P Gx
+                                           0.000002,   // I Gx
                                            0.0,    // D Gx
-                                           0.9,    // P UL
-                                          -0.9,    // P LL
+                                           1.0,    // P UL
+                                          -1.0,    // P LL
                                            0.5,    // I UL
                                           -0.5,    // I LL
-                                           0.2,    // D UL
-                                          -0.2,    // D LL
+                                           0.0,    // D UL
+                                           0.0,    // D LL
+                                           1.0,    // Max upper
+                                          -1.0};   // Max lower
+
+
+const double K_LiftXD_PID[E_PID_CalSz] = { 0.1,   // P Gx
+                                           0.000002,   // I Gx
+                                           0.0,    // D Gx
+                                           1.0,    // P UL
+                                          -1.0,    // P LL
+                                           0.5,    // I UL
+                                          -0.5,    // I LL
+                                           0.0,    // D UL
+                                           0.0,    // D LL
                                            1.0,    // Max upper
                                           -1.0};   // Max lower
 
