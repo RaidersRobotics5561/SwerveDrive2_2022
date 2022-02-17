@@ -36,7 +36,6 @@ double V_lift_measured_position_YD = 0;
 double V_lift_measured_position_XD = 0;
 double V_lift_command_YD = 0;
 double V_lift_command_XD = 0;
-double V_gyro_yawangledegrees = 0;
 
 /******************************************************************************
  * Function:     Lift_Control_Dictator

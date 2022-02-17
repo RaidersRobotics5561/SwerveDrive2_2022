@@ -87,24 +87,18 @@ void Read_Encoders(double         L_encoderWheelAngleFrontLeftRaw,
   {
   T_RobotCorner index;
 
- 
   V_LiftPostitionYD = m_encoderLiftYD.GetPosition();
   V_LiftPostitionXD = m_encoderLiftXD.GetPosition();
-
-  // V_WheelAngleConverted[E_FrontLeft]  = fmod((m_encoderFrontLeftSteer.GetPosition()  * K_SteerDriveReductionRatio + V_WheelRelativeAngleRawOffset[E_FrontLeft]),  360);
-  // V_WheelAngleConverted[E_FrontRight] = fmod((m_encoderFrontRightSteer.GetPosition() * K_SteerDriveReductionRatio + V_WheelRelativeAngleRawOffset[E_FrontRight]), 360);
-  // V_WheelAngleConverted[E_RearLeft]   = fmod((m_encoderRearLeftSteer.GetPosition()   * K_SteerDriveReductionRatio + V_WheelRelativeAngleRawOffset[E_RearLeft]),   360);
-  // V_WheelAngleConverted[E_RearRight]  = fmod((m_encoderRearRightSteer.GetPosition()  * K_SteerDriveReductionRatio + V_WheelRelativeAngleRawOffset[E_RearRight]),  360);
 
   V_WheelAngleConverted[E_FrontLeft]  = std::fmod((L_encoderWheelAngleFrontLeftRaw  * C_EncoderToAngle), 360) - K_WheelOffsetAngle[E_FrontLeft];
   V_WheelAngleConverted[E_FrontRight] = std::fmod((L_encoderWheelAngleFrontRightRaw * C_EncoderToAngle), 360) - K_WheelOffsetAngle[E_FrontRight];
   V_WheelAngleConverted[E_RearLeft]   = std::fmod((L_encoderWheelAngleRearLeftRaw   * C_EncoderToAngle), 360) - K_WheelOffsetAngle[E_RearLeft];
   V_WheelAngleConverted[E_RearRight]  = std::fmod((L_encoderWheelAngleRearRightRaw  * C_EncoderToAngle), 360) - K_WheelOffsetAngle[E_RearRight];
 
-  V_Cnt_WheelDeltaDistanceCurr[E_FrontLeft]  = m_encoderFrontLeftDrive.GetPosition()  - V_Cnt_WheelDeltaDistanceInit[E_FrontLeft];
-  V_Cnt_WheelDeltaDistanceCurr[E_FrontRight] = m_encoderFrontRightDrive.GetPosition() - V_Cnt_WheelDeltaDistanceInit[E_FrontRight];
-  V_Cnt_WheelDeltaDistanceCurr[E_RearRight]  = m_encoderRearRightDrive.GetPosition()  - V_Cnt_WheelDeltaDistanceInit[E_RearRight];
-  V_Cnt_WheelDeltaDistanceCurr[E_RearLeft]   = m_encoderRearLeftDrive.GetPosition()   - V_Cnt_WheelDeltaDistanceInit[E_RearLeft];
+  V_Cnt_WheelDeltaDistanceCurr[E_FrontLeft]  = m_encoderFrontLeftDrive.GetPosition();
+  V_Cnt_WheelDeltaDistanceCurr[E_FrontRight] = m_encoderFrontRightDrive.GetPosition();
+  V_Cnt_WheelDeltaDistanceCurr[E_RearRight]  = m_encoderRearRightDrive.GetPosition();
+  V_Cnt_WheelDeltaDistanceCurr[E_RearLeft]   = m_encoderRearLeftDrive.GetPosition();
   
   for (index = E_FrontLeft;
        index < E_RobotCornerSz;

@@ -15,7 +15,6 @@ extern double       V_lift_measured_position_YD;
 extern double       V_lift_measured_position_XD;
 extern double       V_lift_command_YD;
 extern double       V_lift_command_XD;
-extern double       V_gyro_yawangledegrees;
 extern T_Lift_State V_Lift_state;
 
  T_Lift_State Lift_Control_Dictator(bool          L_driver_button,

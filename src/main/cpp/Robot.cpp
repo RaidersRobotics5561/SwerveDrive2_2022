@@ -149,7 +149,7 @@ void Robot::RobotInit() {
     V_M_RobotDisplacementY = 0;
     V_M_RobotDisplacementX = 0;
 
-    GyroRobotInit();
+    GyroInit();
 
     inst = nt::NetworkTableInstance::Create();
     inst.StartClient("10.55.61.24");
@@ -308,7 +308,6 @@ void Robot::AutonomousInit()
     V_ShooterSpeedDesired[E_leftShooter] = 0;
       
       
-      GyroZero();
       EncodersInit(a_encoderWheelAngleFrontLeft.Get().value(),
                    a_encoderWheelAngleFrontRight.Get().value(),
                    a_encoderWheelAngleRearLeft.Get().value(),
@@ -316,8 +315,6 @@ void Robot::AutonomousInit()
       DriveControlInit();
       BallHandlerInit();
       AutonDriveReset();
-      gyro_yawangledegrees = 0;
-      gyro_yawanglerad = 0;
       V_M_RobotDisplacementX = 0;
       V_M_RobotDisplacementY = 0;
 
@@ -355,8 +352,10 @@ void Robot::AutonomousPeriodic()
                   m_encoderleftShooter,
                   m_encoderLiftYD,
                   m_encoderLiftXD);
+    
+    ReadGyro(false);
  
-    DtrmnSwerveBotLocation(gyro_yawanglerad,
+    DtrmnSwerveBotLocation(V_GyroYawAngleRad,
                            &V_Rad_WheelAngleFwd[0],
                            &V_M_WheelDeltaDistance[0],
                            &V_M_RobotDisplacementX,
@@ -372,8 +371,8 @@ void Robot::AutonomousPeriodic()
                       c_joyStick.GetRawButton(3),
                       c_joyStick.GetRawButton(4),
                       c_joyStick.GetRawButton(5),
-                      gyro_yawangledegrees,
-                      gyro_yawanglerad,
+                      V_GyroYawAngleDegrees,
+                      V_GyroYawAngleRad,
                       targetYaw0.GetDouble(0),
                      &V_WheelAngleFwd[0],
                      &V_WheelAngleRev[0],
@@ -429,8 +428,6 @@ void Robot::TeleopInit()
 
   DriveControlInit();
   BallHandlerInit();
-  gyro_yawangledegrees = 0;
-  gyro_yawanglerad = 0;
   V_AutoShootEnable = false;
   V_M_RobotDisplacementX = 0;
   V_M_RobotDisplacementY = 0;
@@ -521,7 +518,9 @@ void Robot::TeleopPeriodic()
                 m_encoderLiftYD,
                 m_encoderLiftXD);
 
-  DtrmnSwerveBotLocation(gyro_yawanglerad,
+  ReadGyro(L_Driver_zero_gyro);
+
+  DtrmnSwerveBotLocation(V_GyroYawAngleRad,
                          &V_Rad_WheelAngleFwd[0],
                          &V_M_WheelDeltaDistance[0],
                          &V_M_RobotDisplacementX,
@@ -535,8 +534,8 @@ void Robot::TeleopPeriodic()
                     c_joyStick.GetRawButton(3),
                     c_joyStick.GetRawButton(4),
                     c_joyStick.GetRawButton(5),
-                    gyro_yawangledegrees,
-                    gyro_yawanglerad,
+                    V_GyroYawAngleDegrees,
+                    V_GyroYawAngleRad,
                     targetYaw0.GetDouble(0),
                    &V_WheelAngleFwd[0],
                    &V_WheelAngleRev[0],
@@ -554,15 +553,13 @@ void Robot::TeleopPeriodic()
                                        V_lift_measured_position_XD,
                                        &V_lift_command_YD,
                                        &V_lift_command_XD,
-                                       V_gyro_yawangledegrees);
+                                       V_GyroYawAngleDegrees);
 
   BallHandlerControlMain();
 
   LED_VanityLights();
   
   
-  frc::SmartDashboard::PutNumber("wheelAngleCmd Front Left", V_WheelAngleCmnd[E_FrontLeft]);
-
   V_XD_Test = frc::SmartDashboard::GetNumber("XD Lift", V_XD_Test);
   V_YD_Test = frc::SmartDashboard::GetNumber("YD Lift", V_YD_Test);
   V_Intake_Test = frc::SmartDashboard::GetNumber("Intake", V_Intake_Test);

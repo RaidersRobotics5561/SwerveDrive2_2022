@@ -370,7 +370,7 @@ void AutonDriveMain()
     //                    &speen,
     //                     V_M_RobotDisplacementY,
     //                     V_M_RobotDisplacementX,
-    //                     gyro_yawangledegrees,
+    //                     V_GyroYawAngleDegrees,
     //                     0);
 
     //   // case 5 is expirimental, do not use for any real driving

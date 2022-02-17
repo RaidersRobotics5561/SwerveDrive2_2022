@@ -1,3 +1,13 @@
+/*
+  Gyro.cpp
+
+   Created on: Feb 01, 2020
+   Author: 5561
+
+   Contains the code related to the reading and processing of the gyro output.
+
+ */
+
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/DriverStation.h>
 
@@ -8,14 +18,17 @@ AHRS *NavX;
 
 using namespace frc;
 
-double gyro_angleprev;
-double gryo_loopcount = 0;
-double gyro_yawangledegrees;
-double gyro_yawanglerad;
-double gyro_rolloverrad;
+double V_GyroYawAngleDegrees;
+double V_GyroYawAngleRad;
 
-void GyroRobotInit()
-{
+
+/******************************************************************************
+ * Function:     GyroInit
+ *
+ * Description:  Initialization of the gyro.
+ ******************************************************************************/
+void GyroInit()
+  {
     try{
       NavX = new AHRS(SPI::Port::kMXP);
     }
@@ -24,39 +37,25 @@ void GyroRobotInit()
       // err_string += e.what();
       // DriverStation::ReportError(err_string.c_str());
     }
-}
 
-void GyroZero()
-{
-    NavX->ZeroYaw();
-}
-
-void Gyro() {
-
-  double gyro_currentyaw = (double)NavX->GetYaw();
-  //Check to see if gyro angle flips over 180 or -180
-  
-  // if(L_Driver_zero_gyro)
-  // {
-  //   GyroZero();
-  // }
-
-  if(175 <= abs(gyro_angleprev))
-  {
-    if(gyro_angleprev < 0 && gyro_currentyaw > 0)
-    {
-      gryo_loopcount -= 1;
-    } else if (gyro_angleprev > 0 && gyro_currentyaw < 0)
-    {
-      gryo_loopcount += 1;
-    }
+    V_GyroYawAngleDegrees = 0;
+    V_GyroYawAngleRad = 0;
   }
-  gyro_rolloverrad = ((gryo_loopcount * 360) + gyro_currentyaw) / C_RadtoDeg;
-
-  gyro_yawangledegrees = (double)NavX->GetYaw();
-  gyro_yawanglerad = (double)NavX->GetYaw() / C_RadtoDeg;
 
 
-  gyro_angleprev = gyro_currentyaw;
+/******************************************************************************
+ * Function:     ReadGyro
+ *
+ * Description:  Contains the code to read the gyro.
+ ******************************************************************************/
+void ReadGyro(bool L_DriverZeroGyroCmnd)
+  {
+  if(L_DriverZeroGyroCmnd)
+    {
+    NavX->ZeroYaw();
+    }
 
-}
+  V_GyroYawAngleDegrees = (double)NavX->GetYaw();
+
+  V_GyroYawAngleRad = V_GyroYawAngleDegrees / C_RadtoDeg;
+  }
