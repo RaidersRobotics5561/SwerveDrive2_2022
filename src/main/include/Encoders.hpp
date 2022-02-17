@@ -31,7 +31,9 @@
                    rev::SparkMaxRelativeEncoder m_encoderRearLeftDrive,
                    rev::SparkMaxRelativeEncoder m_encoderRearRightDrive,
                    rev::SparkMaxRelativeEncoder m_encoderrightShooter,
-                   rev::SparkMaxRelativeEncoder m_encoderleftShooter);
+                   rev::SparkMaxRelativeEncoder m_encoderleftShooter,
+                   rev::SparkMaxRelativeEncoder m_encoderLiftYD,
+                   rev::SparkMaxRelativeEncoder m_encoderLiftXD);
 
 double DtrmnEncoderRelativeToCmnd(double L_JoystickCmnd,
                                   double L_EncoderReading);

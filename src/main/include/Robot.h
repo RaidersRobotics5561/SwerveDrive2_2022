@@ -50,7 +50,7 @@ class Robot : public frc::TimedRobot {
   frc::DutyCycleEncoder a_encoderWheelAngleRearLeft {3};
   frc::DutyCycleEncoder a_encoderWheelAngleRearRight {0};
 
-  frc::DigitalOutput DIO0{0};
+  frc::DigitalOutput DIO0{7};
 
   rev::CANSparkMax m_frontLeftSteerMotor {frontLeftSteerDeviceID,  rev::CANSparkMax::MotorType::kBrushless};
   rev::CANSparkMax m_frontLeftDriveMotor {frontLeftDriveDeviceID,  rev::CANSparkMax::MotorType::kBrushless};

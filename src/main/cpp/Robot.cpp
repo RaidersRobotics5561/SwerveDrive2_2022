@@ -116,6 +116,11 @@ double V_FF = 0;
 double V_Max = 0;
 double V_Min = 0;
 
+double K_MaxVel = 0;
+double K_MinVel = 0;
+double K_MaxAcc = 0;
+double K_AllErr = 0;
+
 bool   LightOff; //the polarities are funny, true = off
 
 T_RobotState V_RobotState;
@@ -157,6 +162,15 @@ void Robot::RobotInit() {
     frc::SmartDashboard::PutNumber("FF", V_FF);
     frc::SmartDashboard::PutNumber("Max_Limit", V_Max);
     frc::SmartDashboard::PutNumber("Min_Limit", V_Min);
+    frc::SmartDashboard::PutNumber("XD Lift", V_XD_Test);
+  frc::SmartDashboard::PutNumber("YD Lift", V_YD_Test);
+  frc::SmartDashboard::PutNumber("Intake", V_Intake_Test);
+  frc::SmartDashboard::PutNumber("Elevator", V_Elevator_Test);
+
+  frc::SmartDashboard::PutNumber("max velocity", K_MaxVel);
+  frc::SmartDashboard::PutNumber("min velocity", K_MinVel);
+  frc::SmartDashboard::PutNumber("max acceleration", K_MaxAcc);
+  frc::SmartDashboard::PutNumber("kAllErr", K_AllErr);
   
  #ifdef COMP
     // V_testIntake = 0;
@@ -338,7 +352,9 @@ void Robot::AutonomousPeriodic()
                   m_encoderRearLeftDrive,
                   m_encoderRearRightDrive,
                   m_encoderrightShooter,
-                  m_encoderleftShooter);
+                  m_encoderleftShooter,
+                  m_encoderLiftYD,
+                  m_encoderLiftXD);
  
     DtrmnSwerveBotLocation(gyro_yawanglerad,
                            &V_Rad_WheelAngleFwd[0],
@@ -419,11 +435,6 @@ void Robot::TeleopInit()
   V_M_RobotDisplacementX = 0;
   V_M_RobotDisplacementY = 0;
 
-  frc::SmartDashboard::PutNumber("XD Lift", V_XD_Test);
-  frc::SmartDashboard::PutNumber("YD Lift", V_YD_Test);
-  frc::SmartDashboard::PutNumber("Intake", V_Intake_Test);
-  frc::SmartDashboard::PutNumber("Elevator", V_Elevator_Test);
-
     V_P_Gx = frc::SmartDashboard::GetNumber("P_Gx", V_P_Gx);
     V_I_Gx = frc::SmartDashboard::GetNumber("I_Gx", V_I_Gx);
     V_D_Gx = frc::SmartDashboard::GetNumber("D_Gx", V_D_Gx);
@@ -438,6 +449,23 @@ void Robot::TeleopInit()
     m_liftpidYD.SetIZone(V_I_Zone);
     m_liftpidYD.SetFF(V_FF);
     m_liftpidYD.SetOutputRange(V_Min, V_Max);
+
+    m_liftpidXD.SetP(V_P_Gx);
+    m_liftpidXD.SetI(V_I_Gx);
+    m_liftpidXD.SetD(V_D_Gx);
+    m_liftpidXD.SetIZone(V_I_Zone);
+    m_liftpidXD.SetFF(V_FF);
+    m_liftpidXD.SetOutputRange(V_Min, V_Max);
+
+  K_MaxVel = frc::SmartDashboard::GetNumber("max velocity", K_MaxVel);
+  K_MinVel = frc::SmartDashboard::GetNumber("min velocity", K_MinVel);
+  K_MaxAcc = frc::SmartDashboard::GetNumber("max acceleration", K_MaxAcc);
+  K_AllErr = frc::SmartDashboard::GetNumber("kAllErr", K_AllErr);
+
+    // m_liftpidYD.SetSmartMotionMaxVelocity(K_MaxVel);
+    // m_liftpidYD.SetSmartMotionMinOutputVelocity(K_MinVel);
+    // m_liftpidYD.SetSmartMotionMaxAccel(K_MaxAcc);
+    // m_liftpidYD.SetSmartMotionAllowedClosedLoopError(K_AllErr);
 }
 
 
@@ -489,7 +517,9 @@ void Robot::TeleopPeriodic()
                 m_encoderRearLeftDrive,
                 m_encoderRearRightDrive,
                 m_encoderrightShooter,
-                m_encoderleftShooter);
+                m_encoderleftShooter,
+                m_encoderLiftYD,
+                m_encoderLiftXD);
 
   DtrmnSwerveBotLocation(gyro_yawanglerad,
                          &V_Rad_WheelAngleFwd[0],

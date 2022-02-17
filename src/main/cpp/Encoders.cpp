@@ -26,6 +26,8 @@ double V_Cnt_WheelDeltaDistancePrev[E_RobotCornerSz]; // Prev distance wheel mov
 double V_ShooterSpeedCurr[E_RoboShooter];
 double V_Cnt_WheelDeltaDistanceInit[E_RobotCornerSz];
 double V_Delta_Angle[E_RobotCornerSz]; // The delta of the angle needed to align the wheels when the robot inits
+double V_LiftPostitionYD;
+double V_LiftPostitionXD;
 
 
 /******************************************************************************
@@ -66,7 +68,7 @@ void EncodersInit(double          L_encoderWheelAngleFrontLeftRaw,
  *
  * Description:  Run all of the encoder decoding logic.
  ******************************************************************************/
-void Read_Encoders(double          L_encoderWheelAngleFrontLeftRaw,
+void Read_Encoders(double         L_encoderWheelAngleFrontLeftRaw,
                   double          L_encoderWheelAngleFrontRightRaw,
                   double          L_encoderWheelAngleRearLeftRaw,
                   double          L_encoderWheelAngleRearRightRaw,
@@ -79,9 +81,15 @@ void Read_Encoders(double          L_encoderWheelAngleFrontLeftRaw,
                    rev::SparkMaxRelativeEncoder m_encoderRearLeftDrive,
                    rev::SparkMaxRelativeEncoder m_encoderRearRightDrive,
                    rev::SparkMaxRelativeEncoder m_encoderrightShooter,
-                   rev::SparkMaxRelativeEncoder m_encoderleftShooter)
+                   rev::SparkMaxRelativeEncoder m_encoderleftShooter,
+                   rev::SparkMaxRelativeEncoder m_encoderLiftYD,
+                   rev::SparkMaxRelativeEncoder m_encoderLiftXD)
   {
   T_RobotCorner index;
+
+ 
+  V_LiftPostitionYD = m_encoderLiftYD.GetPosition();
+  V_LiftPostitionXD = m_encoderLiftXD.GetPosition();
 
   // V_WheelAngleConverted[E_FrontLeft]  = fmod((m_encoderFrontLeftSteer.GetPosition()  * K_SteerDriveReductionRatio + V_WheelRelativeAngleRawOffset[E_FrontLeft]),  360);
   // V_WheelAngleConverted[E_FrontRight] = fmod((m_encoderFrontRightSteer.GetPosition() * K_SteerDriveReductionRatio + V_WheelRelativeAngleRawOffset[E_FrontRight]), 360);
@@ -132,6 +140,8 @@ void Read_Encoders(double          L_encoderWheelAngleFrontLeftRaw,
   frc::SmartDashboard::PutNumber("FL Angle From Center", V_WheelRelativeAngleRawOffset[E_FrontLeft]);
   frc::SmartDashboard::PutNumber("FL Angle Fwd", V_WheelAngleFwd[E_FrontLeft]);
   frc::SmartDashboard::PutNumber("FL NEO Encoder Processed", V_WheelAngleConverted[E_FrontLeft]);
+  frc::SmartDashboard::PutNumber("Lift postition YD", V_LiftPostitionYD);
+  frc::SmartDashboard::PutNumber("Lift postition XD", V_LiftPostitionXD);
 
   V_WheelVelocity[E_FrontLeft]  = ((m_encoderFrontLeftDrive.GetVelocity()  / K_ReductionRatio) / 60) * K_WheelCircufrence;
   V_WheelVelocity[E_FrontRight] = ((m_encoderFrontRightDrive.GetVelocity() / K_ReductionRatio) / 60) * K_WheelCircufrence;
