@@ -10,6 +10,7 @@
 //NOTE: Set this to TEST for testing of speeds and PID gains.  Set to COMP for competion
 #define TEST
 // #define PHOTON
+#define PhotonTest
 //NOTE: Set this to allow Shuffleboard configuration of PIDConfig objects (Will override defaults)
 #define PID_DEBUG
 #define SPIKE
@@ -126,7 +127,7 @@ bool   LightOff; //the polarities are funny, true = off
 
 T_RobotState V_RobotState;
 
-
+bool   EnableTarget;
 
 // PIDConfig UpperShooterPIDConfig {0.0008, 0.000001, 0.0006};
 
@@ -592,6 +593,16 @@ void Robot::TeleopPeriodic()
 
     m_liftpidYD.SetReference(V_YD_Test, rev::ControlType::kPosition); // positive is up
     m_liftpidXD.SetReference(V_XD_Test, rev::ControlType::kPosition); // This is temporary.  We actually want to use position, but need to force this off temporarily
+
+    if (c_joyStick.GetRawButton(1) == true){
+  
+  EnableTarget = true;
+  LightOff = false;
+
+  
+
+}
+
 }
 
 
