@@ -235,7 +235,11 @@ double BallElevator(bool L_BallDetected,
 void BallHandlerControlMain(bool L_IntakeCmnd,
                             bool L_BallDetected,
                             bool L_ElevatorCmndUp,
-                            bool L_ElevatorCmndDwn)
+                            bool L_ElevatorCmndDwn,
+                            double L_ManualShooter,
+                            double *L_Intake,
+                            double *L_Elevator,
+                            double *L_Shooter)
   {
     double L_LauncherRPM       = 0;
     double L_IntakePowerCmnd   = 0;
@@ -248,4 +252,10 @@ void BallHandlerControlMain(bool L_IntakeCmnd,
                                        L_ElevatorCmndDwn);
 
     L_LauncherRPM = BallLauncher(false);
+
+    *L_Intake = L_IntakePowerCmnd;
+
+    *L_Elevator = L_ElevatorPowerCmnd;
+
+    *L_Shooter = L_LauncherRPM;
   }

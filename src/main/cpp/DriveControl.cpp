@@ -54,6 +54,19 @@ double V_Drive_FF = 0;
 double V_Drive_Max = 1;
 double V_Drive_Min = -1;
 
+double V_WheelSpeedPID_Gx[E_PID_CalSz] = { 0.0055,     // P Gx
+                                                 0.0009,     // I Gx
+                                                 0.00000005, // D Gx
+                                                 1.0,        // P UL
+                                                -1.0,        // P LL
+                                                 0.5,        // I UL
+                                                -0.5,        // I LL
+                                                 0.2,        // D UL
+                                                -0.2,        // D LL
+                                                 1.0,        // Max upper
+                                                -1.0};       // Max lower
+
+
 /******************************************************************************
  * Function:     DriveControlMain
  *
@@ -76,6 +89,24 @@ void DriveControlInit()
         V_WheelSpeedIntergral[L_Index] = 0;
         V_WheelAngleArb[L_Index] = 0;
       }
+
+
+
+  V_P_Gx = frc::SmartDashboard::GetNumber("P_Gx", V_P_Gx);
+  V_I_Gx = frc::SmartDashboard::GetNumber("I_Gx", V_I_Gx);
+  V_D_Gx = frc::SmartDashboard::GetNumber("D_Gx", V_D_Gx);
+  V_I_Zone = frc::SmartDashboard::GetNumber("I_Zone", V_I_Zone);
+  V_FF = frc::SmartDashboard::GetNumber("FF", V_FF);
+  V_Max = frc::SmartDashboard::GetNumber("Max_Limit", V_Max);
+  V_Min = frc::SmartDashboard::GetNumber("Min_Limit", V_Min);
+
+  V_WheelSpeedPID_Gx[E_P_Gx] = V_P_Gx;
+  V_WheelSpeedPID_Gx[E_I_Gx] = V_I_Gx;
+  V_WheelSpeedPID_Gx[E_D_Gx] = V_D_Gx;
+  V_WheelSpeedPID_Gx[E_I_Ul] = V_I_Zone;
+  V_WheelSpeedPID_Gx[E_I_Ll] = -V_I_Zone;
+  V_WheelSpeedPID_Gx[E_Max_Ul] = V_Max;
+  V_WheelSpeedPID_Gx[E_Max_Ll] = V_Min;
   }
 
 
@@ -378,7 +409,7 @@ void DriveControlMain(double              L_JoyStick1Axis1Y, //swerve control
     V_Deg_DesiredAngPrev = desiredAngle;
 
     frc::SmartDashboard::PutNumber("FL Angle Used for PID", V_WheelAngleArb[E_FrontLeft]);
-    frc::SmartDashboard::PutNumber("L_WA_FWD", L_WheelAngleRev[E_FrontLeft]);
-    frc::SmartDashboard::PutNumber("L_WA_REV", L_WheelAngleFwd[E_FrontLeft]);
-    frc::SmartDashboard::PutNumber("L_WA_REV", L_WheelAngleRev[E_FrontLeft]);
+    frc::SmartDashboard::PutNumber("V_RCW", V_RCW);
+    frc::SmartDashboard::PutNumber("V_b_DriveStraight", V_b_DriveStraight);
+    frc::SmartDashboard::PutNumber("L_RotateErrorCalc", L_RotateErrorCalc);
   }

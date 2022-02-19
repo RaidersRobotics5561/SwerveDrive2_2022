@@ -58,4 +58,6 @@ void ReadGyro(bool L_DriverZeroGyroCmnd)
   V_GyroYawAngleDegrees = (double)NavX->GetYaw();
 
   V_GyroYawAngleRad = V_GyroYawAngleDegrees / C_RadtoDeg;
+
+  frc::SmartDashboard::PutNumber("GYRO", V_GyroYawAngleDegrees);
   }

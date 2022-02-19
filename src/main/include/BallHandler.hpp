@@ -15,5 +15,10 @@
 void BallHandlerControlMain(bool L_IntakeCmnd,
                             bool L_BallDetected,
                             bool L_ElevatorCmndUp,
-                            bool L_ElevatorCmndDwn);
+                            bool L_ElevatorCmndDwn,
+                            double L_ManualShooter,
+                            double *L_Intake,
+                            double *L_Elevator,
+                            double *L_Shooter);
+
 void BallHandlerInit(void);

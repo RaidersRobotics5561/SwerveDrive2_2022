@@ -81,7 +81,7 @@ const double K_WheelOffsetAngle[E_RobotCornerSz] = {169.527239,   // E_FrontLeft
                                                     // 33.112801,   // E_RearLeft
                                                     // 247.656102}; // E_RearRight
 
-const double K_WheelMaxSpeed = 200; // This is the max allowed speed for the wheels
+const double K_WheelMaxSpeed = 225; // This is the max allowed speed for the wheels
 
 const double K_WheelAnglePID_Gx[E_PID_CalSz] = { 0.007,     // P Gx
                                                  0.0005,    // I Gx
@@ -95,11 +95,11 @@ const double K_WheelAnglePID_Gx[E_PID_CalSz] = { 0.007,     // P Gx
                                                  0.9,       // Max upper
                                                 -0.9};      // Max lower
 
-const double K_WheelSpeedPID_Gx[E_PID_CalSz] = { 0.0055,     // P Gx
+double const K_WheelSpeedPID_Gx[E_PID_CalSz] = { 0.009,     // P Gx
                                                  0.0009,     // I Gx
                                                  0.00000005, // D Gx
-                                                 0.9,        // P UL
-                                                -0.9,        // P LL
+                                                 1.0,        // P UL
+                                                -1.0,        // P LL
                                                  0.5,        // I UL
                                                 -0.5,        // I LL
                                                  0.2,        // D UL
@@ -199,16 +199,28 @@ const double K_DesiredAutoRotateSpeedAxis[10] = {-4.0,
                                               4.0};
 
 /* K_DesiredRotateSpeed - This is the effective command, equivalent to the rotate joystick */
-const double K_DesiredAutoRotateSpeed[10] = {-0.06,  // -4.0
-                                         -0.05,  //  -3.0
-                                         -0.04,  //  -2.0
-                                         -0.03,  //  -1.0
-                                         -0.01,  //  -0.2
-                                          0.01,  //   0.2
-                                          0.03,  //   1.0
-                                          0.04,  //   2.0
-                                          0.05,  //   4.0
-                                          0.06}; //  20.0
+const double K_DesiredAutoRotateSpeed[10] = {0,  // -4.0
+                                         0,  //  -3.0
+                                         0,  //  -2.0
+                                         0,  //  -1.0
+                                         0,  //  -0.2
+                                          0.0,  //   0.2
+                                          0.0,  //   1.0
+                                          0.0,  //   2.0
+                                          0,  //   4.0
+                                          0.0}; //  20.0
+
+                                        //   const double K_DesiredAutoRotateSpeed[10] = {-0.09,  // -4.0
+                                        //  -0.08,  //  -3.0
+                                        //  -0.07,  //  -2.0
+                                        //  -0.06,  //  -1.0
+                                        //  -0.05,  //  -0.2
+                                        //   0.05,  //   0.2
+                                        //   0.06,  //   1.0
+                                        //   0.07,  //   2.0
+                                        //   0.08,  //   4.0
+                                        //   0.09}; //  20.0
+
 const double K_DesiredDistanceAxis[6] = {415,
                                      644,
                                      840,

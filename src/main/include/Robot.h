@@ -30,6 +30,14 @@
 #include <photonlib/PhotonCamera.h>
 #include <photonlib/PhotonUtils.h>
 
+extern double V_P_Gx;
+extern double V_I_Gx;
+extern double V_D_Gx;
+extern double V_I_Zone;
+extern double V_FF;
+extern double V_Max;
+extern double V_Min;
+
 class Robot : public frc::TimedRobot {
  public:
   void RobotInit() override;

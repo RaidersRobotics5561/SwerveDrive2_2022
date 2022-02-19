@@ -280,8 +280,8 @@ void Robot::RobotPeriodic()
 
     //Run Gyro readings when the robot starts
 
-  VisionDashboard();
-  VisionRun();
+
+  void VisionRun();
     // Gyro();
 
 }
@@ -423,13 +423,22 @@ void Robot::TeleopInit()
   V_M_RobotDisplacementX = 0;
   V_M_RobotDisplacementY = 0;
 
-  V_P_Gx = frc::SmartDashboard::GetNumber("P_Gx", V_P_Gx);
-  V_I_Gx = frc::SmartDashboard::GetNumber("I_Gx", V_I_Gx);
-  V_D_Gx = frc::SmartDashboard::GetNumber("D_Gx", V_D_Gx);
-  V_I_Zone = frc::SmartDashboard::GetNumber("I_Zone", V_I_Zone);
-  V_FF = frc::SmartDashboard::GetNumber("FF", V_FF);
-  V_Max = frc::SmartDashboard::GetNumber("Max_Limit", V_Max);
-  V_Min = frc::SmartDashboard::GetNumber("Min_Limit", V_Min);
+  // V_P_Gx = frc::SmartDashboard::GetNumber("P_Gx", V_P_Gx);
+  // V_I_Gx = frc::SmartDashboard::GetNumber("I_Gx", V_I_Gx);
+  // V_D_Gx = frc::SmartDashboard::GetNumber("D_Gx", V_D_Gx);
+  // V_I_Zone = frc::SmartDashboard::GetNumber("I_Zone", V_I_Zone);
+  // V_FF = frc::SmartDashboard::GetNumber("FF", V_FF);
+  // V_Max = frc::SmartDashboard::GetNumber("Max_Limit", V_Max);
+  // V_Min = frc::SmartDashboard::GetNumber("Min_Limit", V_Min);
+
+  // K_WheelSpeedPID_Gx[E_P_Gx] = V_P_Gx;
+  // K_WheelSpeedPID_Gx[E_I_Gx] = V_I_Gx;
+  // K_WheelSpeedPID_Gx[E_D_Gx] = V_D_Gx;
+  // K_WheelSpeedPID_Gx[E_I_Ul] = V_I_Zone;
+  // K_WheelSpeedPID_Gx[E_I_Ll] = -V_I_Zone;
+  // K_WheelSpeedPID_Gx[E_Max_Ul] = V_Max;
+  // K_WheelSpeedPID_Gx[E_Max_Ll] = V_Min;
+
 
   K_MaxVel = frc::SmartDashboard::GetNumber("max velocity", K_MaxVel);
   K_MinVel = frc::SmartDashboard::GetNumber("min velocity", K_MinVel);
@@ -497,7 +506,6 @@ void Robot::TeleopPeriodic()
                             &L_Driver_right_shooter_desired_speed,
                              c_joyStick2.GetRawAxis(5),
                             &L_Driver_left_shooter_desired_speed);
-                            
 
 
   Read_Encoders(a_encoderWheelAngleFrontLeft.Get().value(),
@@ -555,6 +563,18 @@ void Robot::TeleopPeriodic()
 
   // BallHandlerControlMain();
 
+  double L_Intake = 0;
+  double L_Elevator = 0;
+  double L_Shooter = 0;
+  BallHandlerControlMain(   L_Driver_intake_in,
+                            false,
+                            L_Driver_elevator_up,
+                            L_Driver_elevator_down,
+                            L_Driver_right_shooter_desired_speed,
+                            &L_Intake,
+                            &L_Elevator,
+                            &L_Shooter);
+
   LED_VanityLights();
   
   
@@ -585,11 +605,24 @@ void Robot::TeleopPeriodic()
     // m_rearRightSteerMotor.Set(0);
 
 
-    m_rightShooterpid.SetReference(0, rev::ControlType::kVelocity);
-    m_leftShooterpid.SetReference(-0, rev::ControlType::kVelocity);
+    // m_rightShooterpid.SetReference(L_Shooter, rev::ControlType::kVelocity);
+    // m_leftShooterpid.SetReference(-L_Shooter, rev::ControlType::kVelocity);
 
-    m_intake.Set(ControlMode::PercentOutput, L_Driver_intake_in); //must be positive (don't be a fool)
-    m_elevator.Set(ControlMode::PercentOutput, V_Elevator_Test);
+double L_ELE = 0;
+if (c_joyStick2.GetRawButton(1) == true)
+{
+  L_ELE = 0.9;
+}
+else if (c_joyStick2.GetRawButton(2) == true)
+{
+  L_ELE = -0.9;
+}
+
+m_rightShooterMotor.Set(c_joyStick2.GetRawAxis(1));
+    m_leftShooterMotor.Set(-c_joyStick2.GetRawAxis(1));
+
+    m_intake.Set(ControlMode::PercentOutput, L_Intake); //must be positive (don't be a fool)
+    m_elevator.Set(ControlMode::PercentOutput, L_ELE);
 
     // m_liftpidYD.SetReference(V_lift_command_YD, rev::ControlType::kPosition);
     // m_liftpidXD.SetReference(V_lift_command_XD, rev::ControlType::kPosition);
@@ -611,19 +644,19 @@ void Robot::TestPeriodic()
 
     if (c_joyStick2.GetPOV() == 0)
       {
-      L_LiftYD_Power = 0.4;
+      L_LiftYD_Power = 1.0;
       }
     else if (c_joyStick2.GetPOV() == 180)
       {
-      L_LiftYD_Power = -0.4;
+      L_LiftYD_Power = -0.25;
       }
     else if (c_joyStick2.GetPOV() == 270)
       {
-      L_LiftXD_Power = -0.4;
+      L_LiftXD_Power = -0.15;
       }
     else if (c_joyStick2.GetPOV() == 90)
       {
-      L_LiftXD_Power = 0.4;
+      L_LiftXD_Power = 0.15;
       }
 
     m_liftMotorXD.Set(L_LiftXD_Power);
