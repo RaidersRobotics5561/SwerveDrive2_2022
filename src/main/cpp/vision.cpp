@@ -9,7 +9,7 @@
 #include <photonlib/PhotonUtils.h>
 #include <units/length.h>
 // all our favorite variables
-bool TargetAquired;
+bool TopTargetAquired;
 double TopYaw;
 bool BottomTargetAquired;
 double BottomYaw;
@@ -22,12 +22,14 @@ nt::NetworkTableInstance Cam2;
 void VisionDashboard(){
 
 // puts all our favorite variables to the dashboard, all this stuff happens once on init
-    frc::SmartDashboard::PutBoolean("Has Target?", TargetAquired);
+    frc::SmartDashboard::PutBoolean("Top Target?", TopTargetAquired);
     frc::SmartDashboard::PutNumber("Target Yaw", TopYaw);
 
-    frc::SmartDashboard::PutBoolean("Bottom Has Target?", BottomTargetAquired);
+    frc::SmartDashboard::PutBoolean("Bottom Target?", BottomTargetAquired);
     frc::SmartDashboard::PutNumber("Bottom Yaw", BottomYaw);
     frc::SmartDashboard::PutNumber("Bottom Index", BottomIndex);
+
+
 
 }
 
@@ -41,13 +43,13 @@ void VisionRun(){
     photonlib::PhotonCamera Cam1{"Top"};
     photonlib::PhotonPipelineResult resultTop = Cam1.GetLatestResult();
   
-    TargetAquired = resultTop.HasTargets(); //returns true if the camera has a target
+    TopTargetAquired = resultTop.HasTargets(); //returns true if the camera has a target
 
     photonlib::PhotonTrackedTarget targetTop = resultTop.GetBestTarget(); //gets the best target
 
     TopYaw = targetTop.GetYaw(); // Yaw of the best target
 
-    frc::SmartDashboard::PutBoolean("Top Target?", TargetAquired); //puts those new values to dashboard
+    frc::SmartDashboard::PutBoolean("Top Target?", TopTargetAquired); //puts those new values to dashboard
     frc::SmartDashboard::PutNumber("Top Yaw", TopYaw);
     
     units::meter_t TopRange = photonlib::PhotonUtils::CalculateDistanceToTarget(
@@ -56,7 +58,7 @@ void VisionRun(){
 
     double TopRangeDouble = TopRange.value();
 
-      frc::SmartDashboard::PutNumber("Top Range", TopRangeDouble);
+    frc::SmartDashboard::PutNumber("Top Range", TopRangeDouble);
 
 
     // second camera for cargo detection
@@ -79,12 +81,19 @@ void VisionRun(){
       BottomIndex = 2; // 2 is the index for a blue ball
     }
     
+    units::meter_t BottomRange = photonlib::PhotonUtils::CalculateDistanceToTarget(
+          CAMERA_HEIGHT2, TARGET_HEIGHT2, CAMERA_PITCH2,
+          units::degree_t{resultBottom.GetBestTarget().GetPitch()});
+
+    double BottomRangeDouble = BottomRange.value();
+
+    frc::SmartDashboard::PutNumber("Bottom Range", BottomRangeDouble);
 
     Cam2.SetPipelineIndex(BottomIndex);
      // set the pipeline to whatever the logic gave
 
 
-    frc::SmartDashboard::PutBoolean("Bottom Has Target?", BottomTargetAquired);
+    frc::SmartDashboard::PutBoolean("Bottom Target?", BottomTargetAquired);
     frc::SmartDashboard::PutNumber("Bottom Yaw", BottomYaw);
     frc::SmartDashboard::PutNumber("Bottom Index", BottomIndex); 
     
