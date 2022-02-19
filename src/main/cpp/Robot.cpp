@@ -365,7 +365,6 @@ void Robot::AutonomousPeriodic()
                       V_autonTargetCmd,
                       c_joyStick.GetRawButton(3),
                       c_joyStick.GetRawButton(4),
-                      c_joyStick.GetRawButton(5),
                       V_GyroYawAngleDegrees,
                       V_GyroYawAngleRad,
                       targetYaw0.GetDouble(0),
@@ -473,8 +472,10 @@ void Robot::TeleopPeriodic()
   bool L_Driver_auto_setspeed_shooter = false;
   bool L_Driver_elevator_up = false;
   bool L_Driver_elevator_down = false;
-  bool L_Driver_right_shooter_desired_speed = false;
-  bool L_Driver_left_shooter_desired_speed = false;
+  double L_Driver_right_shooter_desired_speed = 0;
+  double L_Driver_left_shooter_desired_speed = 0;
+  bool L_Driver_intake_in = false;
+  //bool L_driver_intake_out = false;
 
   double timeleft = frc::DriverStation::GetInstance().GetMatchTime();
 
@@ -482,7 +483,7 @@ void Robot::TeleopPeriodic()
                             &L_Driver_elevator_up,
                              c_joyStick2.GetRawButton(2),
                             &L_Driver_elevator_down,
-                             c_joyStick2.GetRawButton(3), //change later
+                             c_joyStick2.GetRawButton(6), //change later
                             &L_Driver_lift_control,
                              c_joyStick2.GetRawButton(7),
                             &L_Driver_stops_shooter,
@@ -490,10 +491,14 @@ void Robot::TeleopPeriodic()
                             &L_Driver_auto_setspeed_shooter,
                              c_joyStick.GetRawButton(7),
                             &L_Driver_zero_gyro,
+                            c_joyStick2.GetRawButton(3),
+                            &L_Driver_intake_in,
                              c_joyStick2.GetRawAxis(1),
                             &L_Driver_right_shooter_desired_speed,
                              c_joyStick2.GetRawAxis(5),
                             &L_Driver_left_shooter_desired_speed);
+                            
+
 
   Read_Encoders(a_encoderWheelAngleFrontLeft.Get().value(),
                a_encoderWheelAngleFrontRight.Get().value(),
@@ -527,7 +532,6 @@ void Robot::TeleopPeriodic()
                     c_joyStick.GetRawButton(1),
                     c_joyStick.GetRawButton(3),
                     c_joyStick.GetRawButton(4),
-                    c_joyStick.GetRawButton(5),
                     V_GyroYawAngleDegrees,
                     V_GyroYawAngleRad,
                     targetYaw0.GetDouble(0),
@@ -584,7 +588,7 @@ void Robot::TeleopPeriodic()
     m_rightShooterpid.SetReference(0, rev::ControlType::kVelocity);
     m_leftShooterpid.SetReference(-0, rev::ControlType::kVelocity);
 
-    m_intake.Set(ControlMode::PercentOutput, c_joyStick.GetRawAxis(2)); //must be positive (don't be a fool)
+    m_intake.Set(ControlMode::PercentOutput, L_Driver_intake_in); //must be positive (don't be a fool)
     m_elevator.Set(ControlMode::PercentOutput, V_Elevator_Test);
 
     // m_liftpidYD.SetReference(V_lift_command_YD, rev::ControlType::kPosition);
@@ -605,19 +609,19 @@ void Robot::TestPeriodic()
     double L_LiftYD_Power = 0;
     double L_LiftXD_Power = 0;
 
-    if (c_joyStick.GetPOV() == 0)
+    if (c_joyStick2.GetPOV() == 0)
       {
       L_LiftYD_Power = 0.4;
       }
-    else if (c_joyStick.GetPOV() == 180)
+    else if (c_joyStick2.GetPOV() == 180)
       {
       L_LiftYD_Power = -0.4;
       }
-    else if (c_joyStick.GetPOV() == 270)
+    else if (c_joyStick2.GetPOV() == 270)
       {
       L_LiftXD_Power = -0.4;
       }
-    else if (c_joyStick.GetPOV() == 90)
+    else if (c_joyStick2.GetPOV() == 90)
       {
       L_LiftXD_Power = 0.4;
       }

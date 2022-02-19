@@ -85,14 +85,13 @@ void DriveControlInit()
  *
  * Description:  Main calling function for the drive control.
  ******************************************************************************/
-void DriveControlMain(double              L_JoyStick1Axis1Y,
-                      double              L_JoyStick1Axis1X,
+void DriveControlMain(double              L_JoyStick1Axis1Y, //swerve control
+                      double              L_JoyStick1Axis1X, //swerve control
                       double              L_JoyStick1Axis2X,//rotate the robot joystick
                       double              L_JoyStick1Axis3, //extra speed trigger
                       bool                L_JoyStick1Button1,
                       double              L_JoyStick1Button3,
                       double              L_JoyStick1Button4,
-                      double              L_JoyStick1Button5,
                       double              L_GyroAngleDegrees,
                       double              L_GyroAngleRadians,
                       double              L_VisionAngleDeg,
@@ -183,12 +182,6 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,
       V_b_DriveStraight = false;
       rotateMode = true;
       desiredAngle = 0;
-      }
-    else if (L_JoyStick1Button5)
-      {
-      V_b_DriveStraight = false;
-      rotateMode = true;
-      desiredAngle = 67.5;
       }
     else if ((fabs(L_JoyStick1Axis1Y_Scaled) == 0) &&
              (fabs(L_JoyStick1Axis1X_Scaled) == 0) &&
