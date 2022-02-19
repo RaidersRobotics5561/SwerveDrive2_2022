@@ -47,10 +47,11 @@ typedef enum T_PID_Cal
 
 typedef enum T_AutoTargetStates
 {
-  E_NotActive,
-  E_TargetFoundRotateBotAndRollerSpinUp,
-  E_MoveBallsToRollers,
-  E_AutoTargetStatesSz
+  E_NotActive, //not doing anything
+  E_TargetFoundRotateBot, //target locked
+  E_RollerSpinUp, //we movin
+  E_MoveBallsToRollers, // get ready
+  E_AutoTargetStatesSz // 
 } T_AutoTargetStates;
 
 
