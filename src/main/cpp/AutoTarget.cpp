@@ -22,9 +22,9 @@
  * Description:  Auto targeting function.
  ******************************************************************************/
 T_AutoTargetStates AutoTargeting(T_AutoTargetStates  L_CurrentState,
-                                 bool                L_ActivateTarget,
-                                 bool                L_ActivateRollers,
-                                 double              L_DriverAxis1,
+                                 bool                L_ActivateTarget, // two booleans, one for targeting motion
+                                 bool                L_ActivateRollers, //another for rollers
+                                 double              L_DriverAxis1, //need driver axis for the abort
                                  double              L_DriverAxis2,
                                  double              L_DriverAxis3,
                                  double              L_RawTargetVisionAngle,
@@ -81,15 +81,19 @@ T_AutoTargetStates AutoTargeting(T_AutoTargetStates  L_CurrentState,
            (L_CurrentState == E_NotActive))
     {
     /* Ok, we seem to be able to see the target and it is being requested that we become active.
-     * We are also not currently active. */ 
+     * We are also not currently active.
+     * (or in carson words: checked that the targetting has been activated, the program is not already 
+     * active, and our angle are within parameters)
+      */ 
   
   
 
     *L_RobotTargetAngle  = K_TargetVisionAngle;
-    *L_BeltPowerReq = 0.0;
+    *L_BeltPowerReq = 0.0; 
 
-    /* Ok, let's go to the next step: */
-    L_CurrentState = E_TargetFoundRotateBot;
+    /* Ok, let's go to the next step:
+     */
+    L_CurrentState = E_TargetFoundRotateBot; // mark that we finished our rotate
 
   if (L_ActivateRollers == true){
   
@@ -102,6 +106,8 @@ T_AutoTargetStates AutoTargeting(T_AutoTargetStates  L_CurrentState,
                        L_RollerSpeedReq,
                        L_RollerSpeedReq);
     }
+
+  L_CurrentState = E_RollerSpinUp; // mark we have spun up rollers
   }
 
   else if ((L_RobotAngleError <= K_TargetVisionAngleErrorMax) &&
@@ -110,7 +116,7 @@ T_AutoTargetStates AutoTargeting(T_AutoTargetStates  L_CurrentState,
            (L_CurrentState > E_NotActive) &&
            (L_CurrentState < E_MoveBallsToRollers))
     {
-    L_CurrentState = E_MoveBallsToRollers;
+    L_CurrentState = E_MoveBallsToRollers; // mark we are now moving our balls up
     *L_BeltPowerReq = 0.9;
     }
 
