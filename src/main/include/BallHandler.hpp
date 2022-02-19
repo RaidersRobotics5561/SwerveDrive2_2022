@@ -12,5 +12,8 @@
    - Targeting
  */
 
-void BallHandlerControlMain(void);
+void BallHandlerControlMain(bool L_IntakeCmnd,
+                            bool L_BallDetected,
+                            bool L_ElevatorCmndUp,
+                            bool L_ElevatorCmndDwn);
 void BallHandlerInit(void);

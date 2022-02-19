@@ -90,7 +90,9 @@ class Robot : public frc::TimedRobot {
   rev::SparkMaxRelativeEncoder m_encoderLiftYD          = m_liftMotorYD.GetEncoder();
   rev::SparkMaxRelativeEncoder m_encoderLiftXD          = m_liftMotorXD.GetEncoder();
 
-  frc::DigitalInput ir_sensor{5};
+  frc::DigitalInput di_XD_LimitSwitch{3};
+  frc::DigitalInput di_XY_LimitSwitch{4};
+  frc::DigitalInput di_IR_Sensor{5};
 
   frc::Spark blinkin {4};
 

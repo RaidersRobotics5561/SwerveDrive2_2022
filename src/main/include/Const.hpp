@@ -66,6 +66,9 @@ const double K_gyro_angle_lift = -10; //robert is tilting
 const double K_gyro_deadband = 2;
 const double K_deadband_timer = 0.5; //keep the deadband for a certain amount of time
 
+const double K_IntakePower = 0.7; // Amount of power to apply to intake wheels.  Must be 0 to 1.
+const double K_ElevatorPowerUp = 1.0; // Amount of power to apply to elevator band when commanded up.  Must be 0 to 1.
+const double K_ElevatorPowerDwn = -0.5; // Amount of power to apply to elevator band when commanded down.  Must be 0 to 1.
 
 const double K_InitAngle = 1.4; // This is the absolute angle that all of the wheels need to be sitting at before allowing the robot to exit init
 const double K_WheelOffsetAngle[E_RobotCornerSz] = {169.527239,   // E_FrontLeft

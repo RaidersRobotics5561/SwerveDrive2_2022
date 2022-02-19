@@ -2,7 +2,7 @@
   LookUp.hpp
 
    Created on: Feb 14, 2018
-       Author: sdbig
+       Author: biggs
  */
 #ifndef SRC_ROBORIO2018_LOOKUP_HPP_
 #define SRC_ROBORIO2018_LOOKUP_HPP_

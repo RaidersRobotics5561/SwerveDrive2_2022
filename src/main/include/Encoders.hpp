@@ -22,10 +22,6 @@
                   double          L_encoderWheelAngleFrontRightRaw,
                   double          L_encoderWheelAngleRearLeftRaw,
                   double          L_encoderWheelAngleRearRightRaw,
-                   rev::SparkMaxRelativeEncoder m_encoderFrontLeftSteer,
-                   rev::SparkMaxRelativeEncoder m_encoderFrontRightSteer,
-                   rev::SparkMaxRelativeEncoder m_encoderRearLeftSteer,
-                   rev::SparkMaxRelativeEncoder m_encoderRearRightSteer,
                    rev::SparkMaxRelativeEncoder m_encoderFrontLeftDrive,
                    rev::SparkMaxRelativeEncoder m_encoderFrontRightDrive,
                    rev::SparkMaxRelativeEncoder m_encoderRearLeftDrive,
@@ -38,7 +34,9 @@
 double DtrmnEncoderRelativeToCmnd(double L_JoystickCmnd,
                                   double L_EncoderReading);
 
-void EncodersInit(double          L_encoderWheelAngleFrontLeftRaw,
-                  double          L_encoderWheelAngleFrontRightRaw,
-                  double          L_encoderWheelAngleRearLeftRaw,
-                  double          L_encoderWheelAngleRearRightRaw);
+void EncodersInit(rev::SparkMaxRelativeEncoder m_encoderFrontRightSteer,
+                  rev::SparkMaxRelativeEncoder m_encoderFrontLeftSteer,
+                  rev::SparkMaxRelativeEncoder m_encoderRearRightSteer,
+                  rev::SparkMaxRelativeEncoder m_encoderRearLeftSteer,
+                  rev::SparkMaxRelativeEncoder m_encoderLiftYD,
+                  rev::SparkMaxRelativeEncoder m_encoderLiftXD);

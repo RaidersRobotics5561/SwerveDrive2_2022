@@ -15,15 +15,9 @@
 #include "Const.hpp"
 #include <math.h>
 
-double PDP_Current_UpperShooter = 0;
-double PDP_Current_LowerShooter = 0;
-double PDP_Current_UpperShooter_last = 0;
-double PDP_Current_LowerShooter_last = 0;
-double BallsShot = 0;
-double V_elevatorValue = 0;
-
-double       V_ShooterSpeedDesiredFinalUpper;
-double       V_ShooterSpeedDesiredFinalLower;
+double V_ShooterSpeedDesiredFinalUpper;
+double V_ShooterSpeedDesiredFinalLower;
+double V_ShooterSpeedDesired[E_RoboShooter];
 
 double V_testspeed = 0;
 double V_testIntake = 0;
@@ -38,15 +32,13 @@ double V_testElevator = 0;
 
 
 /******************************************************************************
- * Function:     BallLauncherInit
+ * Function:     BallHandlerInit
  *
  * Description:  Initialization function for the drive control.
  ******************************************************************************/
 void BallHandlerInit()
   {
     int L_Index;
-    V_elevatorValue = 0;
-    BallsShot = 0;
 
       for (L_Index = E_FrontLeft;
            L_Index < E_RobotCornerSz;
@@ -62,11 +54,11 @@ void BallHandlerInit()
  * Description:  Contains the functionality for controlling the launch 
  *               mechanism.
  ******************************************************************************/
-void BallLauncher()
+double BallLauncher(bool L_AutoShootReq)
   {
 //    if (L_Driver_stops_shooter)
 //    {
-//      V_AutoShootEnable = false;
+//      L_AutoShootReq = false;
 //      V_ShooterSpeedDesiredFinalUpper = 0;
 //      V_ShooterSpeedDesiredFinalLower = 0;
 //    }
@@ -75,7 +67,7 @@ void BallLauncher()
 //         (c_joyStick2.GetPOV() == 270) || 
 //         (c_joyStick2.GetPOV() == 0)   || 
 //         (L_Driver_auto_setspeed_shooter) || 
-//         (V_AutoShootEnable == true))
+//         (L_AutoShootReq == true))
 //     {
 //       if ((c_joyStick2.GetPOV() == 180))
 //       {
@@ -98,7 +90,7 @@ void BallLauncher()
 //         V_ShooterSpeedDesiredFinalLower = DesiredLowerBeamSpeed(distanceTarget);
 //       }
 
-//       V_AutoShootEnable = true;
+//       L_AutoShootReq = true;
 //       V_ShooterSpeedDesired[E_rightShooter] = RampTo(V_ShooterSpeedDesiredFinalUpper, V_ShooterSpeedDesired[E_rightShooter], 50);
 //       V_ShooterSpeedDesired[E_leftShooter] = RampTo(V_ShooterSpeedDesiredFinalLower, V_ShooterSpeedDesired[E_leftShooter], 50);
 //     }
@@ -183,6 +175,7 @@ void BallLauncher()
 //     m_leftShooterpid.SetOutputRange(V_Min, V_Max);
 
 // V_testElevator = frc::SmartDashboard::GetNumber("Elevator Power",V_testElevator);
+    return (0);
   }
 
 /******************************************************************************
@@ -191,9 +184,18 @@ void BallLauncher()
  * Description:  Contains the functionality for controlling the intake 
  *               mechanism.
  ******************************************************************************/
-void BallIntake()
+double BallIntake(bool L_DriverIntakeCmnd)
   {
+    double L_IntakeMotorCmnd = 0;
+
+    if (L_DriverIntakeCmnd == true)
+    {
+      L_IntakeMotorCmnd = K_IntakePower;
+    }
+    // Otherwise, leave at 0
+
     //   V_testIntake = frc::SmartDashboard::GetNumber("Intake Power",V_testIntake);
+    return (L_IntakeMotorCmnd);
   }
 
 /******************************************************************************
@@ -201,32 +203,28 @@ void BallIntake()
  *
  * Description:  Contains the functionality for controlling the elevator 
  *               mechanism.
+ *
+ *               ToDo: What do we want to do with the IR sensor?
  ******************************************************************************/
-void BallElevator()
+double BallElevator(bool L_BallDetected,
+                    bool L_ElevatorCmndUp,
+                    bool L_ElevatorCmndDwn)
   {
-    // bool activeBeamSensor = ir_sensor.Get();
-    // // frc::SmartDashboard::PutBoolean("ir beam", activeBeamSensor);
+    double L_ElevatorPowerCmnd = 0;
 
-    // if(L_Driver_elevator_up)
-    // {
-    //   if(activeBeamSensor)
-    //   {
-    //     m_elevator.Set(ControlMode::PercentOutput, 1);
-    //   }
-    //   else
-    //   {
-    //     m_elevator.Set(ControlMode::PercentOutput, 1);
-    //   }    
-    // }
-    // else if(L_Driver_elevator_down)
-    // {
-    //   m_elevator.Set(ControlMode::PercentOutput, -0.420);
-    // }
-    // else
-    // {
-    //   m_elevator.Set(ControlMode::PercentOutput, 0);
-    // }
+    if(L_ElevatorCmndUp == true)
+      {
+      L_ElevatorPowerCmnd = K_ElevatorPowerUp;
+      }
+    else if(L_ElevatorCmndDwn == true)
+      {
+      L_ElevatorPowerCmnd = K_ElevatorPowerDwn;
+      }
+    // otherwise leave at 0
+
+    return (L_ElevatorPowerCmnd);
   }
+
 
 /******************************************************************************
  * Function:     BallHandlerControlMain
@@ -234,9 +232,20 @@ void BallElevator()
  * Description:  Contains the functionality for controlling the launch 
  *               mechanism.
  ******************************************************************************/
-void BallHandlerControlMain()
-  { 
-    BallIntake();
-    BallElevator();
-    BallLauncher();
+void BallHandlerControlMain(bool L_IntakeCmnd,
+                            bool L_BallDetected,
+                            bool L_ElevatorCmndUp,
+                            bool L_ElevatorCmndDwn)
+  {
+    double L_LauncherRPM       = 0;
+    double L_IntakePowerCmnd   = 0;
+    double L_ElevatorPowerCmnd = 0;
+
+    L_IntakePowerCmnd = BallIntake(L_IntakeCmnd);
+    
+    L_ElevatorPowerCmnd = BallElevator(L_BallDetected,
+                                       L_ElevatorCmndUp,
+                                       L_ElevatorCmndDwn);
+
+    L_LauncherRPM = BallLauncher(false);
   }

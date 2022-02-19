@@ -18,7 +18,6 @@ double V_WheelAngleFwd[E_RobotCornerSz]; // This is the wheel angle as if the wh
 double V_Rad_WheelAngleFwd[E_RobotCornerSz]; // This is the wheel angle as if the wheel were going to be driven in a forward direction, in radians
 double V_WheelAngleRev[E_RobotCornerSz]; // This is the wheel angle as if the wheel were going to be driven in a reverse direction
 
-double V_WheelRelativeAngleRawOffset[E_RobotCornerSz];
 double V_WheelVelocity[E_RobotCornerSz]; // Velocity of drive wheels, in in/sec
 double V_M_WheelDeltaDistance[E_RobotCornerSz]; // Distance wheel moved, loop to loop, in inches
 double V_Cnt_WheelDeltaDistanceCurr[E_RobotCornerSz]; // Prev distance wheel moved, loop to loop, in Counts
@@ -35,10 +34,12 @@ double V_LiftPostitionXD;
  *
  * Description:  Initialize all of the applicable encoder variables.
  ******************************************************************************/
-void EncodersInit(double          L_encoderWheelAngleFrontLeftRaw,
-                  double          L_encoderWheelAngleFrontRightRaw,
-                  double          L_encoderWheelAngleRearLeftRaw,
-                  double          L_encoderWheelAngleRearRightRaw)
+void EncodersInit(rev::SparkMaxRelativeEncoder m_encoderFrontRightSteer,
+                  rev::SparkMaxRelativeEncoder m_encoderFrontLeftSteer,
+                  rev::SparkMaxRelativeEncoder m_encoderRearRightSteer,
+                  rev::SparkMaxRelativeEncoder m_encoderRearLeftSteer,
+                  rev::SparkMaxRelativeEncoder m_encoderLiftYD,
+                  rev::SparkMaxRelativeEncoder m_encoderLiftXD)
   {
     T_RobotCorner L_Index;
 
@@ -53,11 +54,14 @@ void EncodersInit(double          L_encoderWheelAngleFrontLeftRaw,
         V_Cnt_WheelDeltaDistanceCurr[L_Index] = 0;
         V_Cnt_WheelDeltaDistancePrev[L_Index] = 0;
       }
-    /* Capture the wheel angle offset during init using the absolute encoders: */
-    V_WheelRelativeAngleRawOffset[E_FrontLeft]  = std::fmod((L_encoderWheelAngleFrontLeftRaw  * C_EncoderToAngle), 360) - K_WheelOffsetAngle[E_FrontLeft];
-    V_WheelRelativeAngleRawOffset[E_FrontRight] = std::fmod((L_encoderWheelAngleFrontRightRaw * C_EncoderToAngle), 360) - K_WheelOffsetAngle[E_FrontRight];
-    V_WheelRelativeAngleRawOffset[E_RearLeft]   = std::fmod((L_encoderWheelAngleRearLeftRaw   * C_EncoderToAngle), 360) - K_WheelOffsetAngle[E_RearLeft];
-    V_WheelRelativeAngleRawOffset[E_RearRight]  = std::fmod((L_encoderWheelAngleRearRightRaw  * C_EncoderToAngle), 360) - K_WheelOffsetAngle[E_RearRight];
+
+    m_encoderFrontRightSteer.SetPosition(0);
+    m_encoderFrontLeftSteer.SetPosition(0);
+    m_encoderRearRightSteer.SetPosition(0);
+    m_encoderRearLeftSteer.SetPosition(0);
+
+    m_encoderLiftYD.SetPosition(0);
+    m_encoderLiftXD.SetPosition(0);
 
     V_ShooterSpeedCurr[E_rightShooter] = 0;
     V_ShooterSpeedCurr[E_leftShooter] = 0;
@@ -68,14 +72,10 @@ void EncodersInit(double          L_encoderWheelAngleFrontLeftRaw,
  *
  * Description:  Run all of the encoder decoding logic.
  ******************************************************************************/
-void Read_Encoders(double         L_encoderWheelAngleFrontLeftRaw,
-                  double          L_encoderWheelAngleFrontRightRaw,
-                  double          L_encoderWheelAngleRearLeftRaw,
-                  double          L_encoderWheelAngleRearRightRaw,
-                   rev::SparkMaxRelativeEncoder m_encoderFrontLeftSteer,
-                   rev::SparkMaxRelativeEncoder m_encoderFrontRightSteer,
-                   rev::SparkMaxRelativeEncoder m_encoderRearLeftSteer,
-                   rev::SparkMaxRelativeEncoder m_encoderRearRightSteer,
+void Read_Encoders(double                       L_encoderWheelAngleFrontLeftRaw,
+                   double                       L_encoderWheelAngleFrontRightRaw,
+                   double                       L_encoderWheelAngleRearLeftRaw,
+                   double                       L_encoderWheelAngleRearRightRaw,
                    rev::SparkMaxRelativeEncoder m_encoderFrontLeftDrive,
                    rev::SparkMaxRelativeEncoder m_encoderFrontRightDrive,
                    rev::SparkMaxRelativeEncoder m_encoderRearLeftDrive,
@@ -131,7 +131,6 @@ void Read_Encoders(double         L_encoderWheelAngleFrontLeftRaw,
     V_Cnt_WheelDeltaDistancePrev[index]  = V_Cnt_WheelDeltaDistanceCurr[index];
     }
 
-  frc::SmartDashboard::PutNumber("FL Angle From Center", V_WheelRelativeAngleRawOffset[E_FrontLeft]);
   frc::SmartDashboard::PutNumber("FL Angle Fwd", V_WheelAngleFwd[E_FrontLeft]);
   frc::SmartDashboard::PutNumber("FL NEO Encoder Processed", V_WheelAngleConverted[E_FrontLeft]);
   frc::SmartDashboard::PutNumber("Lift postition YD", V_LiftPostitionYD);
