@@ -280,8 +280,8 @@ void Robot::RobotPeriodic()
 
     //Run Gyro readings when the robot starts
 
-
-  void VisionRun();
+  VisionDashboard();
+  VisionRun();
     // Gyro();
 
 }
