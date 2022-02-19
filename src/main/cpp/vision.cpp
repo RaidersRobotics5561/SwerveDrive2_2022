@@ -8,6 +8,8 @@
 #include <photonlib/PhotonCamera.h>
 #include <photonlib/PhotonUtils.h>
 #include <units/length.h>
+#include <AutoTarget.hpp>
+
 // all our favorite variables
 bool TopTargetAquired;
 double TopYaw;
@@ -18,6 +20,9 @@ frc::DriverStation::Alliance AllianceColor;
 // our favorite networktables
 nt::NetworkTableInstance Cam1;
 nt::NetworkTableInstance Cam2;
+
+
+
 
 void VisionDashboard(){
 
@@ -96,5 +101,7 @@ void VisionRun(){
     frc::SmartDashboard::PutBoolean("Bottom Target?", BottomTargetAquired);
     frc::SmartDashboard::PutNumber("Bottom Yaw", BottomYaw);
     frc::SmartDashboard::PutNumber("Bottom Index", BottomIndex); 
+
+
     
 }
