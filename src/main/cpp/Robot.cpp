@@ -27,6 +27,7 @@
 #include "Enums.hpp"
 #include "control_pid.hpp"
 #include "Gyro.hpp"
+#include "IO_Sensors.hpp"
 #include "Lookup.hpp"
 #include "vision.hpp"
 #include "DriveControl.hpp"
@@ -68,7 +69,7 @@ nt::NetworkTableEntry ledControl;
 
 frc::DriverStation::Alliance V_AllianceColor;
 
-double V_ShooterSpeedDesired[E_RoboShooter];
+
 
 double V_AutoTargetAngle;
 double V_AutoTargetUpperRollerSpd;
@@ -209,10 +210,6 @@ void Robot::RobotInit() {
     // frc::SmartDashboard::PutNumber("Speed Desired Left", 0);
 
     frc::SmartDashboard::PutNumber("cooler int", 1);
-
-    V_ShooterSpeedDesired[E_rightShooter] = 0;
-    V_ShooterSpeedDesired[E_leftShooter] = 0;
-
     // double lower_P_Gx = .0008;
     // double lower_I_Gx = .000001;
     // double lower_D_Gx = .0006;
@@ -304,20 +301,18 @@ void Robot::AutonomousInit()
     V_autonTargetCmd = false;
     V_autonTargetFin = false;
     
-    V_ShooterSpeedDesired[E_rightShooter] = 0;
-    V_ShooterSpeedDesired[E_leftShooter] = 0;
-      
-      
-      EncodersInit(a_encoderWheelAngleFrontLeft.Get().value(),
-                   a_encoderWheelAngleFrontRight.Get().value(),
-                   a_encoderWheelAngleRearLeft.Get().value(),
-                   a_encoderWheelAngleRearRight.Get().value());
-      DriveControlInit();
-      BallHandlerInit();
-      AutonDriveReset();
-      V_M_RobotDisplacementX = 0;
-      V_M_RobotDisplacementY = 0;
+    EncodersInit(m_encoderFrontRightSteer,
+                 m_encoderFrontLeftSteer,
+                 m_encoderRearRightSteer,
+                 m_encoderRearLeftSteer,
+                 m_encoderLiftYD,
+                 m_encoderLiftXD);
 
+    DriveControlInit();
+    BallHandlerInit();
+    AutonDriveReset();
+    V_M_RobotDisplacementX = 0;
+    V_M_RobotDisplacementY = 0;
 
       // AutonDriveReset();  
   }
@@ -337,13 +332,9 @@ void Robot::AutonomousPeriodic()
     double speen = 0;
 
     Read_Encoders(a_encoderWheelAngleFrontLeft.Get().value(),
-               a_encoderWheelAngleFrontRight.Get().value(),
-               a_encoderWheelAngleRearLeft.Get().value(),
-               a_encoderWheelAngleRearRight.Get().value(),
-               m_encoderFrontLeftSteer,
-                  m_encoderFrontRightSteer,
-                  m_encoderRearLeftSteer,
-                  m_encoderRearRightSteer,
+                  a_encoderWheelAngleFrontRight.Get().value(),
+                  a_encoderWheelAngleRearLeft.Get().value(),
+                  a_encoderWheelAngleRearRight.Get().value(),
                   m_encoderFrontLeftDrive,
                   m_encoderFrontRightDrive,
                   m_encoderRearLeftDrive,
@@ -354,6 +345,10 @@ void Robot::AutonomousPeriodic()
                   m_encoderLiftXD);
     
     ReadGyro(false);
+
+    Read_IO_Sensors(di_IR_Sensor.Get(),
+                    di_XD_LimitSwitch.Get(),
+                    di_XY_LimitSwitch.Get());
  
     DtrmnSwerveBotLocation(V_GyroYawAngleRad,
                            &V_Rad_WheelAngleFwd[0],
@@ -407,7 +402,6 @@ void Robot::AutonomousPeriodic()
  ******************************************************************************/
 void Robot::TeleopInit()
   {
-
   V_RobotState = E_Teleop;
 
   m_frontLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
@@ -415,54 +409,54 @@ void Robot::TeleopInit()
   m_rearLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
   m_frontLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
 
-
-  m_encoderFrontRightSteer.SetPosition(0);
-  m_encoderFrontLeftSteer.SetPosition(0);
-  m_encoderRearRightSteer.SetPosition(0);
-  m_encoderRearLeftSteer.SetPosition(0);
-
-  EncodersInit(a_encoderWheelAngleFrontLeft.Get().value(),
-               a_encoderWheelAngleFrontRight.Get().value(),
-               a_encoderWheelAngleRearLeft.Get().value(),
-               a_encoderWheelAngleRearRight.Get().value());
+  EncodersInit(m_encoderFrontRightSteer,
+               m_encoderFrontLeftSteer,
+               m_encoderRearRightSteer,
+               m_encoderRearLeftSteer,
+               m_encoderLiftYD,
+               m_encoderLiftXD);
 
   DriveControlInit();
+
   BallHandlerInit();
+
   V_AutoShootEnable = false;
   V_M_RobotDisplacementX = 0;
   V_M_RobotDisplacementY = 0;
 
-    V_P_Gx = frc::SmartDashboard::GetNumber("P_Gx", V_P_Gx);
-    V_I_Gx = frc::SmartDashboard::GetNumber("I_Gx", V_I_Gx);
-    V_D_Gx = frc::SmartDashboard::GetNumber("D_Gx", V_D_Gx);
-    V_I_Zone = frc::SmartDashboard::GetNumber("I_Zone", V_I_Zone);
-    V_FF = frc::SmartDashboard::GetNumber("FF", V_FF);
-    V_Max = frc::SmartDashboard::GetNumber("Max_Limit", V_Max);
-    V_Min = frc::SmartDashboard::GetNumber("Min_Limit", V_Min);
-
-    m_liftpidYD.SetP(V_P_Gx);
-    m_liftpidYD.SetI(V_I_Gx);
-    m_liftpidYD.SetD(V_D_Gx);
-    m_liftpidYD.SetIZone(V_I_Zone);
-    m_liftpidYD.SetFF(V_FF);
-    m_liftpidYD.SetOutputRange(V_Min, V_Max);
-
-    m_liftpidXD.SetP(V_P_Gx);
-    m_liftpidXD.SetI(V_I_Gx);
-    m_liftpidXD.SetD(V_D_Gx);
-    m_liftpidXD.SetIZone(V_I_Zone);
-    m_liftpidXD.SetFF(V_FF);
-    m_liftpidXD.SetOutputRange(V_Min, V_Max);
+  V_P_Gx = frc::SmartDashboard::GetNumber("P_Gx", V_P_Gx);
+  V_I_Gx = frc::SmartDashboard::GetNumber("I_Gx", V_I_Gx);
+  V_D_Gx = frc::SmartDashboard::GetNumber("D_Gx", V_D_Gx);
+  V_I_Zone = frc::SmartDashboard::GetNumber("I_Zone", V_I_Zone);
+  V_FF = frc::SmartDashboard::GetNumber("FF", V_FF);
+  V_Max = frc::SmartDashboard::GetNumber("Max_Limit", V_Max);
+  V_Min = frc::SmartDashboard::GetNumber("Min_Limit", V_Min);
 
   K_MaxVel = frc::SmartDashboard::GetNumber("max velocity", K_MaxVel);
   K_MinVel = frc::SmartDashboard::GetNumber("min velocity", K_MinVel);
   K_MaxAcc = frc::SmartDashboard::GetNumber("max acceleration", K_MaxAcc);
   K_AllErr = frc::SmartDashboard::GetNumber("kAllErr", K_AllErr);
 
-    // m_liftpidYD.SetSmartMotionMaxVelocity(K_MaxVel);
-    // m_liftpidYD.SetSmartMotionMinOutputVelocity(K_MinVel);
-    // m_liftpidYD.SetSmartMotionMaxAccel(K_MaxAcc);
-    // m_liftpidYD.SetSmartMotionAllowedClosedLoopError(K_AllErr);
+  m_liftpidYD.SetP(V_P_Gx);
+  m_liftpidYD.SetI(V_I_Gx);
+  m_liftpidYD.SetD(V_D_Gx);
+  m_liftpidYD.SetIZone(V_I_Zone);
+  m_liftpidYD.SetFF(V_FF);
+  m_liftpidYD.SetOutputRange(V_Min, V_Max);
+
+  m_liftpidXD.SetP(V_P_Gx);
+  m_liftpidXD.SetI(V_I_Gx);
+  m_liftpidXD.SetD(V_D_Gx);
+  m_liftpidXD.SetIZone(V_I_Zone);
+  m_liftpidXD.SetFF(V_FF);
+  m_liftpidXD.SetOutputRange(V_Min, V_Max);
+
+
+
+  m_liftpidYD.SetSmartMotionMaxVelocity(K_MaxVel);
+  m_liftpidYD.SetSmartMotionMinOutputVelocity(K_MinVel);
+  m_liftpidYD.SetSmartMotionMaxAccel(K_MaxAcc);
+  m_liftpidYD.SetSmartMotionAllowedClosedLoopError(K_AllErr);
 }
 
 
@@ -505,10 +499,6 @@ void Robot::TeleopPeriodic()
                a_encoderWheelAngleFrontRight.Get().value(),
                a_encoderWheelAngleRearLeft.Get().value(),
                a_encoderWheelAngleRearRight.Get().value(),
-               m_encoderFrontLeftSteer,
-                m_encoderFrontRightSteer,
-                m_encoderRearLeftSteer,
-                m_encoderRearRightSteer,
                 m_encoderFrontLeftDrive,
                 m_encoderFrontRightDrive,
                 m_encoderRearLeftDrive,
@@ -519,6 +509,10 @@ void Robot::TeleopPeriodic()
                 m_encoderLiftXD);
 
   ReadGyro(L_Driver_zero_gyro);
+
+  Read_IO_Sensors(di_IR_Sensor.Get(),
+                  di_XD_LimitSwitch.Get(),
+                  di_XY_LimitSwitch.Get());
 
   DtrmnSwerveBotLocation(V_GyroYawAngleRad,
                          &V_Rad_WheelAngleFwd[0],
@@ -555,7 +549,7 @@ void Robot::TeleopPeriodic()
                                        &V_lift_command_XD,
                                        V_GyroYawAngleDegrees);
 
-  BallHandlerControlMain();
+  // BallHandlerControlMain();
 
   LED_VanityLights();
   
@@ -598,7 +592,6 @@ void Robot::TeleopPeriodic()
 
     m_liftpidYD.SetReference(V_YD_Test, rev::ControlType::kPosition); // positive is up
     m_liftpidXD.SetReference(V_XD_Test, rev::ControlType::kPosition); // This is temporary.  We actually want to use position, but need to force this off temporarily
-
 }
 
 
@@ -609,7 +602,28 @@ void Robot::TeleopPeriodic()
  ******************************************************************************/
 void Robot::TestPeriodic()
   {
+    double L_LiftYD_Power = 0;
+    double L_LiftXD_Power = 0;
 
+    if (c_joyStick.GetPOV() == 0)
+      {
+      L_LiftYD_Power = 0.4;
+      }
+    else if (c_joyStick.GetPOV() == 180)
+      {
+      L_LiftYD_Power = -0.4;
+      }
+    else if (c_joyStick.GetPOV() == 270)
+      {
+      L_LiftXD_Power = -0.4;
+      }
+    else if (c_joyStick.GetPOV() == 90)
+      {
+      L_LiftXD_Power = 0.4;
+      }
+
+    m_liftMotorXD.Set(L_LiftXD_Power);
+    m_liftMotorYD.Set(L_LiftYD_Power);
   }
 
 
