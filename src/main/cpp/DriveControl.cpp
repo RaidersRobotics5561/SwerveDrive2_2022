@@ -55,7 +55,7 @@ double V_Drive_Max = 1;
 double V_Drive_Min = -1;
 
 /******************************************************************************
- * Function:     DriveControlMain
+ * Function:     DriveControlInit
  *
  * Description:  Initialization function for the drive control.
  ******************************************************************************/
