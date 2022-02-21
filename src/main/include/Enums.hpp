@@ -53,6 +53,12 @@ typedef enum T_AutoTargetStates
   E_AutoTargetStatesSz
 } T_AutoTargetStates;
 
+typedef enum T_LauncherStates
+{
+  E_LauncherNotActive,
+  E_LauncherAutoTargetActive,
+  E_LauncherManualActive,
+} T_LauncherStates;
 
 typedef enum T_Lift_State
 {

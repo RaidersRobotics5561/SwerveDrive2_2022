@@ -326,7 +326,7 @@ void Robot::AutonomousInit()
  ******************************************************************************/
 void Robot::AutonomousPeriodic()
   {
-    double timeleft = frc::Timer::GetMatchTime().value();
+    double L_timeleft = frc::Timer::GetMatchTime().value();
     double driveforward = 0;
     double strafe = 0;
     double speen = 0;
@@ -361,13 +361,14 @@ void Robot::AutonomousPeriodic()
     DriveControlMain( driveforward,
                       strafe,
                       speen,
-                      c_joyStick.GetRawAxis(3),
+                      0, // May need to add additional speed control/command
                       V_autonTargetCmd,
                       c_joyStick.GetRawButton(3),
                       c_joyStick.GetRawButton(4),
                       V_GyroYawAngleDegrees,
                       V_GyroYawAngleRad,
-                      targetYaw0.GetDouble(0),
+                      TopTargetAquired,
+                      TopYaw,
                      &V_WheelAngleFwd[0],
                      &V_WheelAngleRev[0],
                      &V_WheelSpeedCmnd[0],
@@ -485,33 +486,53 @@ void Robot::TeleopPeriodic()
   double L_Driver_left_shooter_desired_speed = 0;
   bool L_Driver_intake_in = false;
   //bool L_driver_intake_out = false;
+  double L_Driver_SwerveForwardBack = 0;
+  double L_Driver_SwerveStrafe = 0;
+  double L_Driver_SwerveRotate = 0;
+  double L_Driver_SwerveSpeed = 0;
+  bool   L_Driver_SwerveGoalAutoCenter = false;
+  bool   L_Driver_SwerveRotateTo0 = false;
+  bool   L_Driver_SwerveRotateTo90 = false;
 
-  double timeleft = frc::DriverStation::GetInstance().GetMatchTime();
+  double L_timeleft = frc::DriverStation::GetInstance().GetMatchTime();
 
-  Joystick_robot_mapping(    c_joyStick2.GetRawButton(1),
-                            &L_Driver_elevator_up,
-                             c_joyStick2.GetRawButton(2),
-                            &L_Driver_elevator_down,
-                             c_joyStick2.GetRawButton(6), //change later
-                            &L_Driver_lift_control,
-                             c_joyStick2.GetRawButton(7),
-                            &L_Driver_stops_shooter,
-                             c_joyStick2.GetRawButton(8),
-                            &L_Driver_auto_setspeed_shooter,
-                             c_joyStick.GetRawButton(7),
-                            &L_Driver_zero_gyro,
-                            c_joyStick2.GetRawButton(3),
-                            &L_Driver_intake_in,
-                             c_joyStick2.GetRawAxis(1),
-                            &L_Driver_right_shooter_desired_speed,
-                             c_joyStick2.GetRawAxis(5),
-                            &L_Driver_left_shooter_desired_speed);
-
+  Joystick_robot_mapping( c_joyStick2.GetRawButton(1),
+                         &L_Driver_elevator_up,
+                          c_joyStick2.GetRawButton(2),
+                         &L_Driver_elevator_down,
+                          c_joyStick2.GetRawButton(6), //change later
+                         &L_Driver_lift_control,
+                          c_joyStick2.GetRawButton(7),
+                         &L_Driver_stops_shooter,
+                          c_joyStick2.GetRawButton(8),
+                         &L_Driver_auto_setspeed_shooter,
+                          c_joyStick.GetRawButton(7),
+                         &L_Driver_zero_gyro,
+                          c_joyStick2.GetRawButton(3),
+                         &L_Driver_intake_in,
+                          c_joyStick2.GetRawAxis(1),
+                         &L_Driver_right_shooter_desired_speed,
+                          c_joyStick2.GetRawAxis(5),
+                         &L_Driver_left_shooter_desired_speed,
+                          c_joyStick.GetRawAxis(1),
+                         &L_Driver_SwerveForwardBack,
+                          c_joyStick.GetRawAxis(0),
+                         &L_Driver_SwerveStrafe,
+                          c_joyStick.GetRawAxis(4),
+                         &L_Driver_SwerveRotate,
+                          c_joyStick.GetRawAxis(3),
+                         &L_Driver_SwerveSpeed,
+                          c_joyStick.GetRawButton(1),
+                         &L_Driver_SwerveGoalAutoCenter,
+                          c_joyStick.GetRawButton(3),
+                         &L_Driver_SwerveRotateTo0,
+                          c_joyStick.GetRawButton(4),
+                         &L_Driver_SwerveRotateTo90);
 
   Read_Encoders(a_encoderWheelAngleFrontLeft.Get().value(),
-               a_encoderWheelAngleFrontRight.Get().value(),
-               a_encoderWheelAngleRearLeft.Get().value(),
-               a_encoderWheelAngleRearRight.Get().value(),
+                a_encoderWheelAngleFrontRight.Get().value(),
+                a_encoderWheelAngleRearLeft.Get().value(),
+                a_encoderWheelAngleRearRight.Get().value(),
                 m_encoderFrontLeftDrive,
                 m_encoderFrontRightDrive,
                 m_encoderRearLeftDrive,
@@ -533,27 +554,26 @@ void Robot::TeleopPeriodic()
                          &V_M_RobotDisplacementX,
                          &V_M_RobotDisplacementY);
 
-  DriveControlMain( c_joyStick.GetRawAxis(1),
-                    c_joyStick.GetRawAxis(0),
-                    c_joyStick.GetRawAxis(4),
-                    c_joyStick.GetRawAxis(3),
-                    c_joyStick.GetRawButton(1),
-                    c_joyStick.GetRawButton(3),
-                    c_joyStick.GetRawButton(4),
+  DriveControlMain( L_Driver_SwerveForwardBack,
+                    L_Driver_SwerveStrafe,
+                    L_Driver_SwerveRotate,
+                    L_Driver_SwerveSpeed,
+                    L_Driver_SwerveGoalAutoCenter,
+                    L_Driver_SwerveRotateTo0,
+                    L_Driver_SwerveRotateTo90,
                     V_GyroYawAngleDegrees,
                     V_GyroYawAngleRad,
-                    targetYaw0.GetDouble(0),
+                    TopTargetAquired,
+                    TopYaw,
                    &V_WheelAngleFwd[0],
                    &V_WheelAngleRev[0],
-
-                   
                    &V_WheelSpeedCmnd[0],
                    &V_WheelAngleCmnd[0],
                    &V_autonTargetFin,
                     V_RobotState);
 
   V_Lift_state = Lift_Control_Dictator(L_Driver_lift_control,
-                                       timeleft,
+                                       L_timeleft,
                                        V_Lift_state,
                                        V_lift_measured_position_YD,
                                        V_lift_measured_position_XD,
@@ -561,22 +581,22 @@ void Robot::TeleopPeriodic()
                                        &V_lift_command_XD,
                                        V_GyroYawAngleDegrees);
 
-  // BallHandlerControlMain();
-
-  double L_Intake = 0;
-  double L_Elevator = 0;
-  double L_Shooter = 0;
-  BallHandlerControlMain(   L_Driver_intake_in,
-                            false,
-                            L_Driver_elevator_up,
-                            L_Driver_elevator_down,
-                            L_Driver_right_shooter_desired_speed,
-                            &L_Intake,
-                            &L_Elevator,
-                            &L_Shooter);
+  BallHandlerControlMain( L_Driver_intake_in,
+                          V_BallDetectedRaw,
+                          L_Driver_elevator_up,
+                          L_Driver_elevator_down,
+                          L_Driver_stops_shooter,
+                          L_Driver_auto_setspeed_shooter,
+                          V_autonTargetFin,
+                          TopTargetAquired,
+                          V_TopTargetDistanceMeters,
+                          V_ShooterSpeedCurr[E_leftShooter],
+                          L_Driver_right_shooter_desired_speed,
+                         &V_IntakePowerCmnd,
+                         &V_ElevatorPowerCmnd,
+                         &V_ShooterRPM_Cmnd);
 
   LED_VanityLights();
-  
   
   V_XD_Test = frc::SmartDashboard::GetNumber("XD Lift", V_XD_Test);
   V_YD_Test = frc::SmartDashboard::GetNumber("YD Lift", V_YD_Test);
@@ -604,25 +624,11 @@ void Robot::TeleopPeriodic()
     // m_rearLeftSteerMotor.Set(0);
     // m_rearRightSteerMotor.Set(0);
 
+    m_rightShooterpid.SetReference(-V_ShooterRPM_Cmnd, rev::ControlType::kSmartVelocity);
+    m_leftShooterpid.SetReference(V_ShooterRPM_Cmnd, rev::ControlType::kSmartVelocity);
 
-    // m_rightShooterpid.SetReference(L_Shooter, rev::ControlType::kVelocity);
-    // m_leftShooterpid.SetReference(-L_Shooter, rev::ControlType::kVelocity);
-
-double L_ELE = 0;
-if (c_joyStick2.GetRawButton(1) == true)
-{
-  L_ELE = 0.9;
-}
-else if (c_joyStick2.GetRawButton(2) == true)
-{
-  L_ELE = -0.9;
-}
-
-m_rightShooterMotor.Set(c_joyStick2.GetRawAxis(1));
-    m_leftShooterMotor.Set(-c_joyStick2.GetRawAxis(1));
-
-    m_intake.Set(ControlMode::PercentOutput, L_Intake); //must be positive (don't be a fool)
-    m_elevator.Set(ControlMode::PercentOutput, L_ELE);
+    m_intake.Set(ControlMode::PercentOutput, V_IntakePowerCmnd); //must be positive (don't be a fool)
+    m_elevator.Set(ControlMode::PercentOutput, V_ElevatorPowerCmnd);
 
     // m_liftpidYD.SetReference(V_lift_command_YD, rev::ControlType::kPosition);
     // m_liftpidXD.SetReference(V_lift_command_XD, rev::ControlType::kPosition);
@@ -639,8 +645,12 @@ m_rightShooterMotor.Set(c_joyStick2.GetRawAxis(1));
  ******************************************************************************/
 void Robot::TestPeriodic()
   {
-    double L_LiftYD_Power = 0;
-    double L_LiftXD_Power = 0;
+  double L_LiftYD_Power = 0;
+  double L_LiftXD_Power = 0;
+
+  Read_IO_Sensors(di_IR_Sensor.Get(),
+                  di_XD_LimitSwitch.Get(),
+                  di_XY_LimitSwitch.Get());
 
     if (c_joyStick2.GetPOV() == 0)
       {
@@ -648,11 +658,17 @@ void Robot::TestPeriodic()
       }
     else if (c_joyStick2.GetPOV() == 180)
       {
-      L_LiftYD_Power = -0.25;
+        if (V_YD_LimitDetected == false)
+          {
+          L_LiftYD_Power = -0.25;
+          }
       }
     else if (c_joyStick2.GetPOV() == 270)
       {
-      L_LiftXD_Power = -0.15;
+        if (V_XD_LimitDetected == false)
+          {
+          L_LiftXD_Power = -0.15;
+          }
       }
     else if (c_joyStick2.GetPOV() == 90)
       {

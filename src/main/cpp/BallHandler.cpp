@@ -13,14 +13,19 @@
  */
 
 #include "Const.hpp"
+#include "Lookup.hpp"
 #include <math.h>
 
-double V_ShooterSpeedDesiredFinalUpper;
-double V_ShooterSpeedDesiredFinalLower;
-double V_ShooterSpeedDesired[E_RoboShooter];
 
-double V_testspeed = 0;
-double V_testIntake = 0;
+double V_IntakePowerCmnd   = 0;
+double V_ElevatorPowerCmnd = 0;
+double V_ShooterRPM_Cmnd   = 0;
+
+T_LauncherStates V_LauncherStatePrev     = E_LauncherNotActive;
+double           V_LauncherSpeedCmndPrev = 0;
+
+double V_testspeed    = 0;
+double V_testIntake   = 0;
 double V_testElevator = 0;
 // double V_P_Gx = 0.00005;
 // double V_I_Gx = 0.000001;
@@ -40,13 +45,20 @@ void BallHandlerInit()
   {
     int L_Index;
 
-      for (L_Index = E_FrontLeft;
-           L_Index < E_RobotCornerSz;
-           L_Index = T_RobotCorner(int(L_Index) + 1))
+    for (L_Index = E_FrontLeft;
+         L_Index < E_RobotCornerSz;
+         L_Index = T_RobotCorner(int(L_Index) + 1))
       {
 
       }
+      
+      V_IntakePowerCmnd = 0;
+      V_ElevatorPowerCmnd = 0;
+      V_ShooterRPM_Cmnd = 0;
+      V_LauncherStatePrev = E_LauncherNotActive;
+      V_LauncherSpeedCmndPrev = 0;
   }
+
 
 /******************************************************************************
  * Function:     BallLauncher
@@ -54,15 +66,48 @@ void BallHandlerInit()
  * Description:  Contains the functionality for controlling the launch 
  *               mechanism.
  ******************************************************************************/
-double BallLauncher(bool L_AutoShootReq)
+double BallLauncher(bool   L_DisableShooter,
+                    bool   L_AutoShootReq,
+                    bool   L_AutoRotateComplete,
+                    bool   L_TopTargetAquired,
+                    double L_TopTargetDistanceMeters,
+                    double L_ManualShooter,
+                    double L_LauncherCurrentSpeed,
+                    bool  *L_TargetSpeedReached)
   {
-//    if (L_Driver_stops_shooter)
-//    {
-//      L_AutoShootReq = false;
-//      V_ShooterSpeedDesiredFinalUpper = 0;
-//      V_ShooterSpeedDesiredFinalLower = 0;
-//    }
+    double           L_ShooterSpeedCmnd = 0;
+    T_LauncherStates L_LauncherState    = E_LauncherNotActive;
+
+   if (L_DisableShooter == true)
+     {
+     L_ShooterSpeedCmnd = 0;
+     L_LauncherState = E_LauncherNotActive;
+     }
+   else if (((L_AutoShootReq == true) &&
+             (L_TopTargetAquired == true)) ||
+
+            ((V_LauncherStatePrev == E_LauncherAutoTargetActive) &&
+             (L_ManualShooter < K_DesiredLauncherManualDb)))
+     {
+     L_ShooterSpeedCmnd = DtrmnAutoLauncherSpeed(L_TopTargetDistanceMeters);
+     L_LauncherState = E_LauncherAutoTargetActive;
+     }
+   else if (L_ManualShooter >= K_DesiredLauncherManualDb)
+     {
+     L_ShooterSpeedCmnd = DtrmnManualLauncherSpeed(L_ManualShooter);
+     L_LauncherState = E_LauncherManualActive;
+     }
+
+    if (L_LauncherState > E_LauncherNotActive)
+      {
+        if ((L_LauncherCurrentSpeed > (L_ShooterSpeedCmnd - K_DesiredLauncherSpeedDb)) &&
+            (L_LauncherCurrentSpeed <= (L_ShooterSpeedCmnd + K_DesiredLauncherSpeedDb)))
+           {
+             *L_TargetSpeedReached = true;
+           }
+      }
     
+    V_LauncherStatePrev = L_LauncherState;
 //     if ((c_joyStick2.GetPOV() == 180) || 
 //         (c_joyStick2.GetPOV() == 270) || 
 //         (c_joyStick2.GetPOV() == 0)   || 
@@ -175,7 +220,7 @@ double BallLauncher(bool L_AutoShootReq)
 //     m_leftShooterpid.SetOutputRange(V_Min, V_Max);
 
 // V_testElevator = frc::SmartDashboard::GetNumber("Elevator Power",V_testElevator);
-    return (0);
+    return (L_ShooterSpeedCmnd);
   }
 
 /******************************************************************************
@@ -208,13 +253,18 @@ double BallIntake(bool L_DriverIntakeCmnd)
  ******************************************************************************/
 double BallElevator(bool L_BallDetected,
                     bool L_ElevatorCmndUp,
-                    bool L_ElevatorCmndDwn)
+                    bool L_ElevatorCmndDwn,
+                    bool L_LauncherTargetSpeedReached)
   {
     double L_ElevatorPowerCmnd = 0;
 
     if(L_ElevatorCmndUp == true)
       {
-      L_ElevatorPowerCmnd = K_ElevatorPowerUp;
+        if ((L_BallDetected == false) ||
+            (L_LauncherTargetSpeedReached == true))
+          {
+          L_ElevatorPowerCmnd = K_ElevatorPowerUp;
+          }
       }
     else if(L_ElevatorCmndDwn == true)
       {
@@ -236,6 +286,12 @@ void BallHandlerControlMain(bool L_IntakeCmnd,
                             bool L_BallDetected,
                             bool L_ElevatorCmndUp,
                             bool L_ElevatorCmndDwn,
+                            bool L_DisableShooter,
+                            bool L_AutoShootReq,
+                            bool L_AutoRotateComplete,
+                            bool L_TopTargetAquired,
+                            double L_TopTargetDistanceMeters,
+                            double L_LauncherCurrentSpeed,
                             double L_ManualShooter,
                             double *L_Intake,
                             double *L_Elevator,
@@ -244,14 +300,23 @@ void BallHandlerControlMain(bool L_IntakeCmnd,
     double L_LauncherRPM       = 0;
     double L_IntakePowerCmnd   = 0;
     double L_ElevatorPowerCmnd = 0;
+    bool   L_TargetSpeedReached = false;
+
+    L_LauncherRPM = BallLauncher( L_DisableShooter,
+                                  L_AutoShootReq,
+                                  L_AutoRotateComplete,
+                                  L_TopTargetAquired,
+                                  L_TopTargetDistanceMeters,
+                                  L_ManualShooter,
+                                  L_LauncherCurrentSpeed,
+                                 &L_TargetSpeedReached);
 
     L_IntakePowerCmnd = BallIntake(L_IntakeCmnd);
     
     L_ElevatorPowerCmnd = BallElevator(L_BallDetected,
                                        L_ElevatorCmndUp,
-                                       L_ElevatorCmndDwn);
-
-    L_LauncherRPM = BallLauncher(false);
+                                       L_ElevatorCmndDwn,
+                                       L_TargetSpeedReached);
 
     *L_Intake = L_IntakePowerCmnd;
 

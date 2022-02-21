@@ -10,7 +10,7 @@
 /******************************************************************************
  * Function:     Joystick_robot_mapping
  *
- * Description:  Main calling function for lift control.
+ * Description:  Captures and maps driver inputs.
  ******************************************************************************/
 
 void Joystick_robot_mapping(bool  L_Driver2_buttonA,
@@ -30,8 +30,21 @@ void Joystick_robot_mapping(bool  L_Driver2_buttonA,
                             double  L_Driver2_left_Axis_y,
                             double *L_right_shooter_desired_speed,
                             double  L_Driver2_right_Axis_y,
-                            double *L_left_shooter_desired_speed
-                            )
+                            double *L_left_shooter_desired_speed,
+                            double  L_Driver1_left_Axis_y,
+                            double *L_Driver_SwerveForwardBack,
+                            double  L_Driver1_left_Axis_x,
+                            double *L_Driver_SwerveStrafe,
+                            double  L_Driver1_right_Axis_x,
+                            double *L_Driver_SwerveRotate,
+                            double  L_Driver1_left_trigger_Axis,
+                            double *L_Driver_SwerveSpeed,
+                            bool    L_Driver1_buttonA,
+                            bool   *L_Driver_SwerveGoalAutoCenter,
+                            bool    L_Driver1_ButtonX,
+                            bool   *L_Driver_SwerveRotateTo0,
+                            bool    L_Driver1_ButtonY,
+                            bool   *L_Driver_SwerveRotateTo90)
 {
     *L_elevator_up = L_Driver2_buttonA;
     *L_elevator_down = L_Driver2_buttonB;
@@ -42,5 +55,13 @@ void Joystick_robot_mapping(bool  L_Driver2_buttonA,
     *L_left_shooter_desired_speed = L_Driver2_right_Axis_y;
     *L_Lift_control = L_Driver2_buttonRB,
     *L_Driver_intake_in = L_Driver2_ButtonX;
+
+    *L_Driver_SwerveForwardBack =  L_Driver1_left_Axis_y;
+    *L_Driver_SwerveStrafe = L_Driver1_left_Axis_x;
+    *L_Driver_SwerveRotate =  L_Driver1_right_Axis_x;
+    *L_Driver_SwerveSpeed =  L_Driver1_left_trigger_Axis;
+    *L_Driver_SwerveGoalAutoCenter = L_Driver1_buttonA;
+    *L_Driver_SwerveRotateTo0 = L_Driver1_ButtonX;
+    *L_Driver_SwerveRotateTo90 = L_Driver1_ButtonY;
 }
 

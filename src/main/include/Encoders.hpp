@@ -17,6 +17,7 @@
  extern double V_WheelVelocity[E_RobotCornerSz];
  extern double V_M_WheelDeltaDistance[E_RobotCornerSz];
  extern double V_WheelAngleConverted[E_RobotCornerSz];
+ extern double V_ShooterSpeedCurr[E_RoboShooter];
  
  void Read_Encoders(double          L_encoderWheelAngleFrontLeftRaw,
                   double          L_encoderWheelAngleFrontRightRaw,

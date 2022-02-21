@@ -7,6 +7,10 @@
   Contains the code related to the reading and processing of the gyro output.
  */
 
+extern bool V_BallDetectedRaw;
+extern bool V_XD_LimitDetected;
+extern bool V_YD_LimitDetected;
+
 void Read_IO_Sensors(bool L_IR_SensorDetect,
                      bool L_XD_LimitSwitch,
                      bool L_XY_LimitSwitch);

@@ -67,8 +67,8 @@ const double K_gyro_deadband = 2;
 const double K_deadband_timer = 0.5; //keep the deadband for a certain amount of time
 
 const double K_IntakePower = 0.7; // Amount of power to apply to intake wheels.  Must be 0 to 1.
-const double K_ElevatorPowerUp = 1.0; // Amount of power to apply to elevator band when commanded up.  Must be 0 to 1.
-const double K_ElevatorPowerDwn = -0.5; // Amount of power to apply to elevator band when commanded down.  Must be 0 to 1.
+const double K_ElevatorPowerUp = 0.9; // Amount of power to apply to elevator band when commanded up.  Must be 0 to 1.
+const double K_ElevatorPowerDwn = -0.9; // Amount of power to apply to elevator band when commanded down.  Must be -1 to 0.
 
 const double K_InitAngle = 1.4; // This is the absolute angle that all of the wheels need to be sitting at before allowing the robot to exit init
 const double K_WheelOffsetAngle[E_RobotCornerSz] = {169.527239,   // E_FrontLeft
@@ -242,19 +242,33 @@ const double K_DesiredSpeedLowerBeam[6] = {-1150,
                                            -2400,
                                            -3100};
 
-// const double K_DesiredSpeedUpperBeam[6] = {-1200,
-//                                            -1200,
-//                                            -1435,
-//                                            -1815,
-//                                            -1965,
-//                                            -3015};
+const double K_DesiredLauncherSpeed[6] = {3300,
+                                          3500,
+                                          3700,
+                                          3800,
+                                          4000,
+                                          4200};
 
-// const double K_DesiredSpeedLowerBeam[6] = {-1150,
-//                                            -1350,
-//                                            -1880,
-//                                            -2100,
-//                                            -2400,
-//                                            -3100};
+
+
+const double K_DesiredLauncherManualAxis[5] = {0.00,
+                                     0.25,
+                                     0.50,
+                                     0.75,
+                                     1.00};
+
+/* K_DesiredLauncherManualDb: Deadband around the manual ball launcher axis. */
+const double K_DesiredLauncherManualDb = 0.1;
+
+const double K_DesiredLauncherManualSpeed[5] = {0,
+                                                1000,
+                                                2000,
+                                                3000,
+                                                4000};
+
+/* K_DesiredLauncherSpeedDb: Deadband around the desired launcher speed (in RPM).  
+                             Used to indicate when a ball can be launched. */
+const double K_DesiredLauncherSpeedDb = 75;
 
 const double K_LiftYD_PID[E_PID_CalSz] = { 0.1,   // P Gx
                                            0.000002,   // I Gx

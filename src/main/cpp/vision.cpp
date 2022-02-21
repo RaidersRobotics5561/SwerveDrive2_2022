@@ -11,6 +11,8 @@
 // all our favorite variables
 bool TopTargetAquired;
 double TopYaw;
+double V_TopTargetDistanceMeters; // Distance from front of robot to top target
+
 bool BottomTargetAquired;
 double BottomYaw;
 int BottomIndex;
@@ -57,6 +59,8 @@ void VisionRun(){
           units::degree_t{resultTop.GetBestTarget().GetPitch()}); // first 3 variables are constants from vision.hpp
 
     double TopRangeDouble = TopRange.value();
+
+    V_TopTargetDistanceMeters = TopRangeDouble;
 
     frc::SmartDashboard::PutNumber("Top Range", TopRangeDouble);
 

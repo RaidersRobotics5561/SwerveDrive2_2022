@@ -21,7 +21,6 @@ using namespace frc;
 double V_GyroYawAngleDegrees;
 double V_GyroYawAngleRad;
 
-
 /******************************************************************************
  * Function:     GyroInit
  *
@@ -29,14 +28,16 @@ double V_GyroYawAngleRad;
  ******************************************************************************/
 void GyroInit()
   {
-    try{
+    try
+      {
       NavX = new AHRS(SPI::Port::kMXP);
-    }
-    catch(const std::exception e){
+      }
+    catch(const std::exception e)
+      {
       // std::string err_string = "Error instantiating navX-MXP:  ";
       // err_string += e.what();
       // DriverStation::ReportError(err_string.c_str());
-    }
+      }
 
     V_GyroYawAngleDegrees = 0;
     V_GyroYawAngleRad = 0;

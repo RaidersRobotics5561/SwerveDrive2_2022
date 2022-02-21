@@ -24,5 +24,19 @@ void Joystick_robot_mapping(bool  L_Driver2_buttonA, //Controller 2, A button (1
                             double  L_Driver2_left_Axis_y, //Controller 2, left axis, uses y (1) 
                             double *L_right_shooter_desired_speed, //Controller 2, left axis, uses y axis (1), (robot.cpp) sets desired speed for the right shooter moter
                             double  L_Driver2_right_Axis_y, //Controller 2,right axis, uses y (5)
-                            double *L_left_shooter_desired_speed);  //Controller 2,right axis, uses y (5), (robot.cpp) sets desired speed for the left shooter moter
+                            double *L_left_shooter_desired_speed,  //Controller 2,right axis, uses y (5), (robot.cpp) sets desired speed for the left shooter moter
+                            double  L_Driver1_left_Axis_y,
+                            double *L_Driver_SwerveForwardBack,
+                            double  L_Driver1_left_Axis_x,
+                            double *L_Driver_SwerveStrafe,
+                            double  L_Driver1_right_Axis_x,
+                            double *L_Driver_SwerveRotate,
+                            double  L_Driver1_left_trigger_Axis,
+                            double *L_Driver_SwerveSpeed,
+                            bool    L_Driver1_buttonA,
+                            bool   *L_Driver_SwerveGoalAutoCenter,
+                            bool    L_Driver1_ButtonX,
+                            bool   *L_Driver_SwerveRotateTo0,
+                            bool    L_Driver1_ButtonY,
+                            bool   *L_Driver_SwerveRotateTo90);
  

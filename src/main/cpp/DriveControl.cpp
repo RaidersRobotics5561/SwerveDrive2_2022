@@ -68,7 +68,7 @@ double V_WheelSpeedPID_Gx[E_PID_CalSz] = { 0.0055,     // P Gx
 
 
 /******************************************************************************
- * Function:     DriveControlMain
+ * Function:     DriveControlInit
  *
  * Description:  Initialization function for the drive control.
  ******************************************************************************/
@@ -116,16 +116,17 @@ void DriveControlInit()
  *
  * Description:  Main calling function for the drive control.
  ******************************************************************************/
-void DriveControlMain(double              L_JoyStick1Axis1Y, //swerve control
-                      double              L_JoyStick1Axis1X, //swerve control
-                      double              L_JoyStick1Axis2X,//rotate the robot joystick
-                      double              L_JoyStick1Axis3, //extra speed trigger
-                      bool                L_JoyStick1Button1,
-                      double              L_JoyStick1Button3,
-                      double              L_JoyStick1Button4,
+void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control forward/back
+                      double              L_JoyStick1Axis1X,  // swerve control strafe
+                      double              L_JoyStick1Axis2X,  // rotate the robot joystick
+                      double              L_JoyStick1Axis3,   // extra speed trigger
+                      bool                L_JoyStick1Button1, // goal auto center
+                      bool                L_JoyStick1Button3, // auto rotate to 0 degrees
+                      bool                L_JoyStick1Button4, // auto rotate to 90 degrees
                       double              L_GyroAngleDegrees,
                       double              L_GyroAngleRadians,
-                      double              L_VisionAngleDeg,
+                      bool                L_TopTargetAquired,
+                      double              L_TopTargetYawDegrees,
                       double             *L_WheelAngleFwd,
                       double             *L_WheelAngleRev,
                       double             *L_WheelSpeedCmnd,
@@ -229,10 +230,11 @@ void DriveControlMain(double              L_JoyStick1Axis1Y, //swerve control
       // Use gyro as target when in auto rotate or drive straight mode
       L_RotateErrorCalc = desiredAngle - L_GyroAngleDegrees;
       }
-    else if(autoBeamLock == true)
+    else if((autoBeamLock == true) &&
+            (L_TopTargetAquired == true))
       {
-      // Use chameleon vison as target when in auto beam lock
-      L_RotateErrorCalc = desiredAngle - L_VisionAngleDeg;
+      // Use photon vison as target when in auto beam lock
+      L_RotateErrorCalc = desiredAngle - L_TopTargetYawDegrees;
       V_AutoRotateComplete = false;
       }
     else
