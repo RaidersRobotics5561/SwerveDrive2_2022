@@ -8,22 +8,13 @@ const units::second_t C_ExeTime_t = 0.02_s; // Set to match the the default cont
 
 const double C_End_game_time = 30;
 
-  const units::meter_t CAMERA_HEIGHT = 24_in;
-  const units::meter_t TARGET_HEIGHT = 5_ft;
-  // Angle between horizontal and the camera.
-
-  const units::radian_t CAMERA_PITCH = 0_deg;
-
-
-  // How far from the target we want to be
-
-  const units::meter_t GOAL_RANGE_METERS = 3_ft;
-
 const double C_RadtoDeg = 57.2958;
 const double C_Deg2Rad = 0.017453292519943295;
 const double C_PI = 3.14159265358979;
 const double C_Tau = 6.28318530717958647;
 
+// CAN Device IDs:
+static const int C_PDP_ID = 0;
 static const int frontLeftSteerDeviceID = 1, frontLeftDriveDeviceID = 2, frontRightSteerDeviceID = 4, frontRightDriveDeviceID = 3;
 static const int rearLeftSteerDeviceID  = 5, rearLeftDriveDeviceID  = 6, rearRightSteerDeviceID  = 7, rearRightDriveDeviceID  = 8;
 static const int rightShooterID = 10, leftShooterID = 9;
@@ -31,8 +22,18 @@ static const int C_liftYD_ID = 11;
 static const int C_liftXD_ID = 12;
 static const int C_elevatorID = 13;
 static const int C_intakeID = 14;
+
+// DIO IDs:
+static const int C_MagEncoderFL_ID = 2, C_MagEncoderFR_ID = 1, C_MagEncoderRL_ID = 3, C_MagEncoderRR_ID = 0;
+static const int C_XY_LimitSwitch_ID = 4, C_XD_LimitSwitch_ID = 6, C_IR_Sensor_ID = 9, C_CameraLightControl_ID = 7;
+
+// PWM IDs:
+static const int C_VanityLight_ID = 1;
+
 const double K_SteerMotorCurrentLimit = 25;
 static const double C_EncoderToAngle = 360; // Raw output of PWM encoder to degrees
+
+
 
 
 const double K_SteerDriveReductionRatio = 30; //30:1
@@ -42,10 +43,6 @@ const double K_WheelCircufrence = 12.566; // Circumferance of wheel, in inches
 const double C_L = 0.5969;
 const double C_W = 0.5969;
 const double C_R = 0.8441;
-
-const double K_ShooterWheelRotation[E_RoboShooter] = {5.12517590321455,     // E_rightShooter    2.5555555555555555555555555555555555555555555555 * 2 * C_PI * 0.3191858136047229930278045677412
-                                                      3.84388192741092};    // E_leftShooter 2.5555555555555555555555555555555555555555555555 * 2 * C_PI *0.2393893602035422447708534258059
-
 
 const double K_lift_max_YD = 207; //distance from floor to mid rung (60.25 inches)
 const double K_lift_mid_YD = 20; //lift YD is aligned with lift XD
@@ -66,20 +63,17 @@ const double K_gyro_angle_lift = -10; //robert is tilting
 const double K_gyro_deadband = 2;
 const double K_deadband_timer = 0.5; //keep the deadband for a certain amount of time
 
+const double K_CameraLightDelay = 0.25; // Delay time between enabling the camera light and allowing the data feed to be used. [seconds]
+const double K_CameraLightMaxOnTime = 5.0; // Max amount of time to have the camera light enabled. [seconds]
+
 const double K_IntakePower = 0.7; // Amount of power to apply to intake wheels.  Must be 0 to 1.
 const double K_ElevatorPowerUp = 0.9; // Amount of power to apply to elevator band when commanded up.  Must be 0 to 1.
 const double K_ElevatorPowerDwn = -0.9; // Amount of power to apply to elevator band when commanded down.  Must be -1 to 0.
 
-const double K_InitAngle = 1.4; // This is the absolute angle that all of the wheels need to be sitting at before allowing the robot to exit init
 const double K_WheelOffsetAngle[E_RobotCornerSz] = {169.527239,   // E_FrontLeft
                                                     128.487963,   // E_FrontRight 152  104.6 
                                                     33.112801,   // E_RearLeft
                                                     246.813891}; // E_RearRight 180.703106  144.580063
-
-                                                    // 169.420,   // E_FrontLeft
-                                                    // 128.487963,   // E_FrontRight 152  104.6 
-                                                    // 33.112801,   // E_RearLeft
-                                                    // 247.656102}; // E_RearRight
 
 const double K_WheelMaxSpeed = 225; // This is the max allowed speed for the wheels
 
@@ -118,6 +112,14 @@ const double K_RobotRotationPID_Gx[E_PID_CalSz] = { 0.07,   // P Gx
                                                    -0.2,    // D LL
                                                     1.0,    // Max upper
                                                    -1.0};   // Max lower
+
+const double K_LauncherPID_Gx[E_PID_SparkMaxCalSz] = { 0.1,   // kP
+                                                       0.0001,   // kI
+                                                       1.0,    // kD
+                                                       0.0,    // kIz
+                                                       0.0,    // kFF
+                                                       1.0,    // kMaxOutput
+                                                      -1.0};  // kMinOutput
 
 const double K_DesiredDriveSpeedAxis[20] = {-0.95,
                                             -0.85,
@@ -377,38 +379,38 @@ const double K_BallLauncherLowerSpeed[K_BallLauncherDistanceSz][K_BallLauncherAn
 #include "K_t_AutonXY_PositionAxisTest1.hpp"
 #endif
 
-#include "K_BarrelRacing_V55A25_T.hpp"
-#include "K_BarrelRacing_V55A25_X.hpp"
-#include "K_BarrelRacing_V55A25_Y.hpp"
-#include "K_BarrelRacing_V75A30_T.hpp"
-#include "K_BarrelRacing_V75A30_X.hpp"
-#include "K_BarrelRacing_V75A30_Y.hpp"
-#include "K_BarrelRacing_V95A35_T.hpp"
-#include "K_BarrelRacing_V95A35_X.hpp"
-#include "K_BarrelRacing_V95A35_Y.hpp"
+#include "MotionProfiles/K_BarrelRacing_V55A25_T.hpp"
+#include "MotionProfiles/K_BarrelRacing_V55A25_X.hpp"
+#include "MotionProfiles/K_BarrelRacing_V55A25_Y.hpp"
+#include "MotionProfiles/K_BarrelRacing_V75A30_T.hpp"
+#include "MotionProfiles/K_BarrelRacing_V75A30_X.hpp"
+#include "MotionProfiles/K_BarrelRacing_V75A30_Y.hpp"
+#include "MotionProfiles/K_BarrelRacing_V95A35_T.hpp"
+#include "MotionProfiles/K_BarrelRacing_V95A35_X.hpp"
+#include "MotionProfiles/K_BarrelRacing_V95A35_Y.hpp"
 
-#include "K_Bounce_V55A25_T.hpp"
-#include "K_Bounce_V55A25_X.hpp"
-#include "K_Bounce_V55A25_Y.hpp"
-#include "K_Bounce_V75A30_T.hpp"
-#include "K_Bounce_V75A30_X.hpp"
-#include "K_Bounce_V75A30_Y.hpp"
-#include "K_Bounce_V95A35_T.hpp"
-#include "K_Bounce_V95A35_X.hpp"
-#include "K_Bounce_V95A35_Y.hpp"
+#include "MotionProfiles/K_Bounce_V55A25_T.hpp"
+#include "MotionProfiles/K_Bounce_V55A25_X.hpp"
+#include "MotionProfiles/K_Bounce_V55A25_Y.hpp"
+#include "MotionProfiles/K_Bounce_V75A30_T.hpp"
+#include "MotionProfiles/K_Bounce_V75A30_X.hpp"
+#include "MotionProfiles/K_Bounce_V75A30_Y.hpp"
+#include "MotionProfiles/K_Bounce_V95A35_T.hpp"
+#include "MotionProfiles/K_Bounce_V95A35_X.hpp"
+#include "MotionProfiles/K_Bounce_V95A35_Y.hpp"
 
-#include "K_Slalom_V55A25_T.hpp"
-#include "K_Slalom_V55A25_X.hpp"
-#include "K_Slalom_V55A25_Y.hpp"
-#include "K_Slalom_V75A30_T.hpp"
-#include "K_Slalom_V75A30_X.hpp"
-#include "K_Slalom_V75A30_Y.hpp"
-#include "K_Slalom_V95A35_T.hpp"
-#include "K_Slalom_V95A35_X.hpp"
-#include "K_Slalom_V95A35_Y.hpp"
-#include "K_Slalom_V125A50_T.hpp"
-#include "K_Slalom_V125A50_X.hpp"
-#include "K_Slalom_V125A50_Y.hpp"
+#include "MotionProfiles/K_Slalom_V55A25_T.hpp"
+#include "MotionProfiles/K_Slalom_V55A25_X.hpp"
+#include "MotionProfiles/K_Slalom_V55A25_Y.hpp"
+#include "MotionProfiles/K_Slalom_V75A30_T.hpp"
+#include "MotionProfiles/K_Slalom_V75A30_X.hpp"
+#include "MotionProfiles/K_Slalom_V75A30_Y.hpp"
+#include "MotionProfiles/K_Slalom_V95A35_T.hpp"
+#include "MotionProfiles/K_Slalom_V95A35_X.hpp"
+#include "MotionProfiles/K_Slalom_V95A35_Y.hpp"
+#include "MotionProfiles/K_Slalom_V125A50_T.hpp"
+#include "MotionProfiles/K_Slalom_V125A50_X.hpp"
+#include "MotionProfiles/K_Slalom_V125A50_Y.hpp"
 
 const double K_k_AutonX_PID_Gx[E_PID_CalSz] = { 0.095,       // P Gx
                                                 0.000001,    // I Gx

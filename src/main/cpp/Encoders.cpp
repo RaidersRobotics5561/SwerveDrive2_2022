@@ -22,7 +22,7 @@ double V_WheelVelocity[E_RobotCornerSz]; // Velocity of drive wheels, in in/sec
 double V_M_WheelDeltaDistance[E_RobotCornerSz]; // Distance wheel moved, loop to loop, in inches
 double V_Cnt_WheelDeltaDistanceCurr[E_RobotCornerSz]; // Prev distance wheel moved, loop to loop, in Counts
 double V_Cnt_WheelDeltaDistancePrev[E_RobotCornerSz]; // Prev distance wheel moved, loop to loop, in Counts
-double V_ShooterSpeedCurr[E_RoboShooter];
+double V_ShooterSpeedCurr;
 double V_Cnt_WheelDeltaDistanceInit[E_RobotCornerSz];
 double V_Delta_Angle[E_RobotCornerSz]; // The delta of the angle needed to align the wheels when the robot inits
 double V_LiftPostitionYD;
@@ -63,8 +63,7 @@ void EncodersInit(rev::SparkMaxRelativeEncoder m_encoderFrontRightSteer,
     m_encoderLiftYD.SetPosition(0);
     m_encoderLiftXD.SetPosition(0);
 
-    V_ShooterSpeedCurr[E_rightShooter] = 0;
-    V_ShooterSpeedCurr[E_leftShooter] = 0;
+    V_ShooterSpeedCurr = 0;
   }
 
 /******************************************************************************
@@ -141,8 +140,7 @@ void Read_Encoders(double                       L_encoderWheelAngleFrontLeftRaw,
   V_WheelVelocity[E_RearRight]  = ((m_encoderRearRightDrive.GetVelocity()  / K_ReductionRatio) / 60) * K_WheelCircufrence;
   V_WheelVelocity[E_RearLeft]   = ((m_encoderRearLeftDrive.GetVelocity()   / K_ReductionRatio) / 60) * K_WheelCircufrence;
 
-  V_ShooterSpeedCurr[E_rightShooter] = (m_encoderrightShooter.GetVelocity() * K_ShooterWheelRotation[E_rightShooter]);
-  V_ShooterSpeedCurr[E_leftShooter]  = (m_encoderleftShooter.GetVelocity()  * K_ShooterWheelRotation[E_leftShooter]);
+  V_ShooterSpeedCurr = m_encoderleftShooter.GetVelocity();
   }
 
 /******************************************************************************

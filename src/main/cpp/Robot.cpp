@@ -66,11 +66,6 @@ nt::NetworkTableEntry latency1;
 nt::NetworkTableEntry lidarDistance;
 nt::NetworkTableEntry ledControl;
 
-
-frc::DriverStation::Alliance V_AllianceColor;
-
-
-
 double V_AutoTargetAngle;
 double V_AutoTargetUpperRollerSpd;
 double V_AutoTargetLowerRollerSpd;
@@ -210,13 +205,6 @@ void Robot::RobotInit() {
     // frc::SmartDashboard::PutNumber("Speed Desired Left", 0);
 
     frc::SmartDashboard::PutNumber("cooler int", 1);
-    // double lower_P_Gx = .0008;
-    // double lower_I_Gx = .000001;
-    // double lower_D_Gx = .0006;
-    // double lower_I_Zone = 0;
-    // double lower_FF = 0;
-    // double lower_Max = 1;
-    // double lower_Min = -1;
 
     // m_rightShooterpid.SetP(V_P_Gx);
     // m_rightShooterpid.SetI(V_I_Gx);
@@ -496,6 +484,8 @@ void Robot::TeleopPeriodic()
 
   double L_timeleft = frc::DriverStation::GetInstance().GetMatchTime();
 
+  frc::DriverStation::Alliance L_AllianceColor = frc::DriverStation::GetInstance().GetAlliance();
+
   Joystick_robot_mapping( c_joyStick2.GetRawButton(1),
                          &L_Driver_elevator_up,
                           c_joyStick2.GetRawButton(2),
@@ -590,13 +580,20 @@ void Robot::TeleopPeriodic()
                           V_autonTargetFin,
                           TopTargetAquired,
                           V_TopTargetDistanceMeters,
-                          V_ShooterSpeedCurr[E_leftShooter],
+                          V_ShooterSpeedCurr,
                           L_Driver_right_shooter_desired_speed,
                          &V_IntakePowerCmnd,
                          &V_ElevatorPowerCmnd,
                          &V_ShooterRPM_Cmnd);
 
-  LED_VanityLights();
+bool                         L_AutoAlignRequest = false;
+bool                         L_AutoLauncherRequest = false;
+  LightControlMain( L_AutoAlignRequest,
+                    L_AutoLauncherRequest,
+                    L_timeleft,
+                    L_AllianceColor,
+                   &V_CameraLightCmndOn,
+                   &V_VanityLightCmnd);
   
   V_XD_Test = frc::SmartDashboard::GetNumber("XD Lift", V_XD_Test);
   V_YD_Test = frc::SmartDashboard::GetNumber("YD Lift", V_YD_Test);
@@ -635,6 +632,9 @@ void Robot::TeleopPeriodic()
 
     m_liftpidYD.SetReference(V_YD_Test, rev::ControlType::kPosition); // positive is up
     m_liftpidXD.SetReference(V_XD_Test, rev::ControlType::kPosition); // This is temporary.  We actually want to use position, but need to force this off temporarily
+
+    do_CameraLightControl.Set(V_CameraLightCmndOn);
+    m_vanityLightControler.Set(V_VanityLightCmnd);
 }
 
 

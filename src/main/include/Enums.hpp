@@ -45,6 +45,19 @@ typedef enum T_PID_Cal
 } T_PID_Cal;
 
 
+typedef enum T_PID_SparkMaxCal
+{
+  E_kP,
+  E_kI,
+  E_kD,
+  E_kIz,
+  E_kFF,
+  E_kMaxOutput,
+  E_kMinOutput,
+  E_PID_SparkMaxCalSz
+} T_PID_SparkMaxCal;
+
+
 typedef enum T_AutoTargetStates
 {
   E_NotActive,
@@ -59,6 +72,14 @@ typedef enum T_LauncherStates
   E_LauncherAutoTargetActive,
   E_LauncherManualActive,
 } T_LauncherStates;
+
+typedef enum T_CameraLightStatus
+{
+  E_LightTurnedOff,
+  E_LightOnWaitingForTarget,
+  E_LightOnTargetingReady,
+  E_LightForcedOffDueToOvertime
+} T_CameraLightStatus;
 
 typedef enum T_Lift_State
 {

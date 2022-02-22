@@ -48,73 +48,75 @@ class Robot : public frc::TimedRobot {
   void TeleopPeriodic() override;
   void TestPeriodic() override;
 
-  // frc::AnalogInput a_encoderFrontLeftSteer{2};
-  // frc::AnalogInput a_encoderFrontRightSteer{1};
-  // frc::AnalogInput a_encoderRearLeftSteer{3};
-  // frc::AnalogInput a_encoderRearRightSteer{0};
+  //DIO - Inputs / Outputs
+  frc::DutyCycleEncoder a_encoderWheelAngleFrontLeft  {C_MagEncoderFL_ID};
+  frc::DutyCycleEncoder a_encoderWheelAngleFrontRight {C_MagEncoderFR_ID};
+  frc::DutyCycleEncoder a_encoderWheelAngleRearLeft   {C_MagEncoderRL_ID};
+  frc::DutyCycleEncoder a_encoderWheelAngleRearRight  {C_MagEncoderRR_ID};
 
-  frc::DutyCycleEncoder a_encoderWheelAngleFrontLeft {2};
-  frc::DutyCycleEncoder a_encoderWheelAngleFrontRight {1};
-  frc::DutyCycleEncoder a_encoderWheelAngleRearLeft {3};
-  frc::DutyCycleEncoder a_encoderWheelAngleRearRight {0};
+  frc::DigitalInput     di_XY_LimitSwitch    {C_XY_LimitSwitch_ID};
+  frc::DigitalInput     di_XD_LimitSwitch    {C_XD_LimitSwitch_ID};
+  frc::DigitalInput     di_IR_Sensor         {C_IR_Sensor_ID};
 
-  frc::DigitalOutput DIO0{7};
+  frc::DigitalOutput    do_CameraLightControl{C_CameraLightControl_ID};
+  
+  // PDP - Power Distribution Panel - CAN
+  frc::PowerDistribution                     PDP                   {C_PDP_ID,               frc::PowerDistribution::ModuleType::kCTRE};
 
-  rev::CANSparkMax m_frontLeftSteerMotor {frontLeftSteerDeviceID,  rev::CANSparkMax::MotorType::kBrushless};
-  rev::CANSparkMax m_frontLeftDriveMotor {frontLeftDriveDeviceID,  rev::CANSparkMax::MotorType::kBrushless};
-  rev::CANSparkMax m_frontRightSteerMotor{frontRightSteerDeviceID, rev::CANSparkMax::MotorType::kBrushless};
-  rev::CANSparkMax m_frontRightDriveMotor{frontRightDriveDeviceID, rev::CANSparkMax::MotorType::kBrushless};
-  rev::CANSparkMax m_rearLeftSteerMotor  {rearLeftSteerDeviceID,   rev::CANSparkMax::MotorType::kBrushless};
-  rev::CANSparkMax m_rearLeftDriveMotor  {rearLeftDriveDeviceID,   rev::CANSparkMax::MotorType::kBrushless};
-  rev::CANSparkMax m_rearRightSteerMotor {rearRightSteerDeviceID,  rev::CANSparkMax::MotorType::kBrushless};
-  rev::CANSparkMax m_rearRightDriveMotor {rearRightDriveDeviceID,  rev::CANSparkMax::MotorType::kBrushless};
+  // CAN Motor Controllers
+  rev::CANSparkMax                           m_frontLeftSteerMotor {frontLeftSteerDeviceID,  rev::CANSparkMax::MotorType::kBrushless};
+  rev::CANSparkMax                           m_frontLeftDriveMotor {frontLeftDriveDeviceID,  rev::CANSparkMax::MotorType::kBrushless};
+  rev::CANSparkMax                           m_frontRightSteerMotor{frontRightSteerDeviceID, rev::CANSparkMax::MotorType::kBrushless};
+  rev::CANSparkMax                           m_frontRightDriveMotor{frontRightDriveDeviceID, rev::CANSparkMax::MotorType::kBrushless};
+  rev::CANSparkMax                           m_rearLeftSteerMotor  {rearLeftSteerDeviceID,   rev::CANSparkMax::MotorType::kBrushless};
+  rev::CANSparkMax                           m_rearLeftDriveMotor  {rearLeftDriveDeviceID,   rev::CANSparkMax::MotorType::kBrushless};
+  rev::CANSparkMax                           m_rearRightSteerMotor {rearRightSteerDeviceID,  rev::CANSparkMax::MotorType::kBrushless};
+  rev::CANSparkMax                           m_rearRightDriveMotor {rearRightDriveDeviceID,  rev::CANSparkMax::MotorType::kBrushless};
+                        
+  rev::CANSparkMax                           m_rightShooterMotor   {rightShooterID,          rev::CANSparkMax::MotorType::kBrushless};
+  rev::CANSparkMax                           m_leftShooterMotor    {leftShooterID,           rev::CANSparkMax::MotorType::kBrushless};
+                        
+  rev::CANSparkMax                           m_liftMotorYD         {C_liftYD_ID,             rev::CANSparkMax::MotorType::kBrushless};
+  rev::CANSparkMax                           m_liftMotorXD         {C_liftXD_ID,             rev::CANSparkMax::MotorType::kBrushless};
 
-  rev::CANSparkMax m_rightShooterMotor     {rightShooterID,  rev::CANSparkMax::MotorType::kBrushless};
-  rev::CANSparkMax m_leftShooterMotor  {leftShooterID,  rev::CANSparkMax::MotorType::kBrushless};
-
-  rev::CANSparkMax m_liftMotorYD         {C_liftYD_ID,                  rev::CANSparkMax::MotorType::kBrushless};
-  rev::CANSparkMax m_liftMotorXD         {C_liftXD_ID,                  rev::CANSparkMax::MotorType::kBrushless};
-
-  ctre::phoenix::motorcontrol::can::TalonSRX m_intake {C_intakeID};
-  ctre::phoenix::motorcontrol::can::TalonSRX m_elevator {C_elevatorID};
+  ctre::phoenix::motorcontrol::can::TalonSRX m_intake              {C_intakeID};
+  ctre::phoenix::motorcontrol::can::TalonSRX m_elevator            {C_elevatorID};
 
   
-  rev::SparkMaxPIDController m_rightShooterpid = m_rightShooterMotor.GetPIDController();
-  rev::SparkMaxPIDController m_leftShooterpid  = m_leftShooterMotor.GetPIDController();
+  rev::SparkMaxPIDController                 m_rightShooterpid        = m_rightShooterMotor.GetPIDController();
+  rev::SparkMaxPIDController                 m_leftShooterpid         = m_leftShooterMotor.GetPIDController();
+       
+  rev::SparkMaxPIDController                 m_liftpidYD              = m_liftMotorYD.GetPIDController();
+  rev::SparkMaxPIDController                 m_liftpidXD              = m_liftMotorXD.GetPIDController();
 
-  rev::SparkMaxPIDController m_liftpidYD       = m_liftMotorYD.GetPIDController();
-  rev::SparkMaxPIDController m_liftpidXD       = m_liftMotorXD.GetPIDController();
+  // PWM Motor / Light Controllers
+  frc::Spark                                 m_vanityLightControler {C_VanityLight_ID};
 
-  rev::SparkMaxRelativeEncoder m_encoderFrontLeftSteer  = m_frontLeftSteerMotor.GetEncoder();
-  rev::SparkMaxRelativeEncoder m_encoderFrontLeftDrive  = m_frontLeftDriveMotor.GetEncoder();
-  rev::SparkMaxRelativeEncoder m_encoderFrontRightSteer = m_frontRightSteerMotor.GetEncoder();
-  rev::SparkMaxRelativeEncoder m_encoderFrontRightDrive = m_frontRightDriveMotor.GetEncoder();
-  rev::SparkMaxRelativeEncoder m_encoderRearLeftSteer   = m_rearLeftSteerMotor.GetEncoder();
-  rev::SparkMaxRelativeEncoder m_encoderRearLeftDrive   = m_rearLeftDriveMotor.GetEncoder();
-  rev::SparkMaxRelativeEncoder m_encoderRearRightSteer  = m_rearRightSteerMotor.GetEncoder();
-  rev::SparkMaxRelativeEncoder m_encoderRearRightDrive  = m_rearRightDriveMotor.GetEncoder();
-  rev::SparkMaxRelativeEncoder m_encoderrightShooter    = m_rightShooterMotor.GetEncoder();
-  rev::SparkMaxRelativeEncoder m_encoderleftShooter     = m_leftShooterMotor.GetEncoder();
-  rev::SparkMaxRelativeEncoder m_encoderLiftYD          = m_liftMotorYD.GetEncoder();
-  rev::SparkMaxRelativeEncoder m_encoderLiftXD          = m_liftMotorXD.GetEncoder();
+  // CAN Encoders
+  rev::SparkMaxRelativeEncoder               m_encoderFrontLeftSteer  = m_frontLeftSteerMotor.GetEncoder();
+  rev::SparkMaxRelativeEncoder               m_encoderFrontLeftDrive  = m_frontLeftDriveMotor.GetEncoder();
+  rev::SparkMaxRelativeEncoder               m_encoderFrontRightSteer = m_frontRightSteerMotor.GetEncoder();
+  rev::SparkMaxRelativeEncoder               m_encoderFrontRightDrive = m_frontRightDriveMotor.GetEncoder();
 
-  frc::DigitalInput di_XD_LimitSwitch{6};
-  frc::DigitalInput di_XY_LimitSwitch{4};
-  frc::DigitalInput di_IR_Sensor{9};
+  rev::SparkMaxRelativeEncoder               m_encoderRearLeftSteer   = m_rearLeftSteerMotor.GetEncoder();
+  rev::SparkMaxRelativeEncoder               m_encoderRearLeftDrive   = m_rearLeftDriveMotor.GetEncoder();
+  rev::SparkMaxRelativeEncoder               m_encoderRearRightSteer  = m_rearRightSteerMotor.GetEncoder();
+  rev::SparkMaxRelativeEncoder               m_encoderRearRightDrive  = m_rearRightDriveMotor.GetEncoder();
 
-  //frc::Spark blinkin {};
+  rev::SparkMaxRelativeEncoder               m_encoderrightShooter    = m_rightShooterMotor.GetEncoder();
+  rev::SparkMaxRelativeEncoder               m_encoderleftShooter     = m_leftShooterMotor.GetEncoder();
 
+  rev::SparkMaxRelativeEncoder               m_encoderLiftYD          = m_liftMotorYD.GetEncoder();
+  rev::SparkMaxRelativeEncoder               m_encoderLiftXD          = m_liftMotorXD.GetEncoder();
+
+
+  // Driver Inputs
   frc::Joystick c_joyStick{0};
   frc::Joystick c_joyStick2{1};
 
-  frc::PowerDistribution PDP {0, frc::PowerDistribution::ModuleType::kCTRE};
-
+  // Network tables
   photonlib::PhotonCamera camera{"photonvision"};
   
-  double Upper_P_Gx = 0, Upper_I_Gx = 0, Upper_D_Gx = 0, Upper_I_Zone = 0, Upper_FF = 0, Upper_Max = 1, Upper_Min = -1;
-  double Lower_P_Gx = 0, Lower_I_Gx = 0, Lower_D_Gx = 0, Lower_I_Zone = 0, Lower_FF = 0, Lower_Max = 1, Lower_Min = -1;
-  double kP = 0.1, kI = 1e-4, kD = 1, kIz = 0, kFF = 0, kMaxOutput = 1, kMinOutput = -1;
-
  private:
   frc::SendableChooser<std::string> m_chooser;
   const std::string kAutoNameDefault = "Default";
