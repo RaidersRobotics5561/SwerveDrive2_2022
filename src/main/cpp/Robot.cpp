@@ -92,8 +92,14 @@ void Robot::RobotInit()
                m_encoderFrontLeftSteer,
                m_encoderRearRightSteer,
                m_encoderRearLeftSteer,
+               m_encoderFrontRightDrive,
+               m_encoderFrontLeftDrive,
+               m_encoderRearRightDrive,
+               m_encoderRearLeftDrive,
                m_encoderLiftYD,
-               m_encoderLiftXD);
+               m_encoderLiftXD,
+               m_encoderrightShooter,
+               m_encoderleftShooter);
 
   GyroInit();
 
@@ -317,13 +323,6 @@ void Robot::TeleopInit()
   {
   V_RobotState = E_Teleop;
   V_AllianceColor = frc::DriverStation::GetInstance().GetAlliance();
-
-  EncodersInit(m_encoderFrontRightSteer,
-               m_encoderFrontLeftSteer,
-               m_encoderRearRightSteer,
-               m_encoderRearLeftSteer,
-               m_encoderLiftYD,
-               m_encoderLiftXD);
 
   DriveControlInit();
 

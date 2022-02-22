@@ -38,8 +38,14 @@ void EncodersInit(rev::SparkMaxRelativeEncoder m_encoderFrontRightSteer,
                   rev::SparkMaxRelativeEncoder m_encoderFrontLeftSteer,
                   rev::SparkMaxRelativeEncoder m_encoderRearRightSteer,
                   rev::SparkMaxRelativeEncoder m_encoderRearLeftSteer,
+                  rev::SparkMaxRelativeEncoder m_encoderFrontRightDrive,
+                  rev::SparkMaxRelativeEncoder m_encoderFrontLeftDrive,
+                  rev::SparkMaxRelativeEncoder m_encoderRearRightDrive,
+                  rev::SparkMaxRelativeEncoder m_encoderRearLeftDrive,
                   rev::SparkMaxRelativeEncoder m_encoderLiftYD,
-                  rev::SparkMaxRelativeEncoder m_encoderLiftXD)
+                  rev::SparkMaxRelativeEncoder m_encoderLiftXD,
+                  rev::SparkMaxRelativeEncoder m_encoderrightShooter,
+                  rev::SparkMaxRelativeEncoder m_encoderleftShooter)
   {
     T_RobotCorner L_Index;
 
@@ -60,8 +66,16 @@ void EncodersInit(rev::SparkMaxRelativeEncoder m_encoderFrontRightSteer,
     m_encoderRearRightSteer.SetPosition(0);
     m_encoderRearLeftSteer.SetPosition(0);
 
+    m_encoderFrontRightDrive.SetPosition(0);
+    m_encoderFrontLeftDrive.SetPosition(0);
+    m_encoderRearRightDrive.SetPosition(0);
+    m_encoderRearLeftDrive.SetPosition(0);
+
     m_encoderLiftYD.SetPosition(0);
     m_encoderLiftXD.SetPosition(0);
+
+    m_encoderrightShooter.SetPosition(0);
+    m_encoderleftShooter.SetPosition(0);
 
     V_ShooterSpeedCurr = 0;
   }
