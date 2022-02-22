@@ -32,8 +32,6 @@ double V_lift_command_XD = 0;
 double V_LiftYD_TestLocation = 0;
 double V_LiftXD_TestLocation = 0;
 
-T_LiftCmndDirection V_DriverLiftCmndDirection = E_LiftCmndNone;
-
 #ifdef LiftXY_Test
 bool   V_LiftXY_Test = true;
 double V_LiftPID_Gx[E_PID_SparkMaxCalSz];
@@ -176,8 +174,6 @@ void LiftControlInit()
 
   V_LiftYD_TestLocation = 0;
   V_LiftXD_TestLocation = 0;
-
-  V_DriverLiftCmndDirection = E_LiftCmndNone;
   }
 
 /******************************************************************************
