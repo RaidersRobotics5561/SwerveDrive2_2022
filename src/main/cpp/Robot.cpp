@@ -122,6 +122,7 @@ void Robot::RobotPeriodic()
                          c_joyStick2.GetRawButton(8),
                          c_joyStick.GetRawButton(7),
                          c_joyStick2.GetRawButton(3),
+                         c_joyStick2.GetRawButton(4),
                          c_joyStick2.GetRawAxis(1),
                          c_joyStick2.GetRawAxis(5),
                          c_joyStick.GetRawAxis(1),
@@ -232,6 +233,7 @@ void Robot::AutonomousPeriodic()
                     V_LauncherState,
                     V_SwerveTargetLocking,
                     V_Driver_CameraLight,
+                    V_ShooterTargetSpeedReached,
                    &V_CameraLightCmndOn,
                    &V_VanityLightCmnd);
 
@@ -332,6 +334,7 @@ void Robot::TeleopPeriodic()
                     V_LauncherState,
                     V_SwerveTargetLocking,
                     V_Driver_CameraLight,
+                    V_ShooterTargetSpeedReached,
                    &V_CameraLightCmndOn,
                    &V_VanityLightCmnd);
 
@@ -370,6 +373,7 @@ void Robot::TeleopPeriodic()
                                        m_liftMotorXD.GetOutputCurrent());
 
   BallHandlerControlMain( V_Driver_intake_in,
+                          V_Driver_intake_out,
                           V_BallDetectedRaw,
                           V_Driver_elevator_up,
                           V_Driver_elevator_down,

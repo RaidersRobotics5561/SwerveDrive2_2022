@@ -24,6 +24,8 @@ double V_IntakePowerCmnd   = 0;
 double V_ElevatorPowerCmnd = 0;
 double V_ShooterRPM_Cmnd   = 0;
 double V_ShooterTestSpeed  = 0;
+double V_ShooterTargetDistance = 0;
+bool   V_ShooterTargetSpeedReached = false;
 T_LauncherStates V_LauncherState = E_LauncherNotActive;
 
 #ifdef BallHandlerTest
@@ -59,8 +61,6 @@ void BallHandlerMotorConfigsInit(rev::SparkMaxPIDController m_rightShooterpid,
   m_leftShooterpid.SetIZone(K_LauncherPID_Gx[E_kIz]);
   m_leftShooterpid.SetFF(K_LauncherPID_Gx[E_kFF]);
   m_leftShooterpid.SetOutputRange(K_LauncherPID_Gx[E_kMinOutput], K_LauncherPID_Gx[E_kMaxOutput]);
-
-
 
   /**
    * Smart Motion coefficients are set on a SparkMaxPIDController object
@@ -108,8 +108,6 @@ void BallHandlerMotorConfigsInit(rev::SparkMaxPIDController m_rightShooterpid,
   frc::SmartDashboard::PutNumber("Min Velocity", K_LauncherPID_Gx[E_kMinVel]);
   frc::SmartDashboard::PutNumber("Max Acceleration", K_LauncherPID_Gx[E_kMaxAcc]);
   frc::SmartDashboard::PutNumber("Allowed Closed Loop Error", K_LauncherPID_Gx[E_kAllErr]);
-  frc::SmartDashboard::PutNumber("Set Position", 0);
-  frc::SmartDashboard::PutNumber("Set Velocity", 0);
 
   frc::SmartDashboard::PutNumber("Launch Speed Desired", V_ShooterTestSpeed);
   #endif
@@ -168,6 +166,8 @@ void BallHandlerInit()
   V_ElevatorPowerCmnd = 0;
   V_ShooterRPM_Cmnd = 0;
   V_LauncherState = E_LauncherNotActive;
+  V_ShooterTargetDistance = 0.0;
+  V_ShooterTargetSpeedReached = false;
   }
 
 
@@ -184,11 +184,19 @@ double BallLauncher(bool   L_DisableShooter,
                     double L_TopTargetDistanceMeters,
                     double L_ManualShooter,
                     double L_LauncherCurrentSpeed,
-                    T_CameraLightStatus L_CameraLightStatus,
-                    bool  *L_TargetSpeedReached)
+                    T_CameraLightStatus L_CameraLightStatus)
   {
   double           L_ShooterSpeedCmnd = 0;
   T_LauncherStates L_LauncherState    = E_LauncherNotActive;
+  bool L_ShooterTargetSpeedReached = false;
+
+  if ((V_LauncherState == E_LauncherAutoTargetActive) && 
+      ((L_CameraLightStatus == E_LightTurnedOff) ||
+       (L_CameraLightStatus == E_LightForcedOffDueToOvertime)))
+    {
+    // Latch the last known good value
+    L_TopTargetDistanceMeters = V_ShooterTargetDistance;
+    }
 
   if (V_BallHandlerTest == true)
     {
@@ -200,6 +208,7 @@ double BallLauncher(bool   L_DisableShooter,
     {
     L_ShooterSpeedCmnd = 0;
     L_LauncherState = E_LauncherNotActive;
+    V_ShooterTargetDistance = 0;
     }
   else if (((L_AutoShootReq == true) &&
             (L_TopTargetAquired == true) &&
@@ -216,6 +225,7 @@ double BallLauncher(bool   L_DisableShooter,
     {
     L_ShooterSpeedCmnd = DtrmnManualLauncherSpeed(L_ManualShooter);
     L_LauncherState = E_LauncherManualActive;
+    V_ShooterTargetDistance = 0;
     }
 
   if (L_LauncherState > E_LauncherNotActive)
@@ -223,10 +233,15 @@ double BallLauncher(bool   L_DisableShooter,
       if ((L_LauncherCurrentSpeed > (L_ShooterSpeedCmnd - K_DesiredLauncherSpeedDb)) &&
           (L_LauncherCurrentSpeed <= (L_ShooterSpeedCmnd + K_DesiredLauncherSpeedDb)))
          {
-         *L_TargetSpeedReached = true;
+         L_ShooterTargetSpeedReached = true;
+           if (L_CameraLightStatus == E_LauncherAutoTargetActive)
+             {
+               V_ShooterTargetDistance = L_TopTargetDistanceMeters;
+             }
          }
     }
 
+  V_ShooterTargetSpeedReached = L_ShooterTargetSpeedReached;
   V_LauncherState = L_LauncherState;
 
   return (L_ShooterSpeedCmnd);
@@ -238,14 +253,19 @@ double BallLauncher(bool   L_DisableShooter,
  * Description:  Contains the functionality for controlling the intake 
  *               mechanism.
  ******************************************************************************/
-double BallIntake(bool L_DriverIntakeCmnd)
+double BallIntake(bool L_DriverIntakeInCmnd,
+                  bool L_DriverIntakeOutCmnd)
   {
     double L_IntakeMotorCmnd = 0;
 
-    if (L_DriverIntakeCmnd == true)
-    {
+    if (L_DriverIntakeInCmnd == true)
+      {
       L_IntakeMotorCmnd = K_IntakePower;
-    }
+      }
+    else if (L_DriverIntakeOutCmnd == true)
+      {
+      L_IntakeMotorCmnd = -K_IntakePower;
+      }
     // Otherwise, leave at 0
 
     return (L_IntakeMotorCmnd);
@@ -290,7 +310,8 @@ double BallElevator(bool L_BallDetected,
  * Description:  Contains the functionality for controlling the launch 
  *               mechanism.
  ******************************************************************************/
-void BallHandlerControlMain(bool L_IntakeCmnd,
+void BallHandlerControlMain(bool L_IntakeInCmnd,
+                            bool L_IntakeOutCmnd,
                             bool L_BallDetected,
                             bool L_ElevatorCmndUp,
                             bool L_ElevatorCmndDwn,
@@ -309,7 +330,6 @@ void BallHandlerControlMain(bool L_IntakeCmnd,
     double L_LauncherRPM       = 0;
     double L_IntakePowerCmnd   = 0;
     double L_ElevatorPowerCmnd = 0;
-    bool   L_TargetSpeedReached = false;
 
     L_LauncherRPM = BallLauncher( L_DisableShooter,
                                   L_AutoShootReq,
@@ -318,15 +338,15 @@ void BallHandlerControlMain(bool L_IntakeCmnd,
                                   L_TopTargetDistanceMeters,
                                   L_ManualShooter,
                                   L_LauncherCurrentSpeed,
-                                  L_CameraLightStatus,
-                                 &L_TargetSpeedReached);
+                                  L_CameraLightStatus);
 
-    L_IntakePowerCmnd = BallIntake(L_IntakeCmnd);
+    L_IntakePowerCmnd = BallIntake(L_IntakeInCmnd,
+                                   L_IntakeOutCmnd);
     
     L_ElevatorPowerCmnd = BallElevator(L_BallDetected,
                                        L_ElevatorCmndUp,
                                        L_ElevatorCmndDwn,
-                                       L_TargetSpeedReached);
+                                       V_ShooterTargetSpeedReached);
 
     *L_Intake = L_IntakePowerCmnd;
 

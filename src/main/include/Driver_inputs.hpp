@@ -15,7 +15,7 @@
  extern bool                V_Driver_elevator_down;
  extern double              V_Driver_manual_shooter_desired_speed;
  extern bool                V_Driver_intake_in;
-// extern bool              V_driver_intake_out;
+ extern bool                V_Driver_intake_out;
  extern double              V_Driver_SwerveForwardBack;
  extern double              V_Driver_SwerveStrafe;
  extern double              V_Driver_SwerveRotate;
@@ -35,6 +35,7 @@ void Joystick_robot_mapping(bool  L_Driver2_buttonA, //Controller 2, A button (1
                             bool  L_Driver2_buttonstart, //controller 2 start button (8)
                             bool  L_Driver1_buttonback, //Controller 1, Back button (7)
                             bool  L_Driver2_ButtonX,  //Controller 2 (3), controlls the intake base on trigger pressed 
+                            bool    L_Driver2_ButtonY, // Controller 2 (), controlls the intake out on trigger pressed 
                             double  L_Driver2_left_Axis_y, //Controller 2, left axis, uses y (1) 
                             double  L_Driver2_right_Axis_y, //Controller 2,right axis, uses y (5)
                             double  L_Driver1_left_Axis_y,

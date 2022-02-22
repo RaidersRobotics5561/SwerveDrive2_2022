@@ -13,7 +13,8 @@
 
 #include "Const.hpp"
 #include <frc/DriverStation.h>
-#include "LightControl.hpp"
+// #include "LightControl.hpp"
+// #include "BallHandler.hpp"
 
 /* V_CameraLightOnTime: Indication of how long the light has been consecutivly on. */
 double V_CameraLightOnTime = 0;
@@ -39,15 +40,19 @@ bool CameraLightControl(bool             L_AutoAlignRequest,
                         bool             L_AutoLauncherRequest,
                         T_LauncherStates L_LauncherState,
                         bool             L_SwerveTargetLocking,
-                        bool             L_Driver_CameraLight)
+                        bool             L_Driver_CameraLight,
+                        bool             L_ShooterTargetSpeedReached)
   {
     bool L_CameraLightCmndOn = false;
 
-    if ((L_AutoAlignRequest == true) ||
-        (L_AutoLauncherRequest == true) ||
-        (L_LauncherState == E_LauncherAutoTargetActive) ||
+    if ((L_AutoAlignRequest == true) ||    /* Swerve drive targeting has been requested or is in process */
         (L_SwerveTargetLocking == true) ||
-        (L_Driver_CameraLight == true))
+
+        ((L_ShooterTargetSpeedReached == false) &&  /* Ball targeting has been requested or is in process */
+         (L_AutoLauncherRequest == true) ||
+         (L_LauncherState == E_LauncherAutoTargetActive)) ||
+        
+        (L_Driver_CameraLight == true))  /* Driver override is present */
       {
       L_CameraLightCmndOn = true;
       }
@@ -140,6 +145,7 @@ void LightControlMain(bool                         L_AutoAlignRequest,
                       T_LauncherStates             L_LauncherState,
                       bool                         L_SwerveTargetLocking,
                       bool                         L_Driver_CameraLight,
+                      bool                         L_ShooterTargetSpeedReached,
                       bool                        *L_CameraLightCmndOn,
                       double                      *L_VanityLightCmnd)
   {
@@ -147,7 +153,8 @@ void LightControlMain(bool                         L_AutoAlignRequest,
                                             L_AutoLauncherRequest,
                                             L_LauncherState,
                                             L_SwerveTargetLocking,
-                                            L_Driver_CameraLight);
+                                            L_Driver_CameraLight,
+                                            L_ShooterTargetSpeedReached);
 
   *L_VanityLightCmnd = VanityLightControl(L_MatchTimeRemaining,
                                           L_AllianceColor);

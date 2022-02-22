@@ -4,7 +4,7 @@
 #include <units/length.h>
 
 // Define the desired test state here: COMP (no test), BallHandlerTest, LiftXY_Test
-#define LiftXY_Test
+#define BallHandlerTest
 
 const double C_ExeTime = 0.02; // Set to match the the default controller loop time of 20 ms
 const units::second_t C_ExeTime_t = 0.02_s; // Set to match the the default controller loop time of 20 ms
@@ -128,8 +128,8 @@ const double K_LauncherPID_Gx[E_PID_SparkMaxCalSz] = { 0.1,    // kP
                                                        0.0,    // kFF
                                                        1.0,    // kMaxOutput
                                                       -1.0,    // kMinOutput
-                                                      20.0,    // kMaxVel
-                                                     -20.0,    // kMinVel
+                                                     200.0,    // kMaxVel
+                                                    -200.0,    // kMinVel
                                                       10.0,    // kMaxAcc
                                                        0.0};   // kAllErr
 
@@ -294,7 +294,7 @@ const double K_DesiredLauncherManualSpeed[5] = {0,
 
 /* K_DesiredLauncherSpeedDb: Deadband around the desired launcher speed (in RPM).  
                              Used to indicate when a ball can be launched. */
-const double K_DesiredLauncherSpeedDb = 75;
+const double K_DesiredLauncherSpeedDb = 10;
 
 const double K_LiftYD_PID[E_PID_CalSz] = { 0.1,   // P Gx
                                            0.000002,   // I Gx
@@ -327,10 +327,10 @@ const double K_LiftXD_PID[E_PID_CalSz] = { 0.1,   // P Gx
 const double K_RotateDebounceTime = 0.06;  
 
 // This is the amount of error allowed when in auto rotate / auto target
-const double K_RotateDeadbandAngle = 0.420;  
+const double K_RotateDeadbandAngle = 0.5;  
 
-// This is the desired target angle for the auto vision targeting.  This is due to the offset of the camera.
-const double K_TargetVisionAngle = 3.3;
+// This is the desired target angle for the auto vision targeting.  This is due to the offset of the camera. For 2020 - 3.3
+const double K_TargetVisionAngle = 0.0;
 
 
 

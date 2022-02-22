@@ -26,6 +26,7 @@ void VisionDashboard(){
 // puts all our favorite variables to the dashboard, all this stuff happens once on init
     frc::SmartDashboard::PutBoolean("Top Target?", TopTargetAquired);
     frc::SmartDashboard::PutNumber("Target Yaw", TopYaw);
+    frc::SmartDashboard::PutNumber("Top Distance", V_TopTargetDistanceMeters);
 
     frc::SmartDashboard::PutBoolean("Bottom Target?", BottomTargetAquired);
     frc::SmartDashboard::PutNumber("Bottom Yaw", BottomYaw);
@@ -63,6 +64,7 @@ void VisionRun(){
     V_TopTargetDistanceMeters = TopRangeDouble;
 
     frc::SmartDashboard::PutNumber("Top Range", TopRangeDouble);
+    frc::SmartDashboard::PutNumber("Top Distance", TopRangeDouble); // Probably can remove this...
 
 
     // second camera for cargo detection
