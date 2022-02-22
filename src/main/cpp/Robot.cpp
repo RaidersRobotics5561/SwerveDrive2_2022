@@ -48,32 +48,14 @@ nt::NetworkTableEntry latency1;
 nt::NetworkTableEntry lidarDistance;
 nt::NetworkTableEntry ledControl;
 
-T_RobotState V_RobotState;
-double V_MatchTimeRemaining = 0;
-
-double       distanceTarget;
-double       distanceBall;
-double       distanceFromTargetCenter;
-double       distanceFromBallCenter;
-double       desiredVisionAngle0;
-double       desiredVisionDistance0;
-double       originalPosition;
-bool         activeVisionAngle0;
-bool         activeVisionDistance0;
-bool         visionRequest;
-bool         visionStart1;
-bool         visionStart2;
-
-int pipelineCounter;
-bool V_pipelinecounterLatch;
+T_RobotState                 V_RobotState;
+frc::DriverStation::Alliance V_AllianceColor; 
+double                       V_MatchTimeRemaining = 0;
 
 bool V_autonTargetCmd = false;
 bool V_autonTargetFin = false;
 
-frc::DriverStation::Alliance V_AllianceColor; 
-
 bool   LightOff; //the polarities are funny, true = off
-
 
 
 /******************************************************************************
@@ -209,8 +191,6 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutNumber("Lift XD S11", V_LiftMotorXD_MaxCurrent[E_S11_Stop]);
   }
 
-
- 
 
 /******************************************************************************
  * Function:     AutonomousInit

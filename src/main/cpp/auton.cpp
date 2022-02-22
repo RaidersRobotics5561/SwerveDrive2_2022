@@ -27,7 +27,7 @@ double V_L_Y_Integral;
 bool   V_b_RecordStartPosition;
 double V_L_X_StartPosition;
 double V_L_Y_StartPosition;
-
+double       distanceTarget;
 int theCoolerInteger;
 
 double V_autonTimer = 0;
