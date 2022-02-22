@@ -397,8 +397,6 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
 
     V_Deg_DesiredAngPrev = desiredAngle;
 
-    frc::SmartDashboard::PutNumber("FL Angle Used for PID", V_WheelAngleArb[E_FrontLeft]);
-    frc::SmartDashboard::PutNumber("V_RCW", V_RCW);
     frc::SmartDashboard::PutNumber("V_b_DriveStraight", V_b_DriveStraight);
     frc::SmartDashboard::PutNumber("L_RotateErrorCalc", L_RotateErrorCalc);
   }

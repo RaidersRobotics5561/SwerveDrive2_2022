@@ -130,11 +130,6 @@ void Read_Encoders(double                       L_encoderWheelAngleFrontLeftRaw,
     V_Cnt_WheelDeltaDistancePrev[index]  = V_Cnt_WheelDeltaDistanceCurr[index];
     }
 
-  frc::SmartDashboard::PutNumber("FL Angle Fwd", V_WheelAngleFwd[E_FrontLeft]);
-  frc::SmartDashboard::PutNumber("FL NEO Encoder Processed", V_WheelAngleConverted[E_FrontLeft]);
-  frc::SmartDashboard::PutNumber("Lift postition YD", V_LiftPostitionYD);
-  frc::SmartDashboard::PutNumber("Lift postition XD", V_LiftPostitionXD);
-
   V_WheelVelocity[E_FrontLeft]  = ((m_encoderFrontLeftDrive.GetVelocity()  / K_ReductionRatio) / 60) * K_WheelCircufrence;
   V_WheelVelocity[E_FrontRight] = ((m_encoderFrontRightDrive.GetVelocity() / K_ReductionRatio) / 60) * K_WheelCircufrence;
   V_WheelVelocity[E_RearRight]  = ((m_encoderRearRightDrive.GetVelocity()  / K_ReductionRatio) / 60) * K_WheelCircufrence;

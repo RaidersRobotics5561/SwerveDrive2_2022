@@ -166,6 +166,9 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutBoolean("YD Limit Detected", V_YD_LimitDetected);
   frc::SmartDashboard::PutBoolean("Ball Detected", V_BallDetectedRaw);
 
+  frc::SmartDashboard::PutNumber("Lift postition YD", V_LiftPostitionYD);
+  frc::SmartDashboard::PutNumber("Lift postition XD", V_LiftPostitionXD);
+
   frc::SmartDashboard::PutNumber("Lift YD S0", V_LiftMotorYD_MaxCurrent[E_S0_BEGONE]);
   frc::SmartDashboard::PutNumber("Lift YD S1", V_LiftMotorYD_MaxCurrent[E_S1_initialize_Up_YD]);
   frc::SmartDashboard::PutNumber("Lift YD S2", V_LiftMotorYD_MaxCurrent[E_S2_lift_down_YD]);
