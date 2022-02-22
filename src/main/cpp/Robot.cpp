@@ -68,6 +68,26 @@ void Robot::RobotInit()
   V_RobotState = E_Init;
   V_AllianceColor = frc::DriverStation::GetInstance().GetAlliance();
 
+  m_frontLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
+  m_frontRightSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
+  m_rearLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
+  m_rearRightSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
+
+  m_frontLeftSteerMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
+  m_frontLeftDriveMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
+  m_frontRightSteerMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
+  m_frontRightDriveMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
+  m_rearLeftSteerMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
+  m_rearLeftDriveMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
+  m_rearRightSteerMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
+  m_rearRightDriveMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
+
+  m_liftMotorYD.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
+  m_liftMotorXD.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
+
+  m_rightShooterMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kCoast);
+  m_leftShooterMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kCoast);
+
   EncodersInit(m_encoderFrontRightSteer,
                m_encoderFrontLeftSteer,
                m_encoderRearRightSteer,
@@ -81,9 +101,6 @@ void Robot::RobotInit()
 
   BallHandlerMotorConfigsInit(m_rightShooterpid,
                               m_leftShooterpid);
-
-  m_liftMotorYD.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
-  m_liftMotorXD.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
 
   LiftMotorConfigsInit(m_liftpidYD,
                        m_liftpidXD);
@@ -301,11 +318,6 @@ void Robot::TeleopInit()
   V_RobotState = E_Teleop;
   V_AllianceColor = frc::DriverStation::GetInstance().GetAlliance();
 
-  m_frontLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
-  m_frontRightSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
-  m_rearLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
-  m_frontLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
-
   EncodersInit(m_encoderFrontRightSteer,
                m_encoderFrontLeftSteer,
                m_encoderRearRightSteer,
@@ -398,20 +410,10 @@ void Robot::TeleopPeriodic()
     m_rearLeftDriveMotor.Set(V_WheelSpeedCmnd[E_RearLeft]);
     m_rearRightDriveMotor.Set(V_WheelSpeedCmnd[E_RearRight]);
 
-    // m_frontLeftDriveMotor.Set(0);
-    // m_frontRightDriveMotor.Set(0);
-    // m_rearLeftDriveMotor.Set(0);
-    // m_rearRightDriveMotor.Set(0);
-
     m_frontLeftSteerMotor.Set(V_WheelAngleCmnd[E_FrontLeft]);
     m_frontRightSteerMotor.Set(V_WheelAngleCmnd[E_FrontRight]);
     m_rearLeftSteerMotor.Set(V_WheelAngleCmnd[E_RearLeft]);
     m_rearRightSteerMotor.Set(V_WheelAngleCmnd[E_RearRight]);
-
-    // m_frontLeftSteerMotor.Set(0);
-    // m_frontRightSteerMotor.Set(0);
-    // m_rearLeftSteerMotor.Set(0);
-    // m_rearRightSteerMotor.Set(0);
 
     m_rightShooterpid.SetReference(-V_ShooterRPM_Cmnd, rev::ControlType::kSmartVelocity);
     m_leftShooterpid.SetReference(V_ShooterRPM_Cmnd, rev::ControlType::kSmartVelocity);
