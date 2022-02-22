@@ -7,11 +7,7 @@
  *
  * */
 
-//NOTE: Set this to TEST for testing of speeds and PID gains.  Set to COMP for competion
-#define TEST
 // #define PHOTON
-//NOTE: Set this to allow Shuffleboard configuration of PIDConfig objects (Will override defaults)
-#define PID_DEBUG
 #define SPIKE
 
 #include "Robot.h"
@@ -19,7 +15,6 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/DriverStation.h>
 #include <frc/livewindow/LiveWindow.h>
-
 
 #include "Encoders.hpp"
 #include "BallHandler.hpp"
@@ -32,26 +27,12 @@
 #include "vision.hpp"
 #include "DriveControl.hpp"
 #include "AutoTarget.hpp"
-
-#include <frc/DigitalInput.h>
-#include <frc/DigitalOutput.h>
 #include "Lift.hpp"
 #include "Driver_inputs.hpp"
-#include "Lift.hpp"
-#include "Driver_inputs.hpp"
-
-#include <units/length.h>
-#include "Utils/PIDConfig.hpp"
 #include "Odometry.hpp"
 #include "Auton.hpp"
-#include <photonlib/PhotonCamera.h>
-#include <photonlib/PhotonUtils.h>
-
-
 
 nt::NetworkTableInstance inst;
-
-
 nt::NetworkTableEntry driverMode0;
 nt::NetworkTableEntry pipeline0;
 nt::NetworkTableEntry targetYaw0;
@@ -66,10 +47,7 @@ nt::NetworkTableEntry latency1;
 nt::NetworkTableEntry lidarDistance;
 nt::NetworkTableEntry ledControl;
 
-double V_AutoTargetAngle;
-double V_AutoTargetUpperRollerSpd;
-double V_AutoTargetLowerRollerSpd;
-double V_AutoTargetBeltPower;
+T_RobotState V_RobotState;
 
 double       distanceTarget;
 double       distanceBall;
@@ -87,11 +65,6 @@ bool         visionStart2;
 int pipelineCounter;
 bool V_pipelinecounterLatch;
 
-bool         V_AutoShootEnable;
-
-
-
-
 bool V_autonTargetCmd = false;
 bool V_autonTargetFin = false;
 
@@ -99,30 +72,9 @@ bool V_autonTargetFin = false;
 double V_M_RobotDisplacementX = 0;
 double V_M_RobotDisplacementY = 0;
 
-double V_XD_Test = 0;
-double V_YD_Test = 0;
-
-
-// double V_P_Gx = 0;
-// double V_I_Gx = 0;
-// double V_D_Gx = 0;
-// double V_I_Zone = 0;
-// double V_FF = 0;
-// double V_Max = 0;
-// double V_Min = 0;
-
-double K_MaxVel = 0;
-double K_MinVel = 0;
-double K_MaxAcc = 0;
-double K_AllErr = 0;
-
 bool   LightOff; //the polarities are funny, true = off
 
-T_RobotState V_RobotState;
 
-
-
-// PIDConfig UpperShooterPIDConfig {0.0008, 0.000001, 0.0006};
 
 /******************************************************************************
  * Function:     RobotInit
@@ -321,7 +273,6 @@ void Robot::TeleopInit()
 
   LiftControlInit();
 
-  V_AutoShootEnable = false;
   V_M_RobotDisplacementX = 0;
   V_M_RobotDisplacementY = 0;
 }
@@ -334,65 +285,27 @@ void Robot::TeleopInit()
  ******************************************************************************/
 void Robot::TeleopPeriodic()
   {
-  bool L_Driver_lift_control = false;
-  bool L_Driver_zero_gyro = false;
-  bool L_Driver_stops_shooter = false;
-  bool L_Driver_auto_setspeed_shooter = false;
-  bool L_Driver_elevator_up = false;
-  bool L_Driver_elevator_down = false;
-  double L_Driver_right_shooter_desired_speed = 0;
-  double L_Driver_left_shooter_desired_speed = 0;
-  bool L_Driver_intake_in = false;
-  //bool L_driver_intake_out = false;
-  double L_Driver_SwerveForwardBack = 0;
-  double L_Driver_SwerveStrafe = 0;
-  double L_Driver_SwerveRotate = 0;
-  double L_Driver_SwerveSpeed = 0;
-  bool   L_Driver_SwerveGoalAutoCenter = false;
-  bool   L_Driver_SwerveRotateTo0 = false;
-  bool   L_Driver_SwerveRotateTo90 = false;
-  bool   L_Driver_LiftYD_Up   = false;
-  bool   L_Driver_LiftYD_Down = false;
-  T_LiftCmndDirection L_DriverLiftCmndDirection = E_LiftCmndNone;
-
   double L_timeleft = frc::DriverStation::GetInstance().GetMatchTime();
 
   frc::DriverStation::Alliance L_AllianceColor = frc::DriverStation::GetInstance().GetAlliance();
 
   Joystick_robot_mapping( c_joyStick2.GetRawButton(1),
-                         &L_Driver_elevator_up,
                           c_joyStick2.GetRawButton(2),
-                         &L_Driver_elevator_down,
                           c_joyStick2.GetRawButton(6), //change later
-                         &L_Driver_lift_control,
                           c_joyStick2.GetRawButton(7),
-                         &L_Driver_stops_shooter,
                           c_joyStick2.GetRawButton(8),
-                         &L_Driver_auto_setspeed_shooter,
                           c_joyStick.GetRawButton(7),
-                         &L_Driver_zero_gyro,
                           c_joyStick2.GetRawButton(3),
-                         &L_Driver_intake_in,
                           c_joyStick2.GetRawAxis(1),
-                         &L_Driver_right_shooter_desired_speed,
                           c_joyStick2.GetRawAxis(5),
-                         &L_Driver_left_shooter_desired_speed,
                           c_joyStick.GetRawAxis(1),
-                         &L_Driver_SwerveForwardBack,
                           c_joyStick.GetRawAxis(0),
-                         &L_Driver_SwerveStrafe,
                           c_joyStick.GetRawAxis(4),
-                         &L_Driver_SwerveRotate,
                           c_joyStick.GetRawAxis(3),
-                         &L_Driver_SwerveSpeed,
                           c_joyStick.GetRawButton(1),
-                         &L_Driver_SwerveGoalAutoCenter,
                           c_joyStick.GetRawButton(3),
-                         &L_Driver_SwerveRotateTo0,
                           c_joyStick.GetRawButton(4),
-                         &L_Driver_SwerveRotateTo90,
-                          c_joyStick2.GetPOV(),
-                         &L_DriverLiftCmndDirection);
+                          c_joyStick2.GetPOV());
 
   Read_Encoders(a_encoderWheelAngleFrontLeft.Get().value(),
                 a_encoderWheelAngleFrontRight.Get().value(),
@@ -407,14 +320,14 @@ void Robot::TeleopPeriodic()
                 m_encoderLiftYD,
                 m_encoderLiftXD);
 
-  ReadGyro(L_Driver_zero_gyro);
+  ReadGyro(V_Driver_zero_gyro);
 
   Read_IO_Sensors(di_IR_Sensor.Get(),
                   di_XD_LimitSwitch.Get(),
                   di_XY_LimitSwitch.Get());
 
-  LightControlMain( L_Driver_SwerveGoalAutoCenter,
-                    L_Driver_auto_setspeed_shooter,
+  LightControlMain( V_Driver_SwerveGoalAutoCenter,
+                    V_Driver_auto_setspeed_shooter,
                     L_timeleft,
                     L_AllianceColor,
                     V_LauncherState,
@@ -428,13 +341,13 @@ void Robot::TeleopPeriodic()
                          &V_M_RobotDisplacementX,
                          &V_M_RobotDisplacementY);
 
-  DriveControlMain( L_Driver_SwerveForwardBack,
-                    L_Driver_SwerveStrafe,
-                    L_Driver_SwerveRotate,
-                    L_Driver_SwerveSpeed,
-                    L_Driver_SwerveGoalAutoCenter,
-                    L_Driver_SwerveRotateTo0,
-                    L_Driver_SwerveRotateTo90,
+  DriveControlMain( V_Driver_SwerveForwardBack,
+                    V_Driver_SwerveStrafe,
+                    V_Driver_SwerveRotate,
+                    V_Driver_SwerveSpeed,
+                    V_Driver_SwerveGoalAutoCenter,
+                    V_Driver_SwerveRotateTo0,
+                    V_Driver_SwerveRotateTo90,
                     V_GyroYawAngleDegrees,
                     V_GyroYawAngleRad,
                     TopTargetAquired,
@@ -446,8 +359,8 @@ void Robot::TeleopPeriodic()
                    &V_autonTargetFin,
                     V_RobotState);
 
-  V_Lift_state = Lift_Control_Dictator(L_Driver_lift_control,
-                                       L_DriverLiftCmndDirection,
+  V_Lift_state = Lift_Control_Dictator(V_Driver_lift_control,
+                                       V_Driver_Lift_Cmnd_Direction,
                                        L_timeleft,
                                        V_Lift_state,
                                        V_LiftPostitionYD,
@@ -456,17 +369,17 @@ void Robot::TeleopPeriodic()
                                        &V_lift_command_XD,
                                        V_GyroYawAngleDegrees);
 
-  BallHandlerControlMain( L_Driver_intake_in,
+  BallHandlerControlMain( V_Driver_intake_in,
                           V_BallDetectedRaw,
-                          L_Driver_elevator_up,
-                          L_Driver_elevator_down,
-                          L_Driver_stops_shooter,
-                          L_Driver_auto_setspeed_shooter,
+                          V_Driver_elevator_up,
+                          V_Driver_elevator_down,
+                          V_Driver_stops_shooter,
+                          V_Driver_auto_setspeed_shooter,
                           V_autonTargetFin,
                           TopTargetAquired,
                           V_TopTargetDistanceMeters,
                           V_ShooterSpeedCurr,
-                          L_Driver_right_shooter_desired_speed,
+                          V_Driver_manual_shooter_desired_speed,
                           V_CameraLightStatus,
                          &V_IntakePowerCmnd,
                          &V_ElevatorPowerCmnd,
