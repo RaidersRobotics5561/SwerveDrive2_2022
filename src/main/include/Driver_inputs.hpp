@@ -38,5 +38,7 @@ void Joystick_robot_mapping(bool  L_Driver2_buttonA, //Controller 2, A button (1
                             bool    L_Driver1_ButtonX,
                             bool   *L_Driver_SwerveRotateTo0,
                             bool    L_Driver1_ButtonY,
-                            bool   *L_Driver_SwerveRotateTo90);
+                            bool   *L_Driver_SwerveRotateTo90,
+                            int     L_Driver2_POV,
+                            T_LiftCmndDirection *L_DriverLiftCmndDirection);
  

@@ -6,6 +6,7 @@
 
   Function that maps the driver inputs to the robot controls. 
  */
+#include "Enums.hpp"
 
 /******************************************************************************
  * Function:     Joystick_robot_mapping
@@ -44,7 +45,9 @@ void Joystick_robot_mapping(bool  L_Driver2_buttonA,
                             bool    L_Driver1_ButtonX,
                             bool   *L_Driver_SwerveRotateTo0,
                             bool    L_Driver1_ButtonY,
-                            bool   *L_Driver_SwerveRotateTo90)
+                            bool   *L_Driver_SwerveRotateTo90,
+                            int     L_Driver2_POV,
+                            T_LiftCmndDirection *L_DriverLiftCmndDirection)
 {
     *L_elevator_up = L_Driver2_buttonA;
     *L_elevator_down = L_Driver2_buttonB;
@@ -63,5 +66,22 @@ void Joystick_robot_mapping(bool  L_Driver2_buttonA,
     *L_Driver_SwerveGoalAutoCenter = L_Driver1_buttonA;
     *L_Driver_SwerveRotateTo0 = L_Driver1_ButtonX;
     *L_Driver_SwerveRotateTo90 = L_Driver1_ButtonY;
+
+    if (L_Driver2_POV == 0)
+      {
+      *L_DriverLiftCmndDirection = E_LiftCmndUp;
+      }
+    else if (L_Driver2_POV == 180)
+      {
+      *L_DriverLiftCmndDirection = E_LiftCmndDown;
+      }
+    else if (L_Driver2_POV == 90)
+      {
+      *L_DriverLiftCmndDirection = E_LiftCmndForward;
+      }
+    else if (L_Driver2_POV == 270)
+      {
+      *L_DriverLiftCmndDirection = E_LiftCmndBack;
+      }
 }
 

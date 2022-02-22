@@ -30,14 +30,6 @@
 #include <photonlib/PhotonCamera.h>
 #include <photonlib/PhotonUtils.h>
 
-extern double V_P_Gx;
-extern double V_I_Gx;
-extern double V_D_Gx;
-extern double V_I_Zone;
-extern double V_FF;
-extern double V_Max;
-extern double V_Min;
-
 class Robot : public frc::TimedRobot {
  public:
   void RobotInit() override;
@@ -79,15 +71,14 @@ class Robot : public frc::TimedRobot {
   rev::CANSparkMax                           m_liftMotorYD         {C_liftYD_ID,             rev::CANSparkMax::MotorType::kBrushless};
   rev::CANSparkMax                           m_liftMotorXD         {C_liftXD_ID,             rev::CANSparkMax::MotorType::kBrushless};
 
-  ctre::phoenix::motorcontrol::can::TalonSRX m_intake              {C_intakeID};
-  ctre::phoenix::motorcontrol::can::TalonSRX m_elevator            {C_elevatorID};
-
-  
   rev::SparkMaxPIDController                 m_rightShooterpid        = m_rightShooterMotor.GetPIDController();
   rev::SparkMaxPIDController                 m_leftShooterpid         = m_leftShooterMotor.GetPIDController();
        
   rev::SparkMaxPIDController                 m_liftpidYD              = m_liftMotorYD.GetPIDController();
   rev::SparkMaxPIDController                 m_liftpidXD              = m_liftMotorXD.GetPIDController();
+
+  ctre::phoenix::motorcontrol::can::TalonSRX m_intake              {C_intakeID};
+  ctre::phoenix::motorcontrol::can::TalonSRX m_elevator            {C_elevatorID};
 
   // PWM Motor / Light Controllers
   frc::Spark                                 m_vanityLightControler {C_VanityLight_ID};

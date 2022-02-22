@@ -11,6 +11,7 @@
 
 extern double V_WheelAngleCmnd[E_RobotCornerSz];
 extern double V_WheelSpeedCmnd[E_RobotCornerSz];
+extern bool   V_SwerveTargetLocking;
 
 void DriveControlInit(void);
 

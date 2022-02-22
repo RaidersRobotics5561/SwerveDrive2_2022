@@ -54,6 +54,10 @@ typedef enum T_PID_SparkMaxCal
   E_kFF,
   E_kMaxOutput,
   E_kMinOutput,
+  E_kMaxVel,
+  E_kMinVel,
+  E_kMaxAcc,
+  E_kAllErr,
   E_PID_SparkMaxCalSz
 } T_PID_SparkMaxCal;
 
@@ -80,6 +84,15 @@ typedef enum T_CameraLightStatus
   E_LightOnTargetingReady,
   E_LightForcedOffDueToOvertime
 } T_CameraLightStatus;
+
+typedef enum T_LiftCmndDirection
+{
+  E_LiftCmndNone,
+  E_LiftCmndUp,
+  E_LiftCmndDown,
+  E_LiftCmndForward,
+  E_LiftCmndBack
+} T_LiftCmndDirection;
 
 typedef enum T_Lift_State
 {

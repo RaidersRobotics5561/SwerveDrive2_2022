@@ -35,17 +35,20 @@ double  V_VanityLightCmnd = 0;
  *               - Informs targeting logic when camera feed should have had 
  *                 enough time with light on for accurate data.
  ******************************************************************************/
-bool CameraLightControl(bool L_AutoAlignRequest,
-                        bool L_AutoLauncherRequest)
+bool CameraLightControl(bool             L_AutoAlignRequest,
+                        bool             L_AutoLauncherRequest,
+                        T_LauncherStates L_LauncherState,
+                        bool             L_SwerveTargetLocking)
   {
     bool L_CameraLightCmndOn = false;
 
     if ((L_AutoAlignRequest == true) ||
-        (L_AutoLauncherRequest == true))
+        (L_AutoLauncherRequest == true) ||
+        (L_LauncherState == E_LauncherAutoTargetActive) ||
+        (L_SwerveTargetLocking == true))
       {
       L_CameraLightCmndOn = true;
       }
-    
 
     if ((L_CameraLightCmndOn == true) &&
         (V_CameraLightOnTime < K_CameraLightMaxOnTime) &&
@@ -122,11 +125,15 @@ void LightControlMain(bool                         L_AutoAlignRequest,
                       bool                         L_AutoLauncherRequest,
                       double                       L_MatchTimeRemaining,
                       frc::DriverStation::Alliance L_AllianceColor,
+                      T_LauncherStates             L_LauncherState,
+                      bool                         L_SwerveTargetLocking,
                       bool                        *L_CameraLightCmndOn,
                       double                      *L_VanityLightCmnd)
   {
   *L_CameraLightCmndOn = CameraLightControl(L_AutoAlignRequest,
-                                            L_AutoLauncherRequest);
+                                            L_AutoLauncherRequest,
+                                            L_LauncherState,
+                                            L_SwerveTargetLocking);
 
   *L_VanityLightCmnd = VanityLightControl(L_MatchTimeRemaining,
                                           L_AllianceColor);

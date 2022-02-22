@@ -22,14 +22,15 @@
 #include "Gyro.hpp"
 #include "Lift.hpp"
 #include "Lift_sub_functions.hpp"
+#include "rev/CANSparkMax.h"
+#include <frc/smartdashboard/SmartDashboard.h>
+#include <frc/DriverStation.h>
 
 T_Lift_State V_Lift_state = E_S0_BEGONE;
 int V_lift_counter = 0;
 bool V_init_state = false;
 double V_stop_positon_XD = 0;
 double V_timer_owo = 0;
-int L_stateControl = 0;
-bool urMomGay = true;
 bool V_criteria_met = false;
 
 double V_lift_measured_position_YD = 0;
@@ -37,35 +38,174 @@ double V_lift_measured_position_XD = 0;
 double V_lift_command_YD = 0;
 double V_lift_command_XD = 0;
 
+double V_LiftYD_TestLocation = 0;
+double V_LiftXD_TestLocation = 0;
+
+T_LiftCmndDirection V_DriverLiftCmndDirection = E_LiftCmndNone;
+
+#ifdef LiftXY_Test
+bool V_LiftXY_Test = true;
+double V_LiftPID_Gx[E_PID_SparkMaxCalSz];
+#else
+bool V_LiftXY_Test = false;
+#endif
+
+/******************************************************************************
+ * Function:     LiftMotorConfigsInit
+ *
+ * Description:  Contains the motor configurations for the lift motors.
+ *               - XD and YD
+ ******************************************************************************/
+void LiftMotorConfigsInit(rev::SparkMaxPIDController m_liftpidYD,
+                          rev::SparkMaxPIDController m_liftpidXD)
+  {
+  // set PID coefficients
+  m_liftpidYD.SetP(K_LiftPID_Gx[E_kP]);
+  m_liftpidYD.SetI(K_LiftPID_Gx[E_kI]);
+  m_liftpidYD.SetD(K_LiftPID_Gx[E_kD]);
+  m_liftpidYD.SetIZone(K_LiftPID_Gx[E_kIz]);
+  m_liftpidYD.SetFF(K_LiftPID_Gx[E_kFF]);
+  m_liftpidYD.SetOutputRange(K_LiftPID_Gx[E_kMinOutput], K_LiftPID_Gx[E_kMaxOutput]);
+
+  m_liftpidXD.SetP(K_LiftPID_Gx[E_kP]);
+  m_liftpidXD.SetI(K_LiftPID_Gx[E_kI]);
+  m_liftpidXD.SetD(K_LiftPID_Gx[E_kD]);
+  m_liftpidXD.SetIZone(K_LiftPID_Gx[E_kIz]);
+  m_liftpidXD.SetFF(K_LiftPID_Gx[E_kFF]);
+  m_liftpidXD.SetOutputRange(K_LiftPID_Gx[E_kMinOutput], K_LiftPID_Gx[E_kMaxOutput]);
+
+  /**
+   * Smart Motion coefficients are set on a SparkMaxPIDController object
+   * 
+   * - SetSmartMotionMaxVelocity() will limit the velocity in RPM of
+   * the pid controller in Smart Motion mode
+   * - SetSmartMotionMinOutputVelocity() will put a lower bound in
+   * RPM of the pid controller in Smart Motion mode
+   * - SetSmartMotionMaxAccel() will limit the acceleration in RPM^2
+   * of the pid controller in Smart Motion mode
+   * - SetSmartMotionAllowedClosedLoopError() will set the max allowed
+   * error for the pid controller in Smart Motion mode
+   */
+  m_liftpidYD.SetSmartMotionMaxVelocity(K_LiftPID_Gx[E_kMaxVel]);
+  m_liftpidYD.SetSmartMotionMinOutputVelocity(K_LiftPID_Gx[E_kMinVel]);
+  m_liftpidYD.SetSmartMotionMaxAccel(K_LiftPID_Gx[E_kMaxAcc]);
+  m_liftpidYD.SetSmartMotionAllowedClosedLoopError(K_LiftPID_Gx[E_kAllErr]);
+
+  m_liftpidXD.SetSmartMotionMaxVelocity(K_LiftPID_Gx[E_kMaxVel]);
+  m_liftpidXD.SetSmartMotionMinOutputVelocity(K_LiftPID_Gx[E_kMinVel]);
+  m_liftpidXD.SetSmartMotionMaxAccel(K_LiftPID_Gx[E_kMaxAcc]);
+  m_liftpidXD.SetSmartMotionAllowedClosedLoopError(K_LiftPID_Gx[E_kAllErr]);
+  
+  #ifdef LiftXY_Test
+  T_PID_SparkMaxCal L_Index = E_kP;
+
+  for (L_Index = E_kP;
+       L_Index < E_PID_SparkMaxCalSz;
+       L_Index = T_PID_SparkMaxCal(int(L_Index) + 1))
+      {
+      V_LiftPID_Gx[L_Index] = K_LiftPID_Gx[L_Index];
+      }
+  
+  // display PID coefficients on SmartDashboard
+  frc::SmartDashboard::PutNumber("P Gain", K_LiftPID_Gx[E_kP]);
+  frc::SmartDashboard::PutNumber("I Gain", K_LiftPID_Gx[E_kI]);
+  frc::SmartDashboard::PutNumber("D Gain", K_LiftPID_Gx[E_kD]);
+  frc::SmartDashboard::PutNumber("I Zone", K_LiftPID_Gx[E_kIz]);
+  frc::SmartDashboard::PutNumber("Feed Forward", K_LiftPID_Gx[E_kFF]);
+  frc::SmartDashboard::PutNumber("Max Output", K_LiftPID_Gx[E_kMaxOutput]);
+  frc::SmartDashboard::PutNumber("Min Output", K_LiftPID_Gx[E_kMinOutput]);
+
+  // display Smart Motion coefficients
+  frc::SmartDashboard::PutNumber("Max Velocity", K_LiftPID_Gx[E_kMaxVel]);
+  frc::SmartDashboard::PutNumber("Min Velocity", K_LiftPID_Gx[E_kMinVel]);
+  frc::SmartDashboard::PutNumber("Max Acceleration", K_LiftPID_Gx[E_kMaxAcc]);
+  frc::SmartDashboard::PutNumber("Allowed Closed Loop Error", K_LiftPID_Gx[E_kAllErr]);
+  frc::SmartDashboard::PutNumber("Set Position Y", 0);
+  frc::SmartDashboard::PutNumber("Set Position X", 0);
+  #endif
+  }
+
+
+/******************************************************************************
+ * Function:     LiftMotorConfigsCal
+ *
+ * Description:  Contains the motor configurations for the lift motors.  This 
+ *               allows for rapid calibration, but must not be used for comp.
+ ******************************************************************************/
+void LiftMotorConfigsCal(rev::SparkMaxPIDController m_liftpidYD,
+                                rev::SparkMaxPIDController m_liftpidXD)
+  {
+  // read PID coefficients from SmartDashboard
+  #ifdef LiftXY_Test
+  double L_p = frc::SmartDashboard::GetNumber("P Gain", 0);
+  double L_i = frc::SmartDashboard::GetNumber("I Gain", 0);
+  double L_d = frc::SmartDashboard::GetNumber("D Gain", 0);
+  double L_iz = frc::SmartDashboard::GetNumber("I Zone", 0);
+  double L_ff = frc::SmartDashboard::GetNumber("Feed Forward", 0);
+  double L_max = frc::SmartDashboard::GetNumber("Max Output", 0);
+  double L_min = frc::SmartDashboard::GetNumber("Min Output", 0);
+  double L_maxV = frc::SmartDashboard::GetNumber("Max Velocity", 0);
+  double L_minV = frc::SmartDashboard::GetNumber("Min Velocity", 0);
+  double L_maxA = frc::SmartDashboard::GetNumber("Max Acceleration", 0);
+  double L_allE = frc::SmartDashboard::GetNumber("Allowed Closed Loop Error", 0);
+
+  V_LiftYD_TestLocation = frc::SmartDashboard::GetNumber("Set Position Y", 0);
+  V_LiftXD_TestLocation = frc::SmartDashboard::GetNumber("Set Position X", 0);
+
+  if((L_p != V_LiftPID_Gx[E_kP]))   { m_liftpidYD.SetP(L_p); m_liftpidXD.SetP(L_p); V_LiftPID_Gx[E_kP] = L_p; }
+  if((L_i != V_LiftPID_Gx[E_kI]))   { m_liftpidYD.SetI(L_i); m_liftpidXD.SetI(L_i); V_LiftPID_Gx[E_kI] = L_i; }
+  if((L_d != V_LiftPID_Gx[E_kD]))   { m_liftpidYD.SetD(L_d); m_liftpidXD.SetD(L_d); V_LiftPID_Gx[E_kD] = L_d; }
+  if((L_iz != V_LiftPID_Gx[E_kIz])) { m_liftpidYD.SetIZone(L_iz); m_liftpidXD.SetIZone(L_iz); V_LiftPID_Gx[E_kIz] = L_iz; }
+  if((L_ff != V_LiftPID_Gx[E_kFF])) { m_liftpidYD.SetFF(L_ff); m_liftpidXD.SetFF(L_ff); V_LiftPID_Gx[E_kFF] = L_ff; }
+  if((L_max != V_LiftPID_Gx[E_kMaxOutput]) || (L_min != K_LauncherPID_Gx[E_kMinOutput])) { m_liftpidYD.SetOutputRange(L_min, L_max); m_liftpidXD.SetOutputRange(L_min, L_max); V_LiftPID_Gx[E_kMinOutput] = L_min; V_LiftPID_Gx[E_kMaxOutput] = L_max; }
+  if((L_maxV != V_LiftPID_Gx[E_kMaxVel])) { m_liftpidYD.SetSmartMotionMaxVelocity(L_maxV); m_liftpidXD.SetSmartMotionMaxVelocity(L_maxV); V_LiftPID_Gx[E_kMaxVel] = L_maxV; }
+  if((L_minV != V_LiftPID_Gx[E_kMinVel])) { m_liftpidYD.SetSmartMotionMinOutputVelocity(L_minV); m_liftpidXD.SetSmartMotionMinOutputVelocity(L_minV); V_LiftPID_Gx[E_kMinVel] = L_minV; }
+  if((L_maxA != V_LiftPID_Gx[E_kMaxAcc])) { m_liftpidYD.SetSmartMotionMaxAccel(L_maxA); m_liftpidXD.SetSmartMotionMaxAccel(L_maxA); V_LiftPID_Gx[E_kMaxAcc] = L_maxA; }
+  if((L_allE != V_LiftPID_Gx[E_kAllErr])) { m_liftpidYD.SetSmartMotionAllowedClosedLoopError(L_allE); m_liftpidXD.SetSmartMotionAllowedClosedLoopError(L_allE); V_LiftPID_Gx[E_kAllErr] = L_allE; }
+  #endif
+  }
+
+
 /******************************************************************************
  * Function:     Lift_Control_Dictator
  *
  * Description:  Main calling function for lift control.
  ******************************************************************************/
- T_Lift_State Lift_Control_Dictator(bool          L_driver_button,
-                                    double        L_game_time,
-                                    T_Lift_State  L_current_state,                                
-                                    double        L_lift_measured_position_YD,
-                                    double        L_lift_measured_position_XD,
-                                    double       *L_lift_command_YD,
-                                    double       *L_lift_command_XD,
-                                    double        L_gyro_yawangledegrees)
+ T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
+                                    T_LiftCmndDirection L_DriverLiftCmndDirection,
+                                    double              L_game_time,
+                                    T_Lift_State        L_current_state,                                
+                                    double              L_lift_measured_position_YD,
+                                    double              L_lift_measured_position_XD,
+                                    double             *L_lift_command_YD,
+                                    double             *L_lift_command_XD,
+                                    double              L_gyro_yawangledegrees)
 {
-    T_Lift_State L_Commanded_State = L_current_state;
+T_Lift_State L_Commanded_State = L_current_state;
+
 switch (L_current_state)
       {
         case E_S0_BEGONE:
+            if (L_DriverLiftCmndDirection == E_LiftCmndUp)
+              {
+              *L_lift_command_YD += K_lift_driver_up_rate_YD;
+              }
+            else if (L_DriverLiftCmndDirection == E_LiftCmndDown)
+              {
+              *L_lift_command_YD -= K_lift_driver_down_rate_YD;
+              }
+            /* The driver should only initiate the state machine once the robot has become suspended. */
             if (L_game_time <= C_End_game_time && L_driver_button == true) {
-                L_Commanded_State = E_S1_initialize_Up_YD;
+                L_Commanded_State = E_S2_lift_down_YD;
             }
         break;
 
-        case E_S1_initialize_Up_YD:
-            V_criteria_met = S1_initialize_Up_YD(L_lift_measured_position_YD, L_lift_measured_position_XD, L_lift_command_YD, L_lift_command_XD);
-            if(V_criteria_met == true){
-              L_Commanded_State = E_S2_lift_down_YD;
-            }
-        break; 
+        // case E_S1_initialize_Up_YD:
+        //     V_criteria_met = S1_initialize_Up_YD(L_lift_measured_position_YD, L_lift_measured_position_XD, L_lift_command_YD, L_lift_command_XD);
+        //     if(V_criteria_met == true){
+        //       L_Commanded_State = E_S2_lift_down_YD;
+        //     }
+        // break; 
 
         case E_S2_lift_down_YD:
             V_criteria_met = S2_lift_down_YD(L_lift_measured_position_YD, L_lift_measured_position_XD, L_lift_command_YD, L_lift_command_XD);
@@ -139,8 +279,26 @@ switch (L_current_state)
         break;
       }
 
-      return(L_Commanded_State);
+  /* Place limits on the travel of XD and YD to prevent damage: */
+  if (*L_lift_command_YD > K_lift_max_YD)
+    {
+    *L_lift_command_YD = K_lift_max_YD;
+    }
+  else if (*L_lift_command_YD < K_lift_min_YD)
+    {
+    *L_lift_command_YD = K_lift_max_YD;
+    }
 
+  if (*L_lift_command_XD > K_lift_max_XD)
+    {
+    *L_lift_command_XD = K_lift_max_XD;
+    }
+  else if (*L_lift_command_XD < K_lift_min_XD)
+    {
+    *L_lift_command_XD = K_lift_max_XD;
+    }
+
+      return(L_Commanded_State);
 }
 
 /******************************************************************************

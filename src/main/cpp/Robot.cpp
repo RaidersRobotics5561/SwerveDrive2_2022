@@ -101,16 +101,15 @@ double V_M_RobotDisplacementY = 0;
 
 double V_XD_Test = 0;
 double V_YD_Test = 0;
-double V_Intake_Test = 0;
-double V_Elevator_Test = 0;
 
-double V_P_Gx = 0;
-double V_I_Gx = 0;
-double V_D_Gx = 0;
-double V_I_Zone = 0;
-double V_FF = 0;
-double V_Max = 0;
-double V_Min = 0;
+
+// double V_P_Gx = 0;
+// double V_I_Gx = 0;
+// double V_D_Gx = 0;
+// double V_I_Zone = 0;
+// double V_FF = 0;
+// double V_Max = 0;
+// double V_Min = 0;
 
 double K_MaxVel = 0;
 double K_MinVel = 0;
@@ -130,12 +129,17 @@ T_RobotState V_RobotState;
  *
  * Description:  Called during initialization of the robot.
  ******************************************************************************/
-void Robot::RobotInit() {
+void Robot::RobotInit()
+  {
+  V_RobotState = E_Init;
 
-    VisionDashboard();
+  BallHandlerMotorConfigsInit(m_rightShooterpid,
+                              m_leftShooterpid);
 
-    V_RobotState = E_Init;
+  VisionDashboard();
 
+  
+  
 //  m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
 //  m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
 //  frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
@@ -151,74 +155,24 @@ void Robot::RobotInit() {
     inst.StartClient("10.55.61.24");
     inst.StartDSClient();
 
-    frc::SmartDashboard::PutNumber("P_Gx", V_P_Gx);
-    frc::SmartDashboard::PutNumber("I_Gx", V_I_Gx);
-    frc::SmartDashboard::PutNumber("D_Gx", V_D_Gx);
-    frc::SmartDashboard::PutNumber("I_Zone", V_I_Zone);
-    frc::SmartDashboard::PutNumber("FF", V_FF);
-    frc::SmartDashboard::PutNumber("Max_Limit", V_Max);
-    frc::SmartDashboard::PutNumber("Min_Limit", V_Min);
-    frc::SmartDashboard::PutNumber("XD Lift", V_XD_Test);
-  frc::SmartDashboard::PutNumber("YD Lift", V_YD_Test);
-  frc::SmartDashboard::PutNumber("Intake", V_Intake_Test);
-  frc::SmartDashboard::PutNumber("Elevator", V_Elevator_Test);
+  //   frc::SmartDashboard::PutNumber("P_Gx", V_P_Gx);
+  //   frc::SmartDashboard::PutNumber("I_Gx", V_I_Gx);
+  //   frc::SmartDashboard::PutNumber("D_Gx", V_D_Gx);
+  //   frc::SmartDashboard::PutNumber("I_Zone", V_I_Zone);
+  //   frc::SmartDashboard::PutNumber("FF", V_FF);
+  //   frc::SmartDashboard::PutNumber("Max_Limit", V_Max);
+  //   frc::SmartDashboard::PutNumber("Min_Limit", V_Min);
+  //   frc::SmartDashboard::PutNumber("XD Lift", V_XD_Test);
+  // frc::SmartDashboard::PutNumber("YD Lift", V_YD_Test);
 
-  frc::SmartDashboard::PutNumber("max velocity", K_MaxVel);
-  frc::SmartDashboard::PutNumber("min velocity", K_MinVel);
-  frc::SmartDashboard::PutNumber("max acceleration", K_MaxAcc);
-  frc::SmartDashboard::PutNumber("kAllErr", K_AllErr);
+  // frc::SmartDashboard::PutNumber("max velocity", K_MaxVel);
+  // frc::SmartDashboard::PutNumber("min velocity", K_MinVel);
+  // frc::SmartDashboard::PutNumber("max acceleration", K_MaxAcc);
+  // frc::SmartDashboard::PutNumber("kAllErr", K_AllErr);
   
- #ifdef COMP
-    // V_testIntake = 0;
-    // V_testElevator = 0;
-    // V_testspeed = 0;
-    // frc::SmartDashboard::PutNumber("Intake Power",V_testIntake);
-    // frc::SmartDashboard::PutNumber("Elevator Power",V_testElevator);
-    // frc::SmartDashboard::PutNumber("Speed Desired", V_testspeed);
 
-    // frc::SmartDashboard::PutNumber("P_Gx", V_P_Gx);
-    // frc::SmartDashboard::PutNumber("I_Gx", V_I_Gx);
-    // frc::SmartDashboard::PutNumber("D_Gx", V_D_Gx);
-    // frc::SmartDashboard::PutNumber("I_Zone", V_I_Zone);
-    // frc::SmartDashboard::PutNumber("FF", V_FF);
-    // frc::SmartDashboard::PutNumber("Max_Limit", V_Max);
-    // frc::SmartDashboard::PutNumber("Min_Limit", V_Min);
 
-    // frc::SmartDashboard::PutNumber("P_Steer_Gx", V_Steer_P_Gx);
-    // frc::SmartDashboard::PutNumber("I_Steer_Gx", V_Steer_I_Gx);
-    // frc::SmartDashboard::PutNumber("D_Steer_Gx", V_Steer_D_Gx);
-    // frc::SmartDashboard::PutNumber("I_Steer_Zone", V_Steer_I_Zone);
-    // frc::SmartDashboard::PutNumber("FF_Steer", V_Steer_FF);
-    // frc::SmartDashboard::PutNumber("Max_Limit_Steer", V_Steer_Max);
-    // frc::SmartDashboard::PutNumber("Min_Limit_Steer", V_Steer_Min);
-
-    // frc::SmartDashboard::PutNumber("P_Gx_Drive", V_Drive_P_Gx);
-    // frc::SmartDashboard::PutNumber("I_Gx_Drive", V_Drive_I_Gx);
-    // frc::SmartDashboard::PutNumber("D_Gx_Drive", V_Drive_D_Gx);
-    // frc::SmartDashboard::PutNumber("I_Zone_Drive", V_Drive_I_Zone);
-    // frc::SmartDashboard::PutNumber("FF_Drive", V_Drive_FF);
-    // frc::SmartDashboard::PutNumber("Max_Limit_Drive", V_Drive_Max);
-    // frc::SmartDashboard::PutNumber("Min_Limit_Drive", V_Drive_Min);
-#endif
-
-    // frc::SmartDashboard::PutNumber("Speed Desired Right", 0);
-    // frc::SmartDashboard::PutNumber("Speed Desired Left", 0);
-
-    frc::SmartDashboard::PutNumber("cooler int", 1);
-
-    // m_rightShooterpid.SetP(V_P_Gx);
-    // m_rightShooterpid.SetI(V_I_Gx);
-    // m_rightShooterpid.SetD(V_D_Gx);
-    // m_rightShooterpid.SetIZone(V_I_Zone);
-    // m_rightShooterpid.SetFF(V_FF);
-    // m_rightShooterpid.SetOutputRange(V_Min, V_Max);
-
-    // m_leftShooterpid.SetP(V_P_Gx);
-    // m_leftShooterpid.SetI(V_I_Gx);
-    // m_leftShooterpid.SetD(V_D_Gx);
-    // m_leftShooterpid.SetIZone(V_I_Zone);
-    // m_leftShooterpid.SetFF(V_FF);
-    // m_leftShooterpid.SetOutputRange(V_Min, V_Max);
+    // frc::SmartDashboard::PutNumber("cooler int", 1);
 
     // m_liftpidYD.SetP(kP);
     // m_liftpidYD.SetI(kI);
@@ -234,23 +188,10 @@ void Robot::RobotInit() {
     // m_liftpidXD.SetFF(kFF);
     // m_liftpidXD.SetOutputRange(kMinOutput, kMaxOutput);
 
-    // frc::SmartDashboard::PutNumber("P Gain", kP);
-    // frc::SmartDashboard::PutNumber("I Gain", kI);
-    // frc::SmartDashboard::PutNumber("D Gain", kD);
-    // frc::SmartDashboard::PutNumber("I Zone", kIz);
-    // frc::SmartDashboard::PutNumber("Feed Forward", kFF);
-    // frc::SmartDashboard::PutNumber("Max Output", kMaxOutput);
-    // frc::SmartDashboard::PutNumber("Min Output", kMinOutput);
-    // frc::SmartDashboard::PutNumber("Desired Level", 0);
-
-
-    // frc::SmartDashboard::PutNumber("Blinkin code", 0);
-
   #ifdef SPIKE
   LightOff = true; // light should be off on robot init
   #endif
-
-}
+  }
 
 
 /******************************************************************************
@@ -260,7 +201,9 @@ void Robot::RobotInit() {
  *               "periodically" means).
  ******************************************************************************/
 void Robot::RobotPeriodic()
-{
+  {
+  BallHandlerMotorConfigsCal(m_rightShooterpid,
+                             m_leftShooterpid);
 
     #ifdef PID_DEBUG
       // UpperShooterPIDConfig.Debug("Upper Shooter PID Control");
@@ -269,10 +212,9 @@ void Robot::RobotPeriodic()
     //Run Gyro readings when the robot starts
 
 
-  void VisionRun();
+  VisionRun();
     // Gyro();
-
-}
+  }
 
 
  
@@ -429,31 +371,31 @@ void Robot::TeleopInit()
   // K_WheelSpeedPID_Gx[E_Max_Ll] = V_Min;
 
 
-  K_MaxVel = frc::SmartDashboard::GetNumber("max velocity", K_MaxVel);
-  K_MinVel = frc::SmartDashboard::GetNumber("min velocity", K_MinVel);
-  K_MaxAcc = frc::SmartDashboard::GetNumber("max acceleration", K_MaxAcc);
-  K_AllErr = frc::SmartDashboard::GetNumber("kAllErr", K_AllErr);
+  // K_MaxVel = frc::SmartDashboard::GetNumber("max velocity", K_MaxVel);
+  // K_MinVel = frc::SmartDashboard::GetNumber("min velocity", K_MinVel);
+  // K_MaxAcc = frc::SmartDashboard::GetNumber("max acceleration", K_MaxAcc);
+  // K_AllErr = frc::SmartDashboard::GetNumber("kAllErr", K_AllErr);
 
-  m_liftpidYD.SetP(V_P_Gx);
-  m_liftpidYD.SetI(V_I_Gx);
-  m_liftpidYD.SetD(V_D_Gx);
-  m_liftpidYD.SetIZone(V_I_Zone);
-  m_liftpidYD.SetFF(V_FF);
-  m_liftpidYD.SetOutputRange(V_Min, V_Max);
+  // m_liftpidYD.SetP(V_P_Gx);
+  // m_liftpidYD.SetI(V_I_Gx);
+  // m_liftpidYD.SetD(V_D_Gx);
+  // m_liftpidYD.SetIZone(V_I_Zone);
+  // m_liftpidYD.SetFF(V_FF);
+  // m_liftpidYD.SetOutputRange(V_Min, V_Max);
 
-  m_liftpidXD.SetP(V_P_Gx);
-  m_liftpidXD.SetI(V_I_Gx);
-  m_liftpidXD.SetD(V_D_Gx);
-  m_liftpidXD.SetIZone(V_I_Zone);
-  m_liftpidXD.SetFF(V_FF);
-  m_liftpidXD.SetOutputRange(V_Min, V_Max);
+  // m_liftpidXD.SetP(V_P_Gx);
+  // m_liftpidXD.SetI(V_I_Gx);
+  // m_liftpidXD.SetD(V_D_Gx);
+  // m_liftpidXD.SetIZone(V_I_Zone);
+  // m_liftpidXD.SetFF(V_FF);
+  // m_liftpidXD.SetOutputRange(V_Min, V_Max);
 
 
 
-  m_liftpidYD.SetSmartMotionMaxVelocity(K_MaxVel);
-  m_liftpidYD.SetSmartMotionMinOutputVelocity(K_MinVel);
-  m_liftpidYD.SetSmartMotionMaxAccel(K_MaxAcc);
-  m_liftpidYD.SetSmartMotionAllowedClosedLoopError(K_AllErr);
+  // m_liftpidYD.SetSmartMotionMaxVelocity(K_MaxVel);
+  // m_liftpidYD.SetSmartMotionMinOutputVelocity(K_MinVel);
+  // m_liftpidYD.SetSmartMotionMaxAccel(K_MaxAcc);
+  // m_liftpidYD.SetSmartMotionAllowedClosedLoopError(K_AllErr);
 }
 
 
@@ -481,6 +423,9 @@ void Robot::TeleopPeriodic()
   bool   L_Driver_SwerveGoalAutoCenter = false;
   bool   L_Driver_SwerveRotateTo0 = false;
   bool   L_Driver_SwerveRotateTo90 = false;
+  bool   L_Driver_LiftYD_Up   = false;
+  bool   L_Driver_LiftYD_Down = false;
+  T_LiftCmndDirection L_DriverLiftCmndDirection = E_LiftCmndNone;
 
   double L_timeleft = frc::DriverStation::GetInstance().GetMatchTime();
 
@@ -517,7 +462,9 @@ void Robot::TeleopPeriodic()
                           c_joyStick.GetRawButton(3),
                          &L_Driver_SwerveRotateTo0,
                           c_joyStick.GetRawButton(4),
-                         &L_Driver_SwerveRotateTo90);
+                         &L_Driver_SwerveRotateTo90,
+                          c_joyStick2.GetPOV(),
+                         &L_DriverLiftCmndDirection);
 
   Read_Encoders(a_encoderWheelAngleFrontLeft.Get().value(),
                 a_encoderWheelAngleFrontRight.Get().value(),
@@ -537,6 +484,15 @@ void Robot::TeleopPeriodic()
   Read_IO_Sensors(di_IR_Sensor.Get(),
                   di_XD_LimitSwitch.Get(),
                   di_XY_LimitSwitch.Get());
+
+  LightControlMain( L_Driver_SwerveGoalAutoCenter,
+                    L_Driver_auto_setspeed_shooter,
+                    L_timeleft,
+                    L_AllianceColor,
+                    V_LauncherState,
+                    V_SwerveTargetLocking,
+                   &V_CameraLightCmndOn,
+                   &V_VanityLightCmnd);
 
   DtrmnSwerveBotLocation(V_GyroYawAngleRad,
                          &V_Rad_WheelAngleFwd[0],
@@ -563,6 +519,7 @@ void Robot::TeleopPeriodic()
                     V_RobotState);
 
   V_Lift_state = Lift_Control_Dictator(L_Driver_lift_control,
+                                       L_DriverLiftCmndDirection,
                                        L_timeleft,
                                        V_Lift_state,
                                        V_lift_measured_position_YD,
@@ -582,23 +539,13 @@ void Robot::TeleopPeriodic()
                           V_TopTargetDistanceMeters,
                           V_ShooterSpeedCurr,
                           L_Driver_right_shooter_desired_speed,
+                          V_CameraLightStatus,
                          &V_IntakePowerCmnd,
                          &V_ElevatorPowerCmnd,
                          &V_ShooterRPM_Cmnd);
 
-bool                         L_AutoAlignRequest = false;
-bool                         L_AutoLauncherRequest = false;
-  LightControlMain( L_AutoAlignRequest,
-                    L_AutoLauncherRequest,
-                    L_timeleft,
-                    L_AllianceColor,
-                   &V_CameraLightCmndOn,
-                   &V_VanityLightCmnd);
-  
   V_XD_Test = frc::SmartDashboard::GetNumber("XD Lift", V_XD_Test);
   V_YD_Test = frc::SmartDashboard::GetNumber("YD Lift", V_YD_Test);
-  V_Intake_Test = frc::SmartDashboard::GetNumber("Intake", V_Intake_Test);
-  V_Elevator_Test = frc::SmartDashboard::GetNumber("Elevator", V_Elevator_Test);
 
   // Motor output commands:
     m_frontLeftDriveMotor.Set(V_WheelSpeedCmnd[E_FrontLeft]);
@@ -630,8 +577,8 @@ bool                         L_AutoLauncherRequest = false;
     // m_liftpidYD.SetReference(V_lift_command_YD, rev::ControlType::kPosition);
     // m_liftpidXD.SetReference(V_lift_command_XD, rev::ControlType::kPosition);
 
-    m_liftpidYD.SetReference(V_YD_Test, rev::ControlType::kPosition); // positive is up
-    m_liftpidXD.SetReference(V_XD_Test, rev::ControlType::kPosition); // This is temporary.  We actually want to use position, but need to force this off temporarily
+    m_liftpidYD.SetReference(V_YD_Test, rev::ControlType::kSmartMotion); // positive is up
+    m_liftpidXD.SetReference(V_XD_Test, rev::ControlType::kSmartMotion); // This is temporary.  We actually want to use position, but need to force this off temporarily
 
     do_CameraLightControl.Set(V_CameraLightCmndOn);
     m_vanityLightControler.Set(V_VanityLightCmnd);

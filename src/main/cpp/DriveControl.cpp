@@ -23,7 +23,7 @@ double desiredAngle;
 double rotateDeBounce;
 double rotateErrorCalc;
 bool   rotateMode;
-bool   autoBeamLock;
+bool   V_SwerveTargetLocking;
 bool   V_b_DriveStraight;
 bool   V_AutoRotateComplete;
 double V_FWD;
@@ -54,19 +54,6 @@ double V_Drive_FF = 0;
 double V_Drive_Max = 1;
 double V_Drive_Min = -1;
 
-double V_WheelSpeedPID_Gx[E_PID_CalSz] = { 0.0055,     // P Gx
-                                                 0.0009,     // I Gx
-                                                 0.00000005, // D Gx
-                                                 1.0,        // P UL
-                                                -1.0,        // P LL
-                                                 0.5,        // I UL
-                                                -0.5,        // I LL
-                                                 0.2,        // D UL
-                                                -0.2,        // D LL
-                                                 1.0,        // Max upper
-                                                -1.0};       // Max lower
-
-
 /******************************************************************************
  * Function:     DriveControlInit
  *
@@ -89,24 +76,24 @@ void DriveControlInit()
         V_WheelSpeedIntergral[L_Index] = 0;
         V_WheelAngleArb[L_Index] = 0;
       }
+  V_SwerveTargetLocking = false;
 
 
+  // V_P_Gx = frc::SmartDashboard::GetNumber("P_Gx", V_P_Gx);
+  // V_I_Gx = frc::SmartDashboard::GetNumber("I_Gx", V_I_Gx);
+  // V_D_Gx = frc::SmartDashboard::GetNumber("D_Gx", V_D_Gx);
+  // V_I_Zone = frc::SmartDashboard::GetNumber("I_Zone", V_I_Zone);
+  // V_FF = frc::SmartDashboard::GetNumber("FF", V_FF);
+  // V_Max = frc::SmartDashboard::GetNumber("Max_Limit", V_Max);
+  // V_Min = frc::SmartDashboard::GetNumber("Min_Limit", V_Min);
 
-  V_P_Gx = frc::SmartDashboard::GetNumber("P_Gx", V_P_Gx);
-  V_I_Gx = frc::SmartDashboard::GetNumber("I_Gx", V_I_Gx);
-  V_D_Gx = frc::SmartDashboard::GetNumber("D_Gx", V_D_Gx);
-  V_I_Zone = frc::SmartDashboard::GetNumber("I_Zone", V_I_Zone);
-  V_FF = frc::SmartDashboard::GetNumber("FF", V_FF);
-  V_Max = frc::SmartDashboard::GetNumber("Max_Limit", V_Max);
-  V_Min = frc::SmartDashboard::GetNumber("Min_Limit", V_Min);
-
-  V_WheelSpeedPID_Gx[E_P_Gx] = V_P_Gx;
-  V_WheelSpeedPID_Gx[E_I_Gx] = V_I_Gx;
-  V_WheelSpeedPID_Gx[E_D_Gx] = V_D_Gx;
-  V_WheelSpeedPID_Gx[E_I_Ul] = V_I_Zone;
-  V_WheelSpeedPID_Gx[E_I_Ll] = -V_I_Zone;
-  V_WheelSpeedPID_Gx[E_Max_Ul] = V_Max;
-  V_WheelSpeedPID_Gx[E_Max_Ll] = V_Min;
+  // V_WheelSpeedPID_Gx[E_P_Gx] = V_P_Gx;
+  // V_WheelSpeedPID_Gx[E_I_Gx] = V_I_Gx;
+  // V_WheelSpeedPID_Gx[E_D_Gx] = V_D_Gx;
+  // V_WheelSpeedPID_Gx[E_I_Ul] = V_I_Zone;
+  // V_WheelSpeedPID_Gx[E_I_Ll] = -V_I_Zone;
+  // V_WheelSpeedPID_Gx[E_Max_Ul] = V_Max;
+  // V_WheelSpeedPID_Gx[E_Max_Ll] = V_Min;
   }
 
 
@@ -178,7 +165,7 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
         (fabs(L_JoyStick1Axis2X_Scaled) > 0))
       {
       // Abort out of auto rotate and/or auto target if the driver moves the joysticks
-      autoBeamLock = false;
+      V_SwerveTargetLocking = false;
       V_AutoRotateComplete = false;
       rotateMode = false;
 
@@ -196,11 +183,11 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
         V_b_DriveStraight   = true;
         }  
       }
-    else if(L_JoyStick1Button1 || autoBeamLock == true)
+    else if(L_JoyStick1Button1 || V_SwerveTargetLocking == true)
       {
       /* Auto targeting */
       V_b_DriveStraight = false;
-      autoBeamLock = true;
+      V_SwerveTargetLocking = true;
       desiredAngle = K_TargetVisionAngle; // This is due to the offset of the camera
       }
     else if (L_JoyStick1Button4)
@@ -230,7 +217,7 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       // Use gyro as target when in auto rotate or drive straight mode
       L_RotateErrorCalc = desiredAngle - L_GyroAngleDegrees;
       }
-    else if((autoBeamLock == true) &&
+    else if((V_SwerveTargetLocking == true) &&
             (L_TopTargetAquired == true))
       {
       // Use photon vison as target when in auto beam lock
@@ -242,20 +229,20 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       L_RotateErrorCalc = 0;
       }
     
-    if ((V_b_DriveStraight == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime) ||
-        (rotateMode        == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime) || 
-        (autoBeamLock      == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime))
+    if ((V_b_DriveStraight     == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime) ||
+        (rotateMode            == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime) || 
+        (V_SwerveTargetLocking == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime))
       {
       V_AutoRotateComplete = false;      // rotateMode = true;
-      // autoBeamLock = true;
+      // V_SwerveTargetLocking = true;
       rotateDeBounce += C_ExeTime;
       }
-    else if ((V_b_DriveStraight == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime) ||
-             (rotateMode        == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime) ||
-             (autoBeamLock      == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime))
+    else if ((V_b_DriveStraight     == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime) ||
+             (rotateMode            == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime) ||
+             (V_SwerveTargetLocking == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime))
       {
       rotateMode = false;
-      autoBeamLock = false;
+      V_SwerveTargetLocking = false;
       rotateDeBounce = 0;
       V_AutoRotateComplete = true;
       *L_TargetFin = true;
@@ -269,7 +256,7 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       {
       V_RCW = DesiredAutoRotateSpeed(L_RotateErrorCalc);
       }
-    else if (autoBeamLock == true)
+    else if (V_SwerveTargetLocking == true)
       {
       V_RCW = -DesiredRotateSpeed(L_RotateErrorCalc);
       }
@@ -329,7 +316,7 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       L_Gain = L_JoyStick1Axis3;
       }
     else if ((rotateMode   == true) ||
-             (autoBeamLock == true))
+             (V_SwerveTargetLocking == true))
       {
       L_Gain = K_AutoRotateGx;
       }

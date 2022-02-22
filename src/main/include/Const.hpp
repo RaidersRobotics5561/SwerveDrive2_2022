@@ -3,6 +3,9 @@
 #include <units/angle.h>
 #include <units/length.h>
 
+// Define the desired test state here: COMP (no test), BallHandlerTest, LiftXY_Test
+#define LiftXY_Test
+
 const double C_ExeTime = 0.02; // Set to match the the default controller loop time of 20 ms
 const units::second_t C_ExeTime_t = 0.02_s; // Set to match the the default controller loop time of 20 ms
 
@@ -51,6 +54,8 @@ const double K_lift_rungs_YD = 15.375; //distance from rung to rung (15.375 inch
 const double K_lift_rate_up_YD = 0.001; //RampTo slope for lift up
 const double K_lift_rate_down_YD = -0.001; //RampTo slope for lift down
 const double K_lift_deadband_YD = 0.5; //it's a deadband for the y lift yeah
+const double K_lift_driver_up_rate_YD = 0.52; // This is the amount added per loop (0.02 sec)
+const double K_lift_driver_down_rate_YD = 0.25; // This is the amount added per loop (0.02 sec)
 
 const double K_lift_max_XD = 135; //distance between bars (24 inches)
 const double K_lift_mid_XD = 30; //lift XD is aligned with lift YD
@@ -63,7 +68,7 @@ const double K_gyro_angle_lift = -10; //robert is tilting
 const double K_gyro_deadband = 2;
 const double K_deadband_timer = 0.5; //keep the deadband for a certain amount of time
 
-const double K_CameraLightDelay = 0.25; // Delay time between enabling the camera light and allowing the data feed to be used. [seconds]
+const double K_CameraLightDelay = 0.01; // Delay time between enabling the camera light and allowing the data feed to be used. [seconds]
 const double K_CameraLightMaxOnTime = 5.0; // Max amount of time to have the camera light enabled. [seconds]
 
 const double K_IntakePower = 0.7; // Amount of power to apply to intake wheels.  Must be 0 to 1.
@@ -113,13 +118,29 @@ const double K_RobotRotationPID_Gx[E_PID_CalSz] = { 0.07,   // P Gx
                                                     1.0,    // Max upper
                                                    -1.0};   // Max lower
 
-const double K_LauncherPID_Gx[E_PID_SparkMaxCalSz] = { 0.1,   // kP
-                                                       0.0001,   // kI
+const double K_LauncherPID_Gx[E_PID_SparkMaxCalSz] = { 0.1,    // kP
+                                                       0.0001, // kI
                                                        1.0,    // kD
                                                        0.0,    // kIz
                                                        0.0,    // kFF
                                                        1.0,    // kMaxOutput
-                                                      -1.0};  // kMinOutput
+                                                      -1.0,    // kMinOutput
+                                                      20.0,    // kMaxVel
+                                                     -20.0,    // kMinVel
+                                                      10.0,    // kMaxAcc
+                                                       0.0};   // kAllErr
+
+const double K_LiftPID_Gx[E_PID_SparkMaxCalSz] = { 0.1,    // kP
+                                                   0.0001, // kI
+                                                   1.0,    // kD
+                                                   0.0,    // kIz
+                                                   0.0,    // kFF
+                                                   1.0,    // kMaxOutput
+                                                  -1.0,    // kMinOutput
+                                                  20.0,    // kMaxVel
+                                                 -20.0,    // kMinVel
+                                                  10.0,    // kMaxAcc
+                                                   0.0};   // kAllErr
 
 const double K_DesiredDriveSpeedAxis[20] = {-0.95,
                                             -0.85,
@@ -368,16 +389,29 @@ const double K_BallLauncherLowerSpeed[K_BallLauncherDistanceSz][K_BallLauncherAn
 
 
 /* Auton specific cals */
-#if 0
-#include "K_L_AutonX_Position.hpp"
-#include "K_L_AutonY_Position.hpp"
-#include "K_t_AutonXY_PositionAxis.hpp"
-#endif
-#if 0
-#include "K_L_AutonX_PositionTest1.hpp"
-#include "K_L_AutonY_PositionTest1.hpp"
-#include "K_t_AutonXY_PositionAxisTest1.hpp"
-#endif
+const double K_k_AutonX_PID_Gx[E_PID_CalSz] = { 0.095,       // P Gx
+                                                0.000001,    // I Gx
+                                                0.00012,      // D Gx
+                                                0.8,       // P UL
+                                               -0.8,       // P LL
+                                                0.05,      // I UL
+                                               -0.05,      // I LL
+                                                0.5,       // D UL
+                                               -0.5,       // D LL
+                                                1.0,       // Max upper
+                                               -1.0};      // Max lower
+
+const double K_k_AutonY_PID_Gx[E_PID_CalSz] = { 0.095,       // P Gx
+                                                0.000001,    // I Gx
+                                                0.00012,      // D Gx
+                                                0.8,       // P UL
+                                               -0.8,       // P LL
+                                                0.05,      // I UL
+                                               -0.05,      // I LL
+                                                0.5,       // D UL
+                                               -0.5,       // D LL
+                                                1.0,       // Max upper
+                                               -1.0};      // Max lower
 
 #include "MotionProfiles/K_BarrelRacing_V55A25_T.hpp"
 #include "MotionProfiles/K_BarrelRacing_V55A25_X.hpp"
@@ -411,27 +445,3 @@ const double K_BallLauncherLowerSpeed[K_BallLauncherDistanceSz][K_BallLauncherAn
 #include "MotionProfiles/K_Slalom_V125A50_T.hpp"
 #include "MotionProfiles/K_Slalom_V125A50_X.hpp"
 #include "MotionProfiles/K_Slalom_V125A50_Y.hpp"
-
-const double K_k_AutonX_PID_Gx[E_PID_CalSz] = { 0.095,       // P Gx
-                                                0.000001,    // I Gx
-                                                0.00012,      // D Gx
-                                                0.8,       // P UL
-                                               -0.8,       // P LL
-                                                0.05,      // I UL
-                                               -0.05,      // I LL
-                                                0.5,       // D UL
-                                               -0.5,       // D LL
-                                                1.0,       // Max upper
-                                               -1.0};      // Max lower
-
-const double K_k_AutonY_PID_Gx[E_PID_CalSz] = { 0.095,       // P Gx
-                                                0.000001,    // I Gx
-                                                0.00012,      // D Gx
-                                                0.8,       // P UL
-                                               -0.8,       // P LL
-                                                0.05,      // I UL
-                                               -0.05,      // I LL
-                                                0.5,       // D UL
-                                               -0.5,       // D LL
-                                                1.0,       // Max upper
-                                               -1.0};      // Max lower
