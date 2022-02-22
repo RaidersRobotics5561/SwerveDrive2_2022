@@ -149,19 +149,14 @@ void Robot::RobotInit()
 
   GyroInit();
   
+  inst = nt::NetworkTableInstance::Create();
+  inst.StartClient("10.55.61.24");
+  inst.StartDSClient();
   
-//  m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
-//  m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
-//  frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
-
-
-
-
-    inst = nt::NetworkTableInstance::Create();
-    inst.StartClient("10.55.61.24");
-    inst.StartDSClient();
-
-    // frc::SmartDashboard::PutNumber("cooler int", 1);
+// m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
+// m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
+// frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
+// frc::SmartDashboard::PutNumber("cooler int", 1);
 
   #ifdef SPIKE
   LightOff = true; // light should be off on robot init
@@ -323,6 +318,8 @@ void Robot::TeleopInit()
   DriveControlInit();
 
   BallHandlerInit();
+
+  LiftControlInit();
 
   V_AutoShootEnable = false;
   V_M_RobotDisplacementX = 0;
