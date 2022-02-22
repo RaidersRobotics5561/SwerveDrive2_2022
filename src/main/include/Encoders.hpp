@@ -18,6 +18,8 @@
  extern double V_M_WheelDeltaDistance[E_RobotCornerSz];
  extern double V_WheelAngleConverted[E_RobotCornerSz];
  extern double V_ShooterSpeedCurr;
+ extern double V_LiftPostitionYD; // Position of the YD lift, in revolutions of the motor
+ extern double V_LiftPostitionXD; // Position of the XD lift, in revolutions of the motor
  
  void Read_Encoders(double          L_encoderWheelAngleFrontLeftRaw,
                   double          L_encoderWheelAngleFrontRightRaw,

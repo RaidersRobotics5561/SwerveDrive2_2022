@@ -48,9 +48,11 @@ const double C_W = 0.5969;
 const double C_R = 0.8441;
 
 const double K_lift_max_YD = 207; //distance from floor to mid rung (60.25 inches)
-const double K_lift_mid_YD = 20; //lift YD is aligned with lift XD
+const double K_lift_enable_auto_YD = 180; //distance the lift must be above to allow the driver to enable the auto climb
+const double K_lift_mid_YD = 60; //lift YD is aligned with lift XD
+const double K_lift_min_traversal_YD = 15; //lift YD commanded value for start of handoff to XD
 const double K_lift_min_YD = 0; //it crunch
-const double K_lift_rungs_YD = 15.375; //distance from rung to rung (15.375 inches)
+// const double K_lift_rungs_YD = 15.375; //distance from rung to rung (15.375 inches)
 const double K_lift_rate_up_YD = 0.001; //RampTo slope for lift up
 const double K_lift_rate_down_YD = -0.001; //RampTo slope for lift down
 const double K_lift_deadband_YD = 0.5; //it's a deadband for the y lift yeah
@@ -58,6 +60,7 @@ const double K_lift_driver_up_rate_YD = 0.52; // This is the amount added per lo
 const double K_lift_driver_down_rate_YD = 0.25; // This is the amount added per loop (0.02 sec)
 
 const double K_lift_max_XD = 135; //distance between bars (24 inches)
+const double K_lift_travel_for_YD_handoff_XD = 90; //lift XD position to allow for robot to rotate to enage YD hook
 const double K_lift_mid_XD = 30; //lift XD is aligned with lift YD
 const double K_lift_min_XD = 0; //we don't want XD to move cuz it's a loser
 const double K_lift_rate_forward_XD = 0.001; //RampTo slope for lift forward

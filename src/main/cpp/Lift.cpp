@@ -20,21 +20,19 @@
 #include "Const.hpp"
 #include "Lookup.hpp"
 #include "Gyro.hpp"
-#include "Lift.hpp"
+// #include "Lift.hpp"
 #include "Lift_sub_functions.hpp"
 #include "rev/CANSparkMax.h"
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/DriverStation.h>
 
 T_Lift_State V_Lift_state = E_S0_BEGONE;
-int V_lift_counter = 0;
-bool V_init_state = false;
+int    V_lift_counter = 0;
+bool   V_init_state = false;
 double V_stop_positon_XD = 0;
 double V_timer_owo = 0;
-bool V_criteria_met = false;
+bool   V_criteria_met = false;
 
-double V_lift_measured_position_YD = 0;
-double V_lift_measured_position_XD = 0;
 double V_lift_command_YD = 0;
 double V_lift_command_XD = 0;
 
@@ -44,7 +42,7 @@ double V_LiftXD_TestLocation = 0;
 T_LiftCmndDirection V_DriverLiftCmndDirection = E_LiftCmndNone;
 
 #ifdef LiftXY_Test
-bool V_LiftXY_Test = true;
+bool   V_LiftXY_Test = true;
 double V_LiftPID_Gx[E_PID_SparkMaxCalSz];
 #else
 bool V_LiftXY_Test = false;
@@ -133,7 +131,7 @@ void LiftMotorConfigsInit(rev::SparkMaxPIDController m_liftpidYD,
  *               allows for rapid calibration, but must not be used for comp.
  ******************************************************************************/
 void LiftMotorConfigsCal(rev::SparkMaxPIDController m_liftpidYD,
-                                rev::SparkMaxPIDController m_liftpidXD)
+                         rev::SparkMaxPIDController m_liftpidXD)
   {
   // read PID coefficients from SmartDashboard
   #ifdef LiftXY_Test
@@ -171,19 +169,27 @@ void LiftMotorConfigsCal(rev::SparkMaxPIDController m_liftpidYD,
  *
  * Description:  Main calling function for lift control.
  ******************************************************************************/
- T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
-                                    T_LiftCmndDirection L_DriverLiftCmndDirection,
-                                    double              L_game_time,
-                                    T_Lift_State        L_current_state,                                
-                                    double              L_lift_measured_position_YD,
-                                    double              L_lift_measured_position_XD,
-                                    double             *L_lift_command_YD,
-                                    double             *L_lift_command_XD,
-                                    double              L_gyro_yawangledegrees)
-{
-T_Lift_State L_Commanded_State = L_current_state;
+T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
+                                   T_LiftCmndDirection L_DriverLiftCmndDirection,
+                                   double              L_game_time,
+                                   T_Lift_State        L_current_state,                                
+                                   double              L_lift_measured_position_YD,
+                                   double              L_lift_measured_position_XD,
+                                   double             *L_lift_command_YD,
+                                   double             *L_lift_command_XD,
+                                   double              L_gyro_yawangledegrees)
+  {
+  T_Lift_State L_Commanded_State = L_current_state;
 
-switch (L_current_state)
+  if (V_LiftXY_Test == true)
+    {
+    /* Only used for testing. */
+    *L_lift_command_YD = V_LiftYD_TestLocation;
+    *L_lift_command_XD = V_LiftXD_TestLocation;
+    }
+  else
+    {
+    switch (L_current_state)
       {
         case E_S0_BEGONE:
             if (L_DriverLiftCmndDirection == E_LiftCmndUp)
@@ -195,7 +201,7 @@ switch (L_current_state)
               *L_lift_command_YD -= K_lift_driver_down_rate_YD;
               }
             /* The driver should only initiate the state machine once the robot has become suspended. */
-            if (L_game_time <= C_End_game_time && L_driver_button == true) {
+            if (L_game_time <= C_End_game_time && L_driver_button == true && L_lift_measured_position_YD >= K_lift_enable_auto_YD) {
                 L_Commanded_State = E_S2_lift_down_YD;
             }
         break;
@@ -278,6 +284,7 @@ switch (L_current_state)
             V_criteria_met = S11_Stop(L_lift_measured_position_YD, L_lift_measured_position_XD, L_lift_command_YD, L_lift_command_XD);
         break;
       }
+    }
 
   /* Place limits on the travel of XD and YD to prevent damage: */
   if (*L_lift_command_YD > K_lift_max_YD)
@@ -339,13 +346,15 @@ switch (L_current_state)
 {
   bool L_criteria_met = false;
 
-  *L_lift_command_YD = RampTo( K_lift_min_YD,
-                               L_lift_measured_position_YD,
-                               K_lift_rate_down_YD);
+  // *L_lift_command_YD = RampTo( K_lift_min_YD,
+  //                              L_lift_measured_position_YD,
+  //                              K_lift_rate_down_YD);
   
+  *L_lift_command_YD = K_lift_min_traversal_YD;
+
   *L_lift_command_XD = K_lift_min_XD;
 
-  if (L_lift_measured_position_YD <= K_lift_min_YD) {
+  if (L_lift_measured_position_YD <= K_lift_min_traversal_YD) {
     L_criteria_met = true;
   }
   
@@ -364,11 +373,13 @@ switch (L_current_state)
 {
   bool L_criteria_met = false;
 
-  *L_lift_command_XD = RampTo( K_lift_mid_XD,
-                               L_lift_measured_position_XD,
-                               K_lift_rate_forward_XD);
+  // *L_lift_command_XD = RampTo( K_lift_mid_XD,
+  //                              L_lift_measured_position_XD,
+  //                              K_lift_rate_forward_XD);
   
-  *L_lift_command_YD = K_lift_min_YD;
+  *L_lift_command_XD = K_lift_mid_XD;
+
+  *L_lift_command_YD = K_lift_min_traversal_YD;
 
   if (L_lift_measured_position_XD >= (K_lift_mid_XD + K_lift_deadband_XD) && L_lift_measured_position_XD <= (K_lift_mid_XD - K_lift_deadband_XD)) {
     V_timer_owo += C_ExeTime;
@@ -396,10 +407,12 @@ switch (L_current_state)
 {
    bool L_criteria_met = false;
 
-  *L_lift_command_YD = RampTo( K_lift_mid_YD,
-                               L_lift_measured_position_YD,
-                               K_lift_rate_up_YD);
+  // *L_lift_command_YD = RampTo( K_lift_mid_YD,
+  //                              L_lift_measured_position_YD,
+  //                              K_lift_rate_up_YD);
   
+  *L_lift_command_YD = K_lift_mid_YD;
+
   *L_lift_command_XD = K_lift_mid_XD;
 
   if (L_lift_measured_position_YD >= (K_lift_mid_YD + K_lift_deadband_YD) && L_lift_measured_position_YD <= (K_lift_mid_YD - K_lift_deadband_YD)) {
@@ -428,10 +441,11 @@ switch (L_current_state)
 {
   bool L_criteria_met = false;
 
-  *L_lift_command_XD = RampTo( K_lift_max_XD,
-                               L_lift_measured_position_XD,
-                               K_lift_rate_forward_XD);
-  
+  // *L_lift_command_XD = RampTo( K_lift_max_XD,
+  //                              L_lift_measured_position_XD,
+  //                              K_lift_rate_forward_XD);
+  *L_lift_command_XD = K_lift_max_XD;
+
   *L_lift_command_YD = K_lift_mid_YD;
 
   if (L_lift_measured_position_XD >= (K_lift_max_XD + K_lift_deadband_XD) && L_lift_measured_position_XD <= (K_lift_max_XD - K_lift_deadband_XD)) {
@@ -460,13 +474,15 @@ switch (L_current_state)
 {
   bool L_criteria_met = false;
 
-  *L_lift_command_YD = RampTo( K_lift_rungs_YD,
-                               L_lift_measured_position_YD,
-                               K_lift_rate_down_YD);
+  // *L_lift_command_YD = RampTo( K_lift_rungs_YD,
+  //                              L_lift_measured_position_YD,
+  //                              K_lift_rate_down_YD);
   
+  *L_lift_command_YD = K_lift_max_YD;
+
   *L_lift_command_XD = K_lift_max_XD;
 
-  if (L_lift_measured_position_YD >= (K_lift_rungs_YD + K_lift_deadband_YD) && L_lift_measured_position_YD <= (K_lift_rungs_YD - K_lift_deadband_YD)) {
+  if (L_lift_measured_position_YD >= (K_lift_max_YD + K_lift_deadband_YD) && L_lift_measured_position_YD <= (K_lift_max_YD - K_lift_deadband_YD)) {
     V_timer_owo += C_ExeTime;
     if (V_timer_owo >= K_deadband_timer){
           L_criteria_met = true;
@@ -493,24 +509,37 @@ switch (L_current_state)
 {
   bool L_criteria_met = false;
 
-  *L_lift_command_XD = RampTo( K_lift_mid_XD,
-                               L_lift_measured_position_XD,
-                               K_lift_rate_backward_XD);
+  // *L_lift_command_XD = RampTo( K_lift_mid_XD,
+  //                              L_lift_measured_position_XD,
+  //                              K_lift_rate_backward_XD);
   
-  *L_lift_command_YD = K_lift_rungs_YD;
+  *L_lift_command_XD = K_lift_travel_for_YD_handoff_XD;
 
-  if (L_lift_measured_position_XD >= (K_lift_mid_XD + K_lift_deadband_XD)  && L_lift_measured_position_XD <= (K_lift_mid_XD - K_lift_deadband_XD) || 
-      L_gyro_yawangledegrees >= (K_gyro_angle_lift + K_gyro_deadband) && L_gyro_yawangledegrees <= (K_gyro_angle_lift - K_gyro_deadband)) {
+  *L_lift_command_YD = K_lift_max_YD;
+
+  // if (L_lift_measured_position_XD >= (K_lift_travel_for_YD_handoff_XD + K_lift_deadband_XD)  && L_lift_measured_position_XD <= (K_lift_travel_for_YD_handoff_XD - K_lift_deadband_XD) || 
+  //     L_gyro_yawangledegrees >= (K_gyro_angle_lift + K_gyro_deadband) && L_gyro_yawangledegrees <= (K_gyro_angle_lift - K_gyro_deadband)) {
+  //   V_timer_owo += C_ExeTime;
+  //    if (V_timer_owo >= K_deadband_timer){
+  //         L_criteria_met = true;
+  //         V_timer_owo = 0;
+  //   }
+  // }
+  // else {
+  //   V_timer_owo = 0;
+  // }
+  
+  if (L_lift_measured_position_XD >= (K_lift_travel_for_YD_handoff_XD + K_lift_deadband_XD)  && L_lift_measured_position_XD <= (K_lift_travel_for_YD_handoff_XD - K_lift_deadband_XD)) {
     V_timer_owo += C_ExeTime;
-     if (V_timer_owo >= K_deadband_timer){
-          L_criteria_met = true;
-          V_timer_owo = 0;
+    if (V_timer_owo >= K_deadband_timer){
+         L_criteria_met = true;
+         V_timer_owo = 0;
     }
   }
   else {
     V_timer_owo = 0;
   }
-  
+
   return(L_criteria_met);
 }
 
@@ -525,18 +554,20 @@ switch (L_current_state)
                            double        *L_lift_command_XD)  
 {
   bool L_criteria_met = false;
-  if (V_init_state == false){
-    V_init_state = true;
-    V_stop_positon_XD = L_lift_measured_position_XD;
-  }
+  // if (V_init_state == false){
+  //   V_init_state = true;
+  //   V_stop_positon_XD = L_lift_measured_position_XD;
+  // }
 
-  *L_lift_command_YD = RampTo( K_lift_mid_YD,
-                               L_lift_measured_position_YD,
-                               K_lift_rate_down_YD);
+  // *L_lift_command_YD = RampTo( K_lift_mid_YD,
+  //                              L_lift_measured_position_YD,
+  //                              K_lift_rate_down_YD);
   
-  *L_lift_command_XD = V_stop_positon_XD;
+  *L_lift_command_YD = K_lift_enable_auto_YD;
 
-  if (L_lift_measured_position_YD >= (K_lift_mid_YD + K_lift_deadband_YD) && L_lift_measured_position_YD <= (K_lift_mid_YD - K_lift_deadband_YD)) {
+  *L_lift_command_XD = K_lift_travel_for_YD_handoff_XD;
+
+  if (L_lift_measured_position_YD >= (K_lift_enable_auto_YD + K_lift_deadband_YD) && L_lift_measured_position_YD <= (K_lift_enable_auto_YD - K_lift_deadband_YD)) {
     V_timer_owo += C_ExeTime;
     if (V_timer_owo >= K_deadband_timer){
           L_criteria_met = true;
@@ -562,10 +593,12 @@ switch (L_current_state)
 {
   bool L_criteria_met = false;
 
-  *L_lift_command_XD = RampTo( K_lift_min_XD,
-                               L_lift_measured_position_XD,
-                               K_lift_rate_backward_XD);
+  // *L_lift_command_XD = RampTo( K_lift_min_XD,
+  //                              L_lift_measured_position_XD,
+  //                              K_lift_rate_backward_XD);
   
+  *L_lift_command_XD = K_lift_min_XD;
+
   *L_lift_command_YD = K_lift_mid_YD;
 
   if (L_lift_measured_position_XD >= (K_lift_min_XD + K_lift_deadband_XD) && L_lift_measured_position_XD <= (K_lift_min_XD - K_lift_deadband_XD)) {
@@ -594,13 +627,15 @@ switch (L_current_state)
 {
   bool L_criteria_met = false;
 
-  *L_lift_command_YD = RampTo( K_lift_min_YD,
-                               L_lift_measured_position_YD,
-                               K_lift_rate_down_YD);
+  // *L_lift_command_YD = RampTo( K_lift_min_YD,
+  //                              L_lift_measured_position_YD,
+  //                              K_lift_rate_down_YD);
   
+  *L_lift_command_YD = K_lift_min_traversal_YD;
+
   *L_lift_command_XD = K_lift_min_XD;
 
-  if (L_lift_measured_position_YD >= (K_lift_min_YD + K_lift_deadband_YD) && L_lift_measured_position_YD <= (K_lift_min_YD - K_lift_deadband_YD)) {
+  if (L_lift_measured_position_YD >= (K_lift_min_traversal_YD + K_lift_deadband_YD) && L_lift_measured_position_YD <= (K_lift_min_traversal_YD - K_lift_deadband_YD)) {
     V_timer_owo += C_ExeTime;
     if (V_timer_owo >= K_deadband_timer){
           L_criteria_met = true;
@@ -620,15 +655,15 @@ switch (L_current_state)
  * Description:  State 11: Hold the robot at it's final postion as state machine ends.
  ******************************************************************************/
  bool S11_Stop(double         L_lift_measured_position_YD,
-                   double         L_lift_measured_position_XD,
-                   double        *L_lift_command_YD,
-                   double        *L_lift_command_XD)  
+               double         L_lift_measured_position_XD,
+               double        *L_lift_command_YD,
+               double        *L_lift_command_XD)  
 {
   bool L_criteria_met = false;
 
-  *L_lift_command_YD = K_lift_min_YD;
+  *L_lift_command_YD = K_lift_min_traversal_YD;
   
-  *L_lift_command_XD = K_lift_min_XD;
+  *L_lift_command_XD = K_lift_mid_XD;
   
   return(L_criteria_met);
 }

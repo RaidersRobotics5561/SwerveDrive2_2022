@@ -25,8 +25,8 @@ double V_Cnt_WheelDeltaDistancePrev[E_RobotCornerSz]; // Prev distance wheel mov
 double V_ShooterSpeedCurr;
 double V_Cnt_WheelDeltaDistanceInit[E_RobotCornerSz];
 double V_Delta_Angle[E_RobotCornerSz]; // The delta of the angle needed to align the wheels when the robot inits
-double V_LiftPostitionYD;
-double V_LiftPostitionXD;
+double V_LiftPostitionYD; // Position of the YD lift, in revolutions of the motor
+double V_LiftPostitionXD; // Position of the XD lift, in revolutions of the motor
 
 
 /******************************************************************************
