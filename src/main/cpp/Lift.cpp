@@ -9,18 +9,11 @@
    lift go brrrrrrrrrrrrrrrrrrr -chloe
  */
 
-
-// #include "Robot.h"
 #include <iostream>
-// #include <frc/smartdashboard/SmartDashboard.h>
-// #include <frc/DriverStation.h>
-// #include <frc/livewindow/LiveWindow.h>
 #include <frc/DigitalInput.h>
-// #include <units/length.h>
 #include "Const.hpp"
 #include "Lookup.hpp"
 #include "Gyro.hpp"
-// #include "Lift.hpp"
 #include "Lift_sub_functions.hpp"
 #include "rev/CANSparkMax.h"
 #include <frc/smartdashboard/SmartDashboard.h>
@@ -47,6 +40,7 @@ double V_LiftPID_Gx[E_PID_SparkMaxCalSz];
 #else
 bool V_LiftXY_Test = false;
 #endif
+
 
 /******************************************************************************
  * Function:     LiftMotorConfigsInit
@@ -163,6 +157,28 @@ void LiftMotorConfigsCal(rev::SparkMaxPIDController m_liftpidYD,
   #endif
   }
 
+/******************************************************************************
+ * Function:     LiftControlInit
+ *
+ * Description:  Initialization function for the lift control.
+ ******************************************************************************/
+void LiftControlInit()
+  {
+  V_Lift_state = E_S0_BEGONE;
+  V_lift_counter = 0;
+  V_init_state = false;
+  V_stop_positon_XD = 0;
+  V_timer_owo = 0;
+  V_criteria_met = false;
+
+  V_lift_command_YD = 0;
+  V_lift_command_XD = 0;
+
+  V_LiftYD_TestLocation = 0;
+  V_LiftXD_TestLocation = 0;
+
+  V_DriverLiftCmndDirection = E_LiftCmndNone;
+  }
 
 /******************************************************************************
  * Function:     Lift_Control_Dictator
