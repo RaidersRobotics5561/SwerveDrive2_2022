@@ -58,6 +58,8 @@ const double K_lift_rate_down_YD = -0.001; //RampTo slope for lift down
 const double K_lift_deadband_YD = 0.5; //it's a deadband for the y lift yeah
 const double K_lift_driver_up_rate_YD = 0.52; // This is the amount added per loop (0.02 sec)
 const double K_lift_driver_down_rate_YD = 0.25; // This is the amount added per loop (0.02 sec)
+const double K_lift_driver_manual_up_YD = 1.0; // Manual override power
+const double K_lift_driver_manual_down_YD = -0.25; // Manual override power
 
 const double K_lift_max_XD = 135; //distance between bars (24 inches)
 const double K_lift_travel_for_YD_handoff_XD = 90; //lift XD position to allow for robot to rotate to enage YD hook
@@ -66,6 +68,8 @@ const double K_lift_min_XD = 0; //we don't want XD to move cuz it's a loser
 const double K_lift_rate_forward_XD = 0.001; //RampTo slope for lift forward
 const double K_lift_rate_backward_XD = -0.001; //RampTo slope for lift backward
 const double K_lift_deadband_XD = 0.5; //it's a deadband for the x lift yeah
+const double K_lift_driver_manual_forward_XD = 0.15; // Manual override power
+const double K_lift_driver_manual_back_XD = -0.15; // Manual override power
 
 const double K_gyro_angle_lift = -10; //robert is tilting
 const double K_gyro_deadband = 2;

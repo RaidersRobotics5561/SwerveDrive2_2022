@@ -234,24 +234,24 @@ void Lift_Control_ManualOverride(double *L_lift_command_YD,
 
     if (V_Driver_Lift_Cmnd_Direction == E_LiftCmndUp)
       {
-      L_LiftYD_Power = 1.0;
+      L_LiftYD_Power = K_lift_driver_manual_up_YD;
       L_current_state = E_S1_initialize_Up_YD;
       }
     else if ((V_Driver_Lift_Cmnd_Direction == E_LiftCmndDown) &&
              (V_YD_LimitDetected == false))
       {
-      L_LiftYD_Power = -0.25;
+      L_LiftYD_Power = K_lift_driver_manual_down_YD;
       L_current_state = E_S2_lift_down_YD;
       }
     else if ((V_Driver_Lift_Cmnd_Direction == E_LiftCmndBack) &&
              (V_XD_LimitDetected == false))
       {
-      L_LiftXD_Power = -0.15;
+      L_LiftXD_Power = K_lift_driver_manual_back_XD;
       L_current_state = E_S7_move_back_XD;
       }
     else if (V_Driver_Lift_Cmnd_Direction == E_LiftCmndForward)
       {
-      L_LiftXD_Power = 0.15;
+      L_LiftXD_Power = K_lift_driver_manual_forward_XD;
       L_current_state = E_S3_move_forward_XD;
       }
 
