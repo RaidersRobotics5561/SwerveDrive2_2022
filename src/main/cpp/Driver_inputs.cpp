@@ -28,6 +28,7 @@
   bool                V_Driver_LiftYD_Up   = false;
   bool                V_Driver_LiftYD_Down = false;
   T_LiftCmndDirection V_Driver_Lift_Cmnd_Direction = E_LiftCmndNone;
+  bool                V_Driver_CameraLight = false;
 
 /******************************************************************************
  * Function:     Joystick_robot_mapping
@@ -50,7 +51,8 @@ void Joystick_robot_mapping(bool    L_Driver2_buttonA,
                             bool    L_Driver1_buttonA,
                             bool    L_Driver1_ButtonX,
                             bool    L_Driver1_ButtonY,
-                            int     L_Driver2_POV)
+                            int     L_Driver2_POV,
+                            bool    L_Driver1_buttonRB)
   {
   V_Driver_elevator_up = L_Driver2_buttonA;                       //Controller 2, A button (1), (robot.cpp) Elevator goes up
   V_Driver_elevator_down = L_Driver2_buttonB;                     //Controller 2, B button (2), (robot.cpp) Elevator goes down
@@ -67,6 +69,7 @@ void Joystick_robot_mapping(bool    L_Driver2_buttonA,
   V_Driver_SwerveGoalAutoCenter = L_Driver1_buttonA;
   V_Driver_SwerveRotateTo0 = L_Driver1_ButtonX;
   V_Driver_SwerveRotateTo90 = L_Driver1_ButtonY;
+  V_Driver_CameraLight = L_Driver1_buttonRB;                      //Controller 1, X button (3), when held, turns on the camera light
 
   if (L_Driver2_POV == 0)
     {

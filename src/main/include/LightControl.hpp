@@ -20,5 +20,6 @@ void LightControlMain(bool                         L_AutoAlignRequest,
                       frc::DriverStation::Alliance L_AllianceColor,
                       T_LauncherStates             L_LauncherState,
                       bool                         L_SwerveTargetLocking,
+                      bool                         L_Driver_CameraLight,
                       bool                        *L_CameraLightCmndOn,
                       double                      *L_VanityLightCmnd);

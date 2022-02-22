@@ -131,7 +131,8 @@ void Robot::RobotPeriodic()
                          c_joyStick.GetRawButton(1),
                          c_joyStick.GetRawButton(3),
                          c_joyStick.GetRawButton(4),
-                         c_joyStick2.GetPOV());
+                         c_joyStick2.GetPOV(),
+                         c_joyStick.GetRawButton(6));
 
   Read_Encoders(a_encoderWheelAngleFrontLeft.Get().value(),
                 a_encoderWheelAngleFrontRight.Get().value(),
@@ -230,6 +231,7 @@ void Robot::AutonomousPeriodic()
                     V_AllianceColor,
                     V_LauncherState,
                     V_SwerveTargetLocking,
+                    V_Driver_CameraLight,
                    &V_CameraLightCmndOn,
                    &V_VanityLightCmnd);
 
@@ -329,6 +331,7 @@ void Robot::TeleopPeriodic()
                     V_AllianceColor,
                     V_LauncherState,
                     V_SwerveTargetLocking,
+                    V_Driver_CameraLight,
                    &V_CameraLightCmndOn,
                    &V_VanityLightCmnd);
 

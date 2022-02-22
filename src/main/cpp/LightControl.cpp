@@ -38,14 +38,16 @@ double  V_VanityLightCmnd = 0;
 bool CameraLightControl(bool             L_AutoAlignRequest,
                         bool             L_AutoLauncherRequest,
                         T_LauncherStates L_LauncherState,
-                        bool             L_SwerveTargetLocking)
+                        bool             L_SwerveTargetLocking,
+                        bool             L_Driver_CameraLight)
   {
     bool L_CameraLightCmndOn = false;
 
     if ((L_AutoAlignRequest == true) ||
         (L_AutoLauncherRequest == true) ||
         (L_LauncherState == E_LauncherAutoTargetActive) ||
-        (L_SwerveTargetLocking == true))
+        (L_SwerveTargetLocking == true) ||
+        (L_Driver_CameraLight == true))
       {
       L_CameraLightCmndOn = true;
       }
@@ -86,7 +88,7 @@ bool CameraLightControl(bool             L_AutoAlignRequest,
     }
   else
     {
-    L_CameraLightCmndOn = false;
+    L_CameraLightCmndOn = true;
     }
 
   return (L_CameraLightCmndOn);
@@ -137,13 +139,15 @@ void LightControlMain(bool                         L_AutoAlignRequest,
                       frc::DriverStation::Alliance L_AllianceColor,
                       T_LauncherStates             L_LauncherState,
                       bool                         L_SwerveTargetLocking,
+                      bool                         L_Driver_CameraLight,
                       bool                        *L_CameraLightCmndOn,
                       double                      *L_VanityLightCmnd)
   {
   *L_CameraLightCmndOn = CameraLightControl(L_AutoAlignRequest,
                                             L_AutoLauncherRequest,
                                             L_LauncherState,
-                                            L_SwerveTargetLocking);
+                                            L_SwerveTargetLocking,
+                                            L_Driver_CameraLight);
 
   *L_VanityLightCmnd = VanityLightControl(L_MatchTimeRemaining,
                                           L_AllianceColor);
