@@ -1,5 +1,5 @@
 /*
-  IO_Sensors.cpp
+  IO_Sensors.hpp
 
   Created on: Feb 17, 2022
   Author: Biggs
@@ -10,6 +10,8 @@
 extern bool V_BallDetectedRaw;
 extern bool V_XD_LimitDetected;
 extern bool V_YD_LimitDetected;
+
+void IO_SensorsInit();
 
 void Read_IO_Sensors(bool L_IR_SensorDetect,
                      bool L_XD_LimitSwitch,

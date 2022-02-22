@@ -18,6 +18,8 @@
 #include "rev/CANSparkMax.h"
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/DriverStation.h>
+#include "Driver_inputs.hpp"
+#include "IO_Sensors.hpp"
 
 T_Lift_State V_Lift_state = E_S0_BEGONE;
 int    V_lift_counter = 0;
@@ -31,6 +33,12 @@ double V_lift_command_XD = 0;
 
 double V_LiftYD_TestLocation = 0;
 double V_LiftXD_TestLocation = 0;
+
+double V_LiftYD_TestPowerCmnd = 0;
+double V_LiftXD_TestPowerCmnd = 0;
+
+double V_LiftMotorYD_MaxCurrent[E_Lift_State_Sz];
+double V_LiftMotorXD_MaxCurrent[E_Lift_State_Sz];
 
 #ifdef LiftXY_Test
 bool   V_LiftXY_Test = true;
@@ -162,6 +170,8 @@ void LiftMotorConfigsCal(rev::SparkMaxPIDController m_liftpidYD,
  ******************************************************************************/
 void LiftControlInit()
   {
+  T_Lift_State L_Index;
+
   V_Lift_state = E_S0_BEGONE;
   V_lift_counter = 0;
   V_init_state = false;
@@ -174,7 +184,85 @@ void LiftControlInit()
 
   V_LiftYD_TestLocation = 0;
   V_LiftXD_TestLocation = 0;
+
+  V_LiftYD_TestPowerCmnd = 0;
+  V_LiftXD_TestPowerCmnd = 0;
+
+  for (L_Index = E_S0_BEGONE;
+       L_Index < E_Lift_State_Sz;
+       L_Index = T_Lift_State(int(L_Index) + 1))
+      {
+      V_LiftMotorYD_MaxCurrent[L_Index] = 0;
+      V_LiftMotorXD_MaxCurrent[L_Index] = 0;
+      }
   }
+
+/******************************************************************************
+ * Function:     RecordLiftMotorMaxCurrent
+ *
+ * Description:  Record the max observed current.  
+ *               This is for instrumentation only.
+ ******************************************************************************/
+void RecordLiftMotorMaxCurrent(T_Lift_State L_current_state,                                
+                               double       L_liftMotorYD_CurrentOut,
+                               double       L_liftMotorXD_CurrentOut)
+  {
+  if (fabs(L_liftMotorYD_CurrentOut) > fabs(V_LiftMotorYD_MaxCurrent[L_current_state]))
+    {
+    V_LiftMotorYD_MaxCurrent[L_current_state] = L_liftMotorYD_CurrentOut;
+    }
+  
+  if (fabs(L_liftMotorXD_CurrentOut) > fabs(V_LiftMotorXD_MaxCurrent[L_current_state]))
+    {
+    V_LiftMotorXD_MaxCurrent[L_current_state] = L_liftMotorXD_CurrentOut;
+    }
+  }
+
+/******************************************************************************
+ * Function:     Lift_Control_ManualOverride
+ *
+ * Description:  Manual override control used during the FRC test section.
+ ******************************************************************************/
+void Lift_Control_ManualOverride(double *L_lift_command_YD,
+                                 double *L_lift_command_XD,
+                                 double  L_liftMotorYD_CurrentOut,
+                                 double  L_liftMotorXD_CurrentOut)
+  {
+  double L_LiftYD_Power = 0;
+  double L_LiftXD_Power = 0;
+  T_Lift_State L_current_state = E_S0_BEGONE; // Not really the lift state, but allows us record the max currents
+
+    if (V_Driver_Lift_Cmnd_Direction == E_LiftCmndUp)
+      {
+      L_LiftYD_Power = 1.0;
+      L_current_state = E_S1_initialize_Up_YD;
+      }
+    else if ((V_Driver_Lift_Cmnd_Direction == E_LiftCmndDown) &&
+             (V_YD_LimitDetected == false))
+      {
+      L_LiftYD_Power = -0.25;
+      L_current_state = E_S2_lift_down_YD;
+      }
+    else if ((V_Driver_Lift_Cmnd_Direction == E_LiftCmndBack) &&
+             (V_XD_LimitDetected == false))
+      {
+      L_LiftXD_Power = -0.15;
+      L_current_state = E_S7_move_back_XD;
+      }
+    else if (V_Driver_Lift_Cmnd_Direction == E_LiftCmndForward)
+      {
+      L_LiftXD_Power = 0.15;
+      L_current_state = E_S3_move_forward_XD;
+      }
+
+  RecordLiftMotorMaxCurrent(L_current_state,                                
+                            L_liftMotorYD_CurrentOut,
+                            L_liftMotorXD_CurrentOut);
+
+  *L_lift_command_YD = L_LiftYD_Power;
+  *L_lift_command_XD = L_LiftXD_Power;
+  }
+
 
 /******************************************************************************
  * Function:     Lift_Control_Dictator
@@ -189,7 +277,9 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
                                    double              L_lift_measured_position_XD,
                                    double             *L_lift_command_YD,
                                    double             *L_lift_command_XD,
-                                   double              L_gyro_yawangledegrees)
+                                   double              L_gyro_yawangledegrees,
+                                   double              L_liftMotorYD_CurrentOut,
+                                   double              L_liftMotorXD_CurrentOut)
   {
   T_Lift_State L_Commanded_State = L_current_state;
 
@@ -317,7 +407,11 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
     *L_lift_command_XD = K_lift_max_XD;
     }
 
-      return(L_Commanded_State);
+  RecordLiftMotorMaxCurrent(L_current_state,
+                            L_liftMotorYD_CurrentOut,
+                            L_liftMotorXD_CurrentOut);
+
+  return(L_Commanded_State);
 }
 
 /******************************************************************************

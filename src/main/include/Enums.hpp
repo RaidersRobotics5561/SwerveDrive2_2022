@@ -107,7 +107,8 @@ typedef enum T_Lift_State
   E_S8_more_down_some_YD,
   E_S9_back_rest_XD,
   E_S10_final_YD,
-  E_S11_Stop
+  E_S11_Stop,
+  E_Lift_State_Sz
 } T_Lift_State;
 
 

@@ -12,6 +12,10 @@
 extern double       V_lift_command_YD;
 extern double       V_lift_command_XD;
 extern T_Lift_State V_Lift_state;
+extern double V_LiftYD_TestPowerCmnd;
+extern double V_LiftXD_TestPowerCmnd;
+extern double V_LiftMotorYD_MaxCurrent[E_Lift_State_Sz];
+extern double V_LiftMotorXD_MaxCurrent[E_Lift_State_Sz];
 
 void LiftMotorConfigsCal(rev::SparkMaxPIDController m_liftpidYD,
                          rev::SparkMaxPIDController m_liftpidXD);
@@ -21,6 +25,11 @@ void LiftMotorConfigsInit(rev::SparkMaxPIDController m_liftpidYD,
 
 void LiftControlInit();
 
+void Lift_Control_ManualOverride(double *L_lift_command_YD,
+                                 double *L_lift_command_XD,
+                                 double  L_liftMotorYD_CurrentOut,
+                                 double  L_liftMotorXD_CurrentOut);
+
 T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
                                    T_LiftCmndDirection L_DriverLiftCmndDirection,
                                    double              L_game_time,
@@ -29,4 +38,6 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
                                    double              L_lift_measured_position_XD,
                                    double             *L_lift_command_YD,
                                    double             *L_lift_command_XD,
-                                   double              L_gyro_yawangledegrees);
+                                   double              L_gyro_yawangledegrees,
+                                   double              L_liftMotorYD_CurrentOut,
+                                   double              L_liftMotorXD_CurrentOut);

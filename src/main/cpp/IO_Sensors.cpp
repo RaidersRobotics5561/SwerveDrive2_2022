@@ -16,6 +16,19 @@ bool V_XD_LimitDetected;  // XD travel is at the limit switch.
 bool V_YD_LimitDetected;  // YD travel is at the limit switch.
 
 /******************************************************************************
+ * Function:     IO_SensorsInit
+ *
+ * Description:  Init calling funciton for the IO sensors.
+ *
+ ******************************************************************************/
+void IO_SensorsInit()
+  {
+  V_BallDetectedRaw = false;
+  V_XD_LimitDetected = false;
+  V_YD_LimitDetected = false;
+  }
+
+/******************************************************************************
  * Function:     BallDetectionSensor
  *
  * Description:  IR sensor that detects the presence of a ball in the elevator.

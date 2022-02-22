@@ -78,6 +78,16 @@ bool CameraLightControl(bool             L_AutoAlignRequest,
       L_CameraLightCmndOn = false;
       V_CameraLightStatus = E_LightTurnedOff;
       }
+  
+  /* Flip the command as the camera light is inverted */
+  if (L_CameraLightCmndOn == true)
+    {
+    L_CameraLightCmndOn = false;
+    }
+  else
+    {
+    L_CameraLightCmndOn = false;
+    }
 
   return (L_CameraLightCmndOn);
   }
