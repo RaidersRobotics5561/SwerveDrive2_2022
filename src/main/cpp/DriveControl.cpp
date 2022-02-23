@@ -258,7 +258,7 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
                       bool                L_JoyStick1Button4, // auto rotate to 90 degrees
                       double              L_GyroAngleDegrees,
                       double              L_GyroAngleRadians,
-                      bool                L_TopTargetAquired,
+                      bool                L_VisionTopTargetAquired,
                       double              L_TopTargetYawDegrees,
                       double             *L_WheelAngleFwd,
                       double             *L_WheelAngleRev,
@@ -364,7 +364,7 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       L_RotateErrorCalc = desiredAngle - L_GyroAngleDegrees;
       }
     else if((V_SwerveTargetLocking == true) &&
-            (L_TopTargetAquired == true))
+            (L_VisionTopTargetAquired == true))
       {
       // Use photon vison as target when in auto beam lock
       L_RotateErrorCalc = desiredAngle - L_TopTargetYawDegrees;

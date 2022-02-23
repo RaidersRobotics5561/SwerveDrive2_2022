@@ -8,33 +8,19 @@
   
  */
 
-#include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/DriverStation.h>
-#include <frc/livewindow/LiveWindow.h>
-// #include <math.h>
 #include <photonlib/PhotonCamera.h>
 #include <photonlib/PhotonUtils.h>
-#include <units/length.h>
-#include <units/angle.h>
-
-// constants for top target cam
-const units::meter_t CAMERA_HEIGHT1 = 0.725_m; // 725 mm to camera lense
-const units::meter_t TARGET_HEIGHT1 = 2.58_m; // bottom of tape to carpet 
-const units::radian_t CAMERA_PITCH1 = 45_deg; // camera on a 45 degree tilt
-
-// constants for bottom ball cam
-const units::meter_t CAMERA_HEIGHT2 = 0.367_m;
-const units::meter_t TARGET_HEIGHT2 = .12_m; // radius of the ball in cm
-const units::radian_t CAMERA_PITCH2 = 50_deg;
+#include "Const.hpp"
 
 // all our favorite variables
-bool TopTargetAquired;
-double TopYaw;
-double V_TopTargetDistanceMeters; // Distance from front of robot to top target
-bool BottomTargetAquired;
-double BottomYaw;
-int BottomIndex;
-int V_VisionBottomIndex;
+bool   V_VisionTopTargetAquired = false;
+double V_VisionTopYaw = 0;
+double V_VisionTopTargetDistanceMeters = 0; // Distance from front of robot to top target
+double V_VisionBottomTargetDistanceMeters = 0;
+bool   V_VisionBottomTargetAquired = false;
+double V_VisionBottomYaw = 0;
+int    V_VisionBottomIndex = 0;
 
 
 /******************************************************************************
@@ -44,29 +30,26 @@ int V_VisionBottomIndex;
  ******************************************************************************/
 void VisionDashboard()
   {
-// puts all our favorite variables to the dashboard, all this stuff happens once on init
-    frc::SmartDashboard::PutBoolean("Top Target?", TopTargetAquired);
-    frc::SmartDashboard::PutNumber("Target Yaw", TopYaw);
-    frc::SmartDashboard::PutNumber("Top Distance", V_TopTargetDistanceMeters);
 
-    frc::SmartDashboard::PutBoolean("Bottom Target?", BottomTargetAquired);
-    frc::SmartDashboard::PutNumber("Bottom Yaw", BottomYaw);
-    frc::SmartDashboard::PutNumber("Bottom Index", BottomIndex);
   }
 
 
 /******************************************************************************
  * Function:     VisionInit
  *
- * Description:  Initialize vision and related variables.  Only call on robot
- *               init, no need to run this multiple times.
+ * Description:  Initialize vision and related variables.
  ******************************************************************************/
-void VisionInit()
+void VisionInit(frc::DriverStation::Alliance L_AllianceColor)
   {
-//   Cam1.StartClientTeam(5561);
-//   Cam2.StartClientTeam(5561);
-//   photonlib::PhotonCamera Cam1{"Top"};
-//   photonlib::PhotonCamera Cam2{"Bottom"};
+  // gets flag from the driver station to choose between alliance colors
+  if (L_AllianceColor == frc::DriverStation::Alliance::kRed)
+    {
+    V_VisionBottomIndex = 1; // 1 is the index for a red ball
+    }
+  else // if (L_AllianceColor == frc::DriverStation::Alliance::kBlue) -> must be either red or blue
+    {
+    V_VisionBottomIndex = 2; // 2 is the index for a blue ball
+    }
   }
 
 
@@ -76,53 +59,37 @@ void VisionInit()
  * Description:  Contains the necessary code relative to processing the 
  *               vision output.
  ******************************************************************************/
-void VisionRun(frc::DriverStation::Alliance    L_AllianceColor,
-               photonlib::PhotonPipelineResult pc_L_TopResult,
-               photonlib::PhotonPipelineResult pc_L_BottomResult,
-               int                            *L_BottomInex)
+void VisionRun(photonlib::PhotonPipelineResult pc_L_TopResult,
+               photonlib::PhotonPipelineResult pc_L_BottomResult)
   {
-    TopTargetAquired = pc_L_TopResult.HasTargets(); //returns true if the camera has a target
+  units::meter_t L_TopRange;
+  photonlib::PhotonTrackedTarget L_TargetTop;
+  photonlib::PhotonTrackedTarget L_TargetBottom;
+  units::meter_t L_BottomRange;
 
-    photonlib::PhotonTrackedTarget targetTop = pc_L_TopResult.GetBestTarget(); //gets the best target
+  // Camera 1 - Top Target Detection:
+  V_VisionTopTargetAquired = pc_L_TopResult.HasTargets(); //returns true if the camera has a target  
 
-    TopYaw = targetTop.GetYaw(); // Yaw of the best target
-    
-    units::meter_t TopRange = photonlib::PhotonUtils::CalculateDistanceToTarget(
-          CAMERA_HEIGHT1, TARGET_HEIGHT1, CAMERA_PITCH1,
-          units::degree_t{pc_L_TopResult.GetBestTarget().GetPitch()}); // first 3 variables are constants from vision.hpp
+  L_TargetTop = pc_L_TopResult.GetBestTarget(); //gets the best target  
 
-    V_TopTargetDistanceMeters = TopRange.value();
+  V_VisionTopYaw = L_TargetTop.GetYaw(); // Yaw of the best target
+  
+  L_TopRange = photonlib::PhotonUtils::CalculateDistanceToTarget(
+        K_VisionHeight1, K_VisionTargetHeight1, K_VisionCameraPitch1,
+        units::degree_t{pc_L_TopResult.GetBestTarget().GetPitch()}); // first 3 variables are constants from Const.hpp  
 
-    // second camera for cargo detection
-    // photonlib::PhotonCamera Cam2{"Bottom"};
-    // photonlib::PhotonPipelineResult resultBottom = pc_L_Camera2.GetLatestResult();
+  V_VisionTopTargetDistanceMeters = L_TopRange.value();  
+  
+  // second camera for cargo detection
+  V_VisionBottomTargetAquired = pc_L_BottomResult.HasTargets();
 
-    photonlib::PhotonTrackedTarget targetBottom = pc_L_BottomResult.GetBestTarget();
-    BottomTargetAquired = pc_L_BottomResult.HasTargets();
-    BottomYaw = targetBottom.GetYaw();
+  L_TargetBottom = pc_L_BottomResult.GetBestTarget();
 
-    // gets flag from the driver station to choose between alliance colors
-    if (L_AllianceColor == frc::DriverStation::Alliance::kRed){
-      *L_BottomInex = 1; // 1 is the index for a red ball
-    }
-    else if (L_AllianceColor == frc::DriverStation::Alliance::kBlue)
-    {
-      *L_BottomInex = 2; // 2 is the index for a blue ball
-    }
-    
-    units::meter_t BottomRange = photonlib::PhotonUtils::CalculateDistanceToTarget(
-          CAMERA_HEIGHT2, TARGET_HEIGHT2, CAMERA_PITCH2,
-          units::degree_t{pc_L_BottomResult.GetBestTarget().GetPitch()});
+  V_VisionBottomYaw = L_TargetBottom.GetYaw();  
+  
+  L_BottomRange = photonlib::PhotonUtils::CalculateDistanceToTarget(
+        K_VisionHeight2, K_VisionTargetHeight2, K_VisionCameraPitch2,
+        units::degree_t{pc_L_BottomResult.GetBestTarget().GetPitch()});
 
-    double BottomRangeDouble = BottomRange.value();
-
-     // set the pipeline to whatever the logic gave
-
-    frc::SmartDashboard::PutBoolean("Top Target?", TopTargetAquired); //puts those new values to dashboard
-    frc::SmartDashboard::PutNumber("Top Yaw", TopYaw);
-    frc::SmartDashboard::PutNumber("Top Distance", V_TopTargetDistanceMeters); // Probably can remove this...
-    frc::SmartDashboard::PutNumber("Bottom Range", BottomRangeDouble);
-    frc::SmartDashboard::PutBoolean("Bottom Target?", BottomTargetAquired);
-    frc::SmartDashboard::PutNumber("Bottom Yaw", BottomYaw);
-    frc::SmartDashboard::PutNumber("Bottom Index", BottomIndex); 
+  V_VisionBottomTargetDistanceMeters = L_BottomRange.value();  
   }

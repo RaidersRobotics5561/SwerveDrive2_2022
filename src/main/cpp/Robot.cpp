@@ -91,6 +91,10 @@ void Robot::RobotInit()
   LiftMotorConfigsInit(m_liftpidYD,
                        m_liftpidXD);
 
+  VisionInit(V_AllianceColor);
+
+  pc_Camera2.SetPipelineIndex(V_VisionBottomIndex);
+
   VisionDashboard();
 
   // inst = nt::NetworkTableInstance::Create();
@@ -153,10 +157,8 @@ void Robot::RobotPeriodic()
                   di_XD_LimitSwitch.Get(),
                   di_XY_LimitSwitch.Get());
 
-  VisionRun( V_AllianceColor,
-             pc_Camera1.GetLatestResult(),
-             pc_Camera2.GetLatestResult(),
-            &V_VisionBottomIndex);
+  VisionRun(pc_Camera1.GetLatestResult(),
+            pc_Camera2.GetLatestResult());
 
   SwerveDriveMotorConfigsCal(m_frontLeftDrivePID,
                              m_frontRightDrivePID,
@@ -169,8 +171,6 @@ void Robot::RobotPeriodic()
   LiftMotorConfigsCal(m_liftpidYD,
                       m_liftpidXD);
 
-  pc_Camera2.SetPipelineIndex(V_VisionBottomIndex);
-
   frc::SmartDashboard::PutBoolean("XD Limit Detected", V_XD_LimitDetected);
   frc::SmartDashboard::PutBoolean("YD Limit Detected", V_YD_LimitDetected);
   frc::SmartDashboard::PutBoolean("Ball Detected", V_BallDetectedRaw);
@@ -181,32 +181,40 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutNumber("V_b_DriveStraight", V_b_DriveStraight);
   frc::SmartDashboard::PutNumber("V_RotateErrorCalc", V_RotateErrorCalc);
 
-  frc::SmartDashboard::PutNumber("GYRO", V_GyroYawAngleDegrees);
+  frc::SmartDashboard::PutNumber("GYRO",            V_GyroYawAngleDegrees);
   frc::SmartDashboard::PutBoolean("voltage thingy", di_Voltage_Man.Get());
 
-  frc::SmartDashboard::PutNumber("Lift YD S0", V_LiftMotorYD_MaxCurrent[E_S0_BEGONE]);
-  frc::SmartDashboard::PutNumber("Lift YD S1", V_LiftMotorYD_MaxCurrent[E_S1_initialize_Up_YD]);
-  frc::SmartDashboard::PutNumber("Lift YD S2", V_LiftMotorYD_MaxCurrent[E_S2_lift_down_YD]);
-  frc::SmartDashboard::PutNumber("Lift YD S3", V_LiftMotorYD_MaxCurrent[E_S3_move_forward_XD]);
-  frc::SmartDashboard::PutNumber("Lift YD S4", V_LiftMotorYD_MaxCurrent[E_S4_stretch_up_YD]);
-  frc::SmartDashboard::PutNumber("Lift YD S5", V_LiftMotorYD_MaxCurrent[E_S5_more_forward_XD]);
-  frc::SmartDashboard::PutNumber("Lift YD S6", V_LiftMotorYD_MaxCurrent[E_S6_lift_up_more_YD]);
-  frc::SmartDashboard::PutNumber("Lift YD S7", V_LiftMotorYD_MaxCurrent[E_S7_move_back_XD]);
-  frc::SmartDashboard::PutNumber("Lift YD S8", V_LiftMotorYD_MaxCurrent[E_S8_more_down_some_YD]);
-  frc::SmartDashboard::PutNumber("Lift YD S9", V_LiftMotorYD_MaxCurrent[E_S9_back_rest_XD]);
+  frc::SmartDashboard::PutBoolean("Top Target?",    V_VisionTopTargetAquired);
+  frc::SmartDashboard::PutNumber("Top Yaw",         V_VisionTopYaw);
+  frc::SmartDashboard::PutNumber("Top Distance",    V_VisionTopTargetDistanceMeters);
+  frc::SmartDashboard::PutNumber("Bottom Range",    V_VisionBottomTargetDistanceMeters);
+  frc::SmartDashboard::PutBoolean("Bottom Target?", V_VisionBottomTargetAquired);
+  frc::SmartDashboard::PutNumber("Bottom Yaw",      V_VisionBottomYaw);
+  frc::SmartDashboard::PutNumber("Bottom Index",    V_VisionBottomIndex); 
+
+  frc::SmartDashboard::PutNumber("Lift YD S0",  V_LiftMotorYD_MaxCurrent[E_S0_BEGONE]);
+  frc::SmartDashboard::PutNumber("Lift YD S1",  V_LiftMotorYD_MaxCurrent[E_S1_initialize_Up_YD]);
+  frc::SmartDashboard::PutNumber("Lift YD S2",  V_LiftMotorYD_MaxCurrent[E_S2_lift_down_YD]);
+  frc::SmartDashboard::PutNumber("Lift YD S3",  V_LiftMotorYD_MaxCurrent[E_S3_move_forward_XD]);
+  frc::SmartDashboard::PutNumber("Lift YD S4",  V_LiftMotorYD_MaxCurrent[E_S4_stretch_up_YD]);
+  frc::SmartDashboard::PutNumber("Lift YD S5",  V_LiftMotorYD_MaxCurrent[E_S5_more_forward_XD]);
+  frc::SmartDashboard::PutNumber("Lift YD S6",  V_LiftMotorYD_MaxCurrent[E_S6_lift_up_more_YD]);
+  frc::SmartDashboard::PutNumber("Lift YD S7",  V_LiftMotorYD_MaxCurrent[E_S7_move_back_XD]);
+  frc::SmartDashboard::PutNumber("Lift YD S8",  V_LiftMotorYD_MaxCurrent[E_S8_more_down_some_YD]);
+  frc::SmartDashboard::PutNumber("Lift YD S9",  V_LiftMotorYD_MaxCurrent[E_S9_back_rest_XD]);
   frc::SmartDashboard::PutNumber("Lift YD S10", V_LiftMotorYD_MaxCurrent[E_S10_final_YD]);
   frc::SmartDashboard::PutNumber("Lift YD S11", V_LiftMotorYD_MaxCurrent[E_S11_Stop]);
   
-  frc::SmartDashboard::PutNumber("Lift XD S0", V_LiftMotorXD_MaxCurrent[E_S0_BEGONE]);
-  frc::SmartDashboard::PutNumber("Lift XD S1", V_LiftMotorXD_MaxCurrent[E_S1_initialize_Up_YD]);
-  frc::SmartDashboard::PutNumber("Lift XD S2", V_LiftMotorXD_MaxCurrent[E_S2_lift_down_YD]);
-  frc::SmartDashboard::PutNumber("Lift XD S3", V_LiftMotorXD_MaxCurrent[E_S3_move_forward_XD]);
-  frc::SmartDashboard::PutNumber("Lift XD S4", V_LiftMotorXD_MaxCurrent[E_S4_stretch_up_YD]);
-  frc::SmartDashboard::PutNumber("Lift XD S5", V_LiftMotorXD_MaxCurrent[E_S5_more_forward_XD]);
-  frc::SmartDashboard::PutNumber("Lift XD S6", V_LiftMotorXD_MaxCurrent[E_S6_lift_up_more_YD]);
-  frc::SmartDashboard::PutNumber("Lift XD S7", V_LiftMotorXD_MaxCurrent[E_S7_move_back_XD]);
-  frc::SmartDashboard::PutNumber("Lift XD S8", V_LiftMotorXD_MaxCurrent[E_S8_more_down_some_YD]);
-  frc::SmartDashboard::PutNumber("Lift XD S9", V_LiftMotorXD_MaxCurrent[E_S9_back_rest_XD]);
+  frc::SmartDashboard::PutNumber("Lift XD S0",  V_LiftMotorXD_MaxCurrent[E_S0_BEGONE]);
+  frc::SmartDashboard::PutNumber("Lift XD S1",  V_LiftMotorXD_MaxCurrent[E_S1_initialize_Up_YD]);
+  frc::SmartDashboard::PutNumber("Lift XD S2",  V_LiftMotorXD_MaxCurrent[E_S2_lift_down_YD]);
+  frc::SmartDashboard::PutNumber("Lift XD S3",  V_LiftMotorXD_MaxCurrent[E_S3_move_forward_XD]);
+  frc::SmartDashboard::PutNumber("Lift XD S4",  V_LiftMotorXD_MaxCurrent[E_S4_stretch_up_YD]);
+  frc::SmartDashboard::PutNumber("Lift XD S5",  V_LiftMotorXD_MaxCurrent[E_S5_more_forward_XD]);
+  frc::SmartDashboard::PutNumber("Lift XD S6",  V_LiftMotorXD_MaxCurrent[E_S6_lift_up_more_YD]);
+  frc::SmartDashboard::PutNumber("Lift XD S7",  V_LiftMotorXD_MaxCurrent[E_S7_move_back_XD]);
+  frc::SmartDashboard::PutNumber("Lift XD S8",  V_LiftMotorXD_MaxCurrent[E_S8_more_down_some_YD]);
+  frc::SmartDashboard::PutNumber("Lift XD S9",  V_LiftMotorXD_MaxCurrent[E_S9_back_rest_XD]);
   frc::SmartDashboard::PutNumber("Lift XD S10", V_LiftMotorXD_MaxCurrent[E_S10_final_YD]);
   frc::SmartDashboard::PutNumber("Lift XD S11", V_LiftMotorXD_MaxCurrent[E_S11_Stop]);
   }
@@ -228,6 +236,8 @@ void Robot::AutonomousInit()
     LiftControlInit();
     AutonDriveReset();
     OdometryInit();
+    VisionInit(V_AllianceColor);
+    pc_Camera2.SetPipelineIndex(V_VisionBottomIndex);
   }
 
 
@@ -269,8 +279,8 @@ void Robot::AutonomousPeriodic()
                       c_joyStick.GetRawButton(4),
                       V_GyroYawAngleDegrees,
                       V_GyroYawAngleRad,
-                      TopTargetAquired,
-                      TopYaw,
+                      V_VisionTopTargetAquired,
+                      V_VisionTopYaw,
                      &V_WheelAngleFwd[0],
                      &V_WheelAngleRev[0],
                      &V_WheelSpeedCmnd[0],
@@ -323,12 +333,10 @@ void Robot::TeleopInit()
   V_AllianceColor = frc::DriverStation::GetInstance().GetAlliance();
 
   DriveControlInit();
-
   BallHandlerInit();
-
   LiftControlInit();
-
   OdometryInit();
+  VisionInit(V_AllianceColor);
 }
 
 
@@ -363,8 +371,8 @@ void Robot::TeleopPeriodic()
                     V_Driver_SwerveRotateTo90,
                     V_GyroYawAngleDegrees,
                     V_GyroYawAngleRad,
-                    TopTargetAquired,
-                    TopYaw,
+                    V_VisionTopTargetAquired,
+                    V_VisionTopYaw,
                    &V_WheelAngleFwd[0],
                    &V_WheelAngleRev[0],
                    &V_WheelSpeedCmnd[0],
@@ -392,8 +400,8 @@ void Robot::TeleopPeriodic()
                           V_Driver_stops_shooter,
                           V_Driver_auto_setspeed_shooter,
                           V_autonTargetFin,
-                          TopTargetAquired,
-                          V_TopTargetDistanceMeters,
+                          V_VisionTopTargetAquired,
+                          V_VisionTopTargetDistanceMeters,
                           V_ShooterSpeedCurr,
                           V_Driver_manual_shooter_desired_speed,
                           V_CameraLightStatus,

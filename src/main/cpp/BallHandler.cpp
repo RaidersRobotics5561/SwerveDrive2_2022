@@ -180,7 +180,7 @@ void BallHandlerInit()
 double BallLauncher(bool   L_DisableShooter,
                     bool   L_AutoShootReq,
                     bool   L_AutoRotateComplete,
-                    bool   L_TopTargetAquired,
+                    bool   L_VisionTopTargetAquired,
                     double L_TopTargetDistanceMeters,
                     double L_ManualShooter,
                     double L_LauncherCurrentSpeed,
@@ -211,7 +211,7 @@ double BallLauncher(bool   L_DisableShooter,
     V_ShooterTargetDistance = 0;
     }
   else if (((L_AutoShootReq == true) &&
-            (L_TopTargetAquired == true) &&
+            (L_VisionTopTargetAquired == true) &&
             (L_CameraLightStatus == E_LightOnTargetingReady)) ||
 
            ((V_LauncherState == E_LauncherAutoTargetActive) &&
@@ -318,7 +318,7 @@ void BallHandlerControlMain(bool L_IntakeInCmnd,
                             bool L_DisableShooter,
                             bool L_AutoShootReq,
                             bool L_AutoRotateComplete,
-                            bool L_TopTargetAquired,
+                            bool L_VisionTopTargetAquired,
                             double L_TopTargetDistanceMeters,
                             double L_LauncherCurrentSpeed,
                             double L_ManualShooter,
@@ -334,7 +334,7 @@ void BallHandlerControlMain(bool L_IntakeInCmnd,
     L_LauncherRPM = BallLauncher( L_DisableShooter,
                                   L_AutoShootReq,
                                   L_AutoRotateComplete,
-                                  L_TopTargetAquired,
+                                  L_VisionTopTargetAquired,
                                   L_TopTargetDistanceMeters,
                                   L_ManualShooter,
                                   L_LauncherCurrentSpeed,
