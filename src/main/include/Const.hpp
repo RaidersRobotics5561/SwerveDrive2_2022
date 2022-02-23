@@ -4,7 +4,7 @@
 #include <units/length.h>
 
 // Define the desired test state here: COMP (no test), BallHandlerTest, LiftXY_Test
-#define BallHandlerTest
+#define LiftXY_Test
 
 const double C_ExeTime = 0.02; // Set to match the the default controller loop time of 20 ms
 const units::second_t C_ExeTime_t = 0.02_s; // Set to match the the default controller loop time of 20 ms
@@ -29,6 +29,7 @@ static const int C_intakeID = 14;
 // DIO IDs:
 static const int C_MagEncoderFL_ID = 2, C_MagEncoderFR_ID = 1, C_MagEncoderRL_ID = 3, C_MagEncoderRR_ID = 0;
 static const int C_XY_LimitSwitch_ID = 4, C_XD_LimitSwitch_ID = 6, C_IR_Sensor_ID = 9, C_CameraLightControl_ID = 7;
+static const int C_Voltage_Woman = 8; //gENDER?!?!?!?!?!??!
 
 // PWM IDs:
 static const int C_VanityLight_ID = 1;

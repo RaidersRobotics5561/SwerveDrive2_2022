@@ -42,7 +42,7 @@ void Joystick_robot_mapping(bool    L_Driver2_buttonA,
                             bool    L_Driver2_buttonstart,
                             bool    L_Driver1_buttonback,
                             bool    L_Driver2_ButtonX,
-                            bool    L_Driver2_ButtonY, //
+                            bool    L_Driver2_ButtonY,
                             double  L_Driver2_left_Axis_y,
                             double  L_Driver2_right_Axis_y,
                             double  L_Driver1_left_Axis_y,
@@ -62,8 +62,8 @@ void Joystick_robot_mapping(bool    L_Driver2_buttonA,
   V_Driver_auto_setspeed_shooter = L_Driver2_buttonstart;         //controller 2 start button (8), (robot.cpp) Starts robot shooter speed based on distance
   V_Driver_manual_shooter_desired_speed = L_Driver2_left_Axis_y;  //Controller 2, left axis, uses y axis (1), (robot.cpp) sets desired speed for the shooter moter
   V_Driver_lift_control = L_Driver2_buttonRB;                     //Controller 2, X button (3), (Lift.cpp) starts automated states machine
-  V_Driver_intake_in = L_Driver2_ButtonX;                         //Controller 2 (3), controlls the intake base on trigger pressed 
-  V_Driver_intake_out = L_Driver2_ButtonY;                         //Controller 2 (3), controlls the intake base on trigger pressed 
+  V_Driver_intake_in = L_Driver2_ButtonX;                         //Controller 2 (3), controlls the intake in on trigger pressed 
+  V_Driver_intake_out = L_Driver2_ButtonY;                         //Controller 2 (4), controlls the intake out on trigger pressed 
   V_Driver_SwerveForwardBack =  L_Driver1_left_Axis_y;
   V_Driver_SwerveStrafe = L_Driver1_left_Axis_x;
   V_Driver_SwerveRotate =  L_Driver1_right_Axis_x;

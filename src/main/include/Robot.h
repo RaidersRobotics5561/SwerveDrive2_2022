@@ -48,6 +48,7 @@ class Robot : public frc::TimedRobot {
   frc::DigitalInput     di_XY_LimitSwitch    {C_XY_LimitSwitch_ID};
   frc::DigitalInput     di_XD_LimitSwitch    {C_XD_LimitSwitch_ID};
   frc::DigitalInput     di_IR_Sensor         {C_IR_Sensor_ID};
+  frc::DigitalInput     di_Voltage_Man       {C_Voltage_Woman}; //OWO
 
   frc::DigitalOutput    do_CameraLightControl{C_CameraLightControl_ID};
   
