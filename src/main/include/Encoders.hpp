@@ -9,8 +9,6 @@
   2022-02-15: Cleaned up file
 */
 
-#include "Enums.hpp"
-
  extern double V_WheelAngleFwd[E_RobotCornerSz];
  extern double V_Rad_WheelAngleFwd[E_RobotCornerSz]; 
  extern double V_WheelAngleRev[E_RobotCornerSz];
@@ -33,9 +31,6 @@
                    rev::SparkMaxRelativeEncoder m_encoderleftShooter,
                    rev::SparkMaxRelativeEncoder m_encoderLiftYD,
                    rev::SparkMaxRelativeEncoder m_encoderLiftXD);
-
-double DtrmnEncoderRelativeToCmnd(double L_JoystickCmnd,
-                                  double L_EncoderReading);
 
 void EncodersInit(rev::SparkMaxRelativeEncoder m_encoderFrontRightSteer,
                   rev::SparkMaxRelativeEncoder m_encoderFrontLeftSteer,

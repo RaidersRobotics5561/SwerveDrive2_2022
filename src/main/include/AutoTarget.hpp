@@ -1,4 +1,4 @@
-#include "Enums.hpp"
+
 
 T_AutoTargetStates AutoTargeting(T_AutoTargetStates  L_CurrentState,
                                  bool                L_Activate,

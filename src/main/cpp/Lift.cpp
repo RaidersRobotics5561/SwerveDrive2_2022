@@ -9,17 +9,12 @@
    lift go brrrrrrrrrrrrrrrrrrr -chloe
  */
 
-#include <iostream>
-#include <frc/DigitalInput.h>
-#include "Const.hpp"
-#include "Lookup.hpp"
-#include "Gyro.hpp"
-#include "Lift_sub_functions.hpp"
 #include "rev/CANSparkMax.h"
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/DriverStation.h>
-#include "Driver_inputs.hpp"
-#include "IO_Sensors.hpp"
+#include "Const.hpp"
+#include "Lookup.hpp"
+#include "Lift_sub_functions.hpp"
 
 T_Lift_State V_Lift_state = E_S0_BEGONE;
 int    V_lift_counter = 0;
@@ -226,30 +221,33 @@ void RecordLiftMotorMaxCurrent(T_Lift_State L_current_state,
 void Lift_Control_ManualOverride(double *L_lift_command_YD,
                                  double *L_lift_command_XD,
                                  double  L_liftMotorYD_CurrentOut,
-                                 double  L_liftMotorXD_CurrentOut)
+                                 double  L_liftMotorXD_CurrentOut,
+                                 T_LiftCmndDirection L_DriverLiftCmndDirection,
+                                 bool    L_YD_LimitDetected,
+                                 bool    L_XD_LimitDetected)
   {
   double L_LiftYD_Power = 0;
   double L_LiftXD_Power = 0;
   T_Lift_State L_current_state = E_S0_BEGONE; // Not really the lift state, but allows us record the max currents
 
-    if (V_Driver_Lift_Cmnd_Direction == E_LiftCmndUp)
+    if (L_DriverLiftCmndDirection == E_LiftCmndUp)
       {
       L_LiftYD_Power = K_lift_driver_manual_up_YD;
       L_current_state = E_S1_initialize_Up_YD;
       }
-    else if ((V_Driver_Lift_Cmnd_Direction == E_LiftCmndDown) &&
-             (V_YD_LimitDetected == false))
+    else if ((L_DriverLiftCmndDirection == E_LiftCmndDown) &&
+             (L_YD_LimitDetected == false))
       {
       L_LiftYD_Power = K_lift_driver_manual_down_YD;
       L_current_state = E_S2_lift_down_YD;
       }
-    else if ((V_Driver_Lift_Cmnd_Direction == E_LiftCmndBack) &&
-             (V_XD_LimitDetected == false))
+    else if ((L_DriverLiftCmndDirection == E_LiftCmndBack) &&
+             (L_XD_LimitDetected == false))
       {
       L_LiftXD_Power = K_lift_driver_manual_back_XD;
       L_current_state = E_S7_move_back_XD;
       }
-    else if (V_Driver_Lift_Cmnd_Direction == E_LiftCmndForward)
+    else if (L_DriverLiftCmndDirection == E_LiftCmndForward)
       {
       L_LiftXD_Power = K_lift_driver_manual_forward_XD;
       L_current_state = E_S3_move_forward_XD;

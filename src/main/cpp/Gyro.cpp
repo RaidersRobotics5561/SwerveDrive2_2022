@@ -8,10 +8,8 @@
 
  */
 
-#include <frc/smartdashboard/SmartDashboard.h>
-#include <frc/DriverStation.h>
-
 #include "AHRS.h"
+
 #include "Const.hpp"
 
 AHRS *NavX;

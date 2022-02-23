@@ -10,11 +10,9 @@
    - Camera lights
  */
 
+#include <frc/DriverStation.h>
 
 #include "Const.hpp"
-#include <frc/DriverStation.h>
-// #include "LightControl.hpp"
-// #include "BallHandler.hpp"
 
 /* V_CameraLightOnTime: Indication of how long the light has been consecutivly on. */
 double V_CameraLightOnTime = 0;

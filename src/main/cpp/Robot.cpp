@@ -16,22 +16,21 @@
 #include <frc/DriverStation.h>
 #include <frc/livewindow/LiveWindow.h>
 
+// #include "Const.hpp"
 #include "Encoders.hpp"
-#include "BallHandler.hpp"
-#include "LightControl.hpp"
-#include "Enums.hpp"
-#include "control_pid.hpp"
 #include "Gyro.hpp"
 #include "IO_Sensors.hpp"
-#include "Lookup.hpp"
 #include "vision.hpp"
-#include "DriveControl.hpp"
-#include "AutoTarget.hpp"
-#include "Lift.hpp"
 #include "Driver_inputs.hpp"
 #include "Odometry.hpp"
+#include "DriveControl.hpp"
+#include "Lift.hpp"
+#include "BallHandler.hpp"
+#include "LightControl.hpp"
+// #include "control_pid.hpp"
+// #include "Lookup.hpp"
 #include "Auton.hpp"
-#include "Odometry.hpp"
+#include "AutoTarget.hpp"
 
 nt::NetworkTableInstance inst;
 nt::NetworkTableEntry driverMode0;
@@ -68,6 +67,23 @@ void Robot::RobotInit()
   V_RobotState = E_Init;
   V_AllianceColor = frc::DriverStation::GetInstance().GetAlliance();
 
+  EncodersInit(m_encoderFrontRightSteer,
+               m_encoderFrontLeftSteer,
+               m_encoderRearRightSteer,
+               m_encoderRearLeftSteer,
+               m_encoderFrontRightDrive,
+               m_encoderFrontLeftDrive,
+               m_encoderRearRightDrive,
+               m_encoderRearLeftDrive,
+               m_encoderLiftYD,
+               m_encoderLiftXD,
+               m_encoderrightShooter,
+               m_encoderleftShooter);
+
+  GyroInit();
+
+  IO_SensorsInit();
+
   m_frontLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
   m_frontRightSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
   m_rearLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
@@ -88,22 +104,10 @@ void Robot::RobotInit()
   m_rightShooterMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kCoast);
   m_leftShooterMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kCoast);
 
-  EncodersInit(m_encoderFrontRightSteer,
-               m_encoderFrontLeftSteer,
-               m_encoderRearRightSteer,
-               m_encoderRearLeftSteer,
-               m_encoderFrontRightDrive,
-               m_encoderFrontLeftDrive,
-               m_encoderRearRightDrive,
-               m_encoderRearLeftDrive,
-               m_encoderLiftYD,
-               m_encoderLiftXD,
-               m_encoderrightShooter,
-               m_encoderleftShooter);
-
-  GyroInit();
-
-  IO_SensorsInit();
+  SwerveDriveMotorConfigsInit(m_frontLeftDrivePID,
+                              m_frontRightDrivePID,
+                              m_rearLeftDrivePID,
+                              m_rearRightDrivePID);
 
   BallHandlerMotorConfigsInit(m_rightShooterpid,
                               m_leftShooterpid);
@@ -179,6 +183,11 @@ void Robot::RobotPeriodic()
 
   VisionRun();
 
+  SwerveDriveMotorConfigsCal(m_frontLeftDrivePID,
+                             m_frontRightDrivePID,
+                             m_rearLeftDrivePID,
+                             m_rearRightDrivePID);
+
   BallHandlerMotorConfigsCal(m_rightShooterpid,
                              m_leftShooterpid);
 
@@ -191,6 +200,9 @@ void Robot::RobotPeriodic()
 
   frc::SmartDashboard::PutNumber("Lift postition YD", V_LiftPostitionYD);
   frc::SmartDashboard::PutNumber("Lift postition XD", V_LiftPostitionXD);
+
+  frc::SmartDashboard::PutNumber("V_b_DriveStraight", V_b_DriveStraight);
+  frc::SmartDashboard::PutNumber("V_RotateErrorCalc", V_RotateErrorCalc);
 
   frc::SmartDashboard::PutNumber("GYRO", V_GyroYawAngleDegrees);
   frc::SmartDashboard::PutBoolean("voltage thingy", di_Voltage_Man.Get());
@@ -289,7 +301,6 @@ void Robot::AutonomousPeriodic()
                      &V_WheelAngleCmnd[0],
                      &V_autonTargetFin,
                       V_RobotState);
-
 
   // Motor output commands:
     m_frontLeftDriveMotor.Set(V_WheelSpeedCmnd[E_FrontLeft]);
@@ -407,10 +418,19 @@ void Robot::TeleopPeriodic()
                          &V_ShooterRPM_Cmnd);
 
   // Motor output commands:
+    
+    #ifdef DriveMotorTest
+    m_frontLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontLeft], rev::ControlType::kSmartVelocity);
+    m_frontRightDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kSmartVelocity);
+    m_rearLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_RearLeft], rev::ControlType::kSmartVelocity);
+    m_rearRightDrivePID.SetReference(V_WheelSpeedCmnd[E_RearRight], rev::ControlType::kSmartVelocity);
+    #endif
+    #ifndef DriveMotorTest
     m_frontLeftDriveMotor.Set(V_WheelSpeedCmnd[E_FrontLeft]);
     m_frontRightDriveMotor.Set(V_WheelSpeedCmnd[E_FrontRight]);
     m_rearLeftDriveMotor.Set(V_WheelSpeedCmnd[E_RearLeft]);
     m_rearRightDriveMotor.Set(V_WheelSpeedCmnd[E_RearRight]);
+    #endif
 
     m_frontLeftSteerMotor.Set(V_WheelAngleCmnd[E_FrontLeft]);
     m_frontRightSteerMotor.Set(V_WheelAngleCmnd[E_FrontRight]);
@@ -440,9 +460,12 @@ void Robot::TestPeriodic()
   {
   Lift_Control_ManualOverride(&V_LiftYD_TestPowerCmnd,
                               &V_LiftXD_TestPowerCmnd,
-                              m_liftMotorYD.GetOutputCurrent(),
-                               m_liftMotorXD.GetOutputCurrent());
-
+                               m_liftMotorYD.GetOutputCurrent(),
+                               m_liftMotorXD.GetOutputCurrent(),
+                               V_Driver_Lift_Cmnd_Direction,
+                               V_YD_LimitDetected,
+                               V_XD_LimitDetected);
+ 
   m_liftMotorYD.Set(V_LiftYD_TestPowerCmnd);
   m_liftMotorXD.Set(V_LiftXD_TestPowerCmnd);
 

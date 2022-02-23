@@ -12,13 +12,13 @@
    - Targeting
  */
 
-#include "Const.hpp"
-#include "Lookup.hpp"
 #include <math.h>
 #include "rev/CANSparkMax.h"
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/DriverStation.h>
 
+#include "Const.hpp"
+#include "Lookup.hpp"
 
 double V_IntakePowerCmnd   = 0;
 double V_ElevatorPowerCmnd = 0;

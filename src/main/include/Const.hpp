@@ -3,8 +3,8 @@
 #include <units/angle.h>
 #include <units/length.h>
 
-// Define the desired test state here: COMP (no test), BallHandlerTest, LiftXY_Test
-#define LiftXY_Test
+// Define the desired test state here: COMP (no test), BallHandlerTest, LiftXY_Test, DriveMotorTest
+#define DriveMotorTest
 
 const double C_ExeTime = 0.02; // Set to match the the default controller loop time of 20 ms
 const units::second_t C_ExeTime_t = 0.02_s; // Set to match the the default controller loop time of 20 ms
@@ -113,6 +113,18 @@ double const K_WheelSpeedPID_Gx[E_PID_CalSz] = { 0.009,     // P Gx
                                                 -0.2,        // D LL
                                                  1.0,        // Max upper
                                                 -1.0};       // Max lower
+
+const double K_WheelSpeedPID_V2_Gx[E_PID_SparkMaxCalSz] = { 0.01,   // kP
+                                                            0.0001, // kI
+                                                            1.0,    // kD
+                                                            0.0,    // kIz
+                                                            0.0,    // kFF
+                                                            1.0,    // kMaxOutput
+                                                           -1.0,    // kMinOutput
+                                                          200.0,    // kMaxVel
+                                                         -200.0,    // kMinVel
+                                                          100.0,    // kMaxAcc
+                                                            0.0};   // kAllErr
 
 const double K_RobotRotationPID_Gx[E_PID_CalSz] = { 0.07,   // P Gx
                                                     0.0,   // I Gx

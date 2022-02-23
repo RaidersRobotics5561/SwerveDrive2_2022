@@ -8,26 +8,19 @@
 #include <frc/AnalogInput.h>
 #include <frc/DigitalInput.h>
 #include <frc/DigitalOutput.h>
-// #include <frc/drive/DifferentialDrive.h>
 #include <frc/Joystick.h>
 #include <frc/smartdashboard/SendableChooser.h>
 #include <frc/TimedRobot.h>
 #include <frc/PowerDistribution.h>
-
-
 #include "ctre/Phoenix.h"
 #include "rev/CANSparkMax.h"
 #include <frc/motorcontrol/Spark.h>
-#include "Const.hpp"
-
-#include <frc/DoubleSolenoid.h>
-#include <frc/Compressor.h>
-#include <networktables/NetworkTable.h>
-
 #include <frc/DutyCycleEncoder.h>
-
+#include <networktables/NetworkTable.h>
 #include <photonlib/PhotonCamera.h>
 #include <photonlib/PhotonUtils.h>
+
+#include "Const.hpp"
 
 class Robot : public frc::TimedRobot {
  public:
@@ -70,6 +63,11 @@ class Robot : public frc::TimedRobot {
                         
   rev::CANSparkMax                           m_liftMotorYD         {C_liftYD_ID,             rev::CANSparkMax::MotorType::kBrushless};
   rev::CANSparkMax                           m_liftMotorXD         {C_liftXD_ID,             rev::CANSparkMax::MotorType::kBrushless};
+
+  rev::SparkMaxPIDController                 m_frontLeftDrivePID      = m_frontLeftDriveMotor.GetPIDController();
+  rev::SparkMaxPIDController                 m_frontRightDrivePID     = m_frontRightDriveMotor.GetPIDController();
+  rev::SparkMaxPIDController                 m_rearLeftDrivePID       = m_rearLeftDriveMotor.GetPIDController();
+  rev::SparkMaxPIDController                 m_rearRightDrivePID      = m_rearRightDriveMotor.GetPIDController();
 
   rev::SparkMaxPIDController                 m_rightShooterpid        = m_rightShooterMotor.GetPIDController();
   rev::SparkMaxPIDController                 m_leftShooterpid         = m_leftShooterMotor.GetPIDController();

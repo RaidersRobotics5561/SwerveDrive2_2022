@@ -12,6 +12,18 @@
 extern double V_WheelAngleCmnd[E_RobotCornerSz];
 extern double V_WheelSpeedCmnd[E_RobotCornerSz];
 extern bool   V_SwerveTargetLocking;
+extern bool   V_b_DriveStraight;
+extern double V_RotateErrorCalc;
+
+void SwerveDriveMotorConfigsInit(rev::SparkMaxPIDController m_frontLeftDrivePID,
+                                 rev::SparkMaxPIDController m_frontRightDrivePID,
+                                 rev::SparkMaxPIDController m_rearLeftDrivePID,
+                                 rev::SparkMaxPIDController m_rearRightDrivePID);
+
+void SwerveDriveMotorConfigsCal(rev::SparkMaxPIDController m_frontLeftDrivePID,
+                                rev::SparkMaxPIDController m_frontRightDrivePID,
+                                rev::SparkMaxPIDController m_rearLeftDrivePID,
+                                rev::SparkMaxPIDController m_rearRightDrivePID);
 
 void DriveControlInit(void);
 

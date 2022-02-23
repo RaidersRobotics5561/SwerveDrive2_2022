@@ -7,7 +7,6 @@
   Function that maps the driver inputs to the robot controls. 
  */
 #include "Enums.hpp"
-#include "Robot.h"
 
   bool                V_Driver_lift_control = false;
   bool                V_Driver_zero_gyro = false;

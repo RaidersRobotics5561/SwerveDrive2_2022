@@ -25,10 +25,13 @@ void LiftMotorConfigsInit(rev::SparkMaxPIDController m_liftpidYD,
 
 void LiftControlInit();
 
-void Lift_Control_ManualOverride(double *L_lift_command_YD,
-                                 double *L_lift_command_XD,
-                                 double  L_liftMotorYD_CurrentOut,
-                                 double  L_liftMotorXD_CurrentOut);
+void Lift_Control_ManualOverride(double              *L_lift_command_YD,
+                                 double              *L_lift_command_XD,
+                                 double               L_liftMotorYD_CurrentOut,
+                                 double               L_liftMotorXD_CurrentOut,
+                                 T_LiftCmndDirection  L_DriverLiftCmndDirection,
+                                 bool                 L_YD_LimitDetected,
+                                 bool                 L_XD_LimitDetected);
 
 T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
                                    T_LiftCmndDirection L_DriverLiftCmndDirection,

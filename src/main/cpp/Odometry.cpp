@@ -8,13 +8,9 @@
  *
  * */
 
-#include "vision.hpp"
-#include "Gyro.hpp"
-#include "Robot.h"
-#include "Lookup.hpp"
-#include <iostream>
+#include <math.h>
 
-using namespace frc;
+#include "Enums.hpp"
 
 double V_M_RobotDisplacementX = 0;
 double V_M_RobotDisplacementY = 0;
