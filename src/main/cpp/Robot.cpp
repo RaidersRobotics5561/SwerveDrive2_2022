@@ -7,16 +7,11 @@
  *
  * */
 
-// #define PHOTON
-#define SPIKE
-
 #include "Robot.h"
-#include <iostream>
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/DriverStation.h>
 #include <frc/livewindow/LiveWindow.h>
 
-// #include "Const.hpp"
 #include "Encoders.hpp"
 #include "Gyro.hpp"
 #include "IO_Sensors.hpp"
@@ -27,35 +22,14 @@
 #include "Lift.hpp"
 #include "BallHandler.hpp"
 #include "LightControl.hpp"
-// #include "control_pid.hpp"
-// #include "Lookup.hpp"
 #include "Auton.hpp"
 #include "AutoTarget.hpp"
 
 nt::NetworkTableInstance inst;
-nt::NetworkTableEntry driverMode0;
-nt::NetworkTableEntry pipeline0;
-nt::NetworkTableEntry targetYaw0;
-nt::NetworkTableEntry targetPitch0;
-nt::NetworkTableEntry targetPose0;
-nt::NetworkTableEntry latency0;
-nt::NetworkTableEntry driverMode1;
-nt::NetworkTableEntry targetYaw1;
-nt::NetworkTableEntry targetPitch1;
-nt::NetworkTableEntry targetPose1;
-nt::NetworkTableEntry latency1;
-nt::NetworkTableEntry lidarDistance;
-nt::NetworkTableEntry ledControl;
 
-T_RobotState                 V_RobotState;
-frc::DriverStation::Alliance V_AllianceColor; 
+T_RobotState                 V_RobotState        = E_Init;
+frc::DriverStation::Alliance V_AllianceColor     = frc::DriverStation::Alliance::kInvalid;
 double                       V_MatchTimeRemaining = 0;
-
-bool V_autonTargetCmd = false;
-bool V_autonTargetFin = false;
-
-bool   LightOff; //the polarities are funny, true = off
-
 
 /******************************************************************************
  * Function:     RobotInit
@@ -64,8 +38,9 @@ bool   LightOff; //the polarities are funny, true = off
  ******************************************************************************/
 void Robot::RobotInit()
   {
-  V_RobotState = E_Init;
-  V_AllianceColor = frc::DriverStation::GetInstance().GetAlliance();
+  V_RobotState         = E_Init;
+  V_AllianceColor      = frc::DriverStation::GetInstance().GetAlliance();
+  V_MatchTimeRemaining = frc::Timer::GetMatchTime().value();
 
   EncodersInit(m_encoderFrontRightSteer,
                m_encoderFrontLeftSteer,
@@ -125,10 +100,6 @@ void Robot::RobotInit()
 // m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
 // frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
 // frc::SmartDashboard::PutNumber("cooler int", 1);
-
-  #ifdef SPIKE
-  LightOff = true; // light should be off on robot init
-  #endif
   }
 
 
@@ -244,8 +215,7 @@ void Robot::RobotPeriodic()
 void Robot::AutonomousInit()
   { 
     V_RobotState = E_Auton;
-    V_autonTargetCmd = false;
-    V_autonTargetFin = false;
+    V_AllianceColor = frc::DriverStation::GetInstance().GetAlliance();
     
     DriveControlInit();
     BallHandlerInit();
@@ -303,10 +273,18 @@ void Robot::AutonomousPeriodic()
                       V_RobotState);
 
   // Motor output commands:
+    #ifdef DriveMotorTest
+    m_frontLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kSmartVelocity);
+    m_frontRightDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kSmartVelocity);
+    m_rearLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_RearLeft],     rev::ControlType::kSmartVelocity);
+    m_rearRightDrivePID.SetReference(V_WheelSpeedCmnd[E_RearRight],   rev::ControlType::kSmartVelocity);
+    #endif
+    #ifndef DriveMotorTest
     m_frontLeftDriveMotor.Set(V_WheelSpeedCmnd[E_FrontLeft]);
     m_frontRightDriveMotor.Set(V_WheelSpeedCmnd[E_FrontRight]);
     m_rearLeftDriveMotor.Set(V_WheelSpeedCmnd[E_RearLeft]);
     m_rearRightDriveMotor.Set(V_WheelSpeedCmnd[E_RearRight]);
+    #endif
 
     m_frontLeftSteerMotor.Set(V_WheelAngleCmnd[E_FrontLeft]);
     m_frontRightSteerMotor.Set(V_WheelAngleCmnd[E_FrontRight]);
@@ -418,12 +396,11 @@ void Robot::TeleopPeriodic()
                          &V_ShooterRPM_Cmnd);
 
   // Motor output commands:
-    
     #ifdef DriveMotorTest
-    m_frontLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontLeft], rev::ControlType::kSmartVelocity);
+    m_frontLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kSmartVelocity);
     m_frontRightDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kSmartVelocity);
-    m_rearLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_RearLeft], rev::ControlType::kSmartVelocity);
-    m_rearRightDrivePID.SetReference(V_WheelSpeedCmnd[E_RearRight], rev::ControlType::kSmartVelocity);
+    m_rearLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_RearLeft],     rev::ControlType::kSmartVelocity);
+    m_rearRightDrivePID.SetReference(V_WheelSpeedCmnd[E_RearRight],   rev::ControlType::kSmartVelocity);
     #endif
     #ifndef DriveMotorTest
     m_frontLeftDriveMotor.Set(V_WheelSpeedCmnd[E_FrontLeft]);
