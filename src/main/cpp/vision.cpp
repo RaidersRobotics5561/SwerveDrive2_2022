@@ -1,3 +1,4 @@
+#if 0
 #include "Robot.h"
 #include <iostream>
 #include <frc/smartdashboard/SmartDashboard.h>
@@ -118,3 +119,4 @@ void VisionRun(){
     frc::SmartDashboard::PutNumber("Bottom Index", BottomIndex); 
     
 }
+#endif

@@ -15,17 +15,18 @@
 #include "Encoders.hpp"
 #include "Gyro.hpp"
 #include "IO_Sensors.hpp"
-#include "vision.hpp"
+// #include "vision.hpp"
 #include "Driver_inputs.hpp"
 #include "Odometry.hpp"
 #include "DriveControl.hpp"
 #include "Lift.hpp"
 #include "BallHandler.hpp"
 #include "LightControl.hpp"
+#include "VisionV2.hpp"
 #include "Auton.hpp"
 #include "AutoTarget.hpp"
 
-nt::NetworkTableInstance inst;
+// nt::NetworkTableInstance inst;
 
 T_RobotState                 V_RobotState        = E_Init;
 frc::DriverStation::Alliance V_AllianceColor     = frc::DriverStation::Alliance::kInvalid;
@@ -92,9 +93,9 @@ void Robot::RobotInit()
 
   VisionDashboard();
 
-  inst = nt::NetworkTableInstance::Create();
-  inst.StartClient("10.55.61.24");
-  inst.StartDSClient();
+  // inst = nt::NetworkTableInstance::Create();
+  // inst.StartClient("10.55.61.24");
+  // inst.StartDSClient();
   
 // m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
 // m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
@@ -152,7 +153,10 @@ void Robot::RobotPeriodic()
                   di_XD_LimitSwitch.Get(),
                   di_XY_LimitSwitch.Get());
 
-  VisionRun();
+  VisionRun( V_AllianceColor,
+             pc_Camera1.GetLatestResult(),
+             pc_Camera2.GetLatestResult(),
+            &V_VisionBottomIndex);
 
   SwerveDriveMotorConfigsCal(m_frontLeftDrivePID,
                              m_frontRightDrivePID,
@@ -164,6 +168,8 @@ void Robot::RobotPeriodic()
 
   LiftMotorConfigsCal(m_liftpidYD,
                       m_liftpidXD);
+
+  pc_Camera2.SetPipelineIndex(V_VisionBottomIndex);
 
   frc::SmartDashboard::PutBoolean("XD Limit Detected", V_XD_LimitDetected);
   frc::SmartDashboard::PutBoolean("YD Limit Detected", V_YD_LimitDetected);

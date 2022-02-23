@@ -16,9 +16,9 @@
 #include "rev/CANSparkMax.h"
 #include <frc/motorcontrol/Spark.h>
 #include <frc/DutyCycleEncoder.h>
-#include <networktables/NetworkTable.h>
+// #include <networktables/NetworkTable.h>
 #include <photonlib/PhotonCamera.h>
-#include <photonlib/PhotonUtils.h>
+// #include <photonlib/PhotonUtils.h>
 
 #include "Const.hpp"
 
@@ -104,7 +104,11 @@ class Robot : public frc::TimedRobot {
   frc::Joystick c_joyStick2{1};
 
   // Network tables
-  photonlib::PhotonCamera camera{"photonvision"};
+  // // photonlib::PhotonCamera camera{"photonvision"};
+  // nt::NetworkTableInstance Cam1;
+  // nt::NetworkTableInstance Cam2;
+  photonlib::PhotonCamera pc_Camera1{"Top"};
+  photonlib::PhotonCamera pc_Camera2{"Bottom"};
   
  private:
   frc::SendableChooser<std::string> m_chooser;
