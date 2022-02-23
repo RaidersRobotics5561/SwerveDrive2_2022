@@ -26,6 +26,8 @@ double distanceTarget;
 int    theCoolerInteger;
 double V_autonTimer = 0;
 int    V_autonState = 0;
+bool V_autonTargetCmd = false;
+bool V_autonTargetFin = false;
 
 /******************************************************************************
  * Function:     AutonDriveReset
@@ -44,6 +46,8 @@ void AutonDriveReset(void)
       V_L_Y_StartPosition = 0.0;
       V_autonTimer = 0;
       V_autonState = 0;
+      V_autonTargetCmd = false;
+      V_autonTargetFin = false;
   }
 
 /******************************************************************************
