@@ -36,7 +36,14 @@ void IO_SensorsInit()
  ******************************************************************************/
 void BallDetectionSensor(bool L_IR_SensorDetect)
   {
-    V_BallDetectedRaw = L_IR_SensorDetect;
+    bool L_BallDetected = false;
+
+    if (L_IR_SensorDetect == false)
+      {
+      L_BallDetected = true;
+      }
+    
+    V_BallDetectedRaw = L_BallDetected;
   }
 
 

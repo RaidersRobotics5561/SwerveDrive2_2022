@@ -193,7 +193,7 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutNumber("Lift postition XD", V_LiftPostitionXD);
 
   frc::SmartDashboard::PutNumber("GYRO", V_GyroYawAngleDegrees);
-  frc::SmartDashboard::PutNumber("voltage thingy", di_Voltage_Man.Get());
+  frc::SmartDashboard::PutBoolean("voltage thingy", di_Voltage_Man.Get());
 
   frc::SmartDashboard::PutNumber("Lift YD S0", V_LiftMotorYD_MaxCurrent[E_S0_BEGONE]);
   frc::SmartDashboard::PutNumber("Lift YD S1", V_LiftMotorYD_MaxCurrent[E_S1_initialize_Up_YD]);
