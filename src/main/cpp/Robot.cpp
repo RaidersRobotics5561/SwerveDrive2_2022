@@ -124,6 +124,7 @@ void Robot::RobotPeriodic()
                          c_joyStick2.GetRawButton(7),
                          c_joyStick2.GetRawButton(8),
                          c_joyStick.GetRawButton(7),
+                         c_joyStick.GetRawButton(8),
                          c_joyStick2.GetRawButton(3),
                          c_joyStick2.GetRawButton(4),
                          c_joyStick2.GetRawAxis(1),
@@ -136,7 +137,8 @@ void Robot::RobotPeriodic()
                          c_joyStick.GetRawButton(3),
                          c_joyStick.GetRawButton(4),
                          c_joyStick2.GetPOV(),
-                         c_joyStick.GetRawButton(6));
+                         c_joyStick.GetRawButton(6),
+                         c_joyStick.GetRawButton(2));
 
   Read_Encoders(a_encoderWheelAngleFrontLeft.Get().value(),
                 a_encoderWheelAngleFrontRight.Get().value(),
@@ -258,7 +260,7 @@ void Robot::AutonomousPeriodic()
                     V_MatchTimeRemaining,
                     V_AllianceColor,
                     V_LauncherState,
-                    V_SwerveTargetLocking,
+                    V_SwerveTargetLockingUpper,
                     V_Driver_CameraLight,
                     V_ShooterTargetSpeedReached,
                    &V_CameraLightCmndOn,
@@ -286,7 +288,11 @@ void Robot::AutonomousPeriodic()
                      &V_WheelSpeedCmnd[0],
                      &V_WheelAngleCmnd[0],
                      &V_autonTargetFin,
-                      V_RobotState);
+                      V_RobotState,
+                      V_Driver_AutoIntake,
+                      V_VisionBottomTargetDistanceMeters,
+                      V_VisionBottomTargetAquired,
+                      V_VisionBottomYaw);
 
   // Motor output commands:
     #ifdef DriveMotorTest
@@ -352,7 +358,7 @@ void Robot::TeleopPeriodic()
                     V_MatchTimeRemaining,
                     V_AllianceColor,
                     V_LauncherState,
-                    V_SwerveTargetLocking,
+                    V_SwerveTargetLockingUpper,
                     V_Driver_CameraLight,
                     V_ShooterTargetSpeedReached,
                    &V_CameraLightCmndOn,
@@ -378,7 +384,11 @@ void Robot::TeleopPeriodic()
                    &V_WheelSpeedCmnd[0],
                    &V_WheelAngleCmnd[0],
                    &V_autonTargetFin,
-                    V_RobotState);
+                    V_RobotState,
+                    V_Driver_AutoIntake,
+                    V_VisionBottomTargetDistanceMeters,
+                    V_VisionBottomTargetAquired,
+                    V_VisionBottomYaw);
 
   V_Lift_state = Lift_Control_Dictator(V_Driver_lift_control,
                                        V_Driver_Lift_Cmnd_Direction,

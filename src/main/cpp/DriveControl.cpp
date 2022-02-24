@@ -20,7 +20,7 @@ double desiredAngle;
 double rotateDeBounce;
 double rotateErrorCalc;
 bool   rotateMode;
-bool   V_SwerveTargetLocking;
+bool   V_SwerveTargetLockingUpper;
 bool   V_b_DriveStraight;
 double V_RotateErrorCalc;
 bool   V_AutoRotateComplete;
@@ -37,6 +37,8 @@ double V_WheelSpeedIntergral[E_RobotCornerSz];
 double V_WheelAngleArb[E_RobotCornerSz]; // This is the arbitrated wheel angle that is used in the PID controller
 
 double V_WheelSpeedPID_V2_Gx[E_PID_SparkMaxCalSz];
+
+T_GetDaBalls V_AutoIntake;
 
 /******************************************************************************
  * Function:     SwerveDriveMotorConfigsInit
@@ -202,11 +204,12 @@ void DriveControlInit()
         V_WheelAngleArb[L_Index] = 0;
       }
   
-  V_SwerveTargetLocking = false;
+  V_SwerveTargetLockingUpper = false;
 
   V_b_DriveStraight = false;
-
   V_RotateErrorCalc = 0;
+  
+  V_AutoIntake = E_GetDaOff;
   }
 
 
@@ -253,7 +256,7 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
                       double              L_JoyStick1Axis1X,  // swerve control strafe
                       double              L_JoyStick1Axis2X,  // rotate the robot joystick
                       double              L_JoyStick1Axis3,   // extra speed trigger
-                      bool                L_JoyStick1Button1, // goal auto center
+                      bool                L_UpperTargetButtonCentering, // goal auto center
                       bool                L_JoyStick1Button3, // auto rotate to 0 degrees
                       bool                L_JoyStick1Button4, // auto rotate to 90 degrees
                       double              L_GyroAngleDegrees,
@@ -265,7 +268,11 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
                       double             *L_WheelSpeedCmnd,
                       double             *L_WheelAngleCmnd,
                       bool               *L_TargetFin,
-                      T_RobotState        L_RobotState)
+                      T_RobotState        L_RobotState,
+                      bool                L_Driver_AutoIntake,
+                      double              L_VisionBottomTargetDistanceMeters,
+                      bool                L_VisionBottomTargetAquired,
+                      double              L_VisionBottomYaw)
   {
   int    L_Index;
   double L_temp;
@@ -311,7 +318,8 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
         (fabs(L_JoyStick1Axis2X_Scaled) > 0))
       {
       // Abort out of auto rotate and/or auto target if the driver moves the joysticks
-      V_SwerveTargetLocking = false;
+      V_SwerveTargetLockingUpper = false;
+      V_AutoIntake = E_GetDaOff;
       V_AutoRotateComplete = false;
       rotateMode = false;
 
@@ -329,12 +337,19 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
         V_b_DriveStraight   = true;
         }  
       }
-    else if(L_JoyStick1Button1 || V_SwerveTargetLocking == true)
+    else if(L_UpperTargetButtonCentering || V_SwerveTargetLockingUpper == true)
       {
-      /* Auto targeting */
+      /* Auto targeting Shooter */
       V_b_DriveStraight = false;
-      V_SwerveTargetLocking = true;
-      desiredAngle = K_TargetVisionAngle; // This is due to the offset of the camera
+      V_SwerveTargetLockingUpper = true;
+      desiredAngle = K_TargetVisionAngleUpper; // This is due to the offset of the camera
+      }
+    else if(L_Driver_AutoIntake || V_AutoIntake == E_GetDaRotation)
+      {
+      /* Auto targeting Balls */
+      V_b_DriveStraight = false;
+      V_AutoIntake = E_GetDaRotation;
+      desiredAngle = K_TargetVisionAngleLower; // This is due to the offset of the camera
       }
     else if (L_JoyStick1Button4)
       {
@@ -363,11 +378,18 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       // Use gyro as target when in auto rotate or drive straight mode
       L_RotateErrorCalc = desiredAngle - L_GyroAngleDegrees;
       }
-    else if((V_SwerveTargetLocking == true) &&
+    else if((V_SwerveTargetLockingUpper == true) &&
             (L_VisionTopTargetAquired == true))
       {
       // Use photon vison as target when in auto beam lock
       L_RotateErrorCalc = desiredAngle - L_TopTargetYawDegrees;
+      V_AutoRotateComplete = false;
+      }
+    else if((V_AutoIntake == E_GetDaRotation) &&
+            (L_VisionBottomTargetAquired == true))
+      {
+      // Use photon vison as target when in auto beam lock
+      L_RotateErrorCalc = desiredAngle - L_VisionBottomYaw;
       V_AutoRotateComplete = false;
       }
     else
@@ -377,18 +399,21 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
     
     if ((V_b_DriveStraight     == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime) ||
         (rotateMode            == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime) || 
-        (V_SwerveTargetLocking == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime))
+        (V_SwerveTargetLockingUpper == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime) ||
+        (V_AutoIntake == E_GetDaRotation && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime))
       {
-      V_AutoRotateComplete = false;      // rotateMode = true;
-      // V_SwerveTargetLocking = true;
+      V_AutoRotateComplete = false;      // rotateMode = true;+
+      // V_SwerveTargetLockingUpper = true;
       rotateDeBounce += C_ExeTime;
       }
     else if ((V_b_DriveStraight     == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime) ||
              (rotateMode            == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime) ||
-             (V_SwerveTargetLocking == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime))
+             (V_SwerveTargetLockingUpper == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime) ||
+             (V_AutoIntake == E_GetDaRotation && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime))
       {
       rotateMode = false;
-      V_SwerveTargetLocking = false;
+      V_SwerveTargetLockingUpper = false;
+      V_AutoIntake = E_GetDaOff;
       rotateDeBounce = 0;
       V_AutoRotateComplete = true;
       *L_TargetFin = true;
@@ -402,7 +427,11 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       {
       V_RCW = DesiredAutoRotateSpeed(L_RotateErrorCalc);
       }
-    else if (V_SwerveTargetLocking == true)
+    else if (V_SwerveTargetLockingUpper == true)
+      {
+      V_RCW = -DesiredRotateSpeed(L_RotateErrorCalc);
+      }
+    else if (V_AutoIntake == E_GetDaRotation)
       {
       V_RCW = -DesiredRotateSpeed(L_RotateErrorCalc);
       }
@@ -462,7 +491,8 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       L_Gain = L_JoyStick1Axis3;
       }
     else if ((rotateMode   == true) ||
-             (V_SwerveTargetLocking == true))
+             (V_SwerveTargetLockingUpper == true) ||
+             (V_AutoIntake == E_GetDaRotation))
       {
       L_Gain = K_AutoRotateGx;
       }

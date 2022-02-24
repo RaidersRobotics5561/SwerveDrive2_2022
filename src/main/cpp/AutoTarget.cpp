@@ -75,7 +75,7 @@ T_AutoTargetStates AutoTargeting(T_AutoTargetStates  L_CurrentState,
                        L_UpperRollerSpeedReq,
                        L_LowerRollerSpeedReq);
 
-    *L_RobotTargetAngle  = K_TargetVisionAngle;
+    *L_RobotTargetAngle  = K_TargetVisionAngleUpper;
     *L_BeltPowerReq = 0.0;
 
     /* Ok, let's go to the next step: */

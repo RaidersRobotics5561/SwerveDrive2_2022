@@ -28,6 +28,7 @@
   bool                V_Driver_LiftYD_Down = false;
   T_LiftCmndDirection V_Driver_Lift_Cmnd_Direction = E_LiftCmndNone;
   bool                V_Driver_CameraLight = false;
+  bool                V_Driver_AutoIntake = false;
 
 /******************************************************************************
  * Function:     Joystick_robot_mapping
@@ -40,6 +41,7 @@ void Joystick_robot_mapping(bool    L_Driver2_buttonA,
                             bool    L_Driver2_buttonback,
                             bool    L_Driver2_buttonstart,
                             bool    L_Driver1_buttonback,
+                            bool    L_Driver1_buttonstart,
                             bool    L_Driver2_ButtonX,
                             bool    L_Driver2_ButtonY,
                             double  L_Driver2_left_Axis_y,
@@ -52,11 +54,12 @@ void Joystick_robot_mapping(bool    L_Driver2_buttonA,
                             bool    L_Driver1_ButtonX,
                             bool    L_Driver1_ButtonY,
                             int     L_Driver2_POV,
-                            bool    L_Driver1_buttonRB)
+                            bool    L_Driver1_buttonRB,
+                            bool    L_Driver1_buttonB)
   {
   V_Driver_elevator_up = L_Driver2_buttonA;                       //Controller 2, A button (1), (robot.cpp) Elevator goes up
   V_Driver_elevator_down = L_Driver2_buttonB;                     //Controller 2, B button (2), (robot.cpp) Elevator goes down
-  V_Driver_zero_gyro = L_Driver1_buttonback;                      //Controller 1, Back button (7), (robot.cpp, gyro.cpp) zeroes out the gyro  
+  V_Driver_zero_gyro = (L_Driver1_buttonback || L_Driver1_buttonstart);     //Controller 1, Back button (7), (robot.cpp, gyro.cpp) zeroes out the gyro  
   V_Driver_stops_shooter = L_Driver2_buttonback;                  //Controller 2 back button (7), (robot.cpp) Stops the shooter- pretty self-explain
   V_Driver_auto_setspeed_shooter = L_Driver2_buttonstart;         //controller 2 start button (8), (robot.cpp) Starts robot shooter speed based on distance
   V_Driver_manual_shooter_desired_speed = L_Driver2_left_Axis_y;  //Controller 2, left axis, uses y axis (1), (robot.cpp) sets desired speed for the shooter moter
@@ -71,6 +74,7 @@ void Joystick_robot_mapping(bool    L_Driver2_buttonA,
   V_Driver_SwerveRotateTo0 = L_Driver1_ButtonX;
   V_Driver_SwerveRotateTo90 = L_Driver1_ButtonY;
   V_Driver_CameraLight = L_Driver1_buttonRB;                      //Controller 1, X button (3), when held, turns on the camera light
+  V_Driver_AutoIntake = L_Driver1_buttonB;
 
   if (L_Driver2_POV == 0)
     {

@@ -119,4 +119,11 @@ typedef enum T_RobotState
   E_Teleop
 } T_RobotState;
 
+typedef enum T_GetDaBalls
+{
+  E_GetDaOff,
+  E_GetDaRotation,
+  E_GetDaIntakeAndRun
+} T_GetDaBalls;
+
 #endif

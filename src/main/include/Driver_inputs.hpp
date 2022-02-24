@@ -27,6 +27,7 @@
  extern bool                V_Driver_LiftYD_Down;
  extern T_LiftCmndDirection V_Driver_Lift_Cmnd_Direction;
  extern bool                V_Driver_CameraLight;
+ extern bool                V_Driver_AutoIntake;
 
 void Joystick_robot_mapping(bool  L_Driver2_buttonA, //Controller 2, A button (1), (robot.cpp) Elevator goes up
                             bool  L_Driver2_buttonB, //Controller 2, B button (2), (robot.cpp) Elevator goes down
@@ -34,6 +35,7 @@ void Joystick_robot_mapping(bool  L_Driver2_buttonA, //Controller 2, A button (1
                             bool L_Driver2_buttonback, //Controller 2 back button (7)
                             bool  L_Driver2_buttonstart, //controller 2 start button (8)
                             bool  L_Driver1_buttonback, //Controller 1, Back button (7)
+                            bool    L_Driver1_buttonstart, //Controller 1, start button (8)
                             bool  L_Driver2_ButtonX,  //Controller 2 (3), controls the intake in on button pressed 
                             bool    L_Driver2_ButtonY, // Controller 2 (4), controls the intake out on button pressed (inverse intake)
                             double  L_Driver2_left_Axis_y, //Controller 2, left axis, uses y (1) 
@@ -46,5 +48,6 @@ void Joystick_robot_mapping(bool  L_Driver2_buttonA, //Controller 2, A button (1
                             bool    L_Driver1_ButtonX,
                             bool    L_Driver1_ButtonY,
                             int     L_Driver2_POV,
-                            bool    L_Driver1_buttonRB);
+                            bool    L_Driver1_buttonRB,
+                            bool    L_Driver1_buttonB);
  
