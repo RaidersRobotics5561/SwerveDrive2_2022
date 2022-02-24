@@ -1,3 +1,11 @@
+/*
+  control_pid.hpp
+
+  Created on: Feb 25, 2019
+
+  Author: Biggs
+*/
+
 double Control_PID(double  L_DesiredSpeed,
                    double  L_CurrentSpeed,
                    double *L_ErrorPrev,

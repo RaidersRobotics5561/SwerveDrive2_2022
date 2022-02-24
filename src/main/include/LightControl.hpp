@@ -10,4 +10,17 @@
    - Camera lights
  */
 
-void LED_VanityLights();
+extern T_CameraLightStatus V_CameraLightStatus;
+extern bool V_CameraLightCmndOn;
+extern double  V_VanityLightCmnd;
+
+void LightControlMain(bool                         L_AutoAlignRequest,
+                      bool                         L_AutoLauncherRequest,
+                      double                       L_MatchTimeRemaining,
+                      frc::DriverStation::Alliance L_AllianceColor,
+                      T_LauncherStates             L_LauncherState,
+                      bool                         L_SwerveTargetLocking,
+                      bool                         L_Driver_CameraLight,
+                      bool                         L_ShooterTargetSpeedReached,
+                      bool                        *L_CameraLightCmndOn,
+                      double                      *L_VanityLightCmnd);

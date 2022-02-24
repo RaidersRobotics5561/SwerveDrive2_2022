@@ -1,6 +1,14 @@
+/*
+  Odometry.hpp
+
+  Created on: Feb 17, 2021
+  Author: Biggs
+
+  Contains the code related to the odemetry tracking of the robot.
+ */
+
+void OdometryInit(void);
 
 void DtrmnSwerveBotLocation(double  L_Rad_Gyro,
                             double *L_Rad_WheelAngleFwd,
-                            double *L_M_DeltaWheelDistance,
-                            double *L_M_RobotDisplacementX,
-                            double *L_M_RobotDisplacementY);
+                            double *L_M_DeltaWheelDistance);

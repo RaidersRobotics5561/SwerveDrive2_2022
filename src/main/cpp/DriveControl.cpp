@@ -7,24 +7,22 @@
   Changes:
   2021-02-25 -> Updates to help the robot drive straight
  */
-#include "Robot.h"
 
-#include "control_pid.hpp"
-#include "Encoders.hpp"
-#include "DriveControl.hpp"
-#include "Lookup.hpp"
-#include "Enums.hpp"
+#include "rev/CANSparkMax.h"
 #include <math.h>
-#include "Gyro.hpp"
 #include <frc/smartdashboard/SmartDashboard.h>
 
+#include "Const.hpp"
+#include "control_pid.hpp"
+#include "Lookup.hpp"
 
 double desiredAngle;
 double rotateDeBounce;
 double rotateErrorCalc;
 bool   rotateMode;
-bool   autoBeamLock;
+bool   V_SwerveTargetLockingUpper;
 bool   V_b_DriveStraight;
+double V_RotateErrorCalc;
 bool   V_AutoRotateComplete;
 double V_FWD;
 double V_STR;
@@ -38,21 +36,150 @@ double V_WheelSpeedError[E_RobotCornerSz];
 double V_WheelSpeedIntergral[E_RobotCornerSz];
 double V_WheelAngleArb[E_RobotCornerSz]; // This is the arbitrated wheel angle that is used in the PID controller
 
-double V_Steer_P_Gx = 0.90000;
-double V_Steer_I_Gx = 0.000000;
-double V_Steer_D_Gx = 0.000002;
-double V_Steer_I_Zone = 0;
-double V_Steer_FF = 0;
-double V_Steer_Max = 1;
-double V_Steer_Min = -1;
+double V_WheelSpeedPID_V2_Gx[E_PID_SparkMaxCalSz];
 
-double V_Drive_P_Gx = 0.00005;
-double V_Drive_I_Gx = 0.000001;
-double V_Drive_D_Gx = 0.000002;
-double V_Drive_I_Zone = 0;
-double V_Drive_FF = 0;
-double V_Drive_Max = 1;
-double V_Drive_Min = -1;
+T_GetDaBalls V_AutoIntake;
+
+/******************************************************************************
+ * Function:     SwerveDriveMotorConfigsInit
+ *
+ * Description:  Contains the motor configurations for the swerve drive motors.
+ *               - Steer (power cmnd only)
+ *               - Drive (PID Control in motor controller)
+ ******************************************************************************/
+void SwerveDriveMotorConfigsInit(rev::SparkMaxPIDController m_frontLeftDrivePID,
+                                 rev::SparkMaxPIDController m_frontRightDrivePID,
+                                 rev::SparkMaxPIDController m_rearLeftDrivePID,
+                                 rev::SparkMaxPIDController m_rearRightDrivePID)
+  {
+  // set PID coefficients
+  m_frontLeftDrivePID.SetP(K_WheelSpeedPID_V2_Gx[E_kP]);
+  m_frontLeftDrivePID.SetI(K_WheelSpeedPID_V2_Gx[E_kI]);
+  m_frontLeftDrivePID.SetD(K_WheelSpeedPID_V2_Gx[E_kD]);
+  m_frontLeftDrivePID.SetIZone(K_WheelSpeedPID_V2_Gx[E_kIz]);
+  m_frontLeftDrivePID.SetFF(K_WheelSpeedPID_V2_Gx[E_kFF]);
+  m_frontLeftDrivePID.SetOutputRange(K_WheelSpeedPID_V2_Gx[E_kMinOutput], K_WheelSpeedPID_V2_Gx[E_kMaxOutput]);
+
+  m_frontRightDrivePID.SetP(K_WheelSpeedPID_V2_Gx[E_kP]);
+  m_frontRightDrivePID.SetI(K_WheelSpeedPID_V2_Gx[E_kI]);
+  m_frontRightDrivePID.SetD(K_WheelSpeedPID_V2_Gx[E_kD]);
+  m_frontRightDrivePID.SetIZone(K_WheelSpeedPID_V2_Gx[E_kIz]);
+  m_frontRightDrivePID.SetFF(K_WheelSpeedPID_V2_Gx[E_kFF]);
+  m_frontRightDrivePID.SetOutputRange(K_WheelSpeedPID_V2_Gx[E_kMinOutput], K_WheelSpeedPID_V2_Gx[E_kMaxOutput]);
+
+  m_rearLeftDrivePID.SetP(K_WheelSpeedPID_V2_Gx[E_kP]);
+  m_rearLeftDrivePID.SetI(K_WheelSpeedPID_V2_Gx[E_kI]);
+  m_rearLeftDrivePID.SetD(K_WheelSpeedPID_V2_Gx[E_kD]);
+  m_rearLeftDrivePID.SetIZone(K_WheelSpeedPID_V2_Gx[E_kIz]);
+  m_rearLeftDrivePID.SetFF(K_WheelSpeedPID_V2_Gx[E_kFF]);
+  m_rearLeftDrivePID.SetOutputRange(K_WheelSpeedPID_V2_Gx[E_kMinOutput], K_WheelSpeedPID_V2_Gx[E_kMaxOutput]);
+
+  m_rearRightDrivePID.SetP(K_WheelSpeedPID_V2_Gx[E_kP]);
+  m_rearRightDrivePID.SetI(K_WheelSpeedPID_V2_Gx[E_kI]);
+  m_rearRightDrivePID.SetD(K_WheelSpeedPID_V2_Gx[E_kD]);
+  m_rearRightDrivePID.SetIZone(K_WheelSpeedPID_V2_Gx[E_kIz]);
+  m_rearRightDrivePID.SetFF(K_WheelSpeedPID_V2_Gx[E_kFF]);
+  m_rearRightDrivePID.SetOutputRange(K_WheelSpeedPID_V2_Gx[E_kMinOutput], K_WheelSpeedPID_V2_Gx[E_kMaxOutput]);
+
+  /**
+   * Smart Motion coefficients are set on a SparkMaxPIDController object
+   * 
+   * - SetSmartMotionMaxVelocity() will limit the velocity in RPM of
+   * the pid controller in Smart Motion mode
+   * - SetSmartMotionMinOutputVelocity() will put a lower bound in
+   * RPM of the pid controller in Smart Motion mode
+   * - SetSmartMotionMaxAccel() will limit the acceleration in RPM^2
+   * of the pid controller in Smart Motion mode
+   * - SetSmartMotionAllowedClosedLoopError() will set the max allowed
+   * error for the pid controller in Smart Motion mode
+   */
+  m_frontLeftDrivePID.SetSmartMotionMaxVelocity(K_WheelSpeedPID_V2_Gx[E_kMaxVel]);
+  m_frontLeftDrivePID.SetSmartMotionMinOutputVelocity(K_WheelSpeedPID_V2_Gx[E_kMinVel]);
+  m_frontLeftDrivePID.SetSmartMotionMaxAccel(K_WheelSpeedPID_V2_Gx[E_kMaxAcc]);
+  m_frontLeftDrivePID.SetSmartMotionAllowedClosedLoopError(K_WheelSpeedPID_V2_Gx[E_kAllErr]);
+
+  m_frontRightDrivePID.SetSmartMotionMaxVelocity(K_WheelSpeedPID_V2_Gx[E_kMaxVel]);
+  m_frontRightDrivePID.SetSmartMotionMinOutputVelocity(K_WheelSpeedPID_V2_Gx[E_kMinVel]);
+  m_frontRightDrivePID.SetSmartMotionMaxAccel(K_WheelSpeedPID_V2_Gx[E_kMaxAcc]);
+  m_frontRightDrivePID.SetSmartMotionAllowedClosedLoopError(K_WheelSpeedPID_V2_Gx[E_kAllErr]);
+  
+  m_rearLeftDrivePID.SetSmartMotionMaxVelocity(K_WheelSpeedPID_V2_Gx[E_kMaxVel]);
+  m_rearLeftDrivePID.SetSmartMotionMinOutputVelocity(K_WheelSpeedPID_V2_Gx[E_kMinVel]);
+  m_rearLeftDrivePID.SetSmartMotionMaxAccel(K_WheelSpeedPID_V2_Gx[E_kMaxAcc]);
+  m_rearLeftDrivePID.SetSmartMotionAllowedClosedLoopError(K_WheelSpeedPID_V2_Gx[E_kAllErr]);
+
+  m_rearRightDrivePID.SetSmartMotionMaxVelocity(K_WheelSpeedPID_V2_Gx[E_kMaxVel]);
+  m_rearRightDrivePID.SetSmartMotionMinOutputVelocity(K_WheelSpeedPID_V2_Gx[E_kMinVel]);
+  m_rearRightDrivePID.SetSmartMotionMaxAccel(K_WheelSpeedPID_V2_Gx[E_kMaxAcc]);
+  m_rearRightDrivePID.SetSmartMotionAllowedClosedLoopError(K_WheelSpeedPID_V2_Gx[E_kAllErr]);
+
+  #ifdef DriveMotorTest
+  T_PID_SparkMaxCal L_Index = E_kP;
+
+  for (L_Index = E_kP;
+       L_Index < E_PID_SparkMaxCalSz;
+       L_Index = T_PID_SparkMaxCal(int(L_Index) + 1))
+      {
+      V_WheelSpeedPID_V2_Gx[L_Index] = K_WheelSpeedPID_V2_Gx[L_Index];
+      }
+  
+  // display PID coefficients on SmartDashboard
+  frc::SmartDashboard::PutNumber("P Gain", K_WheelSpeedPID_V2_Gx[E_kP]);
+  frc::SmartDashboard::PutNumber("I Gain", K_WheelSpeedPID_V2_Gx[E_kI]);
+  frc::SmartDashboard::PutNumber("D Gain", K_WheelSpeedPID_V2_Gx[E_kD]);
+  frc::SmartDashboard::PutNumber("I Zone", K_WheelSpeedPID_V2_Gx[E_kIz]);
+  frc::SmartDashboard::PutNumber("Feed Forward", K_WheelSpeedPID_V2_Gx[E_kFF]);
+  frc::SmartDashboard::PutNumber("Max Output", K_WheelSpeedPID_V2_Gx[E_kMaxOutput]);
+  frc::SmartDashboard::PutNumber("Min Output", K_WheelSpeedPID_V2_Gx[E_kMinOutput]);
+
+  // display Smart Motion coefficients
+  frc::SmartDashboard::PutNumber("Max Velocity", K_WheelSpeedPID_V2_Gx[E_kMaxVel]);
+  frc::SmartDashboard::PutNumber("Min Velocity", K_WheelSpeedPID_V2_Gx[E_kMinVel]);
+  frc::SmartDashboard::PutNumber("Max Acceleration", K_WheelSpeedPID_V2_Gx[E_kMaxAcc]);
+  frc::SmartDashboard::PutNumber("Allowed Closed Loop Error", K_WheelSpeedPID_V2_Gx[E_kAllErr]);
+  #endif
+  }
+
+
+/******************************************************************************
+ * Function:     SwerveDriveMotorConfigsCal
+ *
+ * Description:  Contains the motor configurations for the swerve drive motors.
+ *               - Steer (power cmnd only)
+ *               - Drive (PID Control in motor controller)
+ ******************************************************************************/
+void SwerveDriveMotorConfigsCal(rev::SparkMaxPIDController m_frontLeftDrivePID,
+                                rev::SparkMaxPIDController m_frontRightDrivePID,
+                                rev::SparkMaxPIDController m_rearLeftDrivePID,
+                                rev::SparkMaxPIDController m_rearRightDrivePID)
+  {
+  // read PID coefficients from SmartDashboard
+  #ifdef DriveMotorTest
+  double L_p = frc::SmartDashboard::GetNumber("P Gain", 0);
+  double L_i = frc::SmartDashboard::GetNumber("I Gain", 0);
+  double L_d = frc::SmartDashboard::GetNumber("D Gain", 0);
+  double L_iz = frc::SmartDashboard::GetNumber("I Zone", 0);
+  double L_ff = frc::SmartDashboard::GetNumber("Feed Forward", 0);
+  double L_max = frc::SmartDashboard::GetNumber("Max Output", 0);
+  double L_min = frc::SmartDashboard::GetNumber("Min Output", 0);
+  double L_maxV = frc::SmartDashboard::GetNumber("Max Velocity", 0);
+  double L_minV = frc::SmartDashboard::GetNumber("Min Velocity", 0);
+  double L_maxA = frc::SmartDashboard::GetNumber("Max Acceleration", 0);
+  double L_allE = frc::SmartDashboard::GetNumber("Allowed Closed Loop Error", 0);
+
+  if((L_p != V_WheelSpeedPID_V2_Gx[E_kP]))   { m_frontLeftDrivePID.SetP(L_p); m_frontRightDrivePID.SetP(L_p); m_rearLeftDrivePID.SetP(L_p); m_rearRightDrivePID.SetP(L_p); V_WheelSpeedPID_V2_Gx[E_kP] = L_p; }
+  if((L_i != V_WheelSpeedPID_V2_Gx[E_kI]))   { m_frontLeftDrivePID.SetI(L_i); m_frontRightDrivePID.SetI(L_i); m_rearLeftDrivePID.SetI(L_i); m_rearRightDrivePID.SetI(L_i); V_WheelSpeedPID_V2_Gx[E_kI] = L_i; }
+  if((L_d != V_WheelSpeedPID_V2_Gx[E_kD]))   { m_frontLeftDrivePID.SetD(L_d); m_frontRightDrivePID.SetD(L_d); m_rearLeftDrivePID.SetD(L_d); m_rearRightDrivePID.SetD(L_d); V_WheelSpeedPID_V2_Gx[E_kD] = L_d; }
+  if((L_iz != V_WheelSpeedPID_V2_Gx[E_kIz])) { m_frontLeftDrivePID.SetIZone(L_iz); m_frontRightDrivePID.SetIZone(L_iz); m_rearLeftDrivePID.SetIZone(L_iz); m_rearRightDrivePID.SetIZone(L_iz); V_WheelSpeedPID_V2_Gx[E_kIz] = L_iz; }
+  if((L_ff != V_WheelSpeedPID_V2_Gx[E_kFF])) { m_frontLeftDrivePID.SetFF(L_ff); m_frontRightDrivePID.SetFF(L_ff); m_rearLeftDrivePID.SetFF(L_ff); m_rearRightDrivePID.SetFF(L_ff); V_WheelSpeedPID_V2_Gx[E_kFF] = L_ff; }
+  if((L_max != V_WheelSpeedPID_V2_Gx[E_kMaxOutput]) || (L_min != K_LauncherPID_Gx[E_kMinOutput])) { m_frontLeftDrivePID.SetOutputRange(L_min, L_max); m_frontRightDrivePID.SetOutputRange(L_min, L_max);  m_rearLeftDrivePID.SetOutputRange(L_min, L_max); m_rearRightDrivePID.SetOutputRange(L_min, L_max); V_WheelSpeedPID_V2_Gx[E_kMinOutput] = L_min; V_WheelSpeedPID_V2_Gx[E_kMaxOutput] = L_max; }
+  if((L_maxV != V_WheelSpeedPID_V2_Gx[E_kMaxVel])) { m_frontLeftDrivePID.SetSmartMotionMaxVelocity(L_maxV); m_frontRightDrivePID.SetSmartMotionMaxVelocity(L_maxV); m_rearLeftDrivePID.SetSmartMotionMaxVelocity(L_maxV); m_rearRightDrivePID.SetSmartMotionMaxVelocity(L_maxV); V_WheelSpeedPID_V2_Gx[E_kMaxVel] = L_maxV; }
+  if((L_minV != V_WheelSpeedPID_V2_Gx[E_kMinVel])) { m_frontLeftDrivePID.SetSmartMotionMinOutputVelocity(L_minV); m_frontRightDrivePID.SetSmartMotionMinOutputVelocity(L_minV); m_rearLeftDrivePID.SetSmartMotionMinOutputVelocity(L_minV); m_rearRightDrivePID.SetSmartMotionMinOutputVelocity(L_minV); V_WheelSpeedPID_V2_Gx[E_kMinVel] = L_minV; }
+  if((L_maxA != V_WheelSpeedPID_V2_Gx[E_kMaxAcc])) { m_frontLeftDrivePID.SetSmartMotionMaxAccel(L_maxA); m_frontRightDrivePID.SetSmartMotionMaxAccel(L_maxA); m_rearLeftDrivePID.SetSmartMotionMaxAccel(L_maxA); m_rearRightDrivePID.SetSmartMotionMaxAccel(L_maxA); V_WheelSpeedPID_V2_Gx[E_kMaxAcc] = L_maxA; }
+  if((L_allE != V_WheelSpeedPID_V2_Gx[E_kAllErr])) { m_frontLeftDrivePID.SetSmartMotionAllowedClosedLoopError(L_allE); m_frontRightDrivePID.SetSmartMotionAllowedClosedLoopError(L_allE); m_rearLeftDrivePID.SetSmartMotionAllowedClosedLoopError(L_allE); m_rearRightDrivePID.SetSmartMotionAllowedClosedLoopError(L_allE); V_WheelSpeedPID_V2_Gx[E_kAllErr] = L_allE; }
+  #endif
+  }
+
 
 /******************************************************************************
  * Function:     DriveControlInit
@@ -76,8 +203,48 @@ void DriveControlInit()
         V_WheelSpeedIntergral[L_Index] = 0;
         V_WheelAngleArb[L_Index] = 0;
       }
+  
+  V_SwerveTargetLockingUpper = false;
+
+  V_b_DriveStraight = false;
+  V_RotateErrorCalc = 0;
+  
+  V_AutoIntake = E_GetDaOff;
   }
 
+
+/******************************************************************************
+ * Function:     DtrmnEncoderRelativeToCmnd
+ *
+ * Description:  tbd
+ ******************************************************************************/
+double DtrmnEncoderRelativeToCmnd(double          L_JoystickCmnd,
+                                  double          L_EncoderReading)
+  {
+    double L_Opt1;
+    double L_Opt2;
+    double L_Opt3;
+    double L_Output;
+
+    L_Opt1 = fabs(L_JoystickCmnd - L_EncoderReading);
+    L_Opt2 = fabs(L_JoystickCmnd - (L_EncoderReading + 360));
+    L_Opt3 = fabs(L_JoystickCmnd - (L_EncoderReading - 360));
+
+    if ((L_Opt1 < L_Opt2) && (L_Opt1 < L_Opt3))
+      {
+        L_Output = L_EncoderReading;
+      }
+    else if ((L_Opt2 < L_Opt1) && (L_Opt2 < L_Opt3))
+      {
+        L_Output = L_EncoderReading + 360;
+      }
+    else
+      {
+        L_Output = L_EncoderReading - 360;
+      }
+
+    return (L_Output);
+  }
 
 
 /******************************************************************************
@@ -85,23 +252,27 @@ void DriveControlInit()
  *
  * Description:  Main calling function for the drive control.
  ******************************************************************************/
-void DriveControlMain(double              L_JoyStick1Axis1Y,
-                      double              L_JoyStick1Axis1X,
-                      double              L_JoyStick1Axis2X,//rotate the robot joystick
-                      double              L_JoyStick1Axis3, //extra speed trigger
-                      bool                L_JoyStick1Button1,
-                      double              L_JoyStick1Button3,
-                      double              L_JoyStick1Button4,
-                      double              L_JoyStick1Button5,
+void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control forward/back
+                      double              L_JoyStick1Axis1X,  // swerve control strafe
+                      double              L_JoyStick1Axis2X,  // rotate the robot joystick
+                      double              L_JoyStick1Axis3,   // extra speed trigger
+                      bool                L_UpperTargetButtonCentering, // goal auto center
+                      bool                L_JoyStick1Button3, // auto rotate to 0 degrees
+                      bool                L_JoyStick1Button4, // auto rotate to 90 degrees
                       double              L_GyroAngleDegrees,
                       double              L_GyroAngleRadians,
-                      double              L_VisionAngleDeg,
+                      bool                L_VisionTopTargetAquired,
+                      double              L_TopTargetYawDegrees,
                       double             *L_WheelAngleFwd,
                       double             *L_WheelAngleRev,
                       double             *L_WheelSpeedCmnd,
                       double             *L_WheelAngleCmnd,
                       bool               *L_TargetFin,
-                      T_RobotState        L_RobotState)
+                      T_RobotState        L_RobotState,
+                      bool                L_Driver_AutoIntake,
+                      double              L_VisionBottomTargetDistanceMeters,
+                      bool                L_VisionBottomTargetAquired,
+                      double              L_VisionBottomYaw)
   {
   int    L_Index;
   double L_temp;
@@ -147,7 +318,8 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,
         (fabs(L_JoyStick1Axis2X_Scaled) > 0))
       {
       // Abort out of auto rotate and/or auto target if the driver moves the joysticks
-      autoBeamLock = false;
+      V_SwerveTargetLockingUpper = false;
+      V_AutoIntake = E_GetDaOff;
       V_AutoRotateComplete = false;
       rotateMode = false;
 
@@ -165,12 +337,19 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,
         V_b_DriveStraight   = true;
         }  
       }
-    else if(L_JoyStick1Button1 || autoBeamLock == true)
+    else if(L_UpperTargetButtonCentering || V_SwerveTargetLockingUpper == true)
       {
-      /* Auto targeting */
+      /* Auto targeting Shooter */
       V_b_DriveStraight = false;
-      autoBeamLock = true;
-      desiredAngle = K_TargetVisionAngle; // This is due to the offset of the camera
+      V_SwerveTargetLockingUpper = true;
+      desiredAngle = K_TargetVisionAngleUpper; // This is due to the offset of the camera
+      }
+    else if(L_Driver_AutoIntake || V_AutoIntake == E_GetDaRotation)
+      {
+      /* Auto targeting Balls */
+      V_b_DriveStraight = false;
+      V_AutoIntake = E_GetDaRotation;
+      desiredAngle = K_TargetVisionAngleLower; // This is due to the offset of the camera
       }
     else if (L_JoyStick1Button4)
       {
@@ -183,12 +362,6 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,
       V_b_DriveStraight = false;
       rotateMode = true;
       desiredAngle = 0;
-      }
-    else if (L_JoyStick1Button5)
-      {
-      V_b_DriveStraight = false;
-      rotateMode = true;
-      desiredAngle = 67.5;
       }
     else if ((fabs(L_JoyStick1Axis1Y_Scaled) == 0) &&
              (fabs(L_JoyStick1Axis1X_Scaled) == 0) &&
@@ -205,10 +378,18 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,
       // Use gyro as target when in auto rotate or drive straight mode
       L_RotateErrorCalc = desiredAngle - L_GyroAngleDegrees;
       }
-    else if(autoBeamLock == true)
+    else if((V_SwerveTargetLockingUpper == true) &&
+            (L_VisionTopTargetAquired == true))
       {
-      // Use chameleon vison as target when in auto beam lock
-      L_RotateErrorCalc = desiredAngle - L_VisionAngleDeg;
+      // Use photon vison as target when in auto beam lock
+      L_RotateErrorCalc = desiredAngle - L_TopTargetYawDegrees;
+      V_AutoRotateComplete = false;
+      }
+    else if((V_AutoIntake == E_GetDaRotation) &&
+            (L_VisionBottomTargetAquired == true))
+      {
+      // Use photon vison as target when in auto beam lock
+      L_RotateErrorCalc = desiredAngle - L_VisionBottomYaw;
       V_AutoRotateComplete = false;
       }
     else
@@ -216,20 +397,23 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,
       L_RotateErrorCalc = 0;
       }
     
-    if ((V_b_DriveStraight == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime) ||
-        (rotateMode        == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime) || 
-        (autoBeamLock      == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime))
+    if ((V_b_DriveStraight     == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime) ||
+        (rotateMode            == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime) || 
+        (V_SwerveTargetLockingUpper == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime) ||
+        (V_AutoIntake == E_GetDaRotation && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime))
       {
-      V_AutoRotateComplete = false;      // rotateMode = true;
-      // autoBeamLock = true;
+      V_AutoRotateComplete = false;      // rotateMode = true;+
+      // V_SwerveTargetLockingUpper = true;
       rotateDeBounce += C_ExeTime;
       }
-    else if ((V_b_DriveStraight == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime) ||
-             (rotateMode        == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime) ||
-             (autoBeamLock      == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime))
+    else if ((V_b_DriveStraight     == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime) ||
+             (rotateMode            == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime) ||
+             (V_SwerveTargetLockingUpper == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime) ||
+             (V_AutoIntake == E_GetDaRotation && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime))
       {
       rotateMode = false;
-      autoBeamLock = false;
+      V_SwerveTargetLockingUpper = false;
+      V_AutoIntake = E_GetDaOff;
       rotateDeBounce = 0;
       V_AutoRotateComplete = true;
       *L_TargetFin = true;
@@ -243,7 +427,11 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,
       {
       V_RCW = DesiredAutoRotateSpeed(L_RotateErrorCalc);
       }
-    else if (autoBeamLock == true)
+    else if (V_SwerveTargetLockingUpper == true)
+      {
+      V_RCW = -DesiredRotateSpeed(L_RotateErrorCalc);
+      }
+    else if (V_AutoIntake == E_GetDaRotation)
       {
       V_RCW = -DesiredRotateSpeed(L_RotateErrorCalc);
       }
@@ -303,7 +491,8 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,
       L_Gain = L_JoyStick1Axis3;
       }
     else if ((rotateMode   == true) ||
-             (autoBeamLock == true))
+             (V_SwerveTargetLockingUpper == true) ||
+             (V_AutoIntake == E_GetDaRotation))
       {
       L_Gain = K_AutoRotateGx;
       }
@@ -350,7 +539,6 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,
       {
       L_WheelAngleCmnd[L_Index] =  Control_PID( L_WA[L_Index],
                                                 V_WheelAngleArb[L_Index],
-                                              //V_WheelAngleConverted[L_Index],
                                                &V_WheelAngleError[L_Index],
                                                &V_WheelAngleIntegral[L_Index],
                                                 K_WheelAnglePID_Gx[E_P_Gx],
@@ -364,7 +552,10 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,
                                                 K_WheelAnglePID_Gx[E_D_Ll],
                                                 K_WheelAnglePID_Gx[E_Max_Ul],
                                                 K_WheelAnglePID_Gx[E_Max_Ll]);
-
+      #ifdef DriveMotorTest
+      L_WheelSpeedCmnd[L_Index] = L_WS[L_Index];
+      #endif
+      #ifndef DriveMotorTest
       L_WheelSpeedCmnd[L_Index] = Control_PID( L_WS[L_Index],
                                                V_WheelVelocity[L_Index],
                                               &V_WheelSpeedError[L_Index],
@@ -380,12 +571,9 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,
                                                K_WheelSpeedPID_Gx[E_D_Ll],
                                                K_WheelSpeedPID_Gx[E_Max_Ul],
                                                K_WheelSpeedPID_Gx[E_Max_Ll]);
+      #endif
       }
 
     V_Deg_DesiredAngPrev = desiredAngle;
-
-    frc::SmartDashboard::PutNumber("FL Angle Used for PID", V_WheelAngleArb[E_FrontLeft]);
-    frc::SmartDashboard::PutNumber("L_WA_FWD", L_WheelAngleRev[E_FrontLeft]);
-    frc::SmartDashboard::PutNumber("L_WA_REV", L_WheelAngleFwd[E_FrontLeft]);
-    frc::SmartDashboard::PutNumber("L_WA_REV", L_WheelAngleRev[E_FrontLeft]);
+    V_RotateErrorCalc = L_RotateErrorCalc;
   }

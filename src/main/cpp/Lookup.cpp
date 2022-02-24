@@ -500,6 +500,48 @@ double DesiredSpeed(double L_JoystickAxis)
   }
 
 /******************************************************************************
+ * Function:     DtrmnAutoLauncherSpeed
+ *
+ * Description:  Function to determine the desired launcher speed based on 
+ *               estimated distance from taget from vision.
+ ******************************************************************************/
+double DtrmnAutoLauncherSpeed(double L_TargetDistance)
+  {
+  double L_DesiredLaunchSpeed = 0.0;
+  int L_AxisSize             = (int)(sizeof(K_DesiredDistanceAxis) / sizeof(K_DesiredLauncherSpeed[0]));
+  int L_CalArraySize         = (int)(sizeof(K_DesiredLauncherSpeed) / sizeof(K_DesiredLauncherSpeed[0]));
+
+  L_DesiredLaunchSpeed = LookUp1D_Table(&K_DesiredDistanceAxis[0],
+                                        &K_DesiredLauncherSpeed[0],
+                                         L_AxisSize,
+                                         L_CalArraySize,
+                                         L_TargetDistance);
+
+  return L_DesiredLaunchSpeed;
+  }
+
+/******************************************************************************
+ * Function:     DtrmnManualLauncherSpeed
+ *
+ * Description:  Function to rescale the driver axis to a desired launcher 
+ *               speed.
+ ******************************************************************************/
+double DtrmnManualLauncherSpeed(double L_DriverAxis)
+  {
+  double L_DesiredLaunchSpeed = 0.0;
+  int L_AxisSize             = (int)(sizeof(K_DesiredLauncherManualAxis) / sizeof(K_DesiredLauncherManualSpeed[0]));
+  int L_CalArraySize         = (int)(sizeof(K_DesiredLauncherManualSpeed) / sizeof(K_DesiredLauncherManualSpeed[0]));
+
+  L_DesiredLaunchSpeed = LookUp1D_Table(&K_DesiredLauncherManualAxis[0],
+                                        &K_DesiredLauncherManualSpeed[0],
+                                         L_AxisSize,
+                                         L_CalArraySize,
+                                         L_DriverAxis);
+
+  return L_DesiredLaunchSpeed;
+  }
+
+/******************************************************************************
  * Function:     DesiredUpperBeamSpeed
  *
  * Description:  Function to power up upper beam.

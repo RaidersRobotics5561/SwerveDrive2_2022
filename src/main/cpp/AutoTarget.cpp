@@ -5,16 +5,10 @@
   Author: 5561
  */
 
-
-#include "Robot.h"
-
-#include "control_pid.hpp"
-#include "Encoders.hpp"
-#include "DriveControl.hpp"
-#include "Lookup.hpp"
-#include "Enums.hpp"
 #include <math.h>
 
+#include "Lookup.hpp"
+#include "Const.hpp"
 
 /******************************************************************************
  * Function:     AutoTargeting
@@ -88,18 +82,8 @@ T_AutoTargetStates AutoTargeting(T_AutoTargetStates  L_CurrentState,
   
   
 
-    *L_RobotTargetAngle  = K_TargetVisionAngle;
-    *L_BeltPowerReq = 0.0; 
-
-    /* Ok, let's go to the next step:
-     */
-    L_CurrentState = E_TargetFoundRotateBot; // mark that we finished our rotate
-
-  if (L_ActivateRollers == true){
-  
-  
-  L_RollerSpeedError = fabs(L_RollerSpeed - *L_RollerSpeedReq);
-
+    *L_RobotTargetAngle  = K_TargetVisionAngleUpper;
+    *L_BeltPowerReq = 0.0;
 
     DesiredRollerSpeed(L_RawTargetVisionDistance,
                        L_RawTargetVisionAngle,

@@ -45,6 +45,23 @@ typedef enum T_PID_Cal
 } T_PID_Cal;
 
 
+typedef enum T_PID_SparkMaxCal
+{
+  E_kP,
+  E_kI,
+  E_kD,
+  E_kIz,
+  E_kFF,
+  E_kMaxOutput,
+  E_kMinOutput,
+  E_kMaxVel,
+  E_kMinVel,
+  E_kMaxAcc,
+  E_kAllErr,
+  E_PID_SparkMaxCalSz
+} T_PID_SparkMaxCal;
+
+
 typedef enum T_AutoTargetStates
 {
   E_NotActive, //not doing anything
@@ -54,6 +71,29 @@ typedef enum T_AutoTargetStates
   E_AutoTargetStatesSz // 
 } T_AutoTargetStates;
 
+typedef enum T_LauncherStates
+{
+  E_LauncherNotActive,
+  E_LauncherAutoTargetActive,
+  E_LauncherManualActive,
+} T_LauncherStates;
+
+typedef enum T_CameraLightStatus
+{
+  E_LightTurnedOff,
+  E_LightOnWaitingForTarget,
+  E_LightOnTargetingReady,
+  E_LightForcedOffDueToOvertime
+} T_CameraLightStatus;
+
+typedef enum T_LiftCmndDirection
+{
+  E_LiftCmndNone,
+  E_LiftCmndUp,
+  E_LiftCmndDown,
+  E_LiftCmndForward,
+  E_LiftCmndBack
+} T_LiftCmndDirection;
 
 typedef enum T_Lift_State
 {
@@ -68,7 +108,8 @@ typedef enum T_Lift_State
   E_S8_more_down_some_YD,
   E_S9_back_rest_XD,
   E_S10_final_YD,
-  E_S11_Stop
+  E_S11_Stop,
+  E_Lift_State_Sz
 } T_Lift_State;
 
 
@@ -78,5 +119,12 @@ typedef enum T_RobotState
   E_Auton,
   E_Teleop
 } T_RobotState;
+
+typedef enum T_GetDaBalls
+{
+  E_GetDaOff,
+  E_GetDaRotation,
+  E_GetDaIntakeAndRun
+} T_GetDaBalls;
 
 #endif
