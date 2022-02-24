@@ -8,16 +8,11 @@
   2021-02-28 -> Beta
  */
 
-#include "Robot.h"
+#include <math.h>
 
 #include "control_pid.hpp"
-#include "Encoders.hpp"
-#include "DriveControl.hpp"
 #include "Lookup.hpp"
-#include "Enums.hpp"
-#include <math.h>
-#include "Gyro.hpp"
-#include <frc/smartdashboard/SmartDashboard.h>
+#include "Const.hpp"
 
 double V_t_AutonTime;
 double V_L_X_ErrorPrev;
@@ -27,14 +22,12 @@ double V_L_Y_Integral;
 bool   V_b_RecordStartPosition;
 double V_L_X_StartPosition;
 double V_L_Y_StartPosition;
-
-int theCoolerInteger;
-
+double distanceTarget;
+int    theCoolerInteger;
 double V_autonTimer = 0;
-int V_autonState = 0;
-
-
-// using namespace frc;
+int    V_autonState = 0;
+bool V_autonTargetCmd = false;
+bool V_autonTargetFin = false;
 
 /******************************************************************************
  * Function:     AutonDriveReset
@@ -53,6 +46,8 @@ void AutonDriveReset(void)
       V_L_Y_StartPosition = 0.0;
       V_autonTimer = 0;
       V_autonState = 0;
+      V_autonTargetCmd = false;
+      V_autonTargetFin = false;
   }
 
 /******************************************************************************

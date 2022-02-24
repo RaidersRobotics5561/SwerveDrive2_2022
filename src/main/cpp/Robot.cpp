@@ -7,262 +7,105 @@
  *
  * */
 
-//NOTE: Set this to TEST for testing of speeds and PID gains.  Set to COMP for competion
-#define TEST
-// #define PHOTON
-//NOTE: Set this to allow Shuffleboard configuration of PIDConfig objects (Will override defaults)
-#define PID_DEBUG
-#define SPIKE
-
 #include "Robot.h"
-#include <iostream>
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/DriverStation.h>
 #include <frc/livewindow/LiveWindow.h>
 
-
 #include "Encoders.hpp"
-#include "BallHandler.hpp"
-#include "LightControl.hpp"
-#include "Enums.hpp"
-#include "control_pid.hpp"
 #include "Gyro.hpp"
 #include "IO_Sensors.hpp"
-#include "Lookup.hpp"
-#include "vision.hpp"
+// #include "vision.hpp"
+#include "Driver_inputs.hpp"
+#include "Odometry.hpp"
 #include "DriveControl.hpp"
+#include "Lift.hpp"
+#include "BallHandler.hpp"
+#include "LightControl.hpp"
+#include "VisionV2.hpp"
+#include "Auton.hpp"
 #include "AutoTarget.hpp"
 
-#include <frc/DigitalInput.h>
-#include <frc/DigitalOutput.h>
-#include "Lift.hpp"
-#include "Driver_inputs.hpp"
-#include "Lift.hpp"
-#include "Driver_inputs.hpp"
+// nt::NetworkTableInstance inst;
 
-#include <units/length.h>
-#include "Utils/PIDConfig.hpp"
-#include "Odometry.hpp"
-#include "Auton.hpp"
-#include <photonlib/PhotonCamera.h>
-#include <photonlib/PhotonUtils.h>
-
-
-
-nt::NetworkTableInstance inst;
-
-
-nt::NetworkTableEntry driverMode0;
-nt::NetworkTableEntry pipeline0;
-nt::NetworkTableEntry targetYaw0;
-nt::NetworkTableEntry targetPitch0;
-nt::NetworkTableEntry targetPose0;
-nt::NetworkTableEntry latency0;
-nt::NetworkTableEntry driverMode1;
-nt::NetworkTableEntry targetYaw1;
-nt::NetworkTableEntry targetPitch1;
-nt::NetworkTableEntry targetPose1;
-nt::NetworkTableEntry latency1;
-nt::NetworkTableEntry lidarDistance;
-nt::NetworkTableEntry ledControl;
-
-
-frc::DriverStation::Alliance V_AllianceColor;
-
-
-
-double V_AutoTargetAngle;
-double V_AutoTargetUpperRollerSpd;
-double V_AutoTargetLowerRollerSpd;
-double V_AutoTargetBeltPower;
-
-double       distanceTarget;
-double       distanceBall;
-double       distanceFromTargetCenter;
-double       distanceFromBallCenter;
-double       desiredVisionAngle0;
-double       desiredVisionDistance0;
-double       originalPosition;
-bool         activeVisionAngle0;
-bool         activeVisionDistance0;
-bool         visionRequest;
-bool         visionStart1;
-bool         visionStart2;
-
-int pipelineCounter;
-bool V_pipelinecounterLatch;
-
-bool         V_AutoShootEnable;
-
-
-
-
-bool V_autonTargetCmd = false;
-bool V_autonTargetFin = false;
-
-
-double V_M_RobotDisplacementX = 0;
-double V_M_RobotDisplacementY = 0;
-
-double V_XD_Test = 0;
-double V_YD_Test = 0;
-double V_Intake_Test = 0;
-double V_Elevator_Test = 0;
-
-double V_P_Gx = 0;
-double V_I_Gx = 0;
-double V_D_Gx = 0;
-double V_I_Zone = 0;
-double V_FF = 0;
-double V_Max = 0;
-double V_Min = 0;
-
-double K_MaxVel = 0;
-double K_MinVel = 0;
-double K_MaxAcc = 0;
-double K_AllErr = 0;
-
-bool   LightOff; //the polarities are funny, true = off
-
-T_RobotState V_RobotState;
-
-
-
-// PIDConfig UpperShooterPIDConfig {0.0008, 0.000001, 0.0006};
+T_RobotState                 V_RobotState        = E_Init;
+frc::DriverStation::Alliance V_AllianceColor     = frc::DriverStation::Alliance::kInvalid;
+double                       V_MatchTimeRemaining = 0;
 
 /******************************************************************************
  * Function:     RobotInit
  *
  * Description:  Called during initialization of the robot.
  ******************************************************************************/
-void Robot::RobotInit() {
+void Robot::RobotInit()
+  {
+  V_RobotState         = E_Init;
+  V_AllianceColor      = frc::DriverStation::GetInstance().GetAlliance();
+  V_MatchTimeRemaining = frc::Timer::GetMatchTime().value();
 
-    VisionDashboard();
+  EncodersInit(m_encoderFrontRightSteer,
+               m_encoderFrontLeftSteer,
+               m_encoderRearRightSteer,
+               m_encoderRearLeftSteer,
+               m_encoderFrontRightDrive,
+               m_encoderFrontLeftDrive,
+               m_encoderRearRightDrive,
+               m_encoderRearLeftDrive,
+               m_encoderLiftYD,
+               m_encoderLiftXD,
+               m_encoderrightShooter,
+               m_encoderleftShooter);
 
-    V_RobotState = E_Init;
+  GyroInit();
 
-//  m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
-//  m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
-//  frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
-    m_liftMotorYD.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
-    m_liftMotorXD.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
+  IO_SensorsInit();
 
-    V_M_RobotDisplacementY = 0;
-    V_M_RobotDisplacementX = 0;
+  m_frontLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
+  m_frontRightSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
+  m_rearLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
+  m_rearRightSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
 
-    GyroInit();
+  m_frontLeftSteerMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
+  m_frontLeftDriveMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
+  m_frontRightSteerMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
+  m_frontRightDriveMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
+  m_rearLeftSteerMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
+  m_rearLeftDriveMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
+  m_rearRightSteerMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
+  m_rearRightDriveMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
 
-    inst = nt::NetworkTableInstance::Create();
-    inst.StartClient("10.55.61.24");
-    inst.StartDSClient();
+  m_liftMotorYD.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
+  m_liftMotorXD.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
 
-    frc::SmartDashboard::PutNumber("P_Gx", V_P_Gx);
-    frc::SmartDashboard::PutNumber("I_Gx", V_I_Gx);
-    frc::SmartDashboard::PutNumber("D_Gx", V_D_Gx);
-    frc::SmartDashboard::PutNumber("I_Zone", V_I_Zone);
-    frc::SmartDashboard::PutNumber("FF", V_FF);
-    frc::SmartDashboard::PutNumber("Max_Limit", V_Max);
-    frc::SmartDashboard::PutNumber("Min_Limit", V_Min);
-    frc::SmartDashboard::PutNumber("XD Lift", V_XD_Test);
-  frc::SmartDashboard::PutNumber("YD Lift", V_YD_Test);
-  frc::SmartDashboard::PutNumber("Intake", V_Intake_Test);
-  frc::SmartDashboard::PutNumber("Elevator", V_Elevator_Test);
+  m_rightShooterMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kCoast);
+  m_leftShooterMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kCoast);
 
-  frc::SmartDashboard::PutNumber("max velocity", K_MaxVel);
-  frc::SmartDashboard::PutNumber("min velocity", K_MinVel);
-  frc::SmartDashboard::PutNumber("max acceleration", K_MaxAcc);
-  frc::SmartDashboard::PutNumber("kAllErr", K_AllErr);
+  SwerveDriveMotorConfigsInit(m_frontLeftDrivePID,
+                              m_frontRightDrivePID,
+                              m_rearLeftDrivePID,
+                              m_rearRightDrivePID);
+
+  BallHandlerMotorConfigsInit(m_rightShooterpid,
+                              m_leftShooterpid);
+
+  LiftMotorConfigsInit(m_liftpidYD,
+                       m_liftpidXD);
+
+  VisionInit(V_AllianceColor);
+
+  pc_Camera2.SetPipelineIndex(V_VisionBottomIndex);
+
+  VisionDashboard();
+
+  // inst = nt::NetworkTableInstance::Create();
+  // inst.StartClient("10.55.61.24");
+  // inst.StartDSClient();
   
- #ifdef COMP
-    // V_testIntake = 0;
-    // V_testElevator = 0;
-    // V_testspeed = 0;
-    // frc::SmartDashboard::PutNumber("Intake Power",V_testIntake);
-    // frc::SmartDashboard::PutNumber("Elevator Power",V_testElevator);
-    // frc::SmartDashboard::PutNumber("Speed Desired", V_testspeed);
-
-    // frc::SmartDashboard::PutNumber("P_Gx", V_P_Gx);
-    // frc::SmartDashboard::PutNumber("I_Gx", V_I_Gx);
-    // frc::SmartDashboard::PutNumber("D_Gx", V_D_Gx);
-    // frc::SmartDashboard::PutNumber("I_Zone", V_I_Zone);
-    // frc::SmartDashboard::PutNumber("FF", V_FF);
-    // frc::SmartDashboard::PutNumber("Max_Limit", V_Max);
-    // frc::SmartDashboard::PutNumber("Min_Limit", V_Min);
-
-    // frc::SmartDashboard::PutNumber("P_Steer_Gx", V_Steer_P_Gx);
-    // frc::SmartDashboard::PutNumber("I_Steer_Gx", V_Steer_I_Gx);
-    // frc::SmartDashboard::PutNumber("D_Steer_Gx", V_Steer_D_Gx);
-    // frc::SmartDashboard::PutNumber("I_Steer_Zone", V_Steer_I_Zone);
-    // frc::SmartDashboard::PutNumber("FF_Steer", V_Steer_FF);
-    // frc::SmartDashboard::PutNumber("Max_Limit_Steer", V_Steer_Max);
-    // frc::SmartDashboard::PutNumber("Min_Limit_Steer", V_Steer_Min);
-
-    // frc::SmartDashboard::PutNumber("P_Gx_Drive", V_Drive_P_Gx);
-    // frc::SmartDashboard::PutNumber("I_Gx_Drive", V_Drive_I_Gx);
-    // frc::SmartDashboard::PutNumber("D_Gx_Drive", V_Drive_D_Gx);
-    // frc::SmartDashboard::PutNumber("I_Zone_Drive", V_Drive_I_Zone);
-    // frc::SmartDashboard::PutNumber("FF_Drive", V_Drive_FF);
-    // frc::SmartDashboard::PutNumber("Max_Limit_Drive", V_Drive_Max);
-    // frc::SmartDashboard::PutNumber("Min_Limit_Drive", V_Drive_Min);
-#endif
-
-    // frc::SmartDashboard::PutNumber("Speed Desired Right", 0);
-    // frc::SmartDashboard::PutNumber("Speed Desired Left", 0);
-
-    frc::SmartDashboard::PutNumber("cooler int", 1);
-    // double lower_P_Gx = .0008;
-    // double lower_I_Gx = .000001;
-    // double lower_D_Gx = .0006;
-    // double lower_I_Zone = 0;
-    // double lower_FF = 0;
-    // double lower_Max = 1;
-    // double lower_Min = -1;
-
-    // m_rightShooterpid.SetP(V_P_Gx);
-    // m_rightShooterpid.SetI(V_I_Gx);
-    // m_rightShooterpid.SetD(V_D_Gx);
-    // m_rightShooterpid.SetIZone(V_I_Zone);
-    // m_rightShooterpid.SetFF(V_FF);
-    // m_rightShooterpid.SetOutputRange(V_Min, V_Max);
-
-    // m_leftShooterpid.SetP(V_P_Gx);
-    // m_leftShooterpid.SetI(V_I_Gx);
-    // m_leftShooterpid.SetD(V_D_Gx);
-    // m_leftShooterpid.SetIZone(V_I_Zone);
-    // m_leftShooterpid.SetFF(V_FF);
-    // m_leftShooterpid.SetOutputRange(V_Min, V_Max);
-
-    // m_liftpidYD.SetP(kP);
-    // m_liftpidYD.SetI(kI);
-    // m_liftpidYD.SetD(kD);
-    // m_liftpidYD.SetIZone(kIz);
-    // m_liftpidYD.SetFF(kFF);
-    // m_liftpidYD.SetOutputRange(kMinOutput, kMaxOutput);
-
-    // m_liftpidXD.SetP(kP);
-    // m_liftpidXD.SetI(kI);
-    // m_liftpidXD.SetD(kD);
-    // m_liftpidXD.SetIZone(kIz);
-    // m_liftpidXD.SetFF(kFF);
-    // m_liftpidXD.SetOutputRange(kMinOutput, kMaxOutput);
-
-    // frc::SmartDashboard::PutNumber("P Gain", kP);
-    // frc::SmartDashboard::PutNumber("I Gain", kI);
-    // frc::SmartDashboard::PutNumber("D Gain", kD);
-    // frc::SmartDashboard::PutNumber("I Zone", kIz);
-    // frc::SmartDashboard::PutNumber("Feed Forward", kFF);
-    // frc::SmartDashboard::PutNumber("Max Output", kMaxOutput);
-    // frc::SmartDashboard::PutNumber("Min Output", kMinOutput);
-    // frc::SmartDashboard::PutNumber("Desired Level", 0);
-
-
-    // frc::SmartDashboard::PutNumber("Blinkin code", 0);
-
-  #ifdef SPIKE
-  LightOff = true; // light should be off on robot init
-  #endif
-
-}
+// m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
+// m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
+// frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
+// frc::SmartDashboard::PutNumber("cooler int", 1);
+  }
 
 
 /******************************************************************************
@@ -272,22 +115,110 @@ void Robot::RobotInit() {
  *               "periodically" means).
  ******************************************************************************/
 void Robot::RobotPeriodic()
-{
+  {
+  V_MatchTimeRemaining = frc::Timer::GetMatchTime().value();
 
-    #ifdef PID_DEBUG
-      // UpperShooterPIDConfig.Debug("Upper Shooter PID Control");
-    #endif
+  Joystick_robot_mapping(c_joyStick2.GetRawButton(1),
+                         c_joyStick2.GetRawButton(2),
+                         c_joyStick2.GetRawButton(6), 
+                         c_joyStick2.GetRawButton(7),
+                         c_joyStick2.GetRawButton(8),
+                         c_joyStick.GetRawButton(7),
+                         c_joyStick2.GetRawButton(3),
+                         c_joyStick2.GetRawButton(4),
+                         c_joyStick2.GetRawAxis(1),
+                         c_joyStick2.GetRawAxis(5),
+                         c_joyStick.GetRawAxis(1),
+                         c_joyStick.GetRawAxis(0),
+                         c_joyStick.GetRawAxis(4),
+                         c_joyStick.GetRawAxis(3),
+                         c_joyStick.GetRawButton(1),
+                         c_joyStick.GetRawButton(3),
+                         c_joyStick.GetRawButton(4),
+                         c_joyStick2.GetPOV(),
+                         c_joyStick.GetRawButton(6));
 
-    //Run Gyro readings when the robot starts
+  Read_Encoders(a_encoderWheelAngleFrontLeft.Get().value(),
+                a_encoderWheelAngleFrontRight.Get().value(),
+                a_encoderWheelAngleRearLeft.Get().value(),
+                a_encoderWheelAngleRearRight.Get().value(),
+                m_encoderFrontLeftDrive,
+                m_encoderFrontRightDrive,
+                m_encoderRearLeftDrive,
+                m_encoderRearRightDrive,
+                m_encoderrightShooter,
+                m_encoderleftShooter,
+                m_encoderLiftYD,
+                m_encoderLiftXD);
 
-  VisionDashboard();
-  VisionRun();
-    // Gyro();
+  ReadGyro(V_Driver_zero_gyro);
 
-}
+  Read_IO_Sensors(di_IR_Sensor.Get(),
+                  di_XD_LimitSwitch.Get(),
+                  di_XY_LimitSwitch.Get());
 
+  VisionRun(pc_Camera1.GetLatestResult(),
+            pc_Camera2.GetLatestResult());
 
- 
+  SwerveDriveMotorConfigsCal(m_frontLeftDrivePID,
+                             m_frontRightDrivePID,
+                             m_rearLeftDrivePID,
+                             m_rearRightDrivePID);
+
+  BallHandlerMotorConfigsCal(m_rightShooterpid,
+                             m_leftShooterpid);
+
+  LiftMotorConfigsCal(m_liftpidYD,
+                      m_liftpidXD);
+
+  frc::SmartDashboard::PutBoolean("XD Limit Detected", V_XD_LimitDetected);
+  frc::SmartDashboard::PutBoolean("YD Limit Detected", V_YD_LimitDetected);
+  frc::SmartDashboard::PutBoolean("Ball Detected", V_BallDetectedRaw);
+
+  frc::SmartDashboard::PutNumber("Lift postition YD", V_LiftPostitionYD);
+  frc::SmartDashboard::PutNumber("Lift postition XD", V_LiftPostitionXD);
+
+  frc::SmartDashboard::PutNumber("V_b_DriveStraight", V_b_DriveStraight);
+  frc::SmartDashboard::PutNumber("V_RotateErrorCalc", V_RotateErrorCalc);
+
+  frc::SmartDashboard::PutNumber("GYRO",            V_GyroYawAngleDegrees);
+  frc::SmartDashboard::PutBoolean("voltage thingy", di_Voltage_Man.Get());
+
+  frc::SmartDashboard::PutBoolean("Top Target?",    V_VisionTopTargetAquired);
+  frc::SmartDashboard::PutNumber("Top Yaw",         V_VisionTopYaw);
+  frc::SmartDashboard::PutNumber("Top Distance",    V_VisionTopTargetDistanceMeters);
+  frc::SmartDashboard::PutNumber("Bottom Range",    V_VisionBottomTargetDistanceMeters);
+  frc::SmartDashboard::PutBoolean("Bottom Target?", V_VisionBottomTargetAquired);
+  frc::SmartDashboard::PutNumber("Bottom Yaw",      V_VisionBottomYaw);
+  frc::SmartDashboard::PutNumber("Bottom Index",    V_VisionBottomIndex); 
+
+  frc::SmartDashboard::PutNumber("Lift YD S0",  V_LiftMotorYD_MaxCurrent[E_S0_BEGONE]);
+  frc::SmartDashboard::PutNumber("Lift YD S1",  V_LiftMotorYD_MaxCurrent[E_S1_initialize_Up_YD]);
+  frc::SmartDashboard::PutNumber("Lift YD S2",  V_LiftMotorYD_MaxCurrent[E_S2_lift_down_YD]);
+  frc::SmartDashboard::PutNumber("Lift YD S3",  V_LiftMotorYD_MaxCurrent[E_S3_move_forward_XD]);
+  frc::SmartDashboard::PutNumber("Lift YD S4",  V_LiftMotorYD_MaxCurrent[E_S4_stretch_up_YD]);
+  frc::SmartDashboard::PutNumber("Lift YD S5",  V_LiftMotorYD_MaxCurrent[E_S5_more_forward_XD]);
+  frc::SmartDashboard::PutNumber("Lift YD S6",  V_LiftMotorYD_MaxCurrent[E_S6_lift_up_more_YD]);
+  frc::SmartDashboard::PutNumber("Lift YD S7",  V_LiftMotorYD_MaxCurrent[E_S7_move_back_XD]);
+  frc::SmartDashboard::PutNumber("Lift YD S8",  V_LiftMotorYD_MaxCurrent[E_S8_more_down_some_YD]);
+  frc::SmartDashboard::PutNumber("Lift YD S9",  V_LiftMotorYD_MaxCurrent[E_S9_back_rest_XD]);
+  frc::SmartDashboard::PutNumber("Lift YD S10", V_LiftMotorYD_MaxCurrent[E_S10_final_YD]);
+  frc::SmartDashboard::PutNumber("Lift YD S11", V_LiftMotorYD_MaxCurrent[E_S11_Stop]);
+  
+  frc::SmartDashboard::PutNumber("Lift XD S0",  V_LiftMotorXD_MaxCurrent[E_S0_BEGONE]);
+  frc::SmartDashboard::PutNumber("Lift XD S1",  V_LiftMotorXD_MaxCurrent[E_S1_initialize_Up_YD]);
+  frc::SmartDashboard::PutNumber("Lift XD S2",  V_LiftMotorXD_MaxCurrent[E_S2_lift_down_YD]);
+  frc::SmartDashboard::PutNumber("Lift XD S3",  V_LiftMotorXD_MaxCurrent[E_S3_move_forward_XD]);
+  frc::SmartDashboard::PutNumber("Lift XD S4",  V_LiftMotorXD_MaxCurrent[E_S4_stretch_up_YD]);
+  frc::SmartDashboard::PutNumber("Lift XD S5",  V_LiftMotorXD_MaxCurrent[E_S5_more_forward_XD]);
+  frc::SmartDashboard::PutNumber("Lift XD S6",  V_LiftMotorXD_MaxCurrent[E_S6_lift_up_more_YD]);
+  frc::SmartDashboard::PutNumber("Lift XD S7",  V_LiftMotorXD_MaxCurrent[E_S7_move_back_XD]);
+  frc::SmartDashboard::PutNumber("Lift XD S8",  V_LiftMotorXD_MaxCurrent[E_S8_more_down_some_YD]);
+  frc::SmartDashboard::PutNumber("Lift XD S9",  V_LiftMotorXD_MaxCurrent[E_S9_back_rest_XD]);
+  frc::SmartDashboard::PutNumber("Lift XD S10", V_LiftMotorXD_MaxCurrent[E_S10_final_YD]);
+  frc::SmartDashboard::PutNumber("Lift XD S11", V_LiftMotorXD_MaxCurrent[E_S11_Stop]);
+  }
+
 
 /******************************************************************************
  * Function:     AutonomousInit
@@ -298,23 +229,15 @@ void Robot::RobotPeriodic()
 void Robot::AutonomousInit()
   { 
     V_RobotState = E_Auton;
-    V_autonTargetCmd = false;
-    V_autonTargetFin = false;
+    V_AllianceColor = frc::DriverStation::GetInstance().GetAlliance();
     
-    EncodersInit(m_encoderFrontRightSteer,
-                 m_encoderFrontLeftSteer,
-                 m_encoderRearRightSteer,
-                 m_encoderRearLeftSteer,
-                 m_encoderLiftYD,
-                 m_encoderLiftXD);
-
     DriveControlInit();
     BallHandlerInit();
+    LiftControlInit();
     AutonDriveReset();
-    V_M_RobotDisplacementX = 0;
-    V_M_RobotDisplacementY = 0;
-
-      // AutonDriveReset();  
+    OdometryInit();
+    VisionInit(V_AllianceColor);
+    pc_Camera2.SetPipelineIndex(V_VisionBottomIndex);
   }
 
 
@@ -326,48 +249,38 @@ void Robot::AutonomousInit()
  ******************************************************************************/
 void Robot::AutonomousPeriodic()
   {
-    double timeleft = frc::Timer::GetMatchTime().value();
-    double driveforward = 0;
-    double strafe = 0;
-    double speen = 0;
-
-    Read_Encoders(a_encoderWheelAngleFrontLeft.Get().value(),
-                  a_encoderWheelAngleFrontRight.Get().value(),
-                  a_encoderWheelAngleRearLeft.Get().value(),
-                  a_encoderWheelAngleRearRight.Get().value(),
-                  m_encoderFrontLeftDrive,
-                  m_encoderFrontRightDrive,
-                  m_encoderRearLeftDrive,
-                  m_encoderRearRightDrive,
-                  m_encoderrightShooter,
-                  m_encoderleftShooter,
-                  m_encoderLiftYD,
-                  m_encoderLiftXD);
+  double driveforward = 0;
+  double strafe = 0;
+  double speen = 0;
     
-    ReadGyro(false);
+  LightControlMain( V_Driver_SwerveGoalAutoCenter,
+                    V_Driver_auto_setspeed_shooter,
+                    V_MatchTimeRemaining,
+                    V_AllianceColor,
+                    V_LauncherState,
+                    V_SwerveTargetLocking,
+                    V_Driver_CameraLight,
+                    V_ShooterTargetSpeedReached,
+                   &V_CameraLightCmndOn,
+                   &V_VanityLightCmnd);
 
-    Read_IO_Sensors(di_IR_Sensor.Get(),
-                    di_XD_LimitSwitch.Get(),
-                    di_XY_LimitSwitch.Get());
- 
     DtrmnSwerveBotLocation(V_GyroYawAngleRad,
                            &V_Rad_WheelAngleFwd[0],
-                           &V_M_WheelDeltaDistance[0],
-                           &V_M_RobotDisplacementX,
-                           &V_M_RobotDisplacementY);
+                           &V_M_WheelDeltaDistance[0]);
   
     AutonDriveMain();
 
     DriveControlMain( driveforward,
                       strafe,
                       speen,
-                      c_joyStick.GetRawAxis(3),
+                      0, // May need to add additional speed control/command
                       V_autonTargetCmd,
                       c_joyStick.GetRawButton(3),
                       c_joyStick.GetRawButton(4),
                       V_GyroYawAngleDegrees,
                       V_GyroYawAngleRad,
-                      targetYaw0.GetDouble(0),
+                      V_VisionTopTargetAquired,
+                      V_VisionTopYaw,
                      &V_WheelAngleFwd[0],
                      &V_WheelAngleRev[0],
                      &V_WheelSpeedCmnd[0],
@@ -375,21 +288,36 @@ void Robot::AutonomousPeriodic()
                      &V_autonTargetFin,
                       V_RobotState);
 
+  // Motor output commands:
+    #ifdef DriveMotorTest
+    m_frontLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kSmartVelocity);
+    m_frontRightDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kSmartVelocity);
+    m_rearLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_RearLeft],     rev::ControlType::kSmartVelocity);
+    m_rearRightDrivePID.SetReference(V_WheelSpeedCmnd[E_RearRight],   rev::ControlType::kSmartVelocity);
+    #endif
+    #ifndef DriveMotorTest
+    m_frontLeftDriveMotor.Set(V_WheelSpeedCmnd[E_FrontLeft]);
+    m_frontRightDriveMotor.Set(V_WheelSpeedCmnd[E_FrontRight]);
+    m_rearLeftDriveMotor.Set(V_WheelSpeedCmnd[E_RearLeft]);
+    m_rearRightDriveMotor.Set(V_WheelSpeedCmnd[E_RearRight]);
+    #endif
 
-    // m_rightShooterpid.SetReference(V_ShooterSpeedDesired[E_rightShooter], rev::ControlType::kVelocity);
-    // m_leftShooterpid.SetReference(V_ShooterSpeedDesired[E_leftShooter], rev::ControlType::kVelocity);
+    m_frontLeftSteerMotor.Set(V_WheelAngleCmnd[E_FrontLeft]);
+    m_frontRightSteerMotor.Set(V_WheelAngleCmnd[E_FrontRight]);
+    m_rearLeftSteerMotor.Set(V_WheelAngleCmnd[E_RearLeft]);
+    m_rearRightSteerMotor.Set(V_WheelAngleCmnd[E_RearRight]);
 
-    // m_frontLeftDriveMotor.Set(V_WheelSpeedCmnd[E_FrontLeft]);
-    // m_frontRightDriveMotor.Set(V_WheelSpeedCmnd[E_FrontRight]);
-    // m_rearLeftDriveMotor.Set(V_WheelSpeedCmnd[E_RearLeft]);
-    // m_rearRightDriveMotor.Set(V_WheelSpeedCmnd[E_RearRight]);
+    m_rightShooterpid.SetReference(-V_ShooterRPM_Cmnd, rev::ControlType::kSmartVelocity);
+    m_leftShooterpid.SetReference(V_ShooterRPM_Cmnd, rev::ControlType::kSmartVelocity);
 
-    // m_frontLeftSteerMotor.Set(V_WheelAngleCmnd[E_FrontLeft] * (-1));
-    // m_frontRightSteerMotor.Set(V_WheelAngleCmnd[E_FrontRight] * (-1));
-    // m_rearLeftSteerMotor.Set(V_WheelAngleCmnd[E_RearLeft] * (-1));
-    // m_rearRightSteerMotor.Set(V_WheelAngleCmnd[E_RearRight] * (-1));
+    m_intake.Set(ControlMode::PercentOutput, V_IntakePowerCmnd); //must be positive (don't be a fool)
+    m_elevator.Set(ControlMode::PercentOutput, V_ElevatorPowerCmnd);
 
-    // m_elevator.Set(ControlMode::PercentOutput, 0);
+    m_liftpidYD.SetReference(V_lift_command_YD, rev::ControlType::kSmartMotion); // positive is up
+    m_liftpidXD.SetReference(V_lift_command_XD, rev::ControlType::kSmartMotion); // This is temporary.  We actually want to use position, but need to force this off temporarily
+
+    do_CameraLightControl.Set(V_CameraLightCmndOn);
+    m_vanityLightControler.Set(V_VanityLightCmnd);
   }
 
 
@@ -402,60 +330,13 @@ void Robot::AutonomousPeriodic()
 void Robot::TeleopInit()
   {
   V_RobotState = E_Teleop;
-
-  m_frontLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
-  m_frontRightSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
-  m_rearLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
-  m_frontLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
-
-  EncodersInit(m_encoderFrontRightSteer,
-               m_encoderFrontLeftSteer,
-               m_encoderRearRightSteer,
-               m_encoderRearLeftSteer,
-               m_encoderLiftYD,
-               m_encoderLiftXD);
+  V_AllianceColor = frc::DriverStation::GetInstance().GetAlliance();
 
   DriveControlInit();
-
   BallHandlerInit();
-
-  V_AutoShootEnable = false;
-  V_M_RobotDisplacementX = 0;
-  V_M_RobotDisplacementY = 0;
-
-  V_P_Gx = frc::SmartDashboard::GetNumber("P_Gx", V_P_Gx);
-  V_I_Gx = frc::SmartDashboard::GetNumber("I_Gx", V_I_Gx);
-  V_D_Gx = frc::SmartDashboard::GetNumber("D_Gx", V_D_Gx);
-  V_I_Zone = frc::SmartDashboard::GetNumber("I_Zone", V_I_Zone);
-  V_FF = frc::SmartDashboard::GetNumber("FF", V_FF);
-  V_Max = frc::SmartDashboard::GetNumber("Max_Limit", V_Max);
-  V_Min = frc::SmartDashboard::GetNumber("Min_Limit", V_Min);
-
-  K_MaxVel = frc::SmartDashboard::GetNumber("max velocity", K_MaxVel);
-  K_MinVel = frc::SmartDashboard::GetNumber("min velocity", K_MinVel);
-  K_MaxAcc = frc::SmartDashboard::GetNumber("max acceleration", K_MaxAcc);
-  K_AllErr = frc::SmartDashboard::GetNumber("kAllErr", K_AllErr);
-
-  m_liftpidYD.SetP(V_P_Gx);
-  m_liftpidYD.SetI(V_I_Gx);
-  m_liftpidYD.SetD(V_D_Gx);
-  m_liftpidYD.SetIZone(V_I_Zone);
-  m_liftpidYD.SetFF(V_FF);
-  m_liftpidYD.SetOutputRange(V_Min, V_Max);
-
-  m_liftpidXD.SetP(V_P_Gx);
-  m_liftpidXD.SetI(V_I_Gx);
-  m_liftpidXD.SetD(V_D_Gx);
-  m_liftpidXD.SetIZone(V_I_Zone);
-  m_liftpidXD.SetFF(V_FF);
-  m_liftpidXD.SetOutputRange(V_Min, V_Max);
-
-
-
-  m_liftpidYD.SetSmartMotionMaxVelocity(K_MaxVel);
-  m_liftpidYD.SetSmartMotionMinOutputVelocity(K_MinVel);
-  m_liftpidYD.SetSmartMotionMaxAccel(K_MaxAcc);
-  m_liftpidYD.SetSmartMotionAllowedClosedLoopError(K_AllErr);
+  LiftControlInit();
+  OdometryInit();
+  VisionInit(V_AllianceColor);
 }
 
 
@@ -466,136 +347,98 @@ void Robot::TeleopInit()
  ******************************************************************************/
 void Robot::TeleopPeriodic()
   {
-  bool L_Driver_lift_control = false;
-  bool L_Driver_zero_gyro = false;
-  bool L_Driver_stops_shooter = false;
-  bool L_Driver_auto_setspeed_shooter = false;
-  bool L_Driver_elevator_up = false;
-  bool L_Driver_elevator_down = false;
-  double L_Driver_right_shooter_desired_speed = 0;
-  double L_Driver_left_shooter_desired_speed = 0;
-  bool L_Driver_intake_in = false;
-  //bool L_driver_intake_out = false;
-
-  double timeleft = frc::DriverStation::GetInstance().GetMatchTime();
-
-  Joystick_robot_mapping(    c_joyStick2.GetRawButton(1),
-                            &L_Driver_elevator_up,
-                             c_joyStick2.GetRawButton(2),
-                            &L_Driver_elevator_down,
-                             c_joyStick2.GetRawButton(6), //change later
-                            &L_Driver_lift_control,
-                             c_joyStick2.GetRawButton(7),
-                            &L_Driver_stops_shooter,
-                             c_joyStick2.GetRawButton(8),
-                            &L_Driver_auto_setspeed_shooter,
-                             c_joyStick.GetRawButton(7),
-                            &L_Driver_zero_gyro,
-                            c_joyStick2.GetRawButton(3),
-                            &L_Driver_intake_in,
-                             c_joyStick2.GetRawAxis(1),
-                            &L_Driver_right_shooter_desired_speed,
-                             c_joyStick2.GetRawAxis(5),
-                            &L_Driver_left_shooter_desired_speed);
-                            
-
-
-  Read_Encoders(a_encoderWheelAngleFrontLeft.Get().value(),
-               a_encoderWheelAngleFrontRight.Get().value(),
-               a_encoderWheelAngleRearLeft.Get().value(),
-               a_encoderWheelAngleRearRight.Get().value(),
-                m_encoderFrontLeftDrive,
-                m_encoderFrontRightDrive,
-                m_encoderRearLeftDrive,
-                m_encoderRearRightDrive,
-                m_encoderrightShooter,
-                m_encoderleftShooter,
-                m_encoderLiftYD,
-                m_encoderLiftXD);
-
-  ReadGyro(L_Driver_zero_gyro);
-
-  Read_IO_Sensors(di_IR_Sensor.Get(),
-                  di_XD_LimitSwitch.Get(),
-                  di_XY_LimitSwitch.Get());
+  LightControlMain( V_Driver_SwerveGoalAutoCenter,
+                    V_Driver_auto_setspeed_shooter,
+                    V_MatchTimeRemaining,
+                    V_AllianceColor,
+                    V_LauncherState,
+                    V_SwerveTargetLocking,
+                    V_Driver_CameraLight,
+                    V_ShooterTargetSpeedReached,
+                   &V_CameraLightCmndOn,
+                   &V_VanityLightCmnd);
 
   DtrmnSwerveBotLocation(V_GyroYawAngleRad,
                          &V_Rad_WheelAngleFwd[0],
-                         &V_M_WheelDeltaDistance[0],
-                         &V_M_RobotDisplacementX,
-                         &V_M_RobotDisplacementY);
+                         &V_M_WheelDeltaDistance[0]);
 
-  DriveControlMain( c_joyStick.GetRawAxis(1),
-                    c_joyStick.GetRawAxis(0),
-                    c_joyStick.GetRawAxis(4),
-                    c_joyStick.GetRawAxis(3),
-                    c_joyStick.GetRawButton(1),
-                    c_joyStick.GetRawButton(3),
-                    c_joyStick.GetRawButton(4),
+  DriveControlMain( V_Driver_SwerveForwardBack,
+                    V_Driver_SwerveStrafe,
+                    V_Driver_SwerveRotate,
+                    V_Driver_SwerveSpeed,
+                    V_Driver_SwerveGoalAutoCenter,
+                    V_Driver_SwerveRotateTo0,
+                    V_Driver_SwerveRotateTo90,
                     V_GyroYawAngleDegrees,
                     V_GyroYawAngleRad,
-                    targetYaw0.GetDouble(0),
+                    V_VisionTopTargetAquired,
+                    V_VisionTopYaw,
                    &V_WheelAngleFwd[0],
                    &V_WheelAngleRev[0],
-
-                   
                    &V_WheelSpeedCmnd[0],
                    &V_WheelAngleCmnd[0],
                    &V_autonTargetFin,
                     V_RobotState);
 
-  V_Lift_state = Lift_Control_Dictator(L_Driver_lift_control,
-                                       timeleft,
+  V_Lift_state = Lift_Control_Dictator(V_Driver_lift_control,
+                                       V_Driver_Lift_Cmnd_Direction,
+                                       V_MatchTimeRemaining,
                                        V_Lift_state,
-                                       V_lift_measured_position_YD,
-                                       V_lift_measured_position_XD,
+                                       V_LiftPostitionYD,
+                                       V_LiftPostitionXD,
                                        &V_lift_command_YD,
                                        &V_lift_command_XD,
-                                       V_GyroYawAngleDegrees);
+                                       V_GyroYawAngleDegrees,
+                                       m_liftMotorYD.GetOutputCurrent(),
+                                       m_liftMotorXD.GetOutputCurrent());
 
-  // BallHandlerControlMain();
-
-  LED_VanityLights();
-  
-  
-  V_XD_Test = frc::SmartDashboard::GetNumber("XD Lift", V_XD_Test);
-  V_YD_Test = frc::SmartDashboard::GetNumber("YD Lift", V_YD_Test);
-  V_Intake_Test = frc::SmartDashboard::GetNumber("Intake", V_Intake_Test);
-  V_Elevator_Test = frc::SmartDashboard::GetNumber("Elevator", V_Elevator_Test);
+  BallHandlerControlMain( V_Driver_intake_in,
+                          V_Driver_intake_out,
+                          V_BallDetectedRaw,
+                          V_Driver_elevator_up,
+                          V_Driver_elevator_down,
+                          V_Driver_stops_shooter,
+                          V_Driver_auto_setspeed_shooter,
+                          V_autonTargetFin,
+                          V_VisionTopTargetAquired,
+                          V_VisionTopTargetDistanceMeters,
+                          V_ShooterSpeedCurr,
+                          V_Driver_manual_shooter_desired_speed,
+                          V_CameraLightStatus,
+                         &V_IntakePowerCmnd,
+                         &V_ElevatorPowerCmnd,
+                         &V_ShooterRPM_Cmnd);
 
   // Motor output commands:
+    #ifdef DriveMotorTest
+    m_frontLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kSmartVelocity);
+    m_frontRightDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kSmartVelocity);
+    m_rearLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_RearLeft],     rev::ControlType::kSmartVelocity);
+    m_rearRightDrivePID.SetReference(V_WheelSpeedCmnd[E_RearRight],   rev::ControlType::kSmartVelocity);
+    #endif
+    #ifndef DriveMotorTest
     m_frontLeftDriveMotor.Set(V_WheelSpeedCmnd[E_FrontLeft]);
     m_frontRightDriveMotor.Set(V_WheelSpeedCmnd[E_FrontRight]);
     m_rearLeftDriveMotor.Set(V_WheelSpeedCmnd[E_RearLeft]);
     m_rearRightDriveMotor.Set(V_WheelSpeedCmnd[E_RearRight]);
-
-    // m_frontLeftDriveMotor.Set(0);
-    // m_frontRightDriveMotor.Set(0);
-    // m_rearLeftDriveMotor.Set(0);
-    // m_rearRightDriveMotor.Set(0);
+    #endif
 
     m_frontLeftSteerMotor.Set(V_WheelAngleCmnd[E_FrontLeft]);
     m_frontRightSteerMotor.Set(V_WheelAngleCmnd[E_FrontRight]);
     m_rearLeftSteerMotor.Set(V_WheelAngleCmnd[E_RearLeft]);
     m_rearRightSteerMotor.Set(V_WheelAngleCmnd[E_RearRight]);
 
-    // m_frontLeftSteerMotor.Set(0);
-    // m_frontRightSteerMotor.Set(0);
-    // m_rearLeftSteerMotor.Set(0);
-    // m_rearRightSteerMotor.Set(0);
+    m_rightShooterpid.SetReference(-V_ShooterRPM_Cmnd, rev::ControlType::kSmartVelocity);
+    m_leftShooterpid.SetReference(V_ShooterRPM_Cmnd, rev::ControlType::kSmartVelocity);
 
+    m_intake.Set(ControlMode::PercentOutput, V_IntakePowerCmnd); //must be positive (don't be a fool)
+    m_elevator.Set(ControlMode::PercentOutput, V_ElevatorPowerCmnd);
 
-    m_rightShooterpid.SetReference(0, rev::ControlType::kVelocity);
-    m_leftShooterpid.SetReference(-0, rev::ControlType::kVelocity);
+    m_liftpidYD.SetReference(V_lift_command_YD, rev::ControlType::kSmartMotion); // positive is up
+    m_liftpidXD.SetReference(V_lift_command_XD, rev::ControlType::kSmartMotion); // This is temporary.  We actually want to use position, but need to force this off temporarily
 
-    m_intake.Set(ControlMode::PercentOutput, L_Driver_intake_in); //must be positive (don't be a fool)
-    m_elevator.Set(ControlMode::PercentOutput, V_Elevator_Test);
-
-    // m_liftpidYD.SetReference(V_lift_command_YD, rev::ControlType::kPosition);
-    // m_liftpidXD.SetReference(V_lift_command_XD, rev::ControlType::kPosition);
-
-    m_liftpidYD.SetReference(V_YD_Test, rev::ControlType::kPosition); // positive is up
-    m_liftpidXD.SetReference(V_XD_Test, rev::ControlType::kPosition); // This is temporary.  We actually want to use position, but need to force this off temporarily
+    do_CameraLightControl.Set(V_CameraLightCmndOn);
+    m_vanityLightControler.Set(V_VanityLightCmnd);
 }
 
 
@@ -606,28 +449,35 @@ void Robot::TeleopPeriodic()
  ******************************************************************************/
 void Robot::TestPeriodic()
   {
-    double L_LiftYD_Power = 0;
-    double L_LiftXD_Power = 0;
+  Lift_Control_ManualOverride(&V_LiftYD_TestPowerCmnd,
+                              &V_LiftXD_TestPowerCmnd,
+                               m_liftMotorYD.GetOutputCurrent(),
+                               m_liftMotorXD.GetOutputCurrent(),
+                               V_Driver_Lift_Cmnd_Direction,
+                               V_YD_LimitDetected,
+                               V_XD_LimitDetected);
+ 
+  m_liftMotorYD.Set(V_LiftYD_TestPowerCmnd);
+  m_liftMotorXD.Set(V_LiftXD_TestPowerCmnd);
 
-    if (c_joyStick2.GetPOV() == 0)
-      {
-      L_LiftYD_Power = 0.4;
-      }
-    else if (c_joyStick2.GetPOV() == 180)
-      {
-      L_LiftYD_Power = -0.4;
-      }
-    else if (c_joyStick2.GetPOV() == 270)
-      {
-      L_LiftXD_Power = -0.4;
-      }
-    else if (c_joyStick2.GetPOV() == 90)
-      {
-      L_LiftXD_Power = 0.4;
-      }
+  m_frontLeftDriveMotor.Set(0);
+  m_frontRightDriveMotor.Set(0);
+  m_rearLeftDriveMotor.Set(0);
+  m_rearRightDriveMotor.Set(0);
 
-    m_liftMotorXD.Set(L_LiftXD_Power);
-    m_liftMotorYD.Set(L_LiftYD_Power);
+  m_frontLeftSteerMotor.Set(0);
+  m_frontRightSteerMotor.Set(0);
+  m_rearLeftSteerMotor.Set(0);
+  m_rearRightSteerMotor.Set(0);
+
+  m_rightShooterMotor.Set(0);
+  m_leftShooterMotor.Set(0);
+
+  m_intake.Set(ControlMode::PercentOutput, 0);
+  m_elevator.Set(ControlMode::PercentOutput, 0);
+
+  do_CameraLightControl.Set(true); // I believe this is backwards, so true is off??
+  m_vanityLightControler.Set(0);
   }
 
 

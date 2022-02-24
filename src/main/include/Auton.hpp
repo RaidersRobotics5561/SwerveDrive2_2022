@@ -5,6 +5,9 @@
    Author: 5561
  */
 
+extern bool V_autonTargetCmd;
+extern bool V_autonTargetFin;
+
 void AutonDriveReset(void);
 
 void AutonDriveMain(double *L_Pct_JoyStickFwdRev,

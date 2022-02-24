@@ -6,10 +6,8 @@
  */
 
 #include "rev/CANSparkMax.h"
-#include <frc/AnalogInput.h>
-#include "Enums.hpp"
 #include <frc/smartdashboard/SmartDashboard.h>
-#include "Encoders.hpp"
+
 #include "Const.hpp"
 
 double V_WheelAngle[E_RobotCornerSz];
@@ -22,11 +20,11 @@ double V_WheelVelocity[E_RobotCornerSz]; // Velocity of drive wheels, in in/sec
 double V_M_WheelDeltaDistance[E_RobotCornerSz]; // Distance wheel moved, loop to loop, in inches
 double V_Cnt_WheelDeltaDistanceCurr[E_RobotCornerSz]; // Prev distance wheel moved, loop to loop, in Counts
 double V_Cnt_WheelDeltaDistancePrev[E_RobotCornerSz]; // Prev distance wheel moved, loop to loop, in Counts
-double V_ShooterSpeedCurr[E_RoboShooter];
+double V_ShooterSpeedCurr;
 double V_Cnt_WheelDeltaDistanceInit[E_RobotCornerSz];
 double V_Delta_Angle[E_RobotCornerSz]; // The delta of the angle needed to align the wheels when the robot inits
-double V_LiftPostitionYD;
-double V_LiftPostitionXD;
+double V_LiftPostitionYD; // Position of the YD lift, in revolutions of the motor
+double V_LiftPostitionXD; // Position of the XD lift, in revolutions of the motor
 
 
 /******************************************************************************
@@ -38,8 +36,14 @@ void EncodersInit(rev::SparkMaxRelativeEncoder m_encoderFrontRightSteer,
                   rev::SparkMaxRelativeEncoder m_encoderFrontLeftSteer,
                   rev::SparkMaxRelativeEncoder m_encoderRearRightSteer,
                   rev::SparkMaxRelativeEncoder m_encoderRearLeftSteer,
+                  rev::SparkMaxRelativeEncoder m_encoderFrontRightDrive,
+                  rev::SparkMaxRelativeEncoder m_encoderFrontLeftDrive,
+                  rev::SparkMaxRelativeEncoder m_encoderRearRightDrive,
+                  rev::SparkMaxRelativeEncoder m_encoderRearLeftDrive,
                   rev::SparkMaxRelativeEncoder m_encoderLiftYD,
-                  rev::SparkMaxRelativeEncoder m_encoderLiftXD)
+                  rev::SparkMaxRelativeEncoder m_encoderLiftXD,
+                  rev::SparkMaxRelativeEncoder m_encoderrightShooter,
+                  rev::SparkMaxRelativeEncoder m_encoderleftShooter)
   {
     T_RobotCorner L_Index;
 
@@ -60,11 +64,18 @@ void EncodersInit(rev::SparkMaxRelativeEncoder m_encoderFrontRightSteer,
     m_encoderRearRightSteer.SetPosition(0);
     m_encoderRearLeftSteer.SetPosition(0);
 
+    m_encoderFrontRightDrive.SetPosition(0);
+    m_encoderFrontLeftDrive.SetPosition(0);
+    m_encoderRearRightDrive.SetPosition(0);
+    m_encoderRearLeftDrive.SetPosition(0);
+
     m_encoderLiftYD.SetPosition(0);
     m_encoderLiftXD.SetPosition(0);
 
-    V_ShooterSpeedCurr[E_rightShooter] = 0;
-    V_ShooterSpeedCurr[E_leftShooter] = 0;
+    m_encoderrightShooter.SetPosition(0);
+    m_encoderleftShooter.SetPosition(0);
+
+    V_ShooterSpeedCurr = 0;
   }
 
 /******************************************************************************
@@ -131,49 +142,11 @@ void Read_Encoders(double                       L_encoderWheelAngleFrontLeftRaw,
     V_Cnt_WheelDeltaDistancePrev[index]  = V_Cnt_WheelDeltaDistanceCurr[index];
     }
 
-  frc::SmartDashboard::PutNumber("FL Angle Fwd", V_WheelAngleFwd[E_FrontLeft]);
-  frc::SmartDashboard::PutNumber("FL NEO Encoder Processed", V_WheelAngleConverted[E_FrontLeft]);
-  frc::SmartDashboard::PutNumber("Lift postition YD", V_LiftPostitionYD);
-  frc::SmartDashboard::PutNumber("Lift postition XD", V_LiftPostitionXD);
-
   V_WheelVelocity[E_FrontLeft]  = ((m_encoderFrontLeftDrive.GetVelocity()  / K_ReductionRatio) / 60) * K_WheelCircufrence;
   V_WheelVelocity[E_FrontRight] = ((m_encoderFrontRightDrive.GetVelocity() / K_ReductionRatio) / 60) * K_WheelCircufrence;
   V_WheelVelocity[E_RearRight]  = ((m_encoderRearRightDrive.GetVelocity()  / K_ReductionRatio) / 60) * K_WheelCircufrence;
   V_WheelVelocity[E_RearLeft]   = ((m_encoderRearLeftDrive.GetVelocity()   / K_ReductionRatio) / 60) * K_WheelCircufrence;
 
-  V_ShooterSpeedCurr[E_rightShooter] = (m_encoderrightShooter.GetVelocity() * K_ShooterWheelRotation[E_rightShooter]);
-  V_ShooterSpeedCurr[E_leftShooter]  = (m_encoderleftShooter.GetVelocity()  * K_ShooterWheelRotation[E_leftShooter]);
+  V_ShooterSpeedCurr = m_encoderleftShooter.GetVelocity();
   }
 
-/******************************************************************************
- * Function:     DtrmnEncoderRelativeToCmnd
- *
- * Description:  tbd
- ******************************************************************************/
-double DtrmnEncoderRelativeToCmnd(double          L_JoystickCmnd,
-                                  double          L_EncoderReading)
-  {
-    double L_Opt1;
-    double L_Opt2;
-    double L_Opt3;
-    double L_Output;
-
-    L_Opt1 = fabs(L_JoystickCmnd - L_EncoderReading);
-    L_Opt2 = fabs(L_JoystickCmnd - (L_EncoderReading + 360));
-    L_Opt3 = fabs(L_JoystickCmnd - (L_EncoderReading - 360));
-
-    if ((L_Opt1 < L_Opt2) && (L_Opt1 < L_Opt3))
-      {
-        L_Output = L_EncoderReading;
-      }
-    else if ((L_Opt2 < L_Opt1) && (L_Opt2 < L_Opt3))
-      {
-        L_Output = L_EncoderReading + 360;
-      }
-    else
-      {
-        L_Output = L_EncoderReading - 360;
-      }
-
-    return (L_Output);
-  }

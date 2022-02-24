@@ -5,16 +5,10 @@
   Author: 5561
  */
 
-
-#include "Robot.h"
-
-#include "control_pid.hpp"
-#include "Encoders.hpp"
-#include "DriveControl.hpp"
-#include "Lookup.hpp"
-#include "Enums.hpp"
 #include <math.h>
 
+#include "Lookup.hpp"
+#include "Const.hpp"
 
 /******************************************************************************
  * Function:     AutoTargeting

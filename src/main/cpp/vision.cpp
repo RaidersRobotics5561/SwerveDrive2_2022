@@ -1,16 +1,33 @@
+#if 0
 #include "Robot.h"
 #include <iostream>
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/DriverStation.h>
 #include <frc/livewindow/LiveWindow.h>
-#include "vision.hpp"
+#include <networktables/NetworkTableInstance.h>
+#include "networktables/NetworkTableEntry.h"
+
 #include <math.h>
 #include <photonlib/PhotonCamera.h>
 #include <photonlib/PhotonUtils.h>
 #include <units/length.h>
+#include <units/angle.h>
+
+// constants for top target cam
+const units::meter_t CAMERA_HEIGHT1 = 0.725_m; // 725 mm to camera lense
+const units::meter_t TARGET_HEIGHT1 = 2.58_m; // bottom of tape to carpet 
+const units::radian_t CAMERA_PITCH1 = 45_deg; // camera on a 45 degree tilt
+
+// constants for bottom ball cam
+const units::meter_t CAMERA_HEIGHT2 = 0.367_m;
+const units::meter_t TARGET_HEIGHT2 = .12_m; // radius of the ball in cm
+const units::radian_t CAMERA_PITCH2 = 50_deg;
+
 // all our favorite variables
 bool TopTargetAquired;
 double TopYaw;
+double V_TopTargetDistanceMeters; // Distance from front of robot to top target
+
 bool BottomTargetAquired;
 double BottomYaw;
 int BottomIndex;
@@ -24,6 +41,7 @@ void VisionDashboard(){
 // puts all our favorite variables to the dashboard, all this stuff happens once on init
     frc::SmartDashboard::PutBoolean("Top Target?", TopTargetAquired);
     frc::SmartDashboard::PutNumber("Target Yaw", TopYaw);
+    frc::SmartDashboard::PutNumber("Top Distance", V_TopTargetDistanceMeters);
 
     frc::SmartDashboard::PutBoolean("Bottom Target?", BottomTargetAquired);
     frc::SmartDashboard::PutNumber("Bottom Yaw", BottomYaw);
@@ -58,7 +76,10 @@ void VisionRun(){
 
     double TopRangeDouble = TopRange.value();
 
+    V_TopTargetDistanceMeters = TopRangeDouble;
+
     frc::SmartDashboard::PutNumber("Top Range", TopRangeDouble);
+    frc::SmartDashboard::PutNumber("Top Distance", TopRangeDouble); // Probably can remove this...
 
 
     // second camera for cargo detection
@@ -98,3 +119,4 @@ void VisionRun(){
     frc::SmartDashboard::PutNumber("Bottom Index", BottomIndex); 
     
 }
+#endif

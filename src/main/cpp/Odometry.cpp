@@ -8,20 +8,36 @@
  *
  * */
 
-#include "vision.hpp"
-#include "Gyro.hpp"
-#include "Robot.h"
-#include "Lookup.hpp"
-#include <iostream>
+#include <math.h>
 
-using namespace frc;
+#include "Enums.hpp"
+
+double V_M_RobotDisplacementX = 0;
+double V_M_RobotDisplacementY = 0;
 
 
+/******************************************************************************
+ * Function:     OdometryInit
+ *
+ * Description:  Initializes the necessary items for odometry.
+ *
+ ******************************************************************************/
+void OdometryInit()
+  {
+  V_M_RobotDisplacementX = 0;
+  V_M_RobotDisplacementY = 0;
+  }
+
+
+/******************************************************************************
+ * Function:     DtrmnSwerveBotLocation
+ *
+ * Description:  Tracks the location of the robot as it traverses the field.
+ *
+ ******************************************************************************/
 void DtrmnSwerveBotLocation(double  L_Deg_Gyro,
                             double *L_Deg_WheelAngleArb,
-                            double *L_M_DeltaWheelDistance,
-                            double *L_M_RobotDisplacementX,
-                            double *L_M_RobotDisplacementY)
+                            double *L_M_DeltaWheelDistance)
   {
     T_RobotCorner L_e_Index;
     double        L_Deg_RelativeAngle[E_RobotCornerSz];
@@ -45,8 +61,8 @@ void DtrmnSwerveBotLocation(double  L_Deg_Gyro,
   L_M_TotalDeltaX = L_M_TotalDeltaX / 4;
   L_M_TotalDeltaY = L_M_TotalDeltaY / 4;
 
-  *L_M_RobotDisplacementX += L_M_TotalDeltaX;
-  *L_M_RobotDisplacementY += L_M_TotalDeltaY;
+  V_M_RobotDisplacementX += L_M_TotalDeltaX;
+  V_M_RobotDisplacementY += L_M_TotalDeltaY;
   }
 
 
