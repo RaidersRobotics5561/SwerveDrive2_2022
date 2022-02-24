@@ -29,7 +29,7 @@ static const int C_intakeID = 14;
 // DIO IDs:
 static const int C_MagEncoderFL_ID = 2, C_MagEncoderFR_ID = 1, C_MagEncoderRL_ID = 3, C_MagEncoderRR_ID = 0;
 static const int C_XY_LimitSwitch_ID = 4, C_XD_LimitSwitch_ID = 6, C_IR_Sensor_ID = 9, C_CameraLightControl_ID = 7;
-static const int C_Voltage_Woman = 8; //gENDER?!?!?!?!?!??!
+static const int C_Voltage_Woman = 5; //gENDER?!?!?!?!?!??!
 
 // PWM IDs:
 static const int C_VanityLight_ID = 1;
@@ -356,8 +356,9 @@ const double K_RotateDebounceTime = 0.06;
 const double K_RotateDeadbandAngle = 0.5;  
 
 // This is the desired target angle for the auto vision targeting.  This is due to the offset of the camera. For 2020 - 3.3
-const double K_TargetVisionAngle = 0.0;
+const double K_TargetVisionAngleUpper = 0.0;
 
+const double K_TargetVisionAngleLower = 2.0;
 
 
 

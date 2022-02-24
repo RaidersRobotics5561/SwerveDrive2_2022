@@ -11,7 +11,7 @@
 
 extern double V_WheelAngleCmnd[E_RobotCornerSz];
 extern double V_WheelSpeedCmnd[E_RobotCornerSz];
-extern bool   V_SwerveTargetLocking;
+extern bool   V_SwerveTargetLockingUpper;
 extern bool   V_b_DriveStraight;
 extern double V_RotateErrorCalc;
 
@@ -43,5 +43,9 @@ void DriveControlMain(double       L_JoyStick1Axis1Y,
                       double      *L_WheelSpeedCmnd,
                       double      *L_WheelAngleCmnd,
                       bool        *L_TargetFin,
-                      T_RobotState L_RobotState);
+                      T_RobotState L_RobotState,
+                      bool         L_Driver_AutoIntake,
+                      double       L_VisionBottomTargetDistanceMeters,
+                      bool         L_VisionBottomTargetAquired,
+                      double       L_VisionBottomYaw);
 
