@@ -70,6 +70,7 @@ void VisionRun(photonlib::PhotonPipelineResult pc_L_TopResult,
   // Camera 1 - Top Target Detection:
   V_VisionTopTargetAquired = pc_L_TopResult.HasTargets(); //returns true if the camera has a target  
 
+  if (V_VisionTopTargetAquired == true){
   L_TargetTop = pc_L_TopResult.GetBestTarget(); //gets the best target  
 
   V_VisionTopYaw = L_TargetTop.GetYaw(); // Yaw of the best target
@@ -78,11 +79,13 @@ void VisionRun(photonlib::PhotonPipelineResult pc_L_TopResult,
         K_VisionHeight1, K_VisionTargetHeight1, K_VisionCameraPitch1,
         units::degree_t{pc_L_TopResult.GetBestTarget().GetPitch()}); // first 3 variables are constants from Const.hpp  
 
-  V_VisionTopTargetDistanceMeters = L_TopRange.value();  
+    V_VisionTopTargetDistanceMeters = L_TopRange.value();
+  } 
   
   // second camera for cargo detection
   V_VisionBottomTargetAquired = pc_L_BottomResult.HasTargets();
 
+if (V_VisionTopTargetAquired == true){
   L_TargetBottom = pc_L_BottomResult.GetBestTarget();
 
   V_VisionBottomYaw = L_TargetBottom.GetYaw();  
@@ -91,5 +94,8 @@ void VisionRun(photonlib::PhotonPipelineResult pc_L_TopResult,
         K_VisionHeight2, K_VisionTargetHeight2, K_VisionCameraPitch2,
         units::degree_t{pc_L_BottomResult.GetBestTarget().GetPitch()});
 
-  V_VisionBottomTargetDistanceMeters = L_BottomRange.value();  
+  V_VisionBottomTargetDistanceMeters = L_BottomRange.value(); 
+  } 
+
+ 
   }

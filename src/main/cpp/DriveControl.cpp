@@ -14,6 +14,7 @@
 
 #include "Const.hpp"
 #include "control_pid.hpp"
+#include "Encoders.hpp"
 #include "Lookup.hpp"
 
 double desiredAngle;

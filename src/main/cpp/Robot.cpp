@@ -173,6 +173,19 @@ void Robot::RobotPeriodic()
   LiftMotorConfigsCal(m_liftpidYD,
                       m_liftpidXD);
 
+  LightControlMain( V_Driver_SwerveGoalAutoCenter,
+                    V_Driver_auto_setspeed_shooter,
+                    V_MatchTimeRemaining,
+                    V_AllianceColor,
+                    V_LauncherState,
+                    V_SwerveTargetLockingUpper,
+                    V_Driver_CameraLight,
+                    V_ShooterTargetSpeedReached,
+                   &V_CameraLightCmndOn,
+                   &V_VanityLightCmnd);
+
+  do_CameraLightControl.Set(V_CameraLightCmndOn);
+
   frc::SmartDashboard::PutBoolean("XD Limit Detected", V_XD_LimitDetected);
   frc::SmartDashboard::PutBoolean("YD Limit Detected", V_YD_LimitDetected);
   frc::SmartDashboard::PutBoolean("Ball Detected", V_BallDetectedRaw);
@@ -219,6 +232,8 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutNumber("Lift XD S9",  V_LiftMotorXD_MaxCurrent[E_S9_back_rest_XD]);
   frc::SmartDashboard::PutNumber("Lift XD S10", V_LiftMotorXD_MaxCurrent[E_S10_final_YD]);
   frc::SmartDashboard::PutNumber("Lift XD S11", V_LiftMotorXD_MaxCurrent[E_S11_Stop]);
+
+  frc::SmartDashboard::PutNumber("Launcher Speed",    V_ShooterSpeedCurr);
   }
 
 
@@ -255,16 +270,16 @@ void Robot::AutonomousPeriodic()
   double strafe = 0;
   double speen = 0;
     
-  LightControlMain( V_Driver_SwerveGoalAutoCenter,
-                    V_Driver_auto_setspeed_shooter,
-                    V_MatchTimeRemaining,
-                    V_AllianceColor,
-                    V_LauncherState,
-                    V_SwerveTargetLockingUpper,
-                    V_Driver_CameraLight,
-                    V_ShooterTargetSpeedReached,
-                   &V_CameraLightCmndOn,
-                   &V_VanityLightCmnd);
+  // LightControlMain( V_Driver_SwerveGoalAutoCenter,
+  //                   V_Driver_auto_setspeed_shooter,
+  //                   V_MatchTimeRemaining,
+  //                   V_AllianceColor,
+  //                   V_LauncherState,
+  //                   V_SwerveTargetLockingUpper,
+  //                   V_Driver_CameraLight,
+  //                   V_ShooterTargetSpeedReached,
+  //                  &V_CameraLightCmndOn,
+  //                  &V_VanityLightCmnd);
 
     DtrmnSwerveBotLocation(V_GyroYawAngleRad,
                            &V_Rad_WheelAngleFwd[0],
@@ -322,7 +337,7 @@ void Robot::AutonomousPeriodic()
     m_liftpidYD.SetReference(V_lift_command_YD, rev::ControlType::kSmartMotion); // positive is up
     m_liftpidXD.SetReference(V_lift_command_XD, rev::ControlType::kSmartMotion); // This is temporary.  We actually want to use position, but need to force this off temporarily
 
-    do_CameraLightControl.Set(V_CameraLightCmndOn);
+    // do_CameraLightControl.Set(V_CameraLightCmndOn);
     m_vanityLightControler.Set(V_VanityLightCmnd);
   }
 
@@ -343,6 +358,8 @@ void Robot::TeleopInit()
   LiftControlInit();
   OdometryInit();
   VisionInit(V_AllianceColor);
+      m_encoderrightShooter.SetPosition(0);
+    m_encoderleftShooter.SetPosition(0);
 }
 
 
@@ -353,16 +370,16 @@ void Robot::TeleopInit()
  ******************************************************************************/
 void Robot::TeleopPeriodic()
   {
-  LightControlMain( V_Driver_SwerveGoalAutoCenter,
-                    V_Driver_auto_setspeed_shooter,
-                    V_MatchTimeRemaining,
-                    V_AllianceColor,
-                    V_LauncherState,
-                    V_SwerveTargetLockingUpper,
-                    V_Driver_CameraLight,
-                    V_ShooterTargetSpeedReached,
-                   &V_CameraLightCmndOn,
-                   &V_VanityLightCmnd);
+  // LightControlMain( V_Driver_SwerveGoalAutoCenter,
+  //                   V_Driver_auto_setspeed_shooter,
+  //                   V_MatchTimeRemaining,
+  //                   V_AllianceColor,
+  //                   V_LauncherState,
+  //                   V_SwerveTargetLockingUpper,
+  //                   V_Driver_CameraLight,
+  //                   V_ShooterTargetSpeedReached,
+  //                  &V_CameraLightCmndOn,
+  //                  &V_VanityLightCmnd);
 
   DtrmnSwerveBotLocation(V_GyroYawAngleRad,
                          &V_Rad_WheelAngleFwd[0],
@@ -438,14 +455,24 @@ void Robot::TeleopPeriodic()
     m_rearLeftSteerMotor.Set(V_WheelAngleCmnd[E_RearLeft]);
     m_rearRightSteerMotor.Set(V_WheelAngleCmnd[E_RearRight]);
 
-    m_rightShooterpid.SetReference(-V_ShooterRPM_Cmnd, rev::ControlType::kSmartVelocity);
-    m_leftShooterpid.SetReference(V_ShooterRPM_Cmnd, rev::ControlType::kSmartVelocity);
+      frc::SmartDashboard::PutNumber("Speed Cmnd", V_ShooterRPM_Cmnd);
+
+    if (V_ShooterRPM_Cmnd < 10)
+    {
+    m_rightShooterMotor.Set(0);
+    m_leftShooterMotor.Set(0);
+    }
+    else{
+    m_rightShooterpid.SetReference(V_ShooterRPM_Cmnd, rev::ControlType::kVelocity);
+    m_leftShooterpid.SetReference(-V_ShooterRPM_Cmnd, rev::ControlType::kVelocity);
+    }
+
 
     m_intake.Set(ControlMode::PercentOutput, V_IntakePowerCmnd); //must be positive (don't be a fool)
     m_elevator.Set(ControlMode::PercentOutput, V_ElevatorPowerCmnd);
 
-    m_liftpidYD.SetReference(V_lift_command_YD, rev::ControlType::kSmartMotion); // positive is up
-    m_liftpidXD.SetReference(V_lift_command_XD, rev::ControlType::kSmartMotion); // This is temporary.  We actually want to use position, but need to force this off temporarily
+    m_liftpidYD.SetReference(V_lift_command_YD, rev::ControlType::kPosition); // positive is up
+    m_liftpidXD.SetReference(V_lift_command_XD, rev::ControlType::kPosition); // This is temporary.  We actually want to use position, but need to force this off temporarily
 
     do_CameraLightControl.Set(V_CameraLightCmndOn);
     m_vanityLightControler.Set(V_VanityLightCmnd);

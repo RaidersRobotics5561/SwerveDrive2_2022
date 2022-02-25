@@ -4,7 +4,7 @@
 #include <units/length.h>
 
 // Define the desired test state here: COMP (no test), BallHandlerTest, LiftXY_Test, DriveMotorTest
-#define DriveMotorTest
+#define BallHandlerTest
 
 const double C_ExeTime = 0.02; // Set to match the the default controller loop time of 20 ms
 const units::second_t C_ExeTime_t = 0.02_s; // Set to match the the default controller loop time of 20 ms
@@ -159,9 +159,9 @@ const double K_LauncherPID_Gx[E_PID_SparkMaxCalSz] = { 0.1,    // kP
                                                       10.0,    // kMaxAcc
                                                        0.0};   // kAllErr
 
-const double K_LiftPID_Gx[E_PID_SparkMaxCalSz] = { 0.1,    // kP
-                                                   0.0001, // kI
-                                                   1.0,    // kD
+const double K_LiftPID_Gx[E_PID_SparkMaxCalSz] = { 0.001,    // kP
+                                                   0.000, // kI
+                                                   0.0,    // kD
                                                    0.0,    // kIz
                                                    0.0,    // kFF
                                                    1.0,    // kMaxOutput
