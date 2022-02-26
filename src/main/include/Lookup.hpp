@@ -6,7 +6,7 @@
  */
 #ifndef SRC_ROBORIO2018_LOOKUP_HPP_
 #define SRC_ROBORIO2018_LOOKUP_HPP_
-extern double DesiredSpeed(double L_JoystickAxis);
+extern double ScaleJoystickAxis(double L_JoystickAxis);
 
 extern double RampTo(double  L_Final,
                      double  L_Current,
@@ -28,6 +28,8 @@ extern double DesiredUpperBeamSpeed(double L_TargetDistance);
 extern double DtrmnAutoLauncherSpeed(double L_TargetDistance);
 
 extern double DtrmnManualLauncherSpeed(double L_DriverAxis);
+
+extern double DtrmnTimeToDriveToCaptureBall(double L_EstTargetDistance);
 
 extern void DesiredAutonLocation(double  L_t_AutonTime,
                                  double *L_L_X_Location,

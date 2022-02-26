@@ -4,7 +4,7 @@
 #include <units/length.h>
 
 // Define the desired test state here: COMP (no test), BallHandlerTest, LiftXY_Test, DriveMotorTest
-#define DriveMotorTest
+#define BallHandlerTest
 
 const double C_ExeTime = 0.02; // Set to match the the default controller loop time of 20 ms
 const units::second_t C_ExeTime_t = 0.02_s; // Set to match the the default controller loop time of 20 ms
@@ -53,8 +53,14 @@ const double K_SteerDriveReductionRatio = 30; //30:1
 const double K_ReductionRatio = 8.31;
 const double K_WheelCircufrence = 12.566; // Circumferance of wheel, in inches
 
+// Constants for swerve drive control:
+/* C_L: Robot wheelbase. [meters] */
 const double C_L = 0.5969;
+
+/* C_W: Robot track width. [meters] */
 const double C_W = 0.5969;
+
+/* C_R: Constant composed of the C_W and C_L constants: R = sqrt(L^2 + W^2) [meters]*/
 const double C_R = 0.8441;
 
 const double K_lift_max_YD = 207; //distance from floor to mid rung (60.25 inches)
@@ -147,21 +153,21 @@ const double K_RobotRotationPID_Gx[E_PID_CalSz] = { 0.07,   // P Gx
                                                     1.0,    // Max upper
                                                    -1.0};   // Max lower
 
-const double K_LauncherPID_Gx[E_PID_SparkMaxCalSz] = { 0.1,    // kP
-                                                       0.0001, // kI
-                                                       1.0,    // kD
+const double K_LauncherPID_Gx[E_PID_SparkMaxCalSz] = { 0.00055,    // kP
+                                                       0.000001, // kI
+                                                       0.0,    // kD
                                                        0.0,    // kIz
                                                        0.0,    // kFF
                                                        1.0,    // kMaxOutput
                                                       -1.0,    // kMinOutput
-                                                     200.0,    // kMaxVel
-                                                    -200.0,    // kMinVel
-                                                      10.0,    // kMaxAcc
+                                                       0.0,    // kMaxVel
+                                                       0.0,    // kMinVel
+                                                      55.0,    // kMaxAcc
                                                        0.0};   // kAllErr
 
-const double K_LiftPID_Gx[E_PID_SparkMaxCalSz] = { 0.1,    // kP
-                                                   0.0001, // kI
-                                                   1.0,    // kD
+const double K_LiftPID_Gx[E_PID_SparkMaxCalSz] = { 0.001,    // kP
+                                                   0.000, // kI
+                                                   0.0,    // kD
                                                    0.0,    // kIz
                                                    0.0,    // kFF
                                                    1.0,    // kMaxOutput
@@ -212,6 +218,76 @@ const double K_DesiredDriveSpeed[20] = {-1.00,  //-0.95
                                          0.77,  // 0.75
                                          0.88,  // 0.85
                                          1.00}; // 0.95
+
+/* ADAS Cals */
+/* Upper Targeting Cals (UT) */
+/* K_ADAS_UT_LightDelayTIme - Amount of time wait for the camera to have sufficent light before proceeding. [Seconds] */
+const double K_ADAS_UT_LightDelayTIme = 0.060;
+
+/* K_ADAS_UT_LostTargetGx - When the camera has lost the target, the previous error value will be used,
+   but multiplied against this gain so that we don't go too far before getting another good value. */
+const double K_ADAS_UT_LostTargetGx = 0.25;
+
+/* K_ADAS_UT_NoTargetError - When we haven't seen anything from the camera, take a guess.  This will 
+   be the percieved error value until we see something good. */
+const double K_ADAS_UT_NoTargetError = 20;
+
+/* K_ADAS_UT_DebounceTime - Debounce time to hold a given state before preceding to next step. [Seconds] */
+const double K_ADAS_UT_DebounceTime = 0.080;
+
+/* K_ADAS_UT_AllowedLauncherError - Amount of error allowed in launcher speed before attempting to launch balls. [RPM] */
+const double K_ADAS_UT_AllowedLauncherError = 100;
+
+/* K_ADAS_UT_AllowedLauncherTime - Amount of time to remain in auto elevator mode.  For auton only. [Seconds] */
+const double K_ADAS_UT_AllowedLauncherTime = 5;
+
+/* K_ADAS_UT_RotateDeadbandAngle: Deadband angle for upper targeting */
+const double K_ADAS_UT_RotateDeadbandAngle = 0.5;
+
+/* K_ADAS_UT_TargetVisionAngle: This is the desired target angle for the auto vision targeting.  This is due to the offset of the camera. For 2020 - 3.3 */
+const double K_ADAS_UT_TargetVisionAngle = 0.0;
+
+/* K_ADAS_BT_LostTargetGx - When the camera has lost the target, the previous error value will be used,
+   but multiplied against this gain so that we don't go too far before getting another good value. */
+const double K_ADAS_BT_LostTargetGx = 0.25;
+
+/* K_ADAS_BT_NoTargetError - When we haven't seen anything from the camera, take a guess.  This will 
+   be the percieved error value until we see something good. */
+const double K_ADAS_BT_NoTargetError = 20;
+
+/* K_ADAS_BT_DebounceTime - Debounce time to hold a given state before preceding to next step. [Seconds] */
+const double K_ADAS_BT_DebounceTime = 0.080;
+
+/* K_ADAS_BT_RotateDeadbandAngle: Deadband angle for ball targeting */
+const double K_ADAS_BT_RotateDeadbandAngle = 0.5;
+
+/* K_ADAS_BT_TargetVisionAngle: This is the desired target angle for the auto ball vision targeting.  This is due to the offset of the camera. */
+const double K_ADAS_BT_TargetVisionAngle = 2.0;
+
+/* K_ADAS_BT_DistanceAxis: This is the estimated distance from the camera that will be scaled against the drive time table. [meters] */
+const double K_ADAS_BT_DistanceAxis[6] = {0,
+                                          1,
+                                          2,
+                                          3,
+                                          4,
+                                          5};
+
+/* K_ADAS_BT_DesiredDriveTime: This is the amount of time to drive forward to capture the ball based on the estimated distance. [meters] */
+const double K_ADAS_BT_DesiredDriveTime[6] = {0.8,
+                                              1.5,
+                                              2.0,
+                                              2.5,
+                                              3.0,
+                                              3.4};
+
+/* K_ADAS_BT_MaxTimeToWaitForCamera: This is the max amount of time we will wait for a valid distance from the camera. [Seconds] */
+const double K_ADAS_BT_MaxTimeToWaitForCamera = 0.5;
+
+/* K_ADAS_BT_TimedOutDriveForward: This is the default drive forward time when we have waited too long for the camera. [Seconds] */
+const double K_ADAS_BT_TimedOutDriveForward = 1.0;
+
+/* K_ADAS_BT_DriveForwardPct: This is the percent of swerve drive control to go forward to pickup the ball. */
+const double K_ADAS_BT_DriveForwardPct = 0.8;
 
 /*  Rotation calibrations */
 /* K_DesiredRotateSpeedAxis - This is the effective command axis, function of error calculation, in degrees */
@@ -320,7 +396,7 @@ const double K_DesiredLauncherManualSpeed[5] = {0,
 
 /* K_DesiredLauncherSpeedDb: Deadband around the desired launcher speed (in RPM).  
                              Used to indicate when a ball can be launched. */
-const double K_DesiredLauncherSpeedDb = 10;
+const double K_DesiredLauncherSpeedDb = 50;
 
 const double K_LiftYD_PID[E_PID_CalSz] = { 0.1,   // P Gx
                                            0.000002,   // I Gx
@@ -358,6 +434,7 @@ const double K_RotateDeadbandAngle = 0.5;
 // This is the desired target angle for the auto vision targeting.  This is due to the offset of the camera. For 2020 - 3.3
 const double K_TargetVisionAngleUpper = 0.0;
 
+// This is the desired target angle for the auto ball vision targeting.  This is due to the offset of the camera.
 const double K_TargetVisionAngleLower = 2.0;
 
 

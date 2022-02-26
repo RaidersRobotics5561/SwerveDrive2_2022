@@ -15,7 +15,6 @@
 extern double V_IntakePowerCmnd;
 extern double V_ElevatorPowerCmnd;
 extern double V_ShooterRPM_Cmnd;
-extern T_LauncherStates V_LauncherState;
 extern bool   V_ShooterTargetSpeedReached;
 
 void BallHandlerMotorConfigsInit(rev::SparkMaxPIDController m_rightShooterpid,
@@ -31,12 +30,9 @@ void BallHandlerControlMain(bool L_IntakeInCmnd,
                             bool L_ElevatorCmndDwn,
                             bool L_DisableShooter,
                             bool L_AutoShootReq,
-                            bool L_AutoRotateComplete,
-                            bool L_VisionTopTargetAquired,
-                            double L_TopTargetDistanceMeters,
                             double L_LauncherCurrentSpeed,
                             double L_ManualShooter,
-                            T_CameraLightStatus L_CameraLightStatus,
+                            double L_AutoShootCmnd,
                             double *L_Intake,
                             double *L_Elevator,
                             double *L_Shooter);

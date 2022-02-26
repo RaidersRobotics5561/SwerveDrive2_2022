@@ -126,4 +126,27 @@ typedef enum T_GetDaBalls
   E_GetDaIntakeAndRun
 } T_GetDaBalls;
 
+typedef enum T_ADAS_BT_BallTarget /* aka GetDaBalls */
+{
+  E_ADAS_BT_Disabled,
+  E_ADAS_BT_AutoCenter,
+  E_ADAS_BT_IntakeAndRun,
+} T_ADAS_BT_BallTarget;
+
+typedef enum T_ADAS_UT_UpperTarget
+{
+  E_ADAS_UT_Disabled,
+  E_ADAS_UT_CameraLightOn,
+  E_ADAS_UT_AutoCenter,
+  E_ADAS_UT_LauncherSpeed,
+  E_ADAS_UT_ElevatorControl
+} T_ADAS_UT_UpperTarget;
+
+typedef enum T_ADAS_ActiveFeature
+{
+  E_ADAS_Disabled,
+  E_ADAS_AutoUpperTarget,
+  E_ADAS_AutoBallTarget
+} T_ADAS_ActiveFeature;
+
 #endif
