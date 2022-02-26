@@ -35,6 +35,9 @@ double V_LiftXD_TestPowerCmnd = 0;
 double V_LiftMotorYD_MaxCurrent[E_Lift_State_Sz];
 double V_LiftMotorXD_MaxCurrent[E_Lift_State_Sz];
 
+double KV_LiftMotorYD_RampRate = 0;
+double KV_LiftMotorXD_RampRate = 0;
+
 #ifdef LiftXY_Test
 bool   V_LiftXY_Test = true;
 double V_LiftPID_Gx[E_PID_SparkMaxCalSz];
@@ -79,15 +82,18 @@ void LiftMotorConfigsInit(rev::SparkMaxPIDController m_liftpidYD,
    * - SetSmartMotionAllowedClosedLoopError() will set the max allowed
    * error for the pid controller in Smart Motion mode
    */
-  m_liftpidYD.SetSmartMotionMaxVelocity(K_LiftPID_Gx[E_kMaxVel]);
-  m_liftpidYD.SetSmartMotionMinOutputVelocity(K_LiftPID_Gx[E_kMinVel]);
-  m_liftpidYD.SetSmartMotionMaxAccel(K_LiftPID_Gx[E_kMaxAcc]);
-  m_liftpidYD.SetSmartMotionAllowedClosedLoopError(K_LiftPID_Gx[E_kAllErr]);
+  // m_liftpidYD.SetSmartMotionMaxVelocity(K_LiftPID_Gx[E_kMaxVel]);
+  // m_liftpidYD.SetSmartMotionMinOutputVelocity(K_LiftPID_Gx[E_kMinVel]);
+  // m_liftpidYD.SetSmartMotionMaxAccel(K_LiftPID_Gx[E_kMaxAcc]);
+  // m_liftpidYD.SetSmartMotionAllowedClosedLoopError(K_LiftPID_Gx[E_kAllErr]);
 
-  m_liftpidXD.SetSmartMotionMaxVelocity(K_LiftPID_Gx[E_kMaxVel]);
-  m_liftpidXD.SetSmartMotionMinOutputVelocity(K_LiftPID_Gx[E_kMinVel]);
-  m_liftpidXD.SetSmartMotionMaxAccel(K_LiftPID_Gx[E_kMaxAcc]);
-  m_liftpidXD.SetSmartMotionAllowedClosedLoopError(K_LiftPID_Gx[E_kAllErr]);
+  // m_liftpidXD.SetSmartMotionMaxVelocity(K_LiftPID_Gx[E_kMaxVel]);
+  // m_liftpidXD.SetSmartMotionMinOutputVelocity(K_LiftPID_Gx[E_kMinVel]);
+  // m_liftpidXD.SetSmartMotionMaxAccel(K_LiftPID_Gx[E_kMaxAcc]);
+  // m_liftpidXD.SetSmartMotionAllowedClosedLoopError(K_LiftPID_Gx[E_kAllErr]);
+
+  KV_LiftMotorXD_RampRate = K_LiftPID_Gx[E_kMaxVel];
+  KV_LiftMotorYD_RampRate = K_LiftPID_Gx[E_kMaxVel];
   
   #ifdef LiftXY_Test
   T_PID_SparkMaxCal L_Index = E_kP;
@@ -151,10 +157,10 @@ void LiftMotorConfigsCal(rev::SparkMaxPIDController m_liftpidYD,
   if((L_iz != V_LiftPID_Gx[E_kIz])) { m_liftpidYD.SetIZone(L_iz); m_liftpidXD.SetIZone(L_iz); V_LiftPID_Gx[E_kIz] = L_iz; }
   if((L_ff != V_LiftPID_Gx[E_kFF])) { m_liftpidYD.SetFF(L_ff); m_liftpidXD.SetFF(L_ff); V_LiftPID_Gx[E_kFF] = L_ff; }
   if((L_max != V_LiftPID_Gx[E_kMaxOutput]) || (L_min != K_LauncherPID_Gx[E_kMinOutput])) { m_liftpidYD.SetOutputRange(L_min, L_max); m_liftpidXD.SetOutputRange(L_min, L_max); V_LiftPID_Gx[E_kMinOutput] = L_min; V_LiftPID_Gx[E_kMaxOutput] = L_max; }
-  if((L_maxV != V_LiftPID_Gx[E_kMaxVel])) { m_liftpidYD.SetSmartMotionMaxVelocity(L_maxV); m_liftpidXD.SetSmartMotionMaxVelocity(L_maxV); V_LiftPID_Gx[E_kMaxVel] = L_maxV; }
-  if((L_minV != V_LiftPID_Gx[E_kMinVel])) { m_liftpidYD.SetSmartMotionMinOutputVelocity(L_minV); m_liftpidXD.SetSmartMotionMinOutputVelocity(L_minV); V_LiftPID_Gx[E_kMinVel] = L_minV; }
-  if((L_maxA != V_LiftPID_Gx[E_kMaxAcc])) { m_liftpidYD.SetSmartMotionMaxAccel(L_maxA); m_liftpidXD.SetSmartMotionMaxAccel(L_maxA); V_LiftPID_Gx[E_kMaxAcc] = L_maxA; }
-  if((L_allE != V_LiftPID_Gx[E_kAllErr])) { m_liftpidYD.SetSmartMotionAllowedClosedLoopError(L_allE); m_liftpidXD.SetSmartMotionAllowedClosedLoopError(L_allE); V_LiftPID_Gx[E_kAllErr] = L_allE; }
+  if((L_maxV != V_LiftPID_Gx[E_kMaxVel])) { KV_LiftMotorYD_RampRate = L_maxV; KV_LiftMotorXD_RampRate = L_maxV; V_LiftPID_Gx[E_kMaxVel] = L_maxV; }
+  if((L_minV != V_LiftPID_Gx[E_kMinVel])) { KV_LiftMotorYD_RampRate = L_minV; KV_LiftMotorYD_RampRate = L_minV; V_LiftPID_Gx[E_kMinVel] = L_minV; }
+  // if((L_maxA != V_LiftPID_Gx[E_kMaxAcc])) { KV_LiftMotorYD_RampRate = L_maxA; KV_LiftMotorXD_RampRate = L_maxA; V_LiftPID_Gx[E_kMaxAcc] = L_maxA; }
+  // if((L_allE != V_LiftPID_Gx[E_kAllErr])) { m_liftpidYD.SetSmartMotionAllowedClosedLoopError(L_allE); m_liftpidXD.SetSmartMotionAllowedClosedLoopError(L_allE); V_LiftPID_Gx[E_kAllErr] = L_allE; }
   #endif
   }
 
@@ -280,12 +286,14 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
                                    double              L_liftMotorXD_CurrentOut)
   {
   T_Lift_State L_Commanded_State = L_current_state;
+  double L_lift_command_YD_Temp = 0;
+  double L_lift_command_XD_Temp = 0;
 
   if (V_LiftXY_Test == true)
     {
     /* Only used for testing. */
-    *L_lift_command_YD = V_LiftYD_TestLocation;
-    *L_lift_command_XD = V_LiftXD_TestLocation;
+    L_lift_command_YD_Temp = V_LiftYD_TestLocation;
+    L_lift_command_XD_Temp = V_LiftXD_TestLocation;
     }
   else
     {
@@ -294,11 +302,11 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
         case E_S0_BEGONE:
             if (L_DriverLiftCmndDirection == E_LiftCmndUp)
               {
-              *L_lift_command_YD += K_lift_driver_up_rate_YD;
+              L_lift_command_YD_Temp = *L_lift_command_YD + K_lift_driver_up_rate_YD;
               }
             else if (L_DriverLiftCmndDirection == E_LiftCmndDown)
               {
-              *L_lift_command_YD -= K_lift_driver_down_rate_YD;
+              L_lift_command_YD_Temp = *L_lift_command_YD - K_lift_driver_down_rate_YD;
               }
             /* The driver should only initiate the state machine once the robot has become suspended. */
             if (L_game_time <= C_End_game_time && L_driver_button == true && L_lift_measured_position_YD >= K_lift_enable_auto_YD) {
@@ -314,63 +322,63 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
         // break; 
 
         case E_S2_lift_down_YD:
-            V_criteria_met = S2_lift_down_YD(L_lift_measured_position_YD, L_lift_measured_position_XD, L_lift_command_YD, L_lift_command_XD);
+            V_criteria_met = S2_lift_down_YD(L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp);
             if(V_criteria_met == true){
               L_Commanded_State =   E_S3_move_forward_XD;
             }
         break;
 
         case E_S3_move_forward_XD:
-            V_criteria_met = S3_move_forward_XD(L_lift_measured_position_YD, L_lift_measured_position_XD, L_lift_command_YD, L_lift_command_XD);
+            V_criteria_met = S3_move_forward_XD(L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp);
             if(V_criteria_met == true){
               L_Commanded_State =   E_S4_stretch_up_YD;
             }
         break;
 
         case E_S4_stretch_up_YD:
-            V_criteria_met = S4_stretch_up_YD(L_lift_measured_position_YD, L_lift_measured_position_XD, L_lift_command_YD, L_lift_command_XD);
+            V_criteria_met = S4_stretch_up_YD(L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp);
             if(V_criteria_met == true){
               L_Commanded_State =   E_S5_more_forward_XD;
             }
         break;
 
         case E_S5_more_forward_XD:
-            V_criteria_met = S5_more_forward_XD(L_lift_measured_position_YD, L_lift_measured_position_XD, L_lift_command_YD, L_lift_command_XD);
+            V_criteria_met = S5_more_forward_XD(L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp);
             if(V_criteria_met == true){
               L_Commanded_State =   E_S6_lift_up_more_YD;
             }
         break;
 
         case E_S6_lift_up_more_YD:
-            V_criteria_met = S6_lift_up_more_YD(L_lift_measured_position_YD, L_lift_measured_position_XD, L_lift_command_YD, L_lift_command_XD);
+            V_criteria_met = S6_lift_up_more_YD(L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp);
             if(V_criteria_met == true){
               L_Commanded_State =   E_S7_move_back_XD;
             }
         break;
 
         case E_S7_move_back_XD:
-            V_criteria_met = S7_move_back_XD(L_lift_measured_position_YD, L_lift_measured_position_XD, L_gyro_yawangledegrees, L_lift_command_YD, L_lift_command_XD);
+            V_criteria_met = S7_move_back_XD(L_lift_measured_position_YD, L_lift_measured_position_XD, L_gyro_yawangledegrees, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp);
             if(V_criteria_met == true){
               L_Commanded_State =   E_S7_move_back_XD;
             }
         break;
 
         case E_S8_more_down_some_YD:
-            V_criteria_met = S8_more_down_some_YD(L_lift_measured_position_YD, L_lift_measured_position_XD, L_lift_command_YD, L_lift_command_XD);
+            V_criteria_met = S8_more_down_some_YD(L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp);
             if(V_criteria_met == true){
               L_Commanded_State =   E_S9_back_rest_XD;
             }
         break;
 
         case E_S9_back_rest_XD:
-            V_criteria_met = S9_back_rest_XD(L_lift_measured_position_YD, L_lift_measured_position_XD, L_lift_command_YD, L_lift_command_XD);
+            V_criteria_met = S9_back_rest_XD(L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp);
             if(V_criteria_met == true){
               L_Commanded_State =   E_S10_final_YD;
             }
         break;
 
         case E_S10_final_YD:
-            V_criteria_met = S10_final_YD(L_lift_measured_position_YD, L_lift_measured_position_XD, L_lift_command_YD, L_lift_command_XD);
+            V_criteria_met = S10_final_YD(L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp);
             if(V_criteria_met == true && V_lift_counter < 1){
               L_Commanded_State = E_S3_move_forward_XD;
               V_lift_counter++;
@@ -381,29 +389,36 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
         break;
 
         case E_S11_Stop:
-            V_criteria_met = S11_Stop(L_lift_measured_position_YD, L_lift_measured_position_XD, L_lift_command_YD, L_lift_command_XD);
+            V_criteria_met = S11_Stop(L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp);
         break;
       }
     }
 
   /* Place limits on the travel of XD and YD to prevent damage: */
-  if (*L_lift_command_YD > K_lift_max_YD)
+  if (L_lift_command_YD_Temp > K_lift_max_YD)
     {
-    *L_lift_command_YD = K_lift_max_YD;
+    L_lift_command_YD_Temp = K_lift_max_YD;
     }
-  else if (*L_lift_command_YD < K_lift_min_YD)
+  else if (L_lift_command_YD_Temp < K_lift_min_YD)
     {
-    *L_lift_command_YD = K_lift_max_YD;
+    L_lift_command_YD_Temp = K_lift_max_YD;
     }
 
-  if (*L_lift_command_XD > K_lift_max_XD)
+  if (L_lift_command_XD_Temp > K_lift_max_XD)
     {
-    *L_lift_command_XD = K_lift_max_XD;
+    L_lift_command_XD_Temp = K_lift_max_XD;
     }
-  else if (*L_lift_command_XD < K_lift_min_XD)
+  else if (L_lift_command_XD_Temp < K_lift_min_XD)
     {
-    *L_lift_command_XD = K_lift_max_XD;
+    L_lift_command_XD_Temp = K_lift_max_XD;
     }
+
+  *L_lift_command_YD= RampTo(L_lift_command_YD_Temp, *L_lift_command_YD, KV_LiftMotorYD_RampRate);
+
+  *L_lift_command_XD= RampTo(L_lift_command_XD_Temp, *L_lift_command_XD, KV_LiftMotorXD_RampRate);
+
+  frc::SmartDashboard::PutNumber("L_lift_command_YD_Temp", L_lift_command_YD_Temp);
+  frc::SmartDashboard::PutNumber("L_lift_command_YD", *L_lift_command_YD);
 
   RecordLiftMotorMaxCurrent(L_current_state,
                             L_liftMotorYD_CurrentOut,

@@ -4,7 +4,7 @@
 #include <units/length.h>
 
 // Define the desired test state here: COMP (no test), BallHandlerTest, LiftXY_Test, DriveMotorTest
-#define BallHandlerTest
+#define LiftXY_Test
 
 const double C_ExeTime = 0.02; // Set to match the the default controller loop time of 20 ms
 const units::second_t C_ExeTime_t = 0.02_s; // Set to match the the default controller loop time of 20 ms
@@ -29,10 +29,10 @@ static const int C_intakeID = 14;
 // DIO IDs:
 static const int C_MagEncoderFL_ID = 2, C_MagEncoderFR_ID = 1, C_MagEncoderRL_ID = 3, C_MagEncoderRR_ID = 0;
 static const int C_XY_LimitSwitch_ID = 4, C_XD_LimitSwitch_ID = 6, C_IR_Sensor_ID = 9, C_CameraLightControl_ID = 7;
-static const int C_Voltage_Woman = 5; //gENDER?!?!?!?!?!??!
+static const int C_Voltage_Woman = 5;
 
 // PWM IDs:
-static const int C_VanityLight_ID = 1;
+static const int C_VanityLight_ID = 0;
 
 const double K_SteerMotorCurrentLimit = 25;
 static const double C_EncoderToAngle = 360; // Raw output of PWM encoder to degrees
@@ -63,7 +63,7 @@ const double C_W = 0.5969;
 /* C_R: Constant composed of the C_W and C_L constants: R = sqrt(L^2 + W^2) [meters]*/
 const double C_R = 0.8441;
 
-const double K_lift_max_YD = 207; //distance from floor to mid rung (60.25 inches)
+const double K_lift_max_YD = 210; //distance from floor to mid rung (60.25 inches)
 const double K_lift_enable_auto_YD = 180; //distance the lift must be above to allow the driver to enable the auto climb
 const double K_lift_mid_YD = 60; //lift YD is aligned with lift XD
 const double K_lift_min_traversal_YD = 15; //lift YD commanded value for start of handoff to XD
@@ -74,10 +74,10 @@ const double K_lift_rate_down_YD = -0.001; //RampTo slope for lift down
 const double K_lift_deadband_YD = 0.5; //it's a deadband for the y lift yeah
 const double K_lift_driver_up_rate_YD = 0.52; // This is the amount added per loop (0.02 sec)
 const double K_lift_driver_down_rate_YD = 0.25; // This is the amount added per loop (0.02 sec)
-const double K_lift_driver_manual_up_YD = 1.0; // Manual override power
+const double K_lift_driver_manual_up_YD = 0.25; // Manual override power
 const double K_lift_driver_manual_down_YD = -0.25; // Manual override power
 
-const double K_lift_max_XD = 135; //distance between bars (24 inches)
+const double K_lift_max_XD = 133; //distance between bars (24 inches)
 const double K_lift_travel_for_YD_handoff_XD = 90; //lift XD position to allow for robot to rotate to enage YD hook
 const double K_lift_mid_XD = 30; //lift XD is aligned with lift YD
 const double K_lift_min_XD = 0; //we don't want XD to move cuz it's a loser
@@ -165,16 +165,16 @@ const double K_LauncherPID_Gx[E_PID_SparkMaxCalSz] = { 0.00055,    // kP
                                                       55.0,    // kMaxAcc
                                                        0.0};   // kAllErr
 
-const double K_LiftPID_Gx[E_PID_SparkMaxCalSz] = { 0.001,    // kP
-                                                   0.000, // kI
-                                                   0.0,    // kD
+const double K_LiftPID_Gx[E_PID_SparkMaxCalSz] = { 0.1,    // kP
+                                                   0.000001, // kI
+                                                   0.002000,    // kD
                                                    0.0,    // kIz
                                                    0.0,    // kFF
                                                    1.0,    // kMaxOutput
                                                   -1.0,    // kMinOutput
-                                                  20.0,    // kMaxVel
-                                                 -20.0,    // kMinVel
-                                                  10.0,    // kMaxAcc
+                                                   8.0,    // kMaxVel
+                                                   0.5,    // kMinVel
+                                                   0.0,    // kMaxAcc
                                                    0.0};   // kAllErr
 
 const double K_DesiredDriveSpeedAxis[20] = {-0.95,

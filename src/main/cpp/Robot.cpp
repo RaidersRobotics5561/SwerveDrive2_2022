@@ -472,6 +472,22 @@ void Robot::TestPeriodic()
   m_liftMotorYD.Set(V_LiftYD_TestPowerCmnd);
   m_liftMotorXD.Set(V_LiftXD_TestPowerCmnd);
 
+  if (V_Driver_stops_shooter == true)
+    {
+    EncodersInit(m_encoderFrontRightSteer,
+               m_encoderFrontLeftSteer,
+               m_encoderRearRightSteer,
+               m_encoderRearLeftSteer,
+               m_encoderFrontRightDrive,
+               m_encoderFrontLeftDrive,
+               m_encoderRearRightDrive,
+               m_encoderRearLeftDrive,
+               m_encoderLiftYD,
+               m_encoderLiftXD,
+               m_encoderrightShooter,
+               m_encoderleftShooter);
+    }
+
   m_frontLeftDriveMotor.Set(0);
   m_frontRightDriveMotor.Set(0);
   m_rearLeftDriveMotor.Set(0);

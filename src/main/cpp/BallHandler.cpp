@@ -27,6 +27,7 @@ double V_ShooterTestSpeed  = 0;
 bool   V_ShooterTargetSpeedReached = false;
 double V_ShooterRPM_CmndPrev = 0;
 double KV_ShooterRampRate = 0;
+// double V_LauncherPID_Gx[E_PID_SparkMaxCalSz];
 
 #ifdef BallHandlerTest
 bool V_BallHandlerTest = true;
@@ -206,7 +207,7 @@ double BallLauncher(bool   L_DisableShooter,
     L_LauncherState = E_LauncherManualActive;
     }
   
-  L_ShooterSpeedCmnd = RampTo(L_ShooterSpeedCmndTemp, V_ShooterRPM_CmndPrev, V_LauncherPID_Gx[E_kMaxAcc]);
+  L_ShooterSpeedCmnd = RampTo(L_ShooterSpeedCmndTemp, V_ShooterRPM_CmndPrev, K_LauncherPID_Gx[E_kMaxAcc]);
 
   V_ShooterRPM_CmndPrev = L_ShooterSpeedCmnd;
   

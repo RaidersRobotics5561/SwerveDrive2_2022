@@ -32,9 +32,11 @@ void BallHandlerControlMain(bool L_IntakeInCmnd,
                             bool L_AutoShootReq,
                             double L_LauncherCurrentSpeed,
                             double L_ManualShooter,
-                            double L_AutoShootCmnd,
+                            bool   L_AutoShootCmndRPM,
                             double *L_Intake,
                             double *L_Elevator,
                             double *L_Shooter);
+
+                            
 
 void BallHandlerInit(void);

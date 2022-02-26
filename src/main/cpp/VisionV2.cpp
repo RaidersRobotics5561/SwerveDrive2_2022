@@ -12,7 +12,7 @@
 #include <photonlib/PhotonCamera.h>
 #include <photonlib/PhotonUtils.h>
 #include "Const.hpp"
-
+#if 0
 // all our favorite variables
 bool   V_VisionTopTargetAquired = false;
 double V_VisionTopYaw = 0;
@@ -99,3 +99,4 @@ if (V_VisionTopTargetAquired == true){
 
  
   }
+#endif

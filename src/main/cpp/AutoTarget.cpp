@@ -4,7 +4,7 @@
   Created on: Feb 25, 2020
   Author: 5561
  */
-
+#if 0
 #include <math.h>
 
 #include "Lookup.hpp"
@@ -106,3 +106,4 @@ T_AutoTargetStates AutoTargeting(T_AutoTargetStates  L_CurrentState,
 
   return (L_CurrentState);
   }
+#endif
