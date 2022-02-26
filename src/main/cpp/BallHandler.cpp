@@ -24,10 +24,9 @@ double V_IntakePowerCmnd   = 0;
 double V_ElevatorPowerCmnd = 0;
 double V_ShooterRPM_Cmnd   = 0;
 double V_ShooterTestSpeed  = 0;
-double V_ShooterTargetDistance = 0;
 bool   V_ShooterTargetSpeedReached = false;
-T_LauncherStates V_LauncherState = E_LauncherNotActive;
 double V_ShooterRPM_CmndPrev = 0;
+double KV_ShooterRampRate = 0;
 
 #ifdef BallHandlerTest
 bool V_BallHandlerTest = true;
@@ -94,6 +93,8 @@ void BallHandlerMotorConfigsInit(rev::SparkMaxPIDController m_rightShooterpid,
       {
       V_LauncherPID_Gx[L_Index] = K_LauncherPID_Gx[L_Index];
       }
+
+  KV_ShooterRampRate = V_LauncherPID_Gx[E_kMaxAcc];
   
   // display PID coefficients on SmartDashboard
   frc::SmartDashboard::PutNumber("P Gain", K_LauncherPID_Gx[E_kP]);
@@ -149,16 +150,11 @@ void BallHandlerMotorConfigsCal(rev::SparkMaxPIDController m_rightShooterpid,
   if((L_ff != V_LauncherPID_Gx[E_kFF])) { m_rightShooterpid.SetFF(L_ff); m_leftShooterpid.SetFF(L_ff); V_LauncherPID_Gx[E_kFF] = L_ff; }
   if((L_max != V_LauncherPID_Gx[E_kMaxOutput]) || (L_min != K_LauncherPID_Gx[E_kMinOutput])) { m_rightShooterpid.SetOutputRange(L_min, L_max); m_leftShooterpid.SetOutputRange(L_min, L_max); V_LauncherPID_Gx[E_kMinOutput] = L_min; V_LauncherPID_Gx[E_kMaxOutput] = L_max; }
 
-  if((L_maxV != V_LauncherPID_Gx[E_kMaxVel])) {  V_LauncherPID_Gx[E_kMaxVel] = L_maxV; }
   // if((L_maxV != V_LauncherPID_Gx[E_kMaxVel])) { m_rightShooterpid.SetSmartMotionMaxVelocity(L_maxV); m_leftShooterpid.SetSmartMotionMaxVelocity(L_maxV); V_LauncherPID_Gx[E_kMaxVel] = L_maxV; }
   // if((L_minV != V_LauncherPID_Gx[E_kMinVel])) { m_rightShooterpid.SetSmartMotionMinOutputVelocity(L_minV); m_leftShooterpid.SetSmartMotionMinOutputVelocity(L_minV); V_LauncherPID_Gx[E_kMinVel] = L_minV; }
-  // if((L_maxA != V_LauncherPID_Gx[E_kMaxAcc])) { m_rightShooterpid.SetSmartMotionMaxAccel(L_maxA); m_leftShooterpid.SetSmartMotionMaxAccel(L_maxA); V_LauncherPID_Gx[E_kMaxAcc] = L_maxA; }
+  if((L_maxA != V_LauncherPID_Gx[E_kMaxAcc])) { KV_ShooterRampRate = L_maxA; V_LauncherPID_Gx[E_kMaxAcc] = L_maxA; }
   // if((L_allE != V_LauncherPID_Gx[E_kAllErr])) { m_rightShooterpid.SetSmartMotionAllowedClosedLoopError(L_allE); m_leftShooterpid.SetSmartMotionAllowedClosedLoopError(L_allE); V_LauncherPID_Gx[E_kAllErr] = L_allE; }
   #endif
-  // max velocity 55
-  //p gain 0.00055
-  // I gain 0.000001
-  
   }
 
 
@@ -172,8 +168,6 @@ void BallHandlerInit()
   V_IntakePowerCmnd = 0;
   V_ElevatorPowerCmnd = 0;
   V_ShooterRPM_Cmnd = 0;
-  V_LauncherState = E_LauncherNotActive;
-  V_ShooterTargetDistance = 0.0;
   V_ShooterTargetSpeedReached = false;
   V_ShooterRPM_CmndPrev = 0;
   }
@@ -187,72 +181,43 @@ void BallHandlerInit()
  ******************************************************************************/
 double BallLauncher(bool   L_DisableShooter,
                     bool   L_AutoShootReq,
-                    bool   L_AutoRotateComplete,
-                    bool   L_VisionTopTargetAquired,
-                    double L_TopTargetDistanceMeters,
+                    double L_AutoShootCmnd,
                     double L_ManualShooter,
-                    double L_LauncherCurrentSpeed,
-                    T_CameraLightStatus L_CameraLightStatus)
+                    double L_LauncherCurrentSpeed)
   {
-  double           L_ShooterSpeedCmnd = 0;
-  T_LauncherStates L_LauncherState    = E_LauncherNotActive;
-  bool L_ShooterTargetSpeedReached = false;
-
-  if ((V_LauncherState == E_LauncherAutoTargetActive) && 
-      ((L_CameraLightStatus == E_LightTurnedOff) ||
-       (L_CameraLightStatus == E_LightForcedOffDueToOvertime)))
-    {
-    // Latch the last known good value
-    L_TopTargetDistanceMeters = V_ShooterTargetDistance;
-    }
+  double           L_ShooterSpeedCmnd     = 0;
+  double           L_ShooterSpeedCmndTemp = 0;
+  T_LauncherStates L_LauncherState        = E_LauncherNotActive;
 
   if (V_BallHandlerTest == true)
     {
     // This is only used when in test mode
-    L_ShooterSpeedCmnd = V_ShooterTestSpeed;
-    L_ShooterSpeedCmnd = RampTo(L_ShooterSpeedCmnd, V_ShooterRPM_CmndPrev, V_LauncherPID_Gx[E_kMaxVel]);
+    L_ShooterSpeedCmndTemp = V_ShooterTestSpeed;
     L_LauncherState = E_LauncherManualActive;
     }
-  else if (L_DisableShooter == true)
+  else if (L_AutoShootReq == true)
     {
-    L_ShooterSpeedCmnd = 0;
-    L_LauncherState = E_LauncherNotActive;
-    V_ShooterTargetDistance = 0;
-    }
-  else if (((L_AutoShootReq == true) &&
-            (L_VisionTopTargetAquired == true) &&
-            (L_CameraLightStatus == E_LightOnTargetingReady)) ||
-
-           ((V_LauncherState == E_LauncherAutoTargetActive) &&
-            (L_CameraLightStatus == E_LightOnTargetingReady) &&
-            (L_ManualShooter < K_DesiredLauncherManualDb)))
-    {
-    L_ShooterSpeedCmnd = DtrmnAutoLauncherSpeed(L_TopTargetDistanceMeters);
+    L_ShooterSpeedCmndTemp = L_AutoShootCmnd;
     L_LauncherState = E_LauncherAutoTargetActive;
     }
   else if (L_ManualShooter >= K_DesiredLauncherManualDb)
     {
-    L_ShooterSpeedCmnd = DtrmnManualLauncherSpeed(L_ManualShooter);
+    L_ShooterSpeedCmndTemp = DtrmnManualLauncherSpeed(L_ManualShooter);
     L_LauncherState = E_LauncherManualActive;
-    V_ShooterTargetDistance = 0;
     }
+  
+  L_ShooterSpeedCmnd = RampTo(L_ShooterSpeedCmndTemp, V_ShooterRPM_CmndPrev, V_LauncherPID_Gx[E_kMaxAcc]);
 
-  if (L_LauncherState > E_LauncherNotActive)
-    {
-      if ((L_LauncherCurrentSpeed > (L_ShooterSpeedCmnd - K_DesiredLauncherSpeedDb)) &&
-          (L_LauncherCurrentSpeed <= (L_ShooterSpeedCmnd + K_DesiredLauncherSpeedDb)))
-         {
-         L_ShooterTargetSpeedReached = true;
-           if (L_CameraLightStatus == E_LauncherAutoTargetActive)
-             {
-               V_ShooterTargetDistance = L_TopTargetDistanceMeters;
-             }
-         }
-    }
-
-  V_ShooterTargetSpeedReached = L_ShooterTargetSpeedReached;
-  V_LauncherState = L_LauncherState;
   V_ShooterRPM_CmndPrev = L_ShooterSpeedCmnd;
+  
+  if ((fabs(L_ShooterSpeedCmnd - L_LauncherCurrentSpeed) <= K_DesiredLauncherSpeedDb) == true)
+    {
+    V_ShooterTargetSpeedReached = true;
+    }
+  else
+    {
+    V_ShooterTargetSpeedReached = false;
+    }
 
   return (L_ShooterSpeedCmnd);
   }
@@ -266,17 +231,17 @@ double BallLauncher(bool   L_DisableShooter,
 double BallIntake(bool L_DriverIntakeInCmnd,
                   bool L_DriverIntakeOutCmnd)
   {
-    double L_IntakeMotorCmnd = 0;
+  double L_IntakeMotorCmnd = 0;
 
-    if (L_DriverIntakeInCmnd == true)
-      {
-      L_IntakeMotorCmnd = K_IntakePower;
-      }
-    else if (L_DriverIntakeOutCmnd == true)
-      {
-      L_IntakeMotorCmnd = -K_IntakePower;
-      }
-    // Otherwise, leave at 0
+  if (L_DriverIntakeInCmnd == true)
+    {
+    L_IntakeMotorCmnd = K_IntakePower;
+    }
+  else if (L_DriverIntakeOutCmnd == true)
+    {
+    L_IntakeMotorCmnd = -K_IntakePower;
+    }
+  // Otherwise, leave at 0
 
     return (L_IntakeMotorCmnd);
   }
@@ -327,12 +292,9 @@ void BallHandlerControlMain(bool L_IntakeInCmnd,
                             bool L_ElevatorCmndDwn,
                             bool L_DisableShooter,
                             bool L_AutoShootReq,
-                            bool L_AutoRotateComplete,
-                            bool L_VisionTopTargetAquired,
-                            double L_TopTargetDistanceMeters,
                             double L_LauncherCurrentSpeed,
                             double L_ManualShooter,
-                            T_CameraLightStatus L_CameraLightStatus,
+                            bool   L_AutoShootCmndRPM,
                             double *L_Intake,
                             double *L_Elevator,
                             double *L_Shooter)
@@ -343,12 +305,9 @@ void BallHandlerControlMain(bool L_IntakeInCmnd,
 
     L_LauncherRPM = BallLauncher( L_DisableShooter,
                                   L_AutoShootReq,
-                                  L_AutoRotateComplete,
-                                  L_VisionTopTargetAquired,
-                                  L_TopTargetDistanceMeters,
+                                  L_AutoShootCmndRPM,
                                   L_ManualShooter,
-                                  L_LauncherCurrentSpeed,
-                                  L_CameraLightStatus);
+                                  L_LauncherCurrentSpeed);
 
     L_IntakePowerCmnd = BallIntake(L_IntakeInCmnd,
                                    L_IntakeOutCmnd);

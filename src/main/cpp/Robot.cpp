@@ -177,7 +177,7 @@ void Robot::RobotPeriodic()
                     V_Driver_auto_setspeed_shooter,
                     V_MatchTimeRemaining,
                     V_AllianceColor,
-                    V_LauncherState,
+                    E_LauncherNotActive,
                     V_SwerveTargetLockingUpper,
                     V_Driver_CameraLight,
                     V_ShooterTargetSpeedReached,
@@ -270,17 +270,6 @@ void Robot::AutonomousPeriodic()
   double strafe = 0;
   double speen = 0;
     
-  // LightControlMain( V_Driver_SwerveGoalAutoCenter,
-  //                   V_Driver_auto_setspeed_shooter,
-  //                   V_MatchTimeRemaining,
-  //                   V_AllianceColor,
-  //                   V_LauncherState,
-  //                   V_SwerveTargetLockingUpper,
-  //                   V_Driver_CameraLight,
-  //                   V_ShooterTargetSpeedReached,
-  //                  &V_CameraLightCmndOn,
-  //                  &V_VanityLightCmnd);
-
     DtrmnSwerveBotLocation(V_GyroYawAngleRad,
                            &V_Rad_WheelAngleFwd[0],
                            &V_M_WheelDeltaDistance[0]);
@@ -370,17 +359,6 @@ void Robot::TeleopInit()
  ******************************************************************************/
 void Robot::TeleopPeriodic()
   {
-  // LightControlMain( V_Driver_SwerveGoalAutoCenter,
-  //                   V_Driver_auto_setspeed_shooter,
-  //                   V_MatchTimeRemaining,
-  //                   V_AllianceColor,
-  //                   V_LauncherState,
-  //                   V_SwerveTargetLockingUpper,
-  //                   V_Driver_CameraLight,
-  //                   V_ShooterTargetSpeedReached,
-  //                  &V_CameraLightCmndOn,
-  //                  &V_VanityLightCmnd);
-
   DtrmnSwerveBotLocation(V_GyroYawAngleRad,
                          &V_Rad_WheelAngleFwd[0],
                          &V_M_WheelDeltaDistance[0]);
@@ -426,12 +404,9 @@ void Robot::TeleopPeriodic()
                           V_Driver_elevator_down,
                           V_Driver_stops_shooter,
                           V_Driver_auto_setspeed_shooter,
-                          V_autonTargetFin,
-                          V_VisionTopTargetAquired,
-                          V_VisionTopTargetDistanceMeters,
                           V_ShooterSpeedCurr,
                           V_Driver_manual_shooter_desired_speed,
-                          V_CameraLightStatus,
+                          0, // auto shoot command
                          &V_IntakePowerCmnd,
                          &V_ElevatorPowerCmnd,
                          &V_ShooterRPM_Cmnd);

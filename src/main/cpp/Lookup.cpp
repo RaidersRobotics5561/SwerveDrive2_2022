@@ -479,12 +479,12 @@ void DesiredAutonLocation(double  L_t_AutonTime,
   }
 
 /******************************************************************************
- * Function:     DesiredSpeed
+ * Function:     ScaleJoystickAxis
  *
  * Description:  Function to scale the joystick input.
  *               Primarily used for smooth debouncing.
  ******************************************************************************/
-double DesiredSpeed(double L_JoystickAxis)
+double ScaleJoystickAxis(double L_JoystickAxis)
   {
   double L_DesiredDriveSpeed = 0.0;
   int L_AxisSize             = (int)(sizeof(K_DesiredDriveSpeedAxis) / sizeof(K_DesiredDriveSpeed[0]));
@@ -539,6 +539,27 @@ double DtrmnManualLauncherSpeed(double L_DriverAxis)
                                          L_DriverAxis);
 
   return L_DesiredLaunchSpeed;
+  }
+
+/******************************************************************************
+ * Function:     DtrmnTimeToDriveToCaptureBall
+ *
+ * Description:  Function to determine the amount of time to drive forward to 
+ *               capture the ball.
+ ******************************************************************************/
+double DtrmnTimeToDriveToCaptureBall(double L_EstTargetDistance)
+  {
+  double L_DesiredDriveTime = 0.0;
+  int L_AxisSize            = (int)(sizeof(K_ADAS_BT_DistanceAxis) / sizeof(K_ADAS_BT_DesiredDriveTime[0]));
+  int L_CalArraySize        = (int)(sizeof(K_ADAS_BT_DesiredDriveTime) / sizeof(K_ADAS_BT_DesiredDriveTime[0]));
+
+  L_DesiredDriveTime = LookUp1D_Table(&K_ADAS_BT_DistanceAxis[0],
+                                        &K_ADAS_BT_DesiredDriveTime[0],
+                                         L_AxisSize,
+                                         L_CalArraySize,
+                                         L_EstTargetDistance);
+
+  return L_DesiredDriveTime;
   }
 
 /******************************************************************************
