@@ -1,4 +1,4 @@
-#if 0
+
 #include "Robot.h"
 #include <iostream>
 #include <frc/smartdashboard/SmartDashboard.h>
@@ -35,6 +35,9 @@ frc::DriverStation::Alliance AllianceColor;
 // our favorite networktables
 nt::NetworkTableInstance Cam1;
 nt::NetworkTableInstance Cam2;
+
+
+
 
 void VisionDashboard(){
 
@@ -117,6 +120,7 @@ void VisionRun(){
     frc::SmartDashboard::PutBoolean("Bottom Target?", BottomTargetAquired);
     frc::SmartDashboard::PutNumber("Bottom Yaw", BottomYaw);
     frc::SmartDashboard::PutNumber("Bottom Index", BottomIndex); 
+
+
     
 }
-#endif
