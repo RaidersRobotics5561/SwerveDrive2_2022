@@ -13,6 +13,8 @@
 #include "control_pid.hpp"
 #include "Lookup.hpp"
 #include "Const.hpp"
+#include <frc/DriverStation.h>
+
 // #include "BallHandler.hpp"
 
 double V_t_AutonTime;
@@ -74,6 +76,9 @@ void AutonDriveMain(double *L_Pct_JoyStickFwdRev,
     double L_L_Y_Location = 0.0;
     double L_L_FwdRevPosition = 0.0;
     double L_L_Strafe = 0.0;
+
+    
+
 
     if (L_b_RobotInit == false)
       {
@@ -137,6 +142,30 @@ void AutonDriveMain(double *L_Pct_JoyStickFwdRev,
  ******************************************************************************/
 void AutonDriveMain()
   {          
+    
+    double timeleft = frc::DriverStation::GetInstance().GetMatchTime();
+
+      switch (theCoolerInteger){
+        case 1:
+          if ((timeleft > 13) && (timeleft <= 15)){
+              //drive forward
+          }
+          else if ((timeleft > 9) && timeleft <= 13) {
+            //auto pick up da balls function (+ some elevator)
+          }
+          else if ((timeleft > 7) && timeleft <= 9) {
+            //rotate robot 180 degrees
+          }
+          else if ((timeleft > 5) && timeleft <= 7) {
+            //auto align to shooter
+          }
+          else if ((timeleft > 0) && timeleft <= 5) {
+            //shoot the balls (shooter + elevator)
+          }
+
+
+      }
+
         //   switch (theCoolerInteger)
     //   {
     //     case 1:
@@ -408,3 +437,13 @@ void AutonDriveMain()
     //   break;
     //   }
   }
+
+
+
+
+
+
+
+
+
+  
