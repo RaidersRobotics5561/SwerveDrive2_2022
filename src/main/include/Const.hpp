@@ -80,7 +80,7 @@ const double K_lift_S7_YD = 165; //
 const double K_lift_S8_YD = 210; //
 const double K_lift_S9_YD = 210; //stays the same
 const double K_lift_S10_YD = 170; //
-const double K_lift_S11_YD = 150; //
+const double K_lift_S11_YD = 140; //
 
 const double K_lift_max_YD = 210; //distance from floor to mid rung (60.25 inches)
 const double K_lift_min_YD = 0; //it crunch
@@ -219,8 +219,18 @@ const double K_SD_MaxGain = 0.75;
 /* K_SD_AutoRotateGx: Gain applied to the rotate command for auto functionality. */
 const double K_SD_AutoRotateGx = 0.1;
 
-/* K_SD_WheelMaxSpeed: Max RPM speed of the swerve drive wheel.*/
+/* K_SD_WheelMaxSpeed: Max in/sec speed of the swerve drive wheel.*/
 const double K_SD_WheelMaxSpeed = 225;
+
+/* K_SD_WheelMinCmndSpeed: Min in/sec speed of the swerve drive wheel to keep it under PID control.  
+  If the absolute value of the command, wheels will transition to 0 power (but still in brake 
+  mode).  There is a corresponding actual speed threshold. [in/sec] */
+const double K_SD_WheelMinCmndSpeed = 0.2;
+
+/* K_SD_WheelMinActualSpeed: Min in/sec speed of the swerve drive wheel to keep it under PID control.  
+  If the absolute value of the actual speed, wheels will transition to 0 power (but still in brake 
+  mode).  There is a corresponding commanded speed threshold. [in/sec] */
+const double K_SD_WheelMinActualSpeed = 3;
 
 /* K_SD_WheelSpeedPID_V2_Gx: PID gains for the driven wheels that is within the motor controllers. */
 const double K_SD_WheelSpeedPID_V2_Gx[E_PID_SparkMaxCalSz] = { 0.00055,  // kP
@@ -252,14 +262,14 @@ double const K_SD_WheelSpeedPID_Gx[E_PID_CalSz] = { 0.009,     // P Gx
 const double K_SD_WheelAnglePID_Gx[E_PID_CalSz] = { 0.007,     // P Gx
                                                     0.0005,    // I Gx
                                                     0.0000005, // D Gx
-                                                    0.4,       // P UL
-                                                   -0.4,       // P LL
-                                                    0.1000,      // I UL
-                                                   -0.1000,      // I LL
-                                                    0.5,       // D UL
-                                                   -0.5,       // D LL
-                                                    0.9,       // Max upper
-                                                   -0.9};      // Max lower
+                                                    1.0,       // P UL - 0.4
+                                                   -1.0,       // P LL - -0.4
+                                                    0.1000,      // I UL - 0.1
+                                                   -0.1000,      // I LL - -0.1
+                                                    1.0,       // D UL 0.5
+                                                   -1.0,       // D LL -0.5
+                                                    1.0,       // Max upper 0.9
+                                                   -1.0};      // Max lower -0.9
 
 /* K_SD_DesiredDriveSpeedAxis: Joystick scale axis for K_SD_DesiredDriveSpeed.  */
 const double K_SD_DesiredDriveSpeedAxis[20] = {-0.95,

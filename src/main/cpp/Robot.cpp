@@ -364,8 +364,8 @@ void Robot::TeleopInit()
   LiftControlInit();
   OdometryInit();
   VisionInit(V_AllianceColor);
-      m_encoderrightShooter.SetPosition(0);
-    m_encoderleftShooter.SetPosition(0);
+  m_encoderrightShooter.SetPosition(0);
+  m_encoderleftShooter.SetPosition(0);
 }
 
 
@@ -430,10 +430,20 @@ void Robot::TeleopPeriodic()
 
   // Motor output commands:
     #ifdef DriveMotorTest
-    m_frontLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kVelocity);
-    m_frontRightDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kVelocity);
-    m_rearLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_RearLeft],     rev::ControlType::kVelocity);
-    m_rearRightDrivePID.SetReference(V_WheelSpeedCmnd[E_RearRight],   rev::ControlType::kVelocity);
+    if (V_SD_DriveWheelsInPID == true)
+      {
+      m_frontLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kVelocity);
+      m_frontRightDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kVelocity);
+      m_rearLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_RearLeft],     rev::ControlType::kVelocity);
+      m_rearRightDrivePID.SetReference(V_WheelSpeedCmnd[E_RearRight],   rev::ControlType::kVelocity);
+      }
+    else
+      {
+      m_frontLeftDriveMotor.Set(0);
+      m_frontRightDriveMotor.Set(0);
+      m_rearLeftDriveMotor.Set(0);
+      m_rearRightDriveMotor.Set(0);
+      }
     #endif
     #ifndef DriveMotorTest
     m_frontLeftDriveMotor.Set(V_WheelSpeedCmnd[E_FrontLeft]);
