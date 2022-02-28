@@ -403,6 +403,7 @@ void Robot::TeleopPeriodic()
                     V_VisionBottomYaw);
 
   V_Lift_state = Lift_Control_Dictator(V_Driver_lift_control,
+                                       V_Driver_StopShooterAutoClimbResetGyro,
                                        V_Driver_Lift_Cmnd_Direction,
                                        V_MatchTimeRemaining,
                                        V_Lift_state,
@@ -419,7 +420,7 @@ void Robot::TeleopPeriodic()
                           V_BallDetectedUpper,
                           V_Driver_elevator_up,
                           V_Driver_elevator_down,
-                          V_Driver_stops_shooter,
+                          V_Driver_StopShooterAutoClimbResetGyro,
                           V_Driver_auto_setspeed_shooter,
                           V_ShooterSpeedCurr,
                           V_Driver_manual_shooter_desired_speed,
@@ -497,7 +498,7 @@ void Robot::TestPeriodic()
   m_liftMotorYD.Set(V_LiftYD_TestPowerCmnd);
   m_liftMotorXD.Set(V_LiftXD_TestPowerCmnd);
 
-  if (V_Driver_stops_shooter == true)
+  if (V_Driver_StopShooterAutoClimbResetGyro == true)
     {
     EncodersInit(m_encoderFrontRightSteer,
                  m_encoderFrontLeftSteer,

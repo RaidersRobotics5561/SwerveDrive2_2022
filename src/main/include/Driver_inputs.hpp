@@ -9,7 +9,7 @@
 
  extern bool                V_Driver_lift_control;
  extern bool                V_Driver_zero_gyro;
- extern bool                V_Driver_stops_shooter;
+ extern bool                V_Driver_StopShooterAutoClimbResetGyro;
  extern bool                V_Driver_auto_setspeed_shooter;
  extern bool                V_Driver_elevator_up;
  extern bool                V_Driver_elevator_down;

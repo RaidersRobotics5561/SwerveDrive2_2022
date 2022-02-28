@@ -34,6 +34,10 @@ double V_LiftXD_TestPowerCmnd = 0;
 double V_LiftMotorYD_MaxCurrent[E_Lift_State_Sz];
 double V_LiftMotorXD_MaxCurrent[E_Lift_State_Sz];
 
+bool   V_Lift_Paused = false;
+double V_Lift_PausedXD_Position = 0;
+double V_Lift_PausedYD_Position = 0;
+
 double KV_LiftMotorXDYD_MinRampRate = 0;
 double KV_LiftMotorXDYD_MaxRampRate = 0;
 
@@ -164,6 +168,10 @@ void LiftControlInit()
   V_LiftYD_TestPowerCmnd = 0;
   V_LiftXD_TestPowerCmnd = 0;
 
+  V_Lift_Paused = false;
+  V_Lift_PausedXD_Position = 0;
+  V_Lift_PausedYD_Position = 0;
+
   for (L_Index = E_S0_BEGONE;
        L_Index < E_Lift_State_Sz;
        L_Index = T_Lift_State(int(L_Index) + 1))
@@ -248,7 +256,8 @@ void Lift_Control_ManualOverride(double *L_lift_command_YD,
  *
  * Description:  Main calling function for lift control.
  ******************************************************************************/
-T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
+T_Lift_State Lift_Control_Dictator(bool                L_driver_auto_climb_button,
+                                   bool                L_driver_auto_climb_pause,
                                    T_LiftCmndDirection L_DriverLiftCmndDirection,
                                    double              L_game_time,
                                    T_Lift_State        L_current_state,                                
@@ -272,8 +281,23 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
     L_lift_command_YD_Temp = V_LiftYD_TestLocation;
     L_lift_command_XD_Temp = V_LiftXD_TestLocation;
     }
-  else
+  else if ((L_driver_auto_climb_pause == true) && (V_Lift_Paused == false))
     {
+    /* The driver pressed a button to puase the climb process.  Let's save the current locations and hold. */
+    V_Lift_Paused = true;
+    V_Lift_PausedXD_Position = L_lift_measured_position_XD;
+    V_Lift_PausedYD_Position = L_lift_measured_position_YD;
+    /* Set commanded location to current measured location for this loop. */
+    L_lift_command_XD_Temp = L_lift_measured_position_XD;
+    L_lift_command_YD_Temp = L_lift_measured_position_YD;
+    }
+  else if (((L_driver_auto_climb_button == true) && (V_Lift_Paused == true)) || 
+            (V_Lift_Paused == false))
+    {
+    V_Lift_Paused = false;
+    V_Lift_PausedXD_Position = 0;
+    V_Lift_PausedYD_Position = 0;
+
     switch (L_current_state)
       {
         case E_S0_BEGONE:
@@ -290,76 +314,76 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
                 L_lift_command_YD_Temp = *L_lift_command_YD;
               }
             /* The driver should only initiate the state machine once the robot has become suspended. */
-            if (L_driver_button == true && L_lift_measured_position_YD >= K_lift_enable_auto_YD) {
+            if (L_driver_auto_climb_button == true && L_lift_measured_position_YD >= K_lift_enable_auto_YD) {
                 L_Commanded_State = E_S2_lift_down_YD;
             }
         break;
 
         case E_S2_lift_down_YD:
-            V_criteria_met = S2_lift_down_YD(L_driver_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
+            V_criteria_met = S2_lift_down_YD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
             if(V_criteria_met == true){
               L_Commanded_State =   E_S3_move_forward_XD;
             }
         break;
 
         case E_S3_move_forward_XD:
-            V_criteria_met = S3_move_forward_XD(L_driver_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
+            V_criteria_met = S3_move_forward_XD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
             if(V_criteria_met == true){
               L_Commanded_State =   E_S4_stretch_up_YD;
             }
         break;
 
         case E_S4_stretch_up_YD:
-            V_criteria_met = S4_stretch_up_YD(L_driver_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
+            V_criteria_met = S4_stretch_up_YD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
             if(V_criteria_met == true){
               L_Commanded_State =   E_S5_more_forward_XD;
             }
         break;
 
         case E_S5_more_forward_XD:
-            V_criteria_met = S5_more_forward_XD(L_driver_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
+            V_criteria_met = S5_more_forward_XD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
             if(V_criteria_met == true){
               L_Commanded_State =   E_S6_lift_up_more_YD;
             }
         break;
 
         case E_S6_lift_up_more_YD:
-            V_criteria_met = S6_lift_up_more_YD(L_driver_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
+            V_criteria_met = S6_lift_up_more_YD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
             if(V_criteria_met == true){
               L_Commanded_State =   E_S7_move_back_XD;
             }
         break;
 
         case E_S7_move_back_XD:
-            V_criteria_met = S7_move_back_XD(L_driver_button, L_lift_measured_position_YD, L_lift_measured_position_XD, L_gyro_yawangledegrees, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
+            V_criteria_met = S7_move_back_XD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, L_gyro_yawangledegrees, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
             if(V_criteria_met == true){
               L_Commanded_State =   E_S8_more_down_some_YD;
             }
         break;
 
         case E_S8_more_down_some_YD:
-            V_criteria_met = S8_more_down_some_YD(L_driver_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
+            V_criteria_met = S8_more_down_some_YD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
             if(V_criteria_met == true){
               L_Commanded_State =   E_S9_back_rest_XD;
             }
         break;
 
         case E_S9_back_rest_XD:
-            V_criteria_met = S9_back_rest_XD(L_driver_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
+            V_criteria_met = S9_back_rest_XD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
             if(V_criteria_met == true){
               L_Commanded_State =   E_S10_final_YD;
             }
         break;
 
         case E_S10_final_YD:
-            V_criteria_met = S10_final_YD(L_driver_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
+            V_criteria_met = S10_final_YD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
             if(V_criteria_met == true){
               L_Commanded_State = E_S11_final_OWO;
             }
         break;
 
         case E_S11_final_OWO:
-            V_criteria_met = S11_final_OWO(L_driver_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
+            V_criteria_met = S11_final_OWO(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
             if(V_criteria_met == true && V_lift_counter < 1){
               L_Commanded_State = E_S2_lift_down_YD;
               V_lift_counter++;
@@ -369,6 +393,12 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
             }
         break;
       }
+    }
+  else
+    {
+    /* Lift is currently paused: */
+    L_lift_command_XD_Temp = V_Lift_PausedXD_Position;
+    L_lift_command_YD_Temp = V_Lift_PausedYD_Position;
     }
 
   /* Place limits on the travel of XD and YD to prevent damage: */
@@ -394,9 +424,6 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
 
   *L_lift_command_XD= RampTo(L_lift_command_XD_Temp, *L_lift_command_XD, L_lift_command_rate_XD);
 
-  frc::SmartDashboard::PutNumber("L_lift_command_YD_Temp", L_lift_command_YD_Temp);
-  frc::SmartDashboard::PutNumber("L_lift_command_YD", *L_lift_command_YD);
-
   RecordLiftMotorMaxCurrent(L_current_state,
                             L_liftMotorYD_CurrentOut,
                             L_liftMotorXD_CurrentOut);
@@ -410,7 +437,7 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
  *
  * Description:  State 2: moving robert up by moving y-lift down
  ******************************************************************************/
- bool S2_lift_down_YD(double         L_driver_button,
+ bool S2_lift_down_YD(double         L_driver_auto_climb_button,
                       double         L_lift_measured_position_YD,
                       double         L_lift_measured_position_XD,
                       double        *L_lift_command_YD,
@@ -440,7 +467,7 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
  *
  * Description:  State 3: moving x lift haha it has to do its job
  ******************************************************************************/
- bool S3_move_forward_XD(double         L_driver_button,
+ bool S3_move_forward_XD(double         L_driver_auto_climb_button,
                          double         L_lift_measured_position_YD,
                          double         L_lift_measured_position_XD,
                          double        *L_lift_command_YD,
@@ -477,7 +504,7 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
  *
  * Description:  State 4: x lift no move, y lift go
  ******************************************************************************/
- bool S4_stretch_up_YD(double         L_driver_button,
+ bool S4_stretch_up_YD(double         L_driver_auto_climb_button,
                        double         L_lift_measured_position_YD,
                        double         L_lift_measured_position_XD,
                        double        *L_lift_command_YD,
@@ -514,7 +541,7 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
  *
  * Description:  State 5: y lift no move, x lift go
  ******************************************************************************/
- bool S5_more_forward_XD(double         L_driver_button,
+ bool S5_more_forward_XD(double         L_driver_auto_climb_button,
                          double         L_lift_measured_position_YD,
                          double         L_lift_measured_position_XD,
                          double        *L_lift_command_YD,
@@ -551,7 +578,7 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
  *
  * Description:  State 6: y lift go down, x lift bad stop what's in your mouth no get back here doN'T EAT IT
  ******************************************************************************/
- bool S6_lift_up_more_YD(double         L_driver_button,
+ bool S6_lift_up_more_YD(double         L_driver_auto_climb_button,
                          double         L_lift_measured_position_YD,
                          double         L_lift_measured_position_XD,
                          double        *L_lift_command_YD,
@@ -588,7 +615,7 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
  *
  * Description:  State 7: X go back-aroni, we look at gyro to make sure we aren't tilted too much
  ******************************************************************************/
- bool S7_move_back_XD(double         L_driver_button,
+ bool S7_move_back_XD(double         L_driver_auto_climb_button,
                       double         L_lift_measured_position_YD,
                       double         L_lift_measured_position_XD,
                       double         L_gyro_yawangledegrees,
@@ -609,7 +636,7 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
 
   if (L_lift_measured_position_XD <= (K_lift_S7_XD + K_lift_deadband_XD)  && L_lift_measured_position_XD >= (K_lift_S7_XD - K_lift_deadband_XD)) {
     V_LiftDebounceTimer += C_ExeTime;
-    if (V_LiftDebounceTimer >= K_Lift_deadband_timer && L_driver_button == true){
+    if (V_LiftDebounceTimer >= K_Lift_deadband_timer && L_driver_auto_climb_button == true){
          /* Let the driver determine when we are not swinging and can proceed */
          L_criteria_met = true;
          V_LiftDebounceTimer = 0;
@@ -626,7 +653,7 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
  *
  * Description:  State 8: me when the lift go down more
  ******************************************************************************/
- bool S8_more_down_some_YD(double         L_driver_button,
+ bool S8_more_down_some_YD(double         L_driver_auto_climb_button,
                            double         L_lift_measured_position_YD,
                            double         L_lift_measured_position_XD,
                            double        *L_lift_command_YD,
@@ -646,7 +673,7 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
 
   if (L_lift_measured_position_YD <= (K_lift_S8_YD + K_lift_deadband_YD) && L_lift_measured_position_YD >= (K_lift_S8_YD - K_lift_deadband_YD)) {
     V_LiftDebounceTimer += C_ExeTime;
-    if (V_LiftDebounceTimer >= K_Lift_deadband_timer && L_driver_button == true){
+    if (V_LiftDebounceTimer >= K_Lift_deadband_timer && L_driver_auto_climb_button == true){
           /* Driver needs to verify hook is on correct side and when we can fully extend YD */
           L_criteria_met = true;
           V_LiftDebounceTimer = 0;
@@ -664,7 +691,7 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
  *
  * Description:  State 9: reset it to initial x position (we aren't fixing my back  :(  )
  ******************************************************************************/
- bool S9_back_rest_XD(double         L_driver_button,
+ bool S9_back_rest_XD(double         L_driver_auto_climb_button,
                       double         L_lift_measured_position_YD,
                       double         L_lift_measured_position_XD,
                       double        *L_lift_command_YD,
@@ -701,7 +728,7 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
  *
  * Description:  State 10: y move down, robert move up (what a chad)
  ******************************************************************************/
- bool S10_final_YD(double         L_driver_button,
+ bool S10_final_YD(double         L_driver_auto_climb_button,
                    double         L_lift_measured_position_YD,
                    double         L_lift_measured_position_XD,
                    double        *L_lift_command_YD,
@@ -738,7 +765,7 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
  *
  * Description:  State 11: uwu
  ******************************************************************************/
- bool S11_final_OWO(double         L_driver_button,
+ bool S11_final_OWO(double         L_driver_auto_climb_button,
                     double         L_lift_measured_position_YD,
                     double         L_lift_measured_position_XD,
                     double        *L_lift_command_YD,
@@ -758,7 +785,7 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
 
   if (L_lift_measured_position_YD <= (K_lift_S11_YD + K_lift_deadband_YD) && L_lift_measured_position_YD >= (K_lift_S11_YD - K_lift_deadband_YD)) {
     V_LiftDebounceTimer += C_ExeTime;
-    if (V_LiftDebounceTimer >= K_Lift_deadband_timer && L_driver_button == true){
+    if (V_LiftDebounceTimer >= K_Lift_deadband_timer && L_driver_auto_climb_button == true){
           L_criteria_met = true;
           V_LiftDebounceTimer = 0;
     }

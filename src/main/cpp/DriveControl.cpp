@@ -625,7 +625,12 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
                                                K_SD_WheelSpeedPID_Gx[E_Max_Ll]);
       #endif
       }
-    
+
+    frc::SmartDashboard::PutNumber("L_WheelSpeedCmnd[E_FrontLeft]", L_WheelSpeedCmnd[E_FrontLeft]);
+    frc::SmartDashboard::PutNumber("V_WheelVelocity[E_FrontLeft]", V_WheelVelocity[E_FrontLeft]);
+    frc::SmartDashboard::PutNumber("L_WA[E_FrontLeft]", L_WA[E_FrontLeft]);
+    frc::SmartDashboard::PutNumber("V_WheelAngleArb[E_FrontLeft]", V_WheelAngleArb[E_FrontLeft]);
+
     V_SD_DriveWheelsInPID = L_SD_DriveWheelsPowered;
     V_Deg_DesiredAngPrev = desiredAngle;
     V_RotateErrorCalc = L_RotateErrorCalc;

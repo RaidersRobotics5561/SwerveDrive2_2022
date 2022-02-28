@@ -33,7 +33,8 @@ void Lift_Control_ManualOverride(double              *L_lift_command_YD,
                                  bool                 L_YD_LimitDetected,
                                  bool                 L_XD_LimitDetected);
 
-T_Lift_State Lift_Control_Dictator(bool                L_driver_button,
+T_Lift_State Lift_Control_Dictator(bool                L_driver_auto_climb_button,
+                                   bool                L_driver_auto_climb_pause,
                                    T_LiftCmndDirection L_DriverLiftCmndDirection,
                                    double              L_game_time,
                                    T_Lift_State        L_current_state,
