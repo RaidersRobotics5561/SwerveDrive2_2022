@@ -3,18 +3,25 @@
 #include <units/angle.h>
 #include <units/length.h>
 
-// Define the desired test state here: COMP (no test), BallHandlerTest, LiftXY_Test, DriveMotorTest
-#define LiftXY_Test
+// Define the desired test state here: COMP (no test), BallHandlerTest, LiftXY_Test, DriveMotorTest, WheelAngleTest
+#define BallHandlerTest 
+// Define the version of vision to use: VISION1 VISION2
+#define VISION2
 
+// RoboRio controller execution time
 const double C_ExeTime = 0.02; // Set to match the the default controller loop time of 20 ms
 const units::second_t C_ExeTime_t = 0.02_s; // Set to match the the default controller loop time of 20 ms
 
+// Amount of time for end game
 const double C_End_game_time = 30;
 
+// Numerical constants
 const double C_RadtoDeg = 57.2958;
 const double C_Deg2Rad = 0.017453292519943295;
 const double C_PI = 3.14159265358979;
 const double C_Tau = 6.28318530717958647;
+
+static const double C_EncoderToAngle = 360; // Raw output of PWM encoder to degrees
 
 // CAN Device IDs:
 static const int C_PDP_ID = 0;
@@ -29,13 +36,14 @@ static const int C_intakeID = 14;
 // DIO IDs:
 static const int C_MagEncoderFL_ID = 2, C_MagEncoderFR_ID = 1, C_MagEncoderRL_ID = 3, C_MagEncoderRR_ID = 0;
 static const int C_XY_LimitSwitch_ID = 4, C_XD_LimitSwitch_ID = 6, C_IR_Sensor_ID = 9, C_CameraLightControl_ID = 7;
-static const int C_Voltage_Woman = 5;
+static const int C_LowerBallSensorID = 5;
 
 // PWM IDs:
 static const int C_VanityLight_ID = 0;
 
+
+// Motor specific cals
 const double K_SteerMotorCurrentLimit = 25;
-static const double C_EncoderToAngle = 360; // Raw output of PWM encoder to degrees
 
 
 // Vision Cals:
@@ -49,121 +57,57 @@ const units::meter_t K_VisionHeight2 = 0.367_m;
 const units::meter_t K_VisionTargetHeight2 = .12_m; // radius of the ball in cm
 const units::radian_t K_VisionCameraPitch2 = 50_deg;
 
-const double K_SteerDriveReductionRatio = 30; //30:1
+
+// Cals for Light Control
+const double K_CameraLightDelay = 0.01; // Delay time between enabling the camera light and allowing the data feed to be used. [seconds]
+const double K_CameraLightMaxOnTime = 5.0; // Max amount of time to have the camera light enabled. [seconds]
+const int    K_LED_NumberOfLEDs = 60; 
+
+
+// Encoder / speed calculation related cals
 const double K_ReductionRatio = 8.31;
 const double K_WheelCircufrence = 12.566; // Circumferance of wheel, in inches
 
-// Constants for swerve drive control:
-/* C_L: Robot wheelbase. [meters] */
-const double C_L = 0.5969;
 
-/* C_W: Robot track width. [meters] */
-const double C_W = 0.5969;
 
-/* C_R: Constant composed of the C_W and C_L constants: R = sqrt(L^2 + W^2) [meters]*/
-const double C_R = 0.8441;
+/* Lift specific calibrations: */
+const double K_lift_S2_YD = 8; //initial lift of the robot
+const double K_lift_S3_YD = 8; //stays the same
+const double K_lift_S4_YD = 26; //Move YD off of hooks
+const double K_lift_S5_YD = 26; //stays the same
+const double K_lift_S6_YD = 38; //lower YD below the rung
+const double K_lift_S7_YD = 165; //
+const double K_lift_S8_YD = 210; //
+const double K_lift_S9_YD = 210; //stays the same
+const double K_lift_S10_YD = 170; //
+const double K_lift_S11_YD = 150; //
 
 const double K_lift_max_YD = 210; //distance from floor to mid rung (60.25 inches)
-const double K_lift_enable_auto_YD = 180; //distance the lift must be above to allow the driver to enable the auto climb
-const double K_lift_mid_YD = 60; //lift YD is aligned with lift XD
-const double K_lift_min_traversal_YD = 15; //lift YD commanded value for start of handoff to XD
 const double K_lift_min_YD = 0; //it crunch
-// const double K_lift_rungs_YD = 15.375; //distance from rung to rung (15.375 inches)
-const double K_lift_rate_up_YD = 0.001; //RampTo slope for lift up
-const double K_lift_rate_down_YD = -0.001; //RampTo slope for lift down
-const double K_lift_deadband_YD = 0.5; //it's a deadband for the y lift yeah
-const double K_lift_driver_up_rate_YD = 0.52; // This is the amount added per loop (0.02 sec)
-const double K_lift_driver_down_rate_YD = 0.25; // This is the amount added per loop (0.02 sec)
+const double K_lift_enable_auto_YD = 150; //distance the lift must be above to allow the driver to enable the auto climb
+const double K_lift_deadband_YD = 1.1; //it's a deadband for the y lift yeah
+const double K_lift_driver_up_rate_YD = 0.75; // This is the amount of traversal added per loop (0.02 sec)
+const double K_lift_driver_down_rate_YD = 0.3; // This is the amount of traversal added per loop (0.02 sec)
 const double K_lift_driver_manual_up_YD = 0.25; // Manual override power
 const double K_lift_driver_manual_down_YD = -0.25; // Manual override power
 
+const double K_lift_S3_XD = 30; //move XD onto the rungs
+const double K_lift_S4_XD = 30; //stays the same
+const double K_lift_S5_XD = 32; //tilt the robot
+const double K_lift_S6_XD = 34; //connect YD with the upper rungs
+const double K_lift_S7_XD = 133; //
+const double K_lift_S8_XD = 133; //stays the same
+const double K_lift_S9_XD = 122; //
+const double K_lift_S10_XD = 122; //stays the same
+const double K_lift_S11_XD = 0; //
+
 const double K_lift_max_XD = 133; //distance between bars (24 inches)
-const double K_lift_travel_for_YD_handoff_XD = 90; //lift XD position to allow for robot to rotate to enage YD hook
-const double K_lift_mid_XD = 30; //lift XD is aligned with lift YD
-const double K_lift_min_XD = 0; //we don't want XD to move cuz it's a loser
-const double K_lift_rate_forward_XD = 0.001; //RampTo slope for lift forward
-const double K_lift_rate_backward_XD = -0.001; //RampTo slope for lift backward
-const double K_lift_deadband_XD = 0.5; //it's a deadband for the x lift yeah
+const double K_lift_min_XD = 0; //we don't want XD to past this or it crunch
+const double K_lift_deadband_XD = 0.7; //it's a deadband for the x lift yeah
 const double K_lift_driver_manual_forward_XD = 0.15; // Manual override power
 const double K_lift_driver_manual_back_XD = -0.15; // Manual override power
 
-const double K_gyro_angle_lift = -10; //robert is tilting
-const double K_gyro_deadband = 2;
-const double K_deadband_timer = 0.5; //keep the deadband for a certain amount of time
-
-const double K_CameraLightDelay = 0.01; // Delay time between enabling the camera light and allowing the data feed to be used. [seconds]
-const double K_CameraLightMaxOnTime = 5.0; // Max amount of time to have the camera light enabled. [seconds]
-
-const double K_IntakePower = 0.7; // Amount of power to apply to intake wheels.  Must be 0 to 1.
-const double K_ElevatorPowerUp = 0.9; // Amount of power to apply to elevator band when commanded up.  Must be 0 to 1.
-const double K_ElevatorPowerDwn = -0.9; // Amount of power to apply to elevator band when commanded down.  Must be -1 to 0.
-
-const double K_WheelOffsetAngle[E_RobotCornerSz] = {169.527239,   // E_FrontLeft
-                                                    128.487963,   // E_FrontRight 152  104.6 
-                                                    33.112801,   // E_RearLeft
-                                                    246.813891}; // E_RearRight 180.703106  144.580063
-
-const double K_WheelMaxSpeed = 225; // This is the max allowed speed for the wheels
-
-const double K_WheelAnglePID_Gx[E_PID_CalSz] = { 0.007,     // P Gx
-                                                 0.0005,    // I Gx
-                                                 0.0000005, // D Gx
-                                                 0.4,       // P UL
-                                                -0.4,       // P LL
-                                                 0.1000,      // I UL
-                                                -0.1000,      // I LL
-                                                 0.5,       // D UL
-                                                -0.5,       // D LL
-                                                 0.9,       // Max upper
-                                                -0.9};      // Max lower
-
-double const K_WheelSpeedPID_Gx[E_PID_CalSz] = { 0.009,     // P Gx
-                                                 0.0009,     // I Gx
-                                                 0.00000005, // D Gx
-                                                 1.0,        // P UL
-                                                -1.0,        // P LL
-                                                 0.5,        // I UL
-                                                -0.5,        // I LL
-                                                 0.2,        // D UL
-                                                -0.2,        // D LL
-                                                 1.0,        // Max upper
-                                                -1.0};       // Max lower
-
-const double K_WheelSpeedPID_V2_Gx[E_PID_SparkMaxCalSz] = { 0.01,   // kP
-                                                            0.0001, // kI
-                                                            1.0,    // kD
-                                                            0.0,    // kIz
-                                                            0.0,    // kFF
-                                                            1.0,    // kMaxOutput
-                                                           -1.0,    // kMinOutput
-                                                          200.0,    // kMaxVel
-                                                         -200.0,    // kMinVel
-                                                          100.0,    // kMaxAcc
-                                                            0.0};   // kAllErr
-
-const double K_RobotRotationPID_Gx[E_PID_CalSz] = { 0.07,   // P Gx
-                                                    0.0,   // I Gx
-                                                    0.0,    // D Gx
-                                                    0.9,    // P UL
-                                                   -0.9,    // P LL
-                                                    0.5,    // I UL
-                                                   -0.5,    // I LL
-                                                    0.2,    // D UL
-                                                   -0.2,    // D LL
-                                                    1.0,    // Max upper
-                                                   -1.0};   // Max lower
-
-const double K_LauncherPID_Gx[E_PID_SparkMaxCalSz] = { 0.00055,    // kP
-                                                       0.000001, // kI
-                                                       0.0,    // kD
-                                                       0.0,    // kIz
-                                                       0.0,    // kFF
-                                                       1.0,    // kMaxOutput
-                                                      -1.0,    // kMinOutput
-                                                       0.0,    // kMaxVel
-                                                       0.0,    // kMinVel
-                                                      55.0,    // kMaxAcc
-                                                       0.0};   // kAllErr
+const double K_Lift_deadband_timer = 0.1; //keep the deadband for a certain amount of time [seconds]
 
 const double K_LiftPID_Gx[E_PID_SparkMaxCalSz] = { 0.1,    // kP
                                                    0.000001, // kI
@@ -172,12 +116,153 @@ const double K_LiftPID_Gx[E_PID_SparkMaxCalSz] = { 0.1,    // kP
                                                    0.0,    // kFF
                                                    1.0,    // kMaxOutput
                                                   -1.0,    // kMinOutput
-                                                   8.0,    // kMaxVel
+                                                   0.93,    // kMaxVel
                                                    0.5,    // kMinVel
                                                    0.0,    // kMaxAcc
                                                    0.0};   // kAllErr
 
-const double K_DesiredDriveSpeedAxis[20] = {-0.95,
+
+
+/* Ball handler (BH) cals: */
+const double K_IntakePower = 0.7; // Amount of power to apply to intake wheels.  Must be 0 to 1.
+
+const double K_ElevatorPowerUp = 0.9; // Amount of power to apply to elevator band when commanded up.  Must be 0 to 1.
+
+const double K_ElevatorPowerDwn = -0.9; // Amount of power to apply to elevator band when commanded down.  Must be -1 to 0.
+
+/* K_BH_LauncherMinCmndSpd: Min speed for launcher control.  Below this speed, launcher will transition to 0 power. */
+const double K_BH_LauncherMinCmndSpd = 10;
+
+/* K_BH_LauncherPID_Gx: PID gains for the launcher. */
+const double K_BH_LauncherPID_Gx[E_PID_SparkMaxCalSz] = { 0.00055,  // kP
+                                                          0.000001, // kI
+                                                          0.0,      // kD
+                                                          0.0,      // kIz
+                                                          0.0,      // kFF
+                                                          1.0,      // kMaxOutput
+                                                         -1.0,      // kMinOutput
+                                                          0.0,      // kMaxVel
+                                                          0.0,      // kMinVel
+                                                         55.0,      // kMaxAcc
+                                                          0.0};     // kAllErr
+
+/* K_BH_LauncherSpeedAxis: Launcher speed axis for K_BH_LauncherSpeed.  Distance is in the unit from the camera.  Comments reflect actual measured distance. */
+const double K_BH_LauncherSpeedAxis[10] = {415,   // 3 ft
+                                           644,   // 5 ft
+                                           840,   // 7 ft
+                                           975,   // 9 ft
+                                           1077,  // 11 ft
+                                           1090,  // 13 ft
+                                           1100,  // 15 ft
+                                           1120,  // 17 ft
+                                           1130,  // 19 ft
+                                           1150}; // 21 ft
+
+/* K_BH_LauncherSpeed: Launcher speed necessary for ball to reach target based on the estimated distance from the camera. */
+const double K_BH_LauncherSpeed[10] = {3300,  // 3 ft 
+                                       3300,  // 5 ft
+                                       3550,  // 7 ft
+                                       3750,  // 9 ft
+                                       4000,  // 11 ft
+                                       4300,  // 13 ft
+                                       4550,  // 15 ft
+                                       4700,  // 17 ft
+                                       5000,  // 19 ft
+                                       5300}; // 21 ft
+
+/* K_BH_LauncherManualDb: Deadband around the manual ball launcher axis. */
+const double K_BH_LauncherManualDb = 0.1;
+
+/* K_BH_LauncherManualSpeed: Manual launcher speed control values. */
+const double K_BH_LauncherManualSpeed[5] = {0,
+                                            3300,
+                                            4000,
+                                            4500,
+                                            5300};
+
+/* K_BH_LauncherManualSpeedAxis: Axis for K_BH_LauncherManualSpeed. */
+const double K_BH_LauncherManualSpeedAxis[5] = {0.00,
+                                                0.25,
+                                                0.50,
+                                                0.75,
+                                                1.00};
+
+/* K_BH_LauncherSpeedDb: Deadband around the commanded launcher speed (in RPM).  
+                         Used to indicate when a ball can be launched. */
+const double K_BH_LauncherSpeedDb = 50;
+
+
+
+// Constants and cals for Swerve Drive (SD) control:
+/* C_SD_L: Robot wheelbase. [meters] */
+const double C_SD_L = 0.5969;
+
+/* C_SD_W: Robot track width. [meters] */
+const double C_SD_W = 0.5969;
+
+/* C_SD_R: Constant composed of the C_SD_W and C_SD_L constants: R = sqrt(L^2 + W^2) [meters]*/
+const double C_SD_R = 0.8441;
+
+/* K_SD_WheelOffsetAngle: Offset angle for each respective corder of the swerve drive wheel.  This is the angle 
+   reading from the absolute encoder that is indicated in order for the wheel to point straight. */
+const double K_SD_WheelOffsetAngle[E_RobotCornerSz] = {169.527239,   // E_FrontLeft
+                                                       128.487963,   // E_FrontRight 
+                                                        33.112801,   // E_RearLeft
+                                                       246.813891};  // E_RearRight 
+
+/* K_SD_MinGain: Min gain applied to the wheel speed for swerve drive. */
+const double K_SD_MinGain = 0.1;
+
+/* K_SD_MaxGain: Max gain allowed for swerve drive control. */
+const double K_SD_MaxGain = 0.75;
+
+/* K_SD_AutoRotateGx: Gain applied to the rotate command for auto functionality. */
+const double K_SD_AutoRotateGx = 0.1;
+
+/* K_SD_WheelMaxSpeed: Max RPM speed of the swerve drive wheel.*/
+const double K_SD_WheelMaxSpeed = 225;
+
+/* K_SD_WheelSpeedPID_V2_Gx: PID gains for the driven wheels that is within the motor controllers. */
+const double K_SD_WheelSpeedPID_V2_Gx[E_PID_SparkMaxCalSz] = { 0.00055,  // kP
+                                                               0.000001, // kI
+                                                               0.0001,   // kD
+                                                               0.0,      // kIz
+                                                               0.0,      // kFF
+                                                               1.0,      // kMaxOutput
+                                                              -1.0,      // kMinOutput
+                                                               0.0,      // kMaxVel
+                                                               0.0,      // kMinVel
+                                                              45.0,      // kMaxAcc
+                                                               0.0};     // kAllErr
+
+/* K_SD_WheelSpeedPID_Gx: PID gains for the driven wheels.   PID control is within the RoboRio.  */
+double const K_SD_WheelSpeedPID_Gx[E_PID_CalSz] = { 0.009,     // P Gx
+                                                    0.0009,     // I Gx
+                                                    0.00000005, // D Gx
+                                                    1.0,        // P UL
+                                                   -1.0,        // P LL
+                                                    0.5,        // I UL
+                                                   -0.5,        // I LL
+                                                    0.2,        // D UL
+                                                   -0.2,        // D LL
+                                                    1.0,        // Max upper
+                                                   -1.0};       // Max lower
+
+/* K_SD_WheelAnglePID_Gx: PID gains for the angle of the swerve drive wheels.  PID control is within the RoboRio.  */
+const double K_SD_WheelAnglePID_Gx[E_PID_CalSz] = { 0.007,     // P Gx
+                                                    0.0005,    // I Gx
+                                                    0.0000005, // D Gx
+                                                    0.4,       // P UL
+                                                   -0.4,       // P LL
+                                                    0.1000,      // I UL
+                                                   -0.1000,      // I LL
+                                                    0.5,       // D UL
+                                                   -0.5,       // D LL
+                                                    0.9,       // Max upper
+                                                   -0.9};      // Max lower
+
+/* K_SD_DesiredDriveSpeedAxis: Joystick scale axis for K_SD_DesiredDriveSpeed.  */
+const double K_SD_DesiredDriveSpeedAxis[20] = {-0.95,
                                             -0.85,
                                             -0.75,
                                             -0.65,
@@ -198,7 +283,8 @@ const double K_DesiredDriveSpeedAxis[20] = {-0.95,
                                              0.85,
                                              0.95};
 
-const double K_DesiredDriveSpeed[20] = {-1.00,  //-0.95
+/* K_SD_DesiredDriveSpeed: Joystick scaled output for swerve drive control.  Used as debouncing and to help limit speeds at lower joystick inputs values.  */
+const double K_SD_DesiredDriveSpeed[20] = {-1.00,  //-0.95
                                         -0.88,  //-0.85
                                         -0.77,  //-0.75
                                         -0.66,  //-0.65
@@ -218,6 +304,8 @@ const double K_DesiredDriveSpeed[20] = {-1.00,  //-0.95
                                          0.77,  // 0.75
                                          0.88,  // 0.85
                                          1.00}; // 0.95
+
+
 
 /* ADAS Cals */
 /* Upper Targeting Cals (UT) */
@@ -264,21 +352,21 @@ const double K_ADAS_BT_RotateDeadbandAngle = 0.5;
 /* K_ADAS_BT_TargetVisionAngle: This is the desired target angle for the auto ball vision targeting.  This is due to the offset of the camera. */
 const double K_ADAS_BT_TargetVisionAngle = 2.0;
 
-/* K_ADAS_BT_DistanceAxis: This is the estimated distance from the camera that will be scaled against the drive time table. [meters] */
-const double K_ADAS_BT_DistanceAxis[6] = {0,
+/* K_ADAS_BT_DriveTimeAxis: This is the estimated distance from the camera that will be scaled against the drive time table K_ADAS_BT_DriveTime. [meters] */
+const double K_ADAS_BT_DriveTimeAxis[6] = {0,
                                           1,
                                           2,
                                           3,
                                           4,
                                           5};
 
-/* K_ADAS_BT_DesiredDriveTime: This is the amount of time to drive forward to capture the ball based on the estimated distance. [meters] */
-const double K_ADAS_BT_DesiredDriveTime[6] = {0.8,
-                                              1.5,
-                                              2.0,
-                                              2.5,
-                                              3.0,
-                                              3.4};
+/* K_ADAS_BT_DriveTime: This is the amount of time to drive forward to capture the ball based on the estimated distance. [seconds] */
+const double K_ADAS_BT_DriveTime[6] = {0.8,
+                                       1.5,
+                                       2.0,
+                                       2.5,
+                                       3.0,
+                                       3.4};
 
 /* K_ADAS_BT_MaxTimeToWaitForCamera: This is the max amount of time we will wait for a valid distance from the camera. [Seconds] */
 const double K_ADAS_BT_MaxTimeToWaitForCamera = 0.5;
@@ -288,6 +376,8 @@ const double K_ADAS_BT_TimedOutDriveForward = 1.0;
 
 /* K_ADAS_BT_DriveForwardPct: This is the percent of swerve drive control to go forward to pickup the ball. */
 const double K_ADAS_BT_DriveForwardPct = 0.8;
+
+
 
 /*  Rotation calibrations */
 /* K_DesiredRotateSpeedAxis - This is the effective command axis, function of error calculation, in degrees */
@@ -349,79 +439,6 @@ const double K_DesiredAutoRotateSpeed[10] = {0,  // -4.0
                                         //   0.08,  //   4.0
                                         //   0.09}; //  20.0
 
-const double K_DesiredDistanceAxis[6] = {415,
-                                     644,
-                                     840,
-                                     975,
-                                     1077,
-                                     1667};
-
-const double K_DesiredSpeedUpperBeam[6] = {-1200,
-                                           -1200,
-                                           -1435,
-                                           -1815,
-                                           -1965,
-                                           -3015};
-
-const double K_DesiredSpeedLowerBeam[6] = {-1150,
-                                           -1350,
-                                           -1880,
-                                           -2100,
-                                           -2400,
-                                           -3100};
-
-const double K_DesiredLauncherSpeed[6] = {3300,
-                                          3500,
-                                          3700,
-                                          3800,
-                                          4000,
-                                          4200};
-
-
-
-const double K_DesiredLauncherManualAxis[5] = {0.00,
-                                     0.25,
-                                     0.50,
-                                     0.75,
-                                     1.00};
-
-/* K_DesiredLauncherManualDb: Deadband around the manual ball launcher axis. */
-const double K_DesiredLauncherManualDb = 0.1;
-
-const double K_DesiredLauncherManualSpeed[5] = {0,
-                                                1000,
-                                                2000,
-                                                3000,
-                                                4000};
-
-/* K_DesiredLauncherSpeedDb: Deadband around the desired launcher speed (in RPM).  
-                             Used to indicate when a ball can be launched. */
-const double K_DesiredLauncherSpeedDb = 50;
-
-const double K_LiftYD_PID[E_PID_CalSz] = { 0.1,   // P Gx
-                                           0.000002,   // I Gx
-                                           0.0,    // D Gx
-                                           1.0,    // P UL
-                                          -1.0,    // P LL
-                                           0.5,    // I UL
-                                          -0.5,    // I LL
-                                           0.0,    // D UL
-                                           0.0,    // D LL
-                                           1.0,    // Max upper
-                                          -1.0};   // Max lower
-
-
-const double K_LiftXD_PID[E_PID_CalSz] = { 0.1,   // P Gx
-                                           0.000002,   // I Gx
-                                           0.0,    // D Gx
-                                           1.0,    // P UL
-                                          -1.0,    // P LL
-                                           0.5,    // I UL
-                                          -0.5,    // I LL
-                                           0.0,    // D UL
-                                           0.0,    // D LL
-                                           1.0,    // Max upper
-                                          -1.0};   // Max lower
 
 
 
@@ -453,11 +470,9 @@ const double K_TargetVisionUpperRollerErrorMax = 200;
 
 const double K_TargetVisionLowerRollerErrorMax = 200;
 
-const double K_RotateDebounceThreshold = 0.1;
 
-const double K_MaxGain = 0.75;
 
-const double K_AutoRotateGx = 0.1;
+
 
 #define K_BallLauncherDistanceSz 5
 #define K_BallLauncherAngleSz 3

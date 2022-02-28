@@ -1,4 +1,4 @@
-
+#ifdef VISION1
 #include "Robot.h"
 #include <iostream>
 #include <frc/smartdashboard/SmartDashboard.h>
@@ -124,3 +124,4 @@ void VisionRun(){
 
     
 }
+#endif

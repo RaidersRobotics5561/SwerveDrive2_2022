@@ -95,10 +95,17 @@ typedef enum T_LiftCmndDirection
   E_LiftCmndBack
 } T_LiftCmndDirection;
 
+typedef enum T_LED_LightCmnd
+{
+  E_LED_Red,
+  E_LED_Blue,
+  E_LED_Green,
+  E_LED_Orange
+} T_LED_LightCmnd;
+
 typedef enum T_Lift_State
 {
   E_S0_BEGONE,
-  E_S1_initialize_Up_YD,
   E_S2_lift_down_YD,
   E_S3_move_forward_XD,
   E_S4_stretch_up_YD,
@@ -108,7 +115,7 @@ typedef enum T_Lift_State
   E_S8_more_down_some_YD,
   E_S9_back_rest_XD,
   E_S10_final_YD,
-  E_S11_Stop,
+  E_S11_final_OWO,
   E_Lift_State_Sz
 } T_Lift_State;
 
@@ -131,7 +138,7 @@ typedef enum T_ADAS_BT_BallTarget /* aka GetDaBalls */
 {
   E_ADAS_BT_Disabled,
   E_ADAS_BT_AutoCenter,
-  E_ADAS_BT_IntakeAndRun,
+  E_ADAS_BT_IntakeAndRun
 } T_ADAS_BT_BallTarget;
 
 typedef enum T_ADAS_UT_UpperTarget

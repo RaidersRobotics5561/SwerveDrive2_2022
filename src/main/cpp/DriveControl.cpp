@@ -35,6 +35,8 @@ double V_WheelSpeedIntergral[E_RobotCornerSz];
 double V_WheelAngleArb[E_RobotCornerSz]; // This is the arbitrated wheel angle that is used in the PID controller
 
 double V_WheelSpeedPID_V2_Gx[E_PID_SparkMaxCalSz];
+double V_SD_WheelSpeedCmndPrev[E_RobotCornerSz];
+double KV_WheelSpeedRampRate = 0;
 
 T_GetDaBalls V_AutoIntake;
 
@@ -51,65 +53,35 @@ void SwerveDriveMotorConfigsInit(rev::SparkMaxPIDController m_frontLeftDrivePID,
                                  rev::SparkMaxPIDController m_rearRightDrivePID)
   {
   // set PID coefficients
-  m_frontLeftDrivePID.SetP(K_WheelSpeedPID_V2_Gx[E_kP]);
-  m_frontLeftDrivePID.SetI(K_WheelSpeedPID_V2_Gx[E_kI]);
-  m_frontLeftDrivePID.SetD(K_WheelSpeedPID_V2_Gx[E_kD]);
-  m_frontLeftDrivePID.SetIZone(K_WheelSpeedPID_V2_Gx[E_kIz]);
-  m_frontLeftDrivePID.SetFF(K_WheelSpeedPID_V2_Gx[E_kFF]);
-  m_frontLeftDrivePID.SetOutputRange(K_WheelSpeedPID_V2_Gx[E_kMinOutput], K_WheelSpeedPID_V2_Gx[E_kMaxOutput]);
+  m_frontLeftDrivePID.SetP(K_SD_WheelSpeedPID_V2_Gx[E_kP]);
+  m_frontLeftDrivePID.SetI(K_SD_WheelSpeedPID_V2_Gx[E_kI]);
+  m_frontLeftDrivePID.SetD(K_SD_WheelSpeedPID_V2_Gx[E_kD]);
+  m_frontLeftDrivePID.SetIZone(K_SD_WheelSpeedPID_V2_Gx[E_kIz]);
+  m_frontLeftDrivePID.SetFF(K_SD_WheelSpeedPID_V2_Gx[E_kFF]);
+  m_frontLeftDrivePID.SetOutputRange(K_SD_WheelSpeedPID_V2_Gx[E_kMinOutput], K_SD_WheelSpeedPID_V2_Gx[E_kMaxOutput]);
 
-  m_frontRightDrivePID.SetP(K_WheelSpeedPID_V2_Gx[E_kP]);
-  m_frontRightDrivePID.SetI(K_WheelSpeedPID_V2_Gx[E_kI]);
-  m_frontRightDrivePID.SetD(K_WheelSpeedPID_V2_Gx[E_kD]);
-  m_frontRightDrivePID.SetIZone(K_WheelSpeedPID_V2_Gx[E_kIz]);
-  m_frontRightDrivePID.SetFF(K_WheelSpeedPID_V2_Gx[E_kFF]);
-  m_frontRightDrivePID.SetOutputRange(K_WheelSpeedPID_V2_Gx[E_kMinOutput], K_WheelSpeedPID_V2_Gx[E_kMaxOutput]);
+  m_frontRightDrivePID.SetP(K_SD_WheelSpeedPID_V2_Gx[E_kP]);
+  m_frontRightDrivePID.SetI(K_SD_WheelSpeedPID_V2_Gx[E_kI]);
+  m_frontRightDrivePID.SetD(K_SD_WheelSpeedPID_V2_Gx[E_kD]);
+  m_frontRightDrivePID.SetIZone(K_SD_WheelSpeedPID_V2_Gx[E_kIz]);
+  m_frontRightDrivePID.SetFF(K_SD_WheelSpeedPID_V2_Gx[E_kFF]);
+  m_frontRightDrivePID.SetOutputRange(K_SD_WheelSpeedPID_V2_Gx[E_kMinOutput], K_SD_WheelSpeedPID_V2_Gx[E_kMaxOutput]);
 
-  m_rearLeftDrivePID.SetP(K_WheelSpeedPID_V2_Gx[E_kP]);
-  m_rearLeftDrivePID.SetI(K_WheelSpeedPID_V2_Gx[E_kI]);
-  m_rearLeftDrivePID.SetD(K_WheelSpeedPID_V2_Gx[E_kD]);
-  m_rearLeftDrivePID.SetIZone(K_WheelSpeedPID_V2_Gx[E_kIz]);
-  m_rearLeftDrivePID.SetFF(K_WheelSpeedPID_V2_Gx[E_kFF]);
-  m_rearLeftDrivePID.SetOutputRange(K_WheelSpeedPID_V2_Gx[E_kMinOutput], K_WheelSpeedPID_V2_Gx[E_kMaxOutput]);
+  m_rearLeftDrivePID.SetP(K_SD_WheelSpeedPID_V2_Gx[E_kP]);
+  m_rearLeftDrivePID.SetI(K_SD_WheelSpeedPID_V2_Gx[E_kI]);
+  m_rearLeftDrivePID.SetD(K_SD_WheelSpeedPID_V2_Gx[E_kD]);
+  m_rearLeftDrivePID.SetIZone(K_SD_WheelSpeedPID_V2_Gx[E_kIz]);
+  m_rearLeftDrivePID.SetFF(K_SD_WheelSpeedPID_V2_Gx[E_kFF]);
+  m_rearLeftDrivePID.SetOutputRange(K_SD_WheelSpeedPID_V2_Gx[E_kMinOutput], K_SD_WheelSpeedPID_V2_Gx[E_kMaxOutput]);
 
-  m_rearRightDrivePID.SetP(K_WheelSpeedPID_V2_Gx[E_kP]);
-  m_rearRightDrivePID.SetI(K_WheelSpeedPID_V2_Gx[E_kI]);
-  m_rearRightDrivePID.SetD(K_WheelSpeedPID_V2_Gx[E_kD]);
-  m_rearRightDrivePID.SetIZone(K_WheelSpeedPID_V2_Gx[E_kIz]);
-  m_rearRightDrivePID.SetFF(K_WheelSpeedPID_V2_Gx[E_kFF]);
-  m_rearRightDrivePID.SetOutputRange(K_WheelSpeedPID_V2_Gx[E_kMinOutput], K_WheelSpeedPID_V2_Gx[E_kMaxOutput]);
+  m_rearRightDrivePID.SetP(K_SD_WheelSpeedPID_V2_Gx[E_kP]);
+  m_rearRightDrivePID.SetI(K_SD_WheelSpeedPID_V2_Gx[E_kI]);
+  m_rearRightDrivePID.SetD(K_SD_WheelSpeedPID_V2_Gx[E_kD]);
+  m_rearRightDrivePID.SetIZone(K_SD_WheelSpeedPID_V2_Gx[E_kIz]);
+  m_rearRightDrivePID.SetFF(K_SD_WheelSpeedPID_V2_Gx[E_kFF]);
+  m_rearRightDrivePID.SetOutputRange(K_SD_WheelSpeedPID_V2_Gx[E_kMinOutput], K_SD_WheelSpeedPID_V2_Gx[E_kMaxOutput]);
 
-  /**
-   * Smart Motion coefficients are set on a SparkMaxPIDController object
-   * 
-   * - SetSmartMotionMaxVelocity() will limit the velocity in RPM of
-   * the pid controller in Smart Motion mode
-   * - SetSmartMotionMinOutputVelocity() will put a lower bound in
-   * RPM of the pid controller in Smart Motion mode
-   * - SetSmartMotionMaxAccel() will limit the acceleration in RPM^2
-   * of the pid controller in Smart Motion mode
-   * - SetSmartMotionAllowedClosedLoopError() will set the max allowed
-   * error for the pid controller in Smart Motion mode
-   */
-  m_frontLeftDrivePID.SetSmartMotionMaxVelocity(K_WheelSpeedPID_V2_Gx[E_kMaxVel]);
-  m_frontLeftDrivePID.SetSmartMotionMinOutputVelocity(K_WheelSpeedPID_V2_Gx[E_kMinVel]);
-  m_frontLeftDrivePID.SetSmartMotionMaxAccel(K_WheelSpeedPID_V2_Gx[E_kMaxAcc]);
-  m_frontLeftDrivePID.SetSmartMotionAllowedClosedLoopError(K_WheelSpeedPID_V2_Gx[E_kAllErr]);
-
-  m_frontRightDrivePID.SetSmartMotionMaxVelocity(K_WheelSpeedPID_V2_Gx[E_kMaxVel]);
-  m_frontRightDrivePID.SetSmartMotionMinOutputVelocity(K_WheelSpeedPID_V2_Gx[E_kMinVel]);
-  m_frontRightDrivePID.SetSmartMotionMaxAccel(K_WheelSpeedPID_V2_Gx[E_kMaxAcc]);
-  m_frontRightDrivePID.SetSmartMotionAllowedClosedLoopError(K_WheelSpeedPID_V2_Gx[E_kAllErr]);
-  
-  m_rearLeftDrivePID.SetSmartMotionMaxVelocity(K_WheelSpeedPID_V2_Gx[E_kMaxVel]);
-  m_rearLeftDrivePID.SetSmartMotionMinOutputVelocity(K_WheelSpeedPID_V2_Gx[E_kMinVel]);
-  m_rearLeftDrivePID.SetSmartMotionMaxAccel(K_WheelSpeedPID_V2_Gx[E_kMaxAcc]);
-  m_rearLeftDrivePID.SetSmartMotionAllowedClosedLoopError(K_WheelSpeedPID_V2_Gx[E_kAllErr]);
-
-  m_rearRightDrivePID.SetSmartMotionMaxVelocity(K_WheelSpeedPID_V2_Gx[E_kMaxVel]);
-  m_rearRightDrivePID.SetSmartMotionMinOutputVelocity(K_WheelSpeedPID_V2_Gx[E_kMinVel]);
-  m_rearRightDrivePID.SetSmartMotionMaxAccel(K_WheelSpeedPID_V2_Gx[E_kMaxAcc]);
-  m_rearRightDrivePID.SetSmartMotionAllowedClosedLoopError(K_WheelSpeedPID_V2_Gx[E_kAllErr]);
+  KV_WheelSpeedRampRate = K_SD_WheelSpeedPID_V2_Gx[E_kMaxAcc];
 
   #ifdef DriveMotorTest
   T_PID_SparkMaxCal L_Index = E_kP;
@@ -118,23 +90,23 @@ void SwerveDriveMotorConfigsInit(rev::SparkMaxPIDController m_frontLeftDrivePID,
        L_Index < E_PID_SparkMaxCalSz;
        L_Index = T_PID_SparkMaxCal(int(L_Index) + 1))
       {
-      V_WheelSpeedPID_V2_Gx[L_Index] = K_WheelSpeedPID_V2_Gx[L_Index];
+      V_WheelSpeedPID_V2_Gx[L_Index] = K_SD_WheelSpeedPID_V2_Gx[L_Index];
       }
   
   // display PID coefficients on SmartDashboard
-  frc::SmartDashboard::PutNumber("P Gain", K_WheelSpeedPID_V2_Gx[E_kP]);
-  frc::SmartDashboard::PutNumber("I Gain", K_WheelSpeedPID_V2_Gx[E_kI]);
-  frc::SmartDashboard::PutNumber("D Gain", K_WheelSpeedPID_V2_Gx[E_kD]);
-  frc::SmartDashboard::PutNumber("I Zone", K_WheelSpeedPID_V2_Gx[E_kIz]);
-  frc::SmartDashboard::PutNumber("Feed Forward", K_WheelSpeedPID_V2_Gx[E_kFF]);
-  frc::SmartDashboard::PutNumber("Max Output", K_WheelSpeedPID_V2_Gx[E_kMaxOutput]);
-  frc::SmartDashboard::PutNumber("Min Output", K_WheelSpeedPID_V2_Gx[E_kMinOutput]);
+  frc::SmartDashboard::PutNumber("P Gain", K_SD_WheelSpeedPID_V2_Gx[E_kP]);
+  frc::SmartDashboard::PutNumber("I Gain", K_SD_WheelSpeedPID_V2_Gx[E_kI]);
+  frc::SmartDashboard::PutNumber("D Gain", K_SD_WheelSpeedPID_V2_Gx[E_kD]);
+  frc::SmartDashboard::PutNumber("I Zone", K_SD_WheelSpeedPID_V2_Gx[E_kIz]);
+  frc::SmartDashboard::PutNumber("Feed Forward", K_SD_WheelSpeedPID_V2_Gx[E_kFF]);
+  frc::SmartDashboard::PutNumber("Max Output", K_SD_WheelSpeedPID_V2_Gx[E_kMaxOutput]);
+  frc::SmartDashboard::PutNumber("Min Output", K_SD_WheelSpeedPID_V2_Gx[E_kMinOutput]);
 
-  // display Smart Motion coefficients
-  frc::SmartDashboard::PutNumber("Max Velocity", K_WheelSpeedPID_V2_Gx[E_kMaxVel]);
-  frc::SmartDashboard::PutNumber("Min Velocity", K_WheelSpeedPID_V2_Gx[E_kMinVel]);
-  frc::SmartDashboard::PutNumber("Max Acceleration", K_WheelSpeedPID_V2_Gx[E_kMaxAcc]);
-  frc::SmartDashboard::PutNumber("Allowed Closed Loop Error", K_WheelSpeedPID_V2_Gx[E_kAllErr]);
+  // display secondary coefficients
+  frc::SmartDashboard::PutNumber("Max Velocity", K_SD_WheelSpeedPID_V2_Gx[E_kMaxVel]);
+  frc::SmartDashboard::PutNumber("Min Velocity", K_SD_WheelSpeedPID_V2_Gx[E_kMinVel]);
+  frc::SmartDashboard::PutNumber("Max Acceleration", K_SD_WheelSpeedPID_V2_Gx[E_kMaxAcc]);
+  frc::SmartDashboard::PutNumber("Allowed Closed Loop Error", K_SD_WheelSpeedPID_V2_Gx[E_kAllErr]);
   #endif
   }
 
@@ -170,11 +142,11 @@ void SwerveDriveMotorConfigsCal(rev::SparkMaxPIDController m_frontLeftDrivePID,
   if((L_d != V_WheelSpeedPID_V2_Gx[E_kD]))   { m_frontLeftDrivePID.SetD(L_d); m_frontRightDrivePID.SetD(L_d); m_rearLeftDrivePID.SetD(L_d); m_rearRightDrivePID.SetD(L_d); V_WheelSpeedPID_V2_Gx[E_kD] = L_d; }
   if((L_iz != V_WheelSpeedPID_V2_Gx[E_kIz])) { m_frontLeftDrivePID.SetIZone(L_iz); m_frontRightDrivePID.SetIZone(L_iz); m_rearLeftDrivePID.SetIZone(L_iz); m_rearRightDrivePID.SetIZone(L_iz); V_WheelSpeedPID_V2_Gx[E_kIz] = L_iz; }
   if((L_ff != V_WheelSpeedPID_V2_Gx[E_kFF])) { m_frontLeftDrivePID.SetFF(L_ff); m_frontRightDrivePID.SetFF(L_ff); m_rearLeftDrivePID.SetFF(L_ff); m_rearRightDrivePID.SetFF(L_ff); V_WheelSpeedPID_V2_Gx[E_kFF] = L_ff; }
-  if((L_max != V_WheelSpeedPID_V2_Gx[E_kMaxOutput]) || (L_min != K_LauncherPID_Gx[E_kMinOutput])) { m_frontLeftDrivePID.SetOutputRange(L_min, L_max); m_frontRightDrivePID.SetOutputRange(L_min, L_max);  m_rearLeftDrivePID.SetOutputRange(L_min, L_max); m_rearRightDrivePID.SetOutputRange(L_min, L_max); V_WheelSpeedPID_V2_Gx[E_kMinOutput] = L_min; V_WheelSpeedPID_V2_Gx[E_kMaxOutput] = L_max; }
-  if((L_maxV != V_WheelSpeedPID_V2_Gx[E_kMaxVel])) { m_frontLeftDrivePID.SetSmartMotionMaxVelocity(L_maxV); m_frontRightDrivePID.SetSmartMotionMaxVelocity(L_maxV); m_rearLeftDrivePID.SetSmartMotionMaxVelocity(L_maxV); m_rearRightDrivePID.SetSmartMotionMaxVelocity(L_maxV); V_WheelSpeedPID_V2_Gx[E_kMaxVel] = L_maxV; }
-  if((L_minV != V_WheelSpeedPID_V2_Gx[E_kMinVel])) { m_frontLeftDrivePID.SetSmartMotionMinOutputVelocity(L_minV); m_frontRightDrivePID.SetSmartMotionMinOutputVelocity(L_minV); m_rearLeftDrivePID.SetSmartMotionMinOutputVelocity(L_minV); m_rearRightDrivePID.SetSmartMotionMinOutputVelocity(L_minV); V_WheelSpeedPID_V2_Gx[E_kMinVel] = L_minV; }
-  if((L_maxA != V_WheelSpeedPID_V2_Gx[E_kMaxAcc])) { m_frontLeftDrivePID.SetSmartMotionMaxAccel(L_maxA); m_frontRightDrivePID.SetSmartMotionMaxAccel(L_maxA); m_rearLeftDrivePID.SetSmartMotionMaxAccel(L_maxA); m_rearRightDrivePID.SetSmartMotionMaxAccel(L_maxA); V_WheelSpeedPID_V2_Gx[E_kMaxAcc] = L_maxA; }
-  if((L_allE != V_WheelSpeedPID_V2_Gx[E_kAllErr])) { m_frontLeftDrivePID.SetSmartMotionAllowedClosedLoopError(L_allE); m_frontRightDrivePID.SetSmartMotionAllowedClosedLoopError(L_allE); m_rearLeftDrivePID.SetSmartMotionAllowedClosedLoopError(L_allE); m_rearRightDrivePID.SetSmartMotionAllowedClosedLoopError(L_allE); V_WheelSpeedPID_V2_Gx[E_kAllErr] = L_allE; }
+  if((L_max != V_WheelSpeedPID_V2_Gx[E_kMaxOutput]) || (L_min != V_WheelSpeedPID_V2_Gx[E_kMinOutput])) { m_frontLeftDrivePID.SetOutputRange(L_min, L_max); m_frontRightDrivePID.SetOutputRange(L_min, L_max);  m_rearLeftDrivePID.SetOutputRange(L_min, L_max); m_rearRightDrivePID.SetOutputRange(L_min, L_max); V_WheelSpeedPID_V2_Gx[E_kMinOutput] = L_min; V_WheelSpeedPID_V2_Gx[E_kMaxOutput] = L_max; }
+  // if((L_maxV != V_WheelSpeedPID_V2_Gx[E_kMaxVel])) { m_frontLeftDrivePID.SetSmartMotionMaxVelocity(L_maxV); m_frontRightDrivePID.SetSmartMotionMaxVelocity(L_maxV); m_rearLeftDrivePID.SetSmartMotionMaxVelocity(L_maxV); m_rearRightDrivePID.SetSmartMotionMaxVelocity(L_maxV); V_WheelSpeedPID_V2_Gx[E_kMaxVel] = L_maxV; }
+  // if((L_minV != V_WheelSpeedPID_V2_Gx[E_kMinVel])) { m_frontLeftDrivePID.SetSmartMotionMinOutputVelocity(L_minV); m_frontRightDrivePID.SetSmartMotionMinOutputVelocity(L_minV); m_rearLeftDrivePID.SetSmartMotionMinOutputVelocity(L_minV); m_rearRightDrivePID.SetSmartMotionMinOutputVelocity(L_minV); V_WheelSpeedPID_V2_Gx[E_kMinVel] = L_minV; }
+  if((L_maxA != V_WheelSpeedPID_V2_Gx[E_kMaxAcc])) { KV_WheelSpeedRampRate = L_maxA; V_WheelSpeedPID_V2_Gx[E_kMaxAcc] = L_maxA; }
+  // if((L_allE != V_WheelSpeedPID_V2_Gx[E_kAllErr])) { m_frontLeftDrivePID.SetSmartMotionAllowedClosedLoopError(L_allE); m_frontRightDrivePID.SetSmartMotionAllowedClosedLoopError(L_allE); m_rearLeftDrivePID.SetSmartMotionAllowedClosedLoopError(L_allE); m_rearRightDrivePID.SetSmartMotionAllowedClosedLoopError(L_allE); V_WheelSpeedPID_V2_Gx[E_kAllErr] = L_allE; }
   #endif
   }
 
@@ -197,6 +169,7 @@ void DriveControlInit()
         V_WheelSpeedError[L_Index] = 0;
         V_WheelSpeedIntergral[L_Index] = 0;
         V_WheelAngleArb[L_Index] = 0;
+        V_SD_WheelSpeedCmndPrev[L_Index] = 0;
       }
   
   V_SwerveTargetLockingUpper = false;
@@ -441,20 +414,25 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
     L_FWD  =  L_temp;
 
     //Ws1: fr, Ws2: fl, ws3: rl, ws4: rr
-    L_A = L_STR - L_RCW * (C_L/C_R);
-    L_B = L_STR + L_RCW * (C_L/C_R);
-    L_C = L_FWD - L_RCW * (C_W/C_R);
-    L_D = L_FWD + L_RCW * (C_W/C_R);
+    L_A = L_STR - L_RCW * (C_SD_L/C_SD_R);
+    L_B = L_STR + L_RCW * (C_SD_L/C_SD_R);
+    L_C = L_FWD - L_RCW * (C_SD_W/C_SD_R);
+    L_D = L_FWD + L_RCW * (C_SD_W/C_SD_R);
 
-    L_WS[E_FrontRight] = pow((L_B * L_B + L_C * L_C), 0.5);
-    L_WS[E_FrontLeft]  = pow((L_B * L_B + L_D * L_D), 0.5);
-    L_WS[E_RearLeft]   = pow((L_A * L_A + L_D * L_D), 0.5);
-    L_WS[E_RearRight]  = pow((L_A * L_A + L_C * L_C), 0.5);
+    // L_WS[E_FrontRight] = pow((L_B * L_B + L_C * L_C), 0.5);
+    // L_WS[E_FrontLeft]  = pow((L_B * L_B + L_D * L_D), 0.5);
+    // L_WS[E_RearLeft]   = pow((L_A * L_A + L_D * L_D), 0.5);
+    // L_WS[E_RearRight]  = pow((L_A * L_A + L_C * L_C), 0.5);
 
     // L_WA[E_FrontRight] = atan2(L_B, L_C) *180/C_PI;
     // L_WA[E_FrontLeft]  = atan2(L_B, L_D) *180/C_PI;
     // L_WA[E_RearLeft]   = atan2(L_A, L_D) *180/C_PI;
     // L_WA[E_RearRight]  = atan2(L_A, L_C) *180/C_PI;
+
+    L_WS[E_FrontRight] = pow((L_B * L_B + L_D * L_D), 0.5);
+    L_WS[E_FrontLeft]  = pow((L_B * L_B + L_C * L_C), 0.5);
+    L_WS[E_RearLeft]   = pow((L_A * L_A + L_C * L_C), 0.5);
+    L_WS[E_RearRight]  = pow((L_A * L_A + L_D * L_D), 0.5);
 
     L_WA[E_FrontRight] = atan2(L_B, L_D) *180/C_PI;
     L_WA[E_FrontLeft]  = atan2(L_B, L_C) *180/C_PI;
@@ -484,28 +462,29 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       L_WS[E_RearRight]  /= L_Max;
       }
 
-    L_Gain = K_RotateDebounceThreshold;
-
+    L_Gain = K_SD_MinGain;
+    
     if (L_JoyStick1Axis3 > L_Gain)
       {
+      /* Additional speed trigger from driver: */
       L_Gain = L_JoyStick1Axis3;
       }
     else if ((rotateMode   == true) ||
              (V_SwerveTargetLockingUpper == true) ||
              (V_AutoIntake == E_GetDaRotation))
       {
-      L_Gain = K_AutoRotateGx;
+      L_Gain = K_SD_AutoRotateGx;
       }
 
-    if (L_Gain >= K_MaxGain)
+    if (L_Gain >= K_SD_MaxGain)
       {
-      L_Gain = K_MaxGain;
+      L_Gain = K_SD_MaxGain;
       }
 
-    L_WS[E_FrontRight] *= (K_WheelMaxSpeed * L_Gain);
-    L_WS[E_FrontLeft]  *= (K_WheelMaxSpeed * L_Gain);
-    L_WS[E_RearLeft]   *= (K_WheelMaxSpeed * L_Gain);
-    L_WS[E_RearRight]  *= (K_WheelMaxSpeed * L_Gain);
+    L_WS[E_FrontRight] *= (K_SD_WheelMaxSpeed * L_Gain);
+    L_WS[E_FrontLeft]  *= (K_SD_WheelMaxSpeed * L_Gain);
+    L_WS[E_RearLeft]   *= (K_SD_WheelMaxSpeed * L_Gain);
+    L_WS[E_RearRight]  *= (K_SD_WheelMaxSpeed * L_Gain);
 
     for (L_Index = E_FrontLeft;
          L_Index < E_RobotCornerSz;
@@ -541,36 +520,37 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
                                                 V_WheelAngleArb[L_Index],
                                                &V_WheelAngleError[L_Index],
                                                &V_WheelAngleIntegral[L_Index],
-                                                K_WheelAnglePID_Gx[E_P_Gx],
-                                                K_WheelAnglePID_Gx[E_I_Gx],
-                                                K_WheelAnglePID_Gx[E_D_Gx],
-                                                K_WheelAnglePID_Gx[E_P_Ul],
-                                                K_WheelAnglePID_Gx[E_P_Ll],
-                                                K_WheelAnglePID_Gx[E_I_Ul],
-                                                K_WheelAnglePID_Gx[E_I_Ll],
-                                                K_WheelAnglePID_Gx[E_D_Ul],
-                                                K_WheelAnglePID_Gx[E_D_Ll],
-                                                K_WheelAnglePID_Gx[E_Max_Ul],
-                                                K_WheelAnglePID_Gx[E_Max_Ll]);
+                                                K_SD_WheelAnglePID_Gx[E_P_Gx],
+                                                K_SD_WheelAnglePID_Gx[E_I_Gx],
+                                                K_SD_WheelAnglePID_Gx[E_D_Gx],
+                                                K_SD_WheelAnglePID_Gx[E_P_Ul],
+                                                K_SD_WheelAnglePID_Gx[E_P_Ll],
+                                                K_SD_WheelAnglePID_Gx[E_I_Ul],
+                                                K_SD_WheelAnglePID_Gx[E_I_Ll],
+                                                K_SD_WheelAnglePID_Gx[E_D_Ul],
+                                                K_SD_WheelAnglePID_Gx[E_D_Ll],
+                                                K_SD_WheelAnglePID_Gx[E_Max_Ul],
+                                                K_SD_WheelAnglePID_Gx[E_Max_Ll]);
       #ifdef DriveMotorTest
-      L_WheelSpeedCmnd[L_Index] = L_WS[L_Index];
+      L_WheelSpeedCmnd[L_Index] = RampTo(L_WS[L_Index], V_SD_WheelSpeedCmndPrev[L_Index], KV_WheelSpeedRampRate);
+      V_SD_WheelSpeedCmndPrev[L_Index] = L_WheelSpeedCmnd[L_Index];
       #endif
       #ifndef DriveMotorTest
       L_WheelSpeedCmnd[L_Index] = Control_PID( L_WS[L_Index],
                                                V_WheelVelocity[L_Index],
                                               &V_WheelSpeedError[L_Index],
                                               &V_WheelSpeedIntergral[L_Index],
-                                               K_WheelSpeedPID_Gx[E_P_Gx],
-                                               K_WheelSpeedPID_Gx[E_I_Gx],
-                                               K_WheelSpeedPID_Gx[E_D_Gx],
-                                               K_WheelSpeedPID_Gx[E_P_Ul],
-                                               K_WheelSpeedPID_Gx[E_P_Ll],
-                                               K_WheelSpeedPID_Gx[E_I_Ul],
-                                               K_WheelSpeedPID_Gx[E_I_Ll],
-                                               K_WheelSpeedPID_Gx[E_D_Ul],
-                                               K_WheelSpeedPID_Gx[E_D_Ll],
-                                               K_WheelSpeedPID_Gx[E_Max_Ul],
-                                               K_WheelSpeedPID_Gx[E_Max_Ll]);
+                                               K_SD_WheelSpeedPID_Gx[E_P_Gx],
+                                               K_SD_WheelSpeedPID_Gx[E_I_Gx],
+                                               K_SD_WheelSpeedPID_Gx[E_D_Gx],
+                                               K_SD_WheelSpeedPID_Gx[E_P_Ul],
+                                               K_SD_WheelSpeedPID_Gx[E_P_Ll],
+                                               K_SD_WheelSpeedPID_Gx[E_I_Ul],
+                                               K_SD_WheelSpeedPID_Gx[E_I_Ll],
+                                               K_SD_WheelSpeedPID_Gx[E_D_Ul],
+                                               K_SD_WheelSpeedPID_Gx[E_D_Ll],
+                                               K_SD_WheelSpeedPID_Gx[E_Max_Ul],
+                                               K_SD_WheelSpeedPID_Gx[E_Max_Ll]);
       #endif
       }
 

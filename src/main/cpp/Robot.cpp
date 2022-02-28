@@ -97,6 +97,10 @@ void Robot::RobotInit()
 
   VisionDashboard();
 
+  m_led.SetLength(K_LED_NumberOfLEDs);
+  m_led.SetData(m_ledBuffer);
+  m_led.Start();
+
   // inst = nt::NetworkTableInstance::Create();
   // inst.StartClient("10.55.61.24");
   // inst.StartDSClient();
@@ -116,6 +120,8 @@ void Robot::RobotInit()
  ******************************************************************************/
 void Robot::RobotPeriodic()
   {
+  int L_Index = 0;
+
   V_MatchTimeRemaining = frc::Timer::GetMatchTime().value();
 
   Joystick_robot_mapping(c_joyStick2.GetRawButton(1),
@@ -156,6 +162,7 @@ void Robot::RobotPeriodic()
   ReadGyro(V_Driver_zero_gyro);
 
   Read_IO_Sensors(di_IR_Sensor.Get(),
+                  di_BallSensorLower.Get(),
                   di_XD_LimitSwitch.Get(),
                   di_XY_LimitSwitch.Get());
 
@@ -182,22 +189,31 @@ void Robot::RobotPeriodic()
                     V_Driver_CameraLight,
                     V_ShooterTargetSpeedReached,
                    &V_CameraLightCmndOn,
-                   &V_VanityLightCmnd);
+                   &V_VanityLED_Red,
+                   &V_VanityLED_Green,
+                   &V_VanityLED_Blue);
 
+  for (L_Index = 0; L_Index < K_LED_NumberOfLEDs; L_Index++)
+    {
+    m_ledBuffer[L_Index].SetRGB(V_VanityLED_Red, V_VanityLED_Green, V_VanityLED_Blue);
+    }
+
+  m_led.SetData(m_ledBuffer);
   do_CameraLightControl.Set(V_CameraLightCmndOn);
 
   frc::SmartDashboard::PutBoolean("XD Limit Detected", V_XD_LimitDetected);
   frc::SmartDashboard::PutBoolean("YD Limit Detected", V_YD_LimitDetected);
-  frc::SmartDashboard::PutBoolean("Ball Detected", V_BallDetectedRaw);
+  frc::SmartDashboard::PutBoolean("Ball Detected", V_BallDetectedUpper);
 
   frc::SmartDashboard::PutNumber("Lift postition YD", V_LiftPostitionYD);
   frc::SmartDashboard::PutNumber("Lift postition XD", V_LiftPostitionXD);
 
   frc::SmartDashboard::PutNumber("V_b_DriveStraight", V_b_DriveStraight);
   frc::SmartDashboard::PutNumber("V_RotateErrorCalc", V_RotateErrorCalc);
+  frc::SmartDashboard::PutNumber("Speed Cmnd", V_ShooterRPM_Cmnd);
 
-  frc::SmartDashboard::PutNumber("GYRO",            V_GyroYawAngleDegrees);
-  frc::SmartDashboard::PutBoolean("voltage thingy", di_Voltage_Man.Get());
+  frc::SmartDashboard::PutNumber("GYRO",                 V_GyroYawAngleDegrees);
+  frc::SmartDashboard::PutBoolean("Ball Detected Lower", V_BallDetectedLower);
 
   frc::SmartDashboard::PutBoolean("Top Target?",    V_VisionTopTargetAquired);
   frc::SmartDashboard::PutNumber("Top Yaw",         V_VisionTopYaw);
@@ -208,7 +224,6 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutNumber("Bottom Index",    V_VisionBottomIndex); 
 
   frc::SmartDashboard::PutNumber("Lift YD S0",  V_LiftMotorYD_MaxCurrent[E_S0_BEGONE]);
-  frc::SmartDashboard::PutNumber("Lift YD S1",  V_LiftMotorYD_MaxCurrent[E_S1_initialize_Up_YD]);
   frc::SmartDashboard::PutNumber("Lift YD S2",  V_LiftMotorYD_MaxCurrent[E_S2_lift_down_YD]);
   frc::SmartDashboard::PutNumber("Lift YD S3",  V_LiftMotorYD_MaxCurrent[E_S3_move_forward_XD]);
   frc::SmartDashboard::PutNumber("Lift YD S4",  V_LiftMotorYD_MaxCurrent[E_S4_stretch_up_YD]);
@@ -218,10 +233,8 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutNumber("Lift YD S8",  V_LiftMotorYD_MaxCurrent[E_S8_more_down_some_YD]);
   frc::SmartDashboard::PutNumber("Lift YD S9",  V_LiftMotorYD_MaxCurrent[E_S9_back_rest_XD]);
   frc::SmartDashboard::PutNumber("Lift YD S10", V_LiftMotorYD_MaxCurrent[E_S10_final_YD]);
-  frc::SmartDashboard::PutNumber("Lift YD S11", V_LiftMotorYD_MaxCurrent[E_S11_Stop]);
   
   frc::SmartDashboard::PutNumber("Lift XD S0",  V_LiftMotorXD_MaxCurrent[E_S0_BEGONE]);
-  frc::SmartDashboard::PutNumber("Lift XD S1",  V_LiftMotorXD_MaxCurrent[E_S1_initialize_Up_YD]);
   frc::SmartDashboard::PutNumber("Lift XD S2",  V_LiftMotorXD_MaxCurrent[E_S2_lift_down_YD]);
   frc::SmartDashboard::PutNumber("Lift XD S3",  V_LiftMotorXD_MaxCurrent[E_S3_move_forward_XD]);
   frc::SmartDashboard::PutNumber("Lift XD S4",  V_LiftMotorXD_MaxCurrent[E_S4_stretch_up_YD]);
@@ -231,7 +244,6 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutNumber("Lift XD S8",  V_LiftMotorXD_MaxCurrent[E_S8_more_down_some_YD]);
   frc::SmartDashboard::PutNumber("Lift XD S9",  V_LiftMotorXD_MaxCurrent[E_S9_back_rest_XD]);
   frc::SmartDashboard::PutNumber("Lift XD S10", V_LiftMotorXD_MaxCurrent[E_S10_final_YD]);
-  frc::SmartDashboard::PutNumber("Lift XD S11", V_LiftMotorXD_MaxCurrent[E_S11_Stop]);
 
   frc::SmartDashboard::PutNumber("Launcher Speed",    V_ShooterSpeedCurr);
   }
@@ -317,17 +329,22 @@ void Robot::AutonomousPeriodic()
     m_rearLeftSteerMotor.Set(V_WheelAngleCmnd[E_RearLeft]);
     m_rearRightSteerMotor.Set(V_WheelAngleCmnd[E_RearRight]);
 
-    m_rightShooterpid.SetReference(-V_ShooterRPM_Cmnd, rev::ControlType::kSmartVelocity);
-    m_leftShooterpid.SetReference(V_ShooterRPM_Cmnd, rev::ControlType::kSmartVelocity);
+    if (V_BH_LauncherActive == true)
+      {
+      m_rightShooterpid.SetReference(V_ShooterRPM_Cmnd, rev::ControlType::kVelocity);
+      m_leftShooterpid.SetReference(-V_ShooterRPM_Cmnd, rev::ControlType::kVelocity);
+      }
+    else
+      {
+      m_rightShooterMotor.Set(0);
+      m_leftShooterMotor.Set(0);
+      }
 
     m_intake.Set(ControlMode::PercentOutput, V_IntakePowerCmnd); //must be positive (don't be a fool)
     m_elevator.Set(ControlMode::PercentOutput, V_ElevatorPowerCmnd);
 
     m_liftpidYD.SetReference(V_lift_command_YD, rev::ControlType::kSmartMotion); // positive is up
     m_liftpidXD.SetReference(V_lift_command_XD, rev::ControlType::kSmartMotion); // This is temporary.  We actually want to use position, but need to force this off temporarily
-
-    // do_CameraLightControl.Set(V_CameraLightCmndOn);
-    m_vanityLightControler.Set(V_VanityLightCmnd);
   }
 
 
@@ -399,7 +416,7 @@ void Robot::TeleopPeriodic()
 
   BallHandlerControlMain( V_Driver_intake_in,
                           V_Driver_intake_out,
-                          V_BallDetectedRaw,
+                          V_BallDetectedUpper,
                           V_Driver_elevator_up,
                           V_Driver_elevator_down,
                           V_Driver_stops_shooter,
@@ -413,10 +430,10 @@ void Robot::TeleopPeriodic()
 
   // Motor output commands:
     #ifdef DriveMotorTest
-    m_frontLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kSmartVelocity);
-    m_frontRightDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kSmartVelocity);
-    m_rearLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_RearLeft],     rev::ControlType::kSmartVelocity);
-    m_rearRightDrivePID.SetReference(V_WheelSpeedCmnd[E_RearRight],   rev::ControlType::kSmartVelocity);
+    m_frontLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kVelocity);
+    m_frontRightDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kVelocity);
+    m_rearLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_RearLeft],     rev::ControlType::kVelocity);
+    m_rearRightDrivePID.SetReference(V_WheelSpeedCmnd[E_RearRight],   rev::ControlType::kVelocity);
     #endif
     #ifndef DriveMotorTest
     m_frontLeftDriveMotor.Set(V_WheelSpeedCmnd[E_FrontLeft]);
@@ -430,17 +447,16 @@ void Robot::TeleopPeriodic()
     m_rearLeftSteerMotor.Set(V_WheelAngleCmnd[E_RearLeft]);
     m_rearRightSteerMotor.Set(V_WheelAngleCmnd[E_RearRight]);
 
-      frc::SmartDashboard::PutNumber("Speed Cmnd", V_ShooterRPM_Cmnd);
-
-    if (V_ShooterRPM_Cmnd < 10)
-    {
-    m_rightShooterMotor.Set(0);
-    m_leftShooterMotor.Set(0);
-    }
-    else{
-    m_rightShooterpid.SetReference(V_ShooterRPM_Cmnd, rev::ControlType::kVelocity);
-    m_leftShooterpid.SetReference(-V_ShooterRPM_Cmnd, rev::ControlType::kVelocity);
-    }
+    if (V_BH_LauncherActive == true)
+      {
+      m_rightShooterpid.SetReference(V_ShooterRPM_Cmnd, rev::ControlType::kVelocity);
+      m_leftShooterpid.SetReference(-V_ShooterRPM_Cmnd, rev::ControlType::kVelocity);
+      }
+    else
+      {
+      m_rightShooterMotor.Set(0);
+      m_leftShooterMotor.Set(0);
+      }
 
 
     m_intake.Set(ControlMode::PercentOutput, V_IntakePowerCmnd); //must be positive (don't be a fool)
@@ -450,7 +466,6 @@ void Robot::TeleopPeriodic()
     m_liftpidXD.SetReference(V_lift_command_XD, rev::ControlType::kPosition); // This is temporary.  We actually want to use position, but need to force this off temporarily
 
     do_CameraLightControl.Set(V_CameraLightCmndOn);
-    m_vanityLightControler.Set(V_VanityLightCmnd);
 }
 
 
@@ -475,17 +490,17 @@ void Robot::TestPeriodic()
   if (V_Driver_stops_shooter == true)
     {
     EncodersInit(m_encoderFrontRightSteer,
-               m_encoderFrontLeftSteer,
-               m_encoderRearRightSteer,
-               m_encoderRearLeftSteer,
-               m_encoderFrontRightDrive,
-               m_encoderFrontLeftDrive,
-               m_encoderRearRightDrive,
-               m_encoderRearLeftDrive,
-               m_encoderLiftYD,
-               m_encoderLiftXD,
-               m_encoderrightShooter,
-               m_encoderleftShooter);
+                 m_encoderFrontLeftSteer,
+                 m_encoderRearRightSteer,
+                 m_encoderRearLeftSteer,
+                 m_encoderFrontRightDrive,
+                 m_encoderFrontLeftDrive,
+                 m_encoderRearRightDrive,
+                 m_encoderRearLeftDrive,
+                 m_encoderLiftYD,
+                 m_encoderLiftXD,
+                 m_encoderrightShooter,
+                 m_encoderleftShooter);
     }
 
   m_frontLeftDriveMotor.Set(0);
@@ -504,8 +519,7 @@ void Robot::TestPeriodic()
   m_intake.Set(ControlMode::PercentOutput, 0);
   m_elevator.Set(ControlMode::PercentOutput, 0);
 
-  do_CameraLightControl.Set(true); // I believe this is backwards, so true is off??
-  m_vanityLightControler.Set(0);
+  do_CameraLightControl.Set(V_CameraLightCmndOn); // I believe this is backwards, so true is off??
   }
 
 

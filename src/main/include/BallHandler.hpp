@@ -16,6 +16,7 @@ extern double V_IntakePowerCmnd;
 extern double V_ElevatorPowerCmnd;
 extern double V_ShooterRPM_Cmnd;
 extern bool   V_ShooterTargetSpeedReached;
+extern bool   V_BH_LauncherActive;
 
 void BallHandlerMotorConfigsInit(rev::SparkMaxPIDController m_rightShooterpid,
                                  rev::SparkMaxPIDController m_leftShooterpid);

@@ -11,7 +11,8 @@
 
  */
 
-bool V_BallDetectedRaw;   // Detection of a ball based on the IR sensor.
+bool V_BallDetectedUpper;   // Detection of a ball based on the IR sensor.
+bool V_BallDetectedLower; // Detection of a ball in the lower part of elevator.
 bool V_XD_LimitDetected;  // XD travel is at the limit switch.
 bool V_YD_LimitDetected;  // YD travel is at the limit switch.
 
@@ -23,9 +24,10 @@ bool V_YD_LimitDetected;  // YD travel is at the limit switch.
  ******************************************************************************/
 void IO_SensorsInit()
   {
-  V_BallDetectedRaw = false;
+  V_BallDetectedUpper = false;
   V_XD_LimitDetected = false;
   V_YD_LimitDetected = false;
+  V_BallDetectedLower = false;
   }
 
 /******************************************************************************
@@ -34,16 +36,25 @@ void IO_SensorsInit()
  * Description:  IR sensor that detects the presence of a ball in the elevator.
  *
  ******************************************************************************/
-void BallDetectionSensor(bool L_IR_SensorDetect)
+void BallDetectionSensor(bool L_IR_SensorDetect,
+                         bool L_BallSensorLower)
   {
     bool L_BallDetected = false;
+    bool L_BallDetectedLower = false;
 
     if (L_IR_SensorDetect == false)
       {
       L_BallDetected = true;
       }
+
+    if (L_BallSensorLower == true)
+      {
+      L_BallDetectedLower = true;
+      }
     
-    V_BallDetectedRaw = L_BallDetected;
+    V_BallDetectedUpper = L_BallDetected;
+
+    V_BallDetectedLower = L_BallDetectedLower;
   }
 
 
@@ -68,10 +79,12 @@ void XD_YD_LimitSwitch(bool L_XD_LimitSwitch,
  *
  ******************************************************************************/
 void Read_IO_Sensors(bool L_IR_SensorDetect,
+                     bool L_BallSensorLower,
                      bool L_XD_LimitSwitch,
                      bool L_XY_LimitSwitch)
   {
-    BallDetectionSensor(L_IR_SensorDetect);
+    BallDetectionSensor(L_IR_SensorDetect,
+                        L_BallSensorLower);
 
     XD_YD_LimitSwitch(L_XD_LimitSwitch,
                       L_XY_LimitSwitch);

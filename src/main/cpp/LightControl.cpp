@@ -11,6 +11,7 @@
  */
 
 #include <frc/DriverStation.h>
+#include <frc/AddressableLED.h>
 
 #include "Const.hpp"
 
@@ -25,6 +26,13 @@ bool V_CameraLightCmndOn = false;
 
 /* V_VanityLightCmnd: PWM command to be sent to the blinkin controller. */
 double  V_VanityLightCmnd = 0;
+
+/* V_LED_FirstPixelHue: Hue of the first pixel in the LED stirp. */
+int V_LED_FirstPixelHue = 0;
+
+int V_VanityLED_Red = 0;
+int V_VanityLED_Green = 0;
+int V_VanityLED_Blue = 0;
 
 /******************************************************************************
  * Function:     CameraLightControl
@@ -97,6 +105,41 @@ bool CameraLightControl(bool             L_AutoAlignRequest,
   return (L_CameraLightCmndOn);
   }
 
+
+// /******************************************************************************
+//  * Function:     AddressableLED_Rainbow
+//  *
+//  * Description:  Contains functionality to add a rainbow effect to the LED 
+//  *               light stips.
+//  ******************************************************************************/
+//   void AddressableLED_Rainbow()
+//   {
+//     // For every pixel
+
+//     for (int i = 0; i < K_LED_NumberOfLEDs; i++)
+//       {
+
+//       // Calculate the hue - hue is easier for rainbows because the color
+
+//       // shape is a circle so only one value needs to precess
+
+//       const auto pixelHue = (V_LED_FirstPixelHue + (i * 180 / K_LED_NumberOfLEDs)) % 180;
+
+//       // Set the value
+
+//       m_ledBuffer[i].SetHSV(pixelHue, 255, 128);
+//       }
+
+//     // Increase by to make the rainbow "move"
+
+//     V_LED_FirstPixelHue += 3;
+
+//     // Check bounds
+
+//     V_LED_FirstPixelHue %= 180;
+
+//   }
+
 /******************************************************************************
  * Function:     VanityLightControl
  *
@@ -105,29 +148,28 @@ bool CameraLightControl(bool             L_AutoAlignRequest,
  *               - Will change color when in end game to help inform driver to
  *                 take action.
  ******************************************************************************/
-double VanityLightControl(double L_MatchTimeRemaining,
-                          frc::DriverStation::Alliance L_AllianceColor)
+void VanityLightControl(double L_MatchTimeRemaining,
+                        frc::DriverStation::Alliance L_AllianceColor,
+                        int *L_Red,
+                        int *L_Green,
+                        int *L_Blue)
   {
-    double L_LED_Command = 0;
-
-    if (L_MatchTimeRemaining <= C_End_game_time)
-      {
-      L_LED_Command = -0.89;
-      }
-    else if (L_AllianceColor == frc::DriverStation::Alliance::kRed)
-      {
-      L_LED_Command = -0.17;
-      }
-    else if (L_AllianceColor == frc::DriverStation::Alliance::kBlue)
-      {
-      L_LED_Command = -0.15;
-      }
-    else
-      {
-      L_LED_Command = -0.27;
-      }
-
-    return(L_LED_Command);
+  if (L_MatchTimeRemaining <= C_End_game_time)
+    {
+    *L_Red = 0; *L_Green = 255; *L_Blue = 42;
+    }
+  else if (L_AllianceColor == frc::DriverStation::Alliance::kRed)
+    {
+    *L_Red = 255; *L_Green = 0; *L_Blue = 0;
+    }
+  else if (L_AllianceColor == frc::DriverStation::Alliance::kBlue)
+    {
+    *L_Red = 0; *L_Green = 0; *L_Blue = 255;
+    }
+  else
+    {
+    *L_Red = 255; *L_Green = 85; *L_Blue = 0; // Orange
+    }
   }
 
 /******************************************************************************
@@ -145,7 +187,9 @@ void LightControlMain(bool                         L_AutoAlignRequest,
                       bool                         L_Driver_CameraLight,
                       bool                         L_ShooterTargetSpeedReached,
                       bool                        *L_CameraLightCmndOn,
-                      double                      *L_VanityLightCmnd)
+                      int                         *L_VanityLED_Red,
+                      int                         *L_VanityLED_Green,
+                      int                         *L_VanityLED_Blue)
   {
   *L_CameraLightCmndOn = CameraLightControl(L_AutoAlignRequest,
                                             L_AutoLauncherRequest,
@@ -154,6 +198,9 @@ void LightControlMain(bool                         L_AutoAlignRequest,
                                             L_Driver_CameraLight,
                                             L_ShooterTargetSpeedReached);
 
-  *L_VanityLightCmnd = VanityLightControl(L_MatchTimeRemaining,
-                                          L_AllianceColor);
+  VanityLightControl(L_MatchTimeRemaining,
+                     L_AllianceColor,
+                     L_VanityLED_Red,
+                     L_VanityLED_Green,
+                     L_VanityLED_Blue);
   }

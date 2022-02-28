@@ -16,6 +16,7 @@
 #include "rev/CANSparkMax.h"
 #include <frc/motorcontrol/Spark.h>
 #include <frc/DutyCycleEncoder.h>
+#include <frc/AddressableLED.h>
 // #include <networktables/NetworkTable.h>
 #include <photonlib/PhotonCamera.h>
 // #include <photonlib/PhotonUtils.h>
@@ -41,10 +42,10 @@ class Robot : public frc::TimedRobot {
   frc::DigitalInput     di_XY_LimitSwitch    {C_XY_LimitSwitch_ID};
   frc::DigitalInput     di_XD_LimitSwitch    {C_XD_LimitSwitch_ID};
   frc::DigitalInput     di_IR_Sensor         {C_IR_Sensor_ID};
-  frc::DigitalInput     di_Voltage_Man       {C_Voltage_Woman}; //OWO
+  frc::DigitalInput     di_BallSensorLower   {C_LowerBallSensorID}; //OWO
 
   frc::DigitalOutput    do_CameraLightControl{C_CameraLightControl_ID};
-  
+
   // PDP - Power Distribution Panel - CAN
   frc::PowerDistribution                     PDP                   {C_PDP_ID,               frc::PowerDistribution::ModuleType::kCTRE};
 
@@ -79,7 +80,11 @@ class Robot : public frc::TimedRobot {
   ctre::phoenix::motorcontrol::can::TalonSRX m_elevator            {C_elevatorID};
 
   // PWM Motor / Light Controllers
-  frc::Spark                                 m_vanityLightControler {C_VanityLight_ID};
+  frc::AddressableLED                        m_led{C_VanityLight_ID};
+  std::array<frc::AddressableLED::LEDData, K_LED_NumberOfLEDs> m_ledBuffer; 
+  
+  // frc::Spark                                 m_vanityLightControler {C_VanityLight_ID};
+
 
   // CAN Encoders
   rev::SparkMaxRelativeEncoder               m_encoderFrontLeftSteer  = m_frontLeftSteerMotor.GetEncoder();

@@ -104,7 +104,7 @@ T_ADAS_UT_UpperTarget ADAS_UT_AutoCenter(double *L_Pct_FwdRev,
   *L_Pct_Elevator = 0;
 
   /* Get the launcher ready by setting it to the lowest expected speed */
-  *L_RPM_Launcher = K_DesiredLauncherSpeed[0];
+  *L_RPM_Launcher = K_BH_LauncherSpeed[0];
 
   /* Ok, now let's focus on the auto centering: */
   if (L_VisionTopTargetAquired == true)
@@ -204,7 +204,7 @@ T_ADAS_UT_UpperTarget ADAS_UT_LauncherSpeed(double *L_Pct_FwdRev,
     /* Ehh, we don't seem to have observed a good value from the camera yet.
        Let's take a stab in the dark and hold it at the initial value and 
        hope that we can see something soon... */
-    L_LauncherSpeedCmnd = K_DesiredLauncherSpeed[0];
+    L_LauncherSpeedCmnd = K_BH_LauncherSpeed[0];
     V_ADAS_UT_DebounceTime = 0;
     }
   

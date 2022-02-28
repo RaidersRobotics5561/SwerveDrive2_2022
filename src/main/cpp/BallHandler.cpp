@@ -26,6 +26,7 @@ double V_ShooterRPM_Cmnd   = 0;
 double V_ShooterTestSpeed  = 0;
 bool   V_ShooterTargetSpeedReached = false;
 double V_ShooterRPM_CmndPrev = 0;
+bool   V_BH_LauncherActive = false;
 double KV_ShooterRampRate = 0;
 // double V_LauncherPID_Gx[E_PID_SparkMaxCalSz];
 
@@ -49,42 +50,20 @@ void BallHandlerMotorConfigsInit(rev::SparkMaxPIDController m_rightShooterpid,
                                  rev::SparkMaxPIDController m_leftShooterpid)
   {
   // set PID coefficients
-  m_rightShooterpid.SetP(K_LauncherPID_Gx[E_kP]);
-  m_rightShooterpid.SetI(K_LauncherPID_Gx[E_kI]);
-  m_rightShooterpid.SetD(K_LauncherPID_Gx[E_kD]);
-  m_rightShooterpid.SetIZone(K_LauncherPID_Gx[E_kIz]);
-  m_rightShooterpid.SetFF(K_LauncherPID_Gx[E_kFF]);
-  m_rightShooterpid.SetOutputRange(K_LauncherPID_Gx[E_kMinOutput], K_LauncherPID_Gx[E_kMaxOutput]);
+  m_rightShooterpid.SetP(K_BH_LauncherPID_Gx[E_kP]);
+  m_rightShooterpid.SetI(K_BH_LauncherPID_Gx[E_kI]);
+  m_rightShooterpid.SetD(K_BH_LauncherPID_Gx[E_kD]);
+  m_rightShooterpid.SetIZone(K_BH_LauncherPID_Gx[E_kIz]);
+  m_rightShooterpid.SetFF(K_BH_LauncherPID_Gx[E_kFF]);
+  m_rightShooterpid.SetOutputRange(K_BH_LauncherPID_Gx[E_kMinOutput], K_BH_LauncherPID_Gx[E_kMaxOutput]);
 
-  m_leftShooterpid.SetP(K_LauncherPID_Gx[E_kP]);
-  m_leftShooterpid.SetI(K_LauncherPID_Gx[E_kI]);
-  m_leftShooterpid.SetD(K_LauncherPID_Gx[E_kD]);
-  m_leftShooterpid.SetIZone(K_LauncherPID_Gx[E_kIz]);
-  m_leftShooterpid.SetFF(K_LauncherPID_Gx[E_kFF]);
-  m_leftShooterpid.SetOutputRange(K_LauncherPID_Gx[E_kMinOutput], K_LauncherPID_Gx[E_kMaxOutput]);
+  m_leftShooterpid.SetP(K_BH_LauncherPID_Gx[E_kP]);
+  m_leftShooterpid.SetI(K_BH_LauncherPID_Gx[E_kI]);
+  m_leftShooterpid.SetD(K_BH_LauncherPID_Gx[E_kD]);
+  m_leftShooterpid.SetIZone(K_BH_LauncherPID_Gx[E_kIz]);
+  m_leftShooterpid.SetFF(K_BH_LauncherPID_Gx[E_kFF]);
+  m_leftShooterpid.SetOutputRange(K_BH_LauncherPID_Gx[E_kMinOutput], K_BH_LauncherPID_Gx[E_kMaxOutput]);
 
-  /**
-   * Smart Motion coefficients are set on a SparkMaxPIDController object
-   * 
-   * - SetSmartMotionMaxVelocity() will limit the velocity in RPM of
-   * the pid controller in Smart Motion mode
-   * - SetSmartMotionMinOutputVelocity() will put a lower bound in
-   * RPM of the pid controller in Smart Motion mode
-   * - SetSmartMotionMaxAccel() will limit the acceleration in RPM^2
-   * of the pid controller in Smart Motion mode
-   * - SetSmartMotionAllowedClosedLoopError() will set the max allowed
-   * error for the pid controller in Smart Motion mode
-   */
-  // m_rightShooterpid.SetSmartMotionMaxVelocity(K_LauncherPID_Gx[E_kMaxVel]);
-  // m_rightShooterpid.SetSmartMotionMinOutputVelocity(K_LauncherPID_Gx[E_kMinVel]);
-  // m_rightShooterpid.SetSmartMotionMaxAccel(K_LauncherPID_Gx[E_kMaxAcc]);
-  // m_rightShooterpid.SetSmartMotionAllowedClosedLoopError(K_LauncherPID_Gx[E_kAllErr]);
-
-  // m_leftShooterpid.SetSmartMotionMaxVelocity(K_LauncherPID_Gx[E_kMaxVel]);
-  // m_leftShooterpid.SetSmartMotionMinOutputVelocity(K_LauncherPID_Gx[E_kMinVel]);
-  // m_leftShooterpid.SetSmartMotionMaxAccel(K_LauncherPID_Gx[E_kMaxAcc]);
-  // m_leftShooterpid.SetSmartMotionAllowedClosedLoopError(K_LauncherPID_Gx[E_kAllErr]);
-  
   #ifdef BallHandlerTest
   T_PID_SparkMaxCal L_Index = E_kP;
 
@@ -92,25 +71,25 @@ void BallHandlerMotorConfigsInit(rev::SparkMaxPIDController m_rightShooterpid,
        L_Index < E_PID_SparkMaxCalSz;
        L_Index = T_PID_SparkMaxCal(int(L_Index) + 1))
       {
-      V_LauncherPID_Gx[L_Index] = K_LauncherPID_Gx[L_Index];
+      V_LauncherPID_Gx[L_Index] = K_BH_LauncherPID_Gx[L_Index];
       }
 
   KV_ShooterRampRate = V_LauncherPID_Gx[E_kMaxAcc];
   
   // display PID coefficients on SmartDashboard
-  frc::SmartDashboard::PutNumber("P Gain", K_LauncherPID_Gx[E_kP]);
-  frc::SmartDashboard::PutNumber("I Gain", K_LauncherPID_Gx[E_kI]);
-  frc::SmartDashboard::PutNumber("D Gain", K_LauncherPID_Gx[E_kD]);
-  frc::SmartDashboard::PutNumber("I Zone", K_LauncherPID_Gx[E_kIz]);
-  frc::SmartDashboard::PutNumber("Feed Forward", K_LauncherPID_Gx[E_kFF]);
-  frc::SmartDashboard::PutNumber("Max Output", K_LauncherPID_Gx[E_kMaxOutput]);
-  frc::SmartDashboard::PutNumber("Min Output", K_LauncherPID_Gx[E_kMinOutput]);
+  frc::SmartDashboard::PutNumber("P Gain", K_BH_LauncherPID_Gx[E_kP]);
+  frc::SmartDashboard::PutNumber("I Gain", K_BH_LauncherPID_Gx[E_kI]);
+  frc::SmartDashboard::PutNumber("D Gain", K_BH_LauncherPID_Gx[E_kD]);
+  frc::SmartDashboard::PutNumber("I Zone", K_BH_LauncherPID_Gx[E_kIz]);
+  frc::SmartDashboard::PutNumber("Feed Forward", K_BH_LauncherPID_Gx[E_kFF]);
+  frc::SmartDashboard::PutNumber("Max Output", K_BH_LauncherPID_Gx[E_kMaxOutput]);
+  frc::SmartDashboard::PutNumber("Min Output", K_BH_LauncherPID_Gx[E_kMinOutput]);
 
-  // display Smart Motion coefficients
-  frc::SmartDashboard::PutNumber("Max Velocity", K_LauncherPID_Gx[E_kMaxVel]);
-  frc::SmartDashboard::PutNumber("Min Velocity", K_LauncherPID_Gx[E_kMinVel]);
-  frc::SmartDashboard::PutNumber("Max Acceleration", K_LauncherPID_Gx[E_kMaxAcc]);
-  frc::SmartDashboard::PutNumber("Allowed Closed Loop Error", K_LauncherPID_Gx[E_kAllErr]);
+  // display secondary coefficients
+  frc::SmartDashboard::PutNumber("Max Velocity", K_BH_LauncherPID_Gx[E_kMaxVel]);
+  frc::SmartDashboard::PutNumber("Min Velocity", K_BH_LauncherPID_Gx[E_kMinVel]);
+  frc::SmartDashboard::PutNumber("Max Acceleration", K_BH_LauncherPID_Gx[E_kMaxAcc]);
+  frc::SmartDashboard::PutNumber("Allowed Closed Loop Error", K_BH_LauncherPID_Gx[E_kAllErr]);
 
   frc::SmartDashboard::PutNumber("Launch Speed Desired", V_ShooterTestSpeed);
   #endif
@@ -149,7 +128,7 @@ void BallHandlerMotorConfigsCal(rev::SparkMaxPIDController m_rightShooterpid,
   if((L_d != V_LauncherPID_Gx[E_kD]))   { m_rightShooterpid.SetD(L_d); m_leftShooterpid.SetD(L_d); V_LauncherPID_Gx[E_kD] = L_d; }
   if((L_iz != V_LauncherPID_Gx[E_kIz])) { m_rightShooterpid.SetIZone(L_iz); m_leftShooterpid.SetIZone(L_iz); V_LauncherPID_Gx[E_kIz] = L_iz; }
   if((L_ff != V_LauncherPID_Gx[E_kFF])) { m_rightShooterpid.SetFF(L_ff); m_leftShooterpid.SetFF(L_ff); V_LauncherPID_Gx[E_kFF] = L_ff; }
-  if((L_max != V_LauncherPID_Gx[E_kMaxOutput]) || (L_min != K_LauncherPID_Gx[E_kMinOutput])) { m_rightShooterpid.SetOutputRange(L_min, L_max); m_leftShooterpid.SetOutputRange(L_min, L_max); V_LauncherPID_Gx[E_kMinOutput] = L_min; V_LauncherPID_Gx[E_kMaxOutput] = L_max; }
+  if((L_max != V_LauncherPID_Gx[E_kMaxOutput]) || (L_min != K_BH_LauncherPID_Gx[E_kMinOutput])) { m_rightShooterpid.SetOutputRange(L_min, L_max); m_leftShooterpid.SetOutputRange(L_min, L_max); V_LauncherPID_Gx[E_kMinOutput] = L_min; V_LauncherPID_Gx[E_kMaxOutput] = L_max; }
 
   // if((L_maxV != V_LauncherPID_Gx[E_kMaxVel])) { m_rightShooterpid.SetSmartMotionMaxVelocity(L_maxV); m_leftShooterpid.SetSmartMotionMaxVelocity(L_maxV); V_LauncherPID_Gx[E_kMaxVel] = L_maxV; }
   // if((L_minV != V_LauncherPID_Gx[E_kMinVel])) { m_rightShooterpid.SetSmartMotionMinOutputVelocity(L_minV); m_leftShooterpid.SetSmartMotionMinOutputVelocity(L_minV); V_LauncherPID_Gx[E_kMinVel] = L_minV; }
@@ -171,6 +150,7 @@ void BallHandlerInit()
   V_ShooterRPM_Cmnd = 0;
   V_ShooterTargetSpeedReached = false;
   V_ShooterRPM_CmndPrev = 0;
+  V_BH_LauncherActive = false;
   }
 
 
@@ -201,23 +181,32 @@ double BallLauncher(bool   L_DisableShooter,
     L_ShooterSpeedCmndTemp = L_AutoShootCmnd;
     L_LauncherState = E_LauncherAutoTargetActive;
     }
-  else if (L_ManualShooter >= K_DesiredLauncherManualDb)
+  else if (L_ManualShooter >= K_BH_LauncherManualDb)
     {
     L_ShooterSpeedCmndTemp = DtrmnManualLauncherSpeed(L_ManualShooter);
     L_LauncherState = E_LauncherManualActive;
     }
   
-  L_ShooterSpeedCmnd = RampTo(L_ShooterSpeedCmndTemp, V_ShooterRPM_CmndPrev, K_LauncherPID_Gx[E_kMaxAcc]);
+  L_ShooterSpeedCmnd = RampTo(L_ShooterSpeedCmndTemp, V_ShooterRPM_CmndPrev, KV_ShooterRampRate);
 
   V_ShooterRPM_CmndPrev = L_ShooterSpeedCmnd;
   
-  if ((fabs(L_ShooterSpeedCmnd - L_LauncherCurrentSpeed) <= K_DesiredLauncherSpeedDb) == true)
+  if ((fabs(L_ShooterSpeedCmnd - L_LauncherCurrentSpeed) <= K_BH_LauncherSpeedDb) == true)
     {
     V_ShooterTargetSpeedReached = true;
     }
   else
     {
     V_ShooterTargetSpeedReached = false;
+    }
+
+  if (fabs(L_ShooterSpeedCmnd) >= K_BH_LauncherMinCmndSpd)
+    {
+    V_BH_LauncherActive = true;
+    }
+  else
+    {
+    V_BH_LauncherActive = false;
     }
 
   return (L_ShooterSpeedCmnd);
@@ -274,6 +263,7 @@ double BallElevator(bool L_BallDetected,
       {
       L_ElevatorPowerCmnd = K_ElevatorPowerDwn;
       }
+
     // otherwise leave at 0
 
     return (L_ElevatorPowerCmnd);

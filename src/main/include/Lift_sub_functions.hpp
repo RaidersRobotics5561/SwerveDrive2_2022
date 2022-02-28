@@ -7,11 +7,6 @@
    These are the sub functions for our lift control states machine.
  */
 
-  bool S1_initialize_Up_YD(double         L_lift_measured_position_YD,
-                          double         L_lift_measured_position_XD,
-                          double        *L_lift_command_YD,
-                          double        *L_lift_command_XD);  
-
   bool S2_lift_down_YD(double         L_lift_measured_position_YD,
                         double         L_lift_measured_position_XD,
                         double        *L_lift_command_YD,
@@ -57,9 +52,9 @@
   bool S10_final_YD(double         L_lift_measured_position_YD,
                     double         L_lift_measured_position_XD,
                     double        *L_lift_command_YD,
-                    double        *L_lift_command_XD);
+                    double        *L_lift_command_XD);    
 
-  bool S11_Stop(double         L_lift_measured_position_YD,
-                double         L_lift_measured_position_XD,
-                double        *L_lift_command_YD,
-                double        *L_lift_command_XD);                            
+   bool S11_final_OWO(double         L_lift_measured_position_YD,
+                      double         L_lift_measured_position_XD,
+                      double        *L_lift_command_YD,
+                      double        *L_lift_command_XD);                             

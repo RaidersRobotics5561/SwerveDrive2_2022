@@ -1,4 +1,4 @@
-#if 0
+#ifdef VISION1
 void VisionRun();
 void VisionDashboard();
 

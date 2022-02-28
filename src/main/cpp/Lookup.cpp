@@ -91,7 +91,7 @@ double LookUp1D_Table(const double *L_X_Axis,
 /******************************************************************************
  * Function:     RampTo
  *
- * Description:  Function to ramp to a certain motor speed/postition
+ * Description:  Function to ramp from one value to another.
  *****************************************************************************/
 double RampTo(double  L_Final,
               double  L_Current,
@@ -487,11 +487,11 @@ void DesiredAutonLocation(double  L_t_AutonTime,
 double ScaleJoystickAxis(double L_JoystickAxis)
   {
   double L_DesiredDriveSpeed = 0.0;
-  int L_AxisSize             = (int)(sizeof(K_DesiredDriveSpeedAxis) / sizeof(K_DesiredDriveSpeed[0]));
-  int L_CalArraySize         = (int)(sizeof(K_DesiredDriveSpeed) / sizeof(K_DesiredDriveSpeed[0]));
+  int L_AxisSize             = (int)(sizeof(K_SD_DesiredDriveSpeedAxis) / sizeof(K_SD_DesiredDriveSpeed[0]));
+  int L_CalArraySize         = (int)(sizeof(K_SD_DesiredDriveSpeed) / sizeof(K_SD_DesiredDriveSpeed[0]));
 
-  L_DesiredDriveSpeed = LookUp1D_Table(&K_DesiredDriveSpeedAxis[0],
-                                       &K_DesiredDriveSpeed[0],
+  L_DesiredDriveSpeed = LookUp1D_Table(&K_SD_DesiredDriveSpeedAxis[0],
+                                       &K_SD_DesiredDriveSpeed[0],
                                         L_AxisSize,
                                         L_CalArraySize,
                                         L_JoystickAxis);
@@ -508,11 +508,11 @@ double ScaleJoystickAxis(double L_JoystickAxis)
 double DtrmnAutoLauncherSpeed(double L_TargetDistance)
   {
   double L_DesiredLaunchSpeed = 0.0;
-  int L_AxisSize             = (int)(sizeof(K_DesiredDistanceAxis) / sizeof(K_DesiredLauncherSpeed[0]));
-  int L_CalArraySize         = (int)(sizeof(K_DesiredLauncherSpeed) / sizeof(K_DesiredLauncherSpeed[0]));
+  int L_AxisSize             = (int)(sizeof(K_BH_LauncherSpeedAxis) / sizeof(K_BH_LauncherSpeed[0]));
+  int L_CalArraySize         = (int)(sizeof(K_BH_LauncherSpeed) / sizeof(K_BH_LauncherSpeed[0]));
 
-  L_DesiredLaunchSpeed = LookUp1D_Table(&K_DesiredDistanceAxis[0],
-                                        &K_DesiredLauncherSpeed[0],
+  L_DesiredLaunchSpeed = LookUp1D_Table(&K_BH_LauncherSpeedAxis[0],
+                                        &K_BH_LauncherSpeed[0],
                                          L_AxisSize,
                                          L_CalArraySize,
                                          L_TargetDistance);
@@ -529,11 +529,11 @@ double DtrmnAutoLauncherSpeed(double L_TargetDistance)
 double DtrmnManualLauncherSpeed(double L_DriverAxis)
   {
   double L_DesiredLaunchSpeed = 0.0;
-  int L_AxisSize             = (int)(sizeof(K_DesiredLauncherManualAxis) / sizeof(K_DesiredLauncherManualSpeed[0]));
-  int L_CalArraySize         = (int)(sizeof(K_DesiredLauncherManualSpeed) / sizeof(K_DesiredLauncherManualSpeed[0]));
+  int L_AxisSize             = (int)(sizeof(K_BH_LauncherManualSpeedAxis) / sizeof(K_BH_LauncherManualSpeed[0]));
+  int L_CalArraySize         = (int)(sizeof(K_BH_LauncherManualSpeed) / sizeof(K_BH_LauncherManualSpeed[0]));
 
-  L_DesiredLaunchSpeed = LookUp1D_Table(&K_DesiredLauncherManualAxis[0],
-                                        &K_DesiredLauncherManualSpeed[0],
+  L_DesiredLaunchSpeed = LookUp1D_Table(&K_BH_LauncherManualSpeedAxis[0],
+                                        &K_BH_LauncherManualSpeed[0],
                                          L_AxisSize,
                                          L_CalArraySize,
                                          L_DriverAxis);
@@ -550,11 +550,11 @@ double DtrmnManualLauncherSpeed(double L_DriverAxis)
 double DtrmnTimeToDriveToCaptureBall(double L_EstTargetDistance)
   {
   double L_DesiredDriveTime = 0.0;
-  int L_AxisSize            = (int)(sizeof(K_ADAS_BT_DistanceAxis) / sizeof(K_ADAS_BT_DesiredDriveTime[0]));
-  int L_CalArraySize        = (int)(sizeof(K_ADAS_BT_DesiredDriveTime) / sizeof(K_ADAS_BT_DesiredDriveTime[0]));
+  int L_AxisSize            = (int)(sizeof(K_ADAS_BT_DriveTimeAxis) / sizeof(K_ADAS_BT_DriveTime[0]));
+  int L_CalArraySize        = (int)(sizeof(K_ADAS_BT_DriveTime) / sizeof(K_ADAS_BT_DriveTime[0]));
 
-  L_DesiredDriveTime = LookUp1D_Table(&K_ADAS_BT_DistanceAxis[0],
-                                        &K_ADAS_BT_DesiredDriveTime[0],
+  L_DesiredDriveTime = LookUp1D_Table(&K_ADAS_BT_DriveTimeAxis[0],
+                                        &K_ADAS_BT_DriveTime[0],
                                          L_AxisSize,
                                          L_CalArraySize,
                                          L_EstTargetDistance);
@@ -569,17 +569,8 @@ double DtrmnTimeToDriveToCaptureBall(double L_EstTargetDistance)
  ******************************************************************************/
 double DesiredUpperBeamSpeed(double L_TargetDistance)
   {
-  double L_DesiredBeamSpeed = 0.0;
-  int L_AxisSize             = (int)(sizeof(K_DesiredDistanceAxis) / sizeof(K_DesiredSpeedUpperBeam[0]));
-  int L_CalArraySize         = (int)(sizeof(K_DesiredSpeedUpperBeam) / sizeof(K_DesiredSpeedUpperBeam[0]));
 
-  L_DesiredBeamSpeed = LookUp1D_Table(&K_DesiredDistanceAxis[0],
-                                      &K_DesiredSpeedUpperBeam[0],
-                                       L_AxisSize,
-                                       L_CalArraySize,
-                                       L_TargetDistance);
-
-  return L_DesiredBeamSpeed;
+  return 0;
   }
 
   /******************************************************************************
@@ -589,17 +580,8 @@ double DesiredUpperBeamSpeed(double L_TargetDistance)
  ******************************************************************************/
 double DesiredLowerBeamSpeed(double L_TargetDistance)
   {
-  double L_DesiredBeamSpeed = 0.0;
-  int L_AxisSize             = (int)(sizeof(K_DesiredDistanceAxis) / sizeof(K_DesiredSpeedLowerBeam[0]));
-  int L_CalArraySize         = (int)(sizeof(K_DesiredSpeedLowerBeam) / sizeof(K_DesiredSpeedLowerBeam[0]));
 
-  L_DesiredBeamSpeed = LookUp1D_Table(&K_DesiredDistanceAxis[0],
-                                       &K_DesiredSpeedLowerBeam[0],
-                                        L_AxisSize,
-                                        L_CalArraySize,
-                                        L_TargetDistance);
-
-  return L_DesiredBeamSpeed;
+  return 0;
   }
 
 /******************************************************************************
@@ -651,6 +633,8 @@ double DesiredAutoRotateSpeed(double L_Error)
  *               beam cannon".  This is a function of distance out from the
  *               target and the angle of the robot relative to the target.
  *               We also look up the ideal robot angle for targeting.
+ *
+ *               Not currently used
  ******************************************************************************/
 void DesiredRollerSpeed(double  L_Distance,
                         double  L_Angle,
