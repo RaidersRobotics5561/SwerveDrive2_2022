@@ -115,7 +115,8 @@ double VanityLightControl(double L_MatchTimeRemaining,
       {
       L_LED_Command = C_BlinkinLED_SolidWhite;
       }
-    else if (L_MatchTimeRemaining <= C_End_game_time)
+    else if ((L_MatchTimeRemaining <= C_End_game_time) &&
+             (L_MatchTimeRemaining > 0))
       {
       L_LED_Command = C_BlinkinLED_RainbowWithGlitter;
       }

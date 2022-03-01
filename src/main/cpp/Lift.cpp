@@ -281,8 +281,23 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_auto_climb_butto
     L_lift_command_YD_Temp = V_LiftYD_TestLocation;
     L_lift_command_XD_Temp = V_LiftXD_TestLocation;
     }
-  else
+  else if ((L_driver_auto_climb_pause == true) && (V_Lift_Paused == false))
     {
+    /* The driver pressed a button to puase the climb process.  Let's save the current locations and hold. */
+    V_Lift_Paused = true;
+    V_Lift_PausedXD_Position = L_lift_measured_position_XD;
+    V_Lift_PausedYD_Position = L_lift_measured_position_YD;
+    /* Set commanded location to current measured location for this loop. */
+    L_lift_command_XD_Temp = L_lift_measured_position_XD;
+    L_lift_command_YD_Temp = L_lift_measured_position_YD;
+    }
+  else if (((L_driver_auto_climb_button == true) && (V_Lift_Paused == true)) || 
+            (V_Lift_Paused == false))
+    {
+    V_Lift_Paused = false;
+    V_Lift_PausedXD_Position = L_lift_measured_position_XD;
+    V_Lift_PausedYD_Position = L_lift_measured_position_YD;
+
     switch (L_current_state)
       {
         case E_S0_BEGONE:
@@ -379,7 +394,12 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_auto_climb_butto
         break;
       }
     }
-
+  else
+    {
+    /* Lift is currently paused: */
+    L_lift_command_XD_Temp = V_Lift_PausedXD_Position;
+    L_lift_command_YD_Temp = V_Lift_PausedYD_Position;
+    }
 
   /* Place limits on the travel of XD and YD to prevent damage: */
   if (L_lift_command_YD_Temp > K_lift_max_YD)
