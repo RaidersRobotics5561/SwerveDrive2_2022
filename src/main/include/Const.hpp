@@ -112,19 +112,19 @@ const double K_lift_deadband_XD = 0.7; //it's a deadband for the x lift yeah
 const double K_lift_driver_manual_forward_XD = 0.15; // Manual override power
 const double K_lift_driver_manual_back_XD = -0.15; // Manual override power
 
-const double K_Lift_deadband_timer = 0.1; //keep the deadband for a certain amount of time [seconds]
+const double K_Lift_deadband_timer = 0.035; //keep the deadband for a certain amount of time [seconds]
 
-const double K_LiftPID_Gx[E_PID_SparkMaxCalSz] = { 0.1,    // kP
+const double K_LiftPID_Gx[E_PID_SparkMaxCalSz] = { 0.1,      // kP
                                                    0.000001, // kI
-                                                   0.002000,    // kD
-                                                   0.0,    // kIz
-                                                   0.0,    // kFF
-                                                   1.0,    // kMaxOutput
-                                                  -1.0,    // kMinOutput
-                                                   0.93,    // kMaxVel
-                                                   0.5,    // kMinVel
-                                                   0.0,    // kMaxAcc
-                                                   0.0};   // kAllErr
+                                                   0.002000, // kD
+                                                   0.0,      // kIz
+                                                   0.0,      // kFF
+                                                   1.0,      // kMaxOutput
+                                                  -1.0,      // kMinOutput
+                                                   1.35,     // kMaxVel - 0.93
+                                                   0.5,      // kMinVel
+                                                   0.0,      // kMaxAcc
+                                                   0.0};     // kAllErr
 
 
 

@@ -676,8 +676,7 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_auto_climb_butto
 
   if (L_lift_measured_position_YD <= (K_lift_S8_YD + K_lift_deadband_YD) && L_lift_measured_position_YD >= (K_lift_S8_YD - K_lift_deadband_YD)) {
     V_LiftDebounceTimer += C_ExeTime;
-    if (V_LiftDebounceTimer >= K_Lift_deadband_timer && L_driver_auto_climb_button == true){
-          /* Driver needs to verify hook is on correct side and when we can fully extend YD */
+    if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
           L_criteria_met = true;
           V_LiftDebounceTimer = 0;
     }
@@ -714,7 +713,7 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_auto_climb_butto
 
   if (L_lift_measured_position_XD <= (K_lift_S9_XD + K_lift_deadband_XD) && L_lift_measured_position_XD >= (K_lift_S9_XD - K_lift_deadband_XD)) {
     V_LiftDebounceTimer += C_ExeTime;
-    if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
+    if (V_LiftDebounceTimer >= K_Lift_deadband_timer && L_driver_auto_climb_button == true){
           L_criteria_met = true;
           V_LiftDebounceTimer = 0;
     }
