@@ -97,6 +97,8 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
   if (L_Driver_SwerveGoalAutoCenter == true)
     {
     L_ADAS_ActiveFeature = E_ADAS_AutoUpperTarget;
+
+    
     }
   else if (L_Driver_AutoIntake == true)
     {

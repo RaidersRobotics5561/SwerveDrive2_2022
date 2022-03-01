@@ -42,8 +42,6 @@ double V_SD_WheelAngleCmndPrev[E_RobotCornerSz];
 double KV_SD_WheelAnglePID_Gx[E_PID_CalSz];
 double KV_SD_WheelAngleRampRate = 0;
 
-T_GetDaBalls V_AutoIntake;
-
 /******************************************************************************
  * Function:     SwerveDriveMotorConfigsInit
  *
@@ -233,7 +231,6 @@ void DriveControlInit()
   V_b_DriveStraight = false;
   V_RotateErrorCalc = 0;
   
-  V_AutoIntake = E_GetDaOff;
   V_SD_DriveWheelsInPID = false;
   }
 
@@ -327,21 +324,16 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
   /* Scale the joysticks based on a calibratable lookup when in teleop: */
   if (L_RobotState == E_Teleop)
     {
-      L_JoyStick1Axis1Y_Scaled = ScaleJoystickAxis(L_JoyStick1Axis1Y);
-      L_JoyStick1Axis1X_Scaled = ScaleJoystickAxis(-L_JoyStick1Axis1X);
-      L_JoyStick1Axis2X_Scaled = ScaleJoystickAxis(-L_JoyStick1Axis2X);
+      L_FWD = -L_JoyStick1Axis1Y;
+      L_STR = -L_JoyStick1Axis1X;
+      L_RCW = -L_JoyStick1Axis2X;
     }
   else /* In auton, just past through the commands: */
     {
-      L_JoyStick1Axis1Y_Scaled = L_JoyStick1Axis1Y;
-      L_JoyStick1Axis1X_Scaled = -L_JoyStick1Axis1X;
-      L_JoyStick1Axis2X_Scaled = L_JoyStick1Axis2X;
+      L_FWD = -L_JoyStick1Axis1Y;
+      L_STR = -L_JoyStick1Axis1X;
+      L_RCW = L_JoyStick1Axis2X;
     }
-
-  /* Let's place a deadband around the joystick readings */
-  L_FWD = L_JoyStick1Axis1Y_Scaled * -1;
-  L_STR = L_JoyStick1Axis1X_Scaled;
-  L_RCW = L_JoyStick1Axis2X_Scaled;
 
    //turning rotatemode on/off & setting desired angle
     if ((fabs(L_JoyStick1Axis1Y_Scaled) > 0) ||
@@ -350,7 +342,6 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       {
       // Abort out of auto rotate and/or auto target if the driver moves the joysticks
       V_SwerveTargetLockingUpper = false;
-      V_AutoIntake = E_GetDaOff;
       V_AutoRotateComplete = false;
       rotateMode = false;
 
@@ -375,11 +366,10 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       V_SwerveTargetLockingUpper = true;
       desiredAngle = K_TargetVisionAngleUpper; // This is due to the offset of the camera
       }
-    else if(L_Driver_AutoIntake || V_AutoIntake == E_GetDaRotation)
+    else if(L_Driver_AutoIntake)
       {
       /* Auto targeting Balls */
       V_b_DriveStraight = false;
-      V_AutoIntake = E_GetDaRotation;
       desiredAngle = K_TargetVisionAngleLower; // This is due to the offset of the camera
       }
     else if (L_JoyStick1Button4)
@@ -416,22 +406,14 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       L_RotateErrorCalc = desiredAngle - L_TopTargetYawDegrees;
       V_AutoRotateComplete = false;
       }
-    else if((V_AutoIntake == E_GetDaRotation) &&
-            (L_VisionBottomTargetAquired == true))
-      {
-      // Use photon vison as target when in auto beam lock
-      L_RotateErrorCalc = desiredAngle - L_VisionBottomYaw;
-      V_AutoRotateComplete = false;
-      }
     else
       {
       L_RotateErrorCalc = 0;
       }
-    
+
     if ((V_b_DriveStraight     == true           && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime) ||
         (rotateMode            == true           && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime) || 
-        (V_SwerveTargetLockingUpper == true      && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime) ||
-        (V_AutoIntake == E_GetDaRotation         && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime))
+        (V_SwerveTargetLockingUpper == true      && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime))
       {
       V_AutoRotateComplete = false;
       // V_SwerveTargetLockingUpper = true;
@@ -439,12 +421,10 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       }
     else if ((V_b_DriveStraight     == true      && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime) ||
              (rotateMode            == true      && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime) ||
-             (V_SwerveTargetLockingUpper == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime) ||
-             (V_AutoIntake == E_GetDaRotation    && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime))
+             (V_SwerveTargetLockingUpper == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime))
       {
       rotateMode = false;
       V_SwerveTargetLockingUpper = false;
-      V_AutoIntake = E_GetDaOff;
       rotateDeBounce = 0;
       V_AutoRotateComplete = true;
       *L_TargetFin = true;
@@ -459,10 +439,6 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       L_RCW = DesiredAutoRotateSpeed(L_RotateErrorCalc);
       }
     else if (V_SwerveTargetLockingUpper == true)
-      {
-      L_RCW = -DesiredRotateSpeed(L_RotateErrorCalc);
-      }
-    else if (V_AutoIntake == E_GetDaRotation)
       {
       L_RCW = -DesiredRotateSpeed(L_RotateErrorCalc);
       }
@@ -528,8 +504,7 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       L_Gain = L_JoyStick1Axis3;
       }
     else if ((rotateMode   == true) ||
-             (V_SwerveTargetLockingUpper == true) ||
-             (V_AutoIntake == E_GetDaRotation))
+             (V_SwerveTargetLockingUpper == true))
       {
       L_Gain = K_SD_AutoRotateGx;
       }

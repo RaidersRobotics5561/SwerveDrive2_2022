@@ -4,7 +4,7 @@
 #include <units/length.h>
 
 // Define the desired test state here: COMP (no test), BallHandlerTest, LiftXY_Test, DriveMotorTest, WheelAngleTest
-#define BallHandlerTest 
+#define COMP 
 // Define the version of vision to use: VISION1 VISION2
 #define VISION2
 
