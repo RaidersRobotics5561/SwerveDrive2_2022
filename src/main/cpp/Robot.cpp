@@ -25,6 +25,7 @@
 #include "VisionV2.hpp"
 #include "Auton.hpp"
 #include "AutoTarget.hpp"
+#include "ADAS.hpp"
 
 // nt::NetworkTableInstance inst;
 
@@ -182,6 +183,7 @@ void Robot::RobotPeriodic()
                     V_SwerveTargetLockingUpper,
                     V_Driver_CameraLight,
                     V_ShooterTargetSpeedReached,
+                    false, // request for ball targeting
                    &V_CameraLightCmndOn,
                    &V_VanityLightCmnd);
 
@@ -367,6 +369,32 @@ void Robot::TeleopPeriodic()
   DtrmnSwerveBotLocation(V_GyroYawAngleRad,
                          &V_Rad_WheelAngleFwd[0],
                          &V_M_WheelDeltaDistance[0]);
+
+  V_ADAS_ActiveFeature = ADAS_ControlMainTeleop(&V_ADAS_Pct_SD_FwdRev,
+                                                &V_ADAS_Pct_SD_Strafe,
+                                                &V_ADAS_Pct_SD_Rotate,
+                                                &V_ADAS_RPM_BH_Launcher,
+                                                &V_ADAS_Pct_BH_Intake,
+                                                &V_ADAS_Pct_BH_Elevator,
+                                                &V_ADAS_CameraUpperLightCmndOn,
+                                                &V_ADAS_CameraLowerLightCmndOn,
+                                                 V_Driver_JoystickActive,
+                                                 V_Driver_StopShooterAutoClimbResetGyro,
+                                                 V_Driver_SwerveGoalAutoCenter,
+                                                 V_Driver_AutoIntake,
+                                                 V_GyroYawAngleDegrees,
+                                                 V_VisionTopTargetAquired,
+                                                 V_VisionTopYaw,
+                                                 V_VisionTopTargetDistanceMeters,
+                                                 V_VisionBottomTargetAquired,
+                                                 V_VisionBottomYaw,
+                                                 V_VisionBottomTargetDistanceMeters,
+                                                 V_RobotState,
+                                                 V_ShooterSpeedCurr,
+                                                 V_BallDetectedUpper,
+                                                 V_Driver_elevator_up,
+                                                 V_Driver_elevator_down,
+                                                 V_ADAS_ActiveFeature);
 
   DriveControlMain( V_Driver_SwerveForwardBack,
                     V_Driver_SwerveStrafe,

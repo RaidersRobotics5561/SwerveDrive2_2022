@@ -50,13 +50,15 @@ T_ADAS_UT_UpperTarget ADAS_UT_CameraLightOn(double *L_Pct_FwdRev,
                                             double *L_RPM_Launcher,
                                             double *L_Pct_Intake,
                                             double *L_Pct_Elevator,
-                                            bool   *L_CameraLightCmndOn)
+                                            bool   *L_CameraUpperLightCmndOn,
+                                            bool   *L_CameraLowerLightCmndOn)
   {
   T_ADAS_UT_UpperTarget L_ADAS_UT_State = E_ADAS_UT_CameraLightOn;
 
   /* First thing, let's turn on the light: */
-  *L_CameraLightCmndOn = true;
+  *L_CameraUpperLightCmndOn = true;
   /* Next, set all other values to off as we are just wanting to command the light on: */
+  *L_CameraLowerLightCmndOn = false;
   *L_Pct_FwdRev = 0;
   *L_Pct_Strafe = 0;
   *L_Pct_Rotate = 0;
@@ -88,7 +90,8 @@ T_ADAS_UT_UpperTarget ADAS_UT_AutoCenter(double *L_Pct_FwdRev,
                                          double *L_RPM_Launcher,
                                          double *L_Pct_Intake,
                                          double *L_Pct_Elevator,
-                                         bool   *L_CameraLightCmndOn,
+                                         bool   *L_CameraUpperLightCmndOn,
+                                         bool   *L_CameraLowerLightCmndOn,
                                          double  L_VisionTopTargetAquired,
                                          double  L_TopTargetYawDegrees)
   {
@@ -96,8 +99,9 @@ T_ADAS_UT_UpperTarget ADAS_UT_AutoCenter(double *L_Pct_FwdRev,
   double L_RotateErrorCalc = 0;
 
   /* First thing, let's keep the light on: */
-  *L_CameraLightCmndOn = true;
+  *L_CameraUpperLightCmndOn = true;
   /* Next, let's set all the other items we aren't trying to control to off: */
+  *L_CameraLowerLightCmndOn = false;
   *L_Pct_FwdRev = 0;
   *L_Pct_Strafe = 0;
   *L_Pct_Intake = 0;
@@ -170,7 +174,8 @@ T_ADAS_UT_UpperTarget ADAS_UT_LauncherSpeed(double *L_Pct_FwdRev,
                                             double *L_RPM_Launcher,
                                             double *L_Pct_Intake,
                                             double *L_Pct_Elevator,
-                                            bool   *L_CameraLightCmndOn,
+                                            bool   *L_CameraUpperLightCmndOn,
+                                            bool   *L_CameraLowerLightCmndOn,
                                             double  L_VisionTopTargetAquired,
                                             double  L_VisionTopTargetDistanceMeters)
   {
@@ -178,8 +183,9 @@ T_ADAS_UT_UpperTarget ADAS_UT_LauncherSpeed(double *L_Pct_FwdRev,
   double                L_LauncherSpeedCmnd = 0;
 
   /* First thing, let's keep the light on: */
-  *L_CameraLightCmndOn = true;
+  *L_CameraUpperLightCmndOn = true;
   /* Next, let's set all the other items we aren't trying to control to off: */
+  *L_CameraLowerLightCmndOn = false;
   *L_Pct_FwdRev = 0;
   *L_Pct_Strafe = 0;
   *L_Pct_Rotate = 0;
@@ -234,7 +240,8 @@ T_ADAS_UT_UpperTarget ADAS_UT_ElevatorControl(double       *L_Pct_FwdRev,
                                               double       *L_RPM_Launcher,
                                               double       *L_Pct_Intake,
                                               double       *L_Pct_Elevator,
-                                              bool         *L_CameraLightCmndOn,
+                                              bool         *L_CameraUpperLightCmndOn,
+                                              bool         *L_CameraLowerLightCmndOn,
                                               T_RobotState  L_RobotState,
                                               double        L_LauncherRPM_Measured,
                                               bool          L_BallDetected,
@@ -246,7 +253,8 @@ T_ADAS_UT_UpperTarget ADAS_UT_ElevatorControl(double       *L_Pct_FwdRev,
   double                L_LauncherSpeedCmnd = 0;
 
   /* Next, let's set all the other items we aren't trying to control to off: */
-  *L_CameraLightCmndOn = false;
+  *L_CameraUpperLightCmndOn = false;
+  *L_CameraLowerLightCmndOn = false;
   *L_Pct_FwdRev = 0;
   *L_Pct_Strafe = 0;
   *L_Pct_Rotate = 0;
@@ -325,7 +333,8 @@ T_ADAS_ActiveFeature ADAS_UT_Main(double               *L_Pct_FwdRev,
                                   double               *L_RPM_Launcher,
                                   double               *L_Pct_Intake,
                                   double               *L_Pct_Elevator,
-                                  bool                 *L_CameraLightCmndOn,
+                                  bool                 *L_CameraUpperLightCmndOn,
+                                  bool                 *L_CameraLowerLightCmndOn,
                                   T_ADAS_ActiveFeature  L_ADAS_ActiveFeature,
                                    bool                 L_VisionTopTargetAquired,
                                   double                L_TopTargetYawDegrees,
@@ -348,7 +357,8 @@ T_ADAS_ActiveFeature ADAS_UT_Main(double               *L_Pct_FwdRev,
                                                   L_RPM_Launcher,
                                                   L_Pct_Intake,
                                                   L_Pct_Elevator,
-                                                  L_CameraLightCmndOn);
+                                                  L_CameraUpperLightCmndOn,
+                                                  L_CameraLowerLightCmndOn);
       break;
       case E_ADAS_UT_AutoCenter:
           V_ADAS_UT_State = ADAS_UT_AutoCenter(L_Pct_FwdRev,
@@ -357,7 +367,8 @@ T_ADAS_ActiveFeature ADAS_UT_Main(double               *L_Pct_FwdRev,
                                                L_RPM_Launcher,
                                                L_Pct_Intake,
                                                L_Pct_Elevator,
-                                               L_CameraLightCmndOn,
+                                               L_CameraUpperLightCmndOn,
+                                               L_CameraLowerLightCmndOn,
                                                L_VisionTopTargetAquired,
                                                L_TopTargetYawDegrees);
       break;
@@ -368,7 +379,8 @@ T_ADAS_ActiveFeature ADAS_UT_Main(double               *L_Pct_FwdRev,
                                                   L_RPM_Launcher,
                                                   L_Pct_Intake,
                                                   L_Pct_Elevator,
-                                                  L_CameraLightCmndOn,
+                                                  L_CameraUpperLightCmndOn,
+                                                  L_CameraLowerLightCmndOn,
                                                   L_VisionTopTargetAquired,
                                                   L_VisionTopTargetDistanceMeters);
       break;
@@ -379,7 +391,8 @@ T_ADAS_ActiveFeature ADAS_UT_Main(double               *L_Pct_FwdRev,
                                                     L_RPM_Launcher,
                                                     L_Pct_Intake,
                                                     L_Pct_Elevator,
-                                                    L_CameraLightCmndOn,
+                                                    L_CameraUpperLightCmndOn,
+                                                    L_CameraLowerLightCmndOn,
                                                     L_RobotState,
                                                     L_LauncherRPM_Measured,
                                                     L_BallDetected,

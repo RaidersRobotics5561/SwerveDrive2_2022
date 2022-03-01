@@ -44,6 +44,46 @@ void ADAS_BT_Reset(void)
 
 
 /******************************************************************************
+ * Function:     ADAS_UT_CameraLightOn
+ *
+ * Description:  Initializes and waits for the camera light to come on.
+ ******************************************************************************/
+T_ADAS_BT_BallTarget ADAS_BT_CameraLightOn(double *L_Pct_FwdRev,
+                                            double *L_Pct_Strafe,
+                                            double *L_Pct_Rotate,
+                                            double *L_RPM_Launcher,
+                                            double *L_Pct_Intake,
+                                            double *L_Pct_Elevator,
+                                            bool   *L_CameraUpperLightCmndOn,
+                                            bool   *L_CameraLowerLightCmndOn)
+  {
+  T_ADAS_BT_BallTarget L_ADAS_BT_State = E_ADAS_BT_CameraLightOn;
+
+  /* First thing, let's turn on the light: */
+  *L_CameraLowerLightCmndOn = true;
+  /* Next, set all other values to off as we are just wanting to command the light on: */
+  *L_CameraUpperLightCmndOn = false;
+  *L_Pct_FwdRev = 0;
+  *L_Pct_Strafe = 0;
+  *L_Pct_Rotate = 0;
+  *L_RPM_Launcher = 0;
+  *L_Pct_Intake = 0;
+  *L_Pct_Elevator = 0;
+  /* Indicate that the light is on and we can proceed: */
+  /* Start incremeting a debounce time.  We want to give a bit of time for the camera to have light: */
+  V_ADAS_BT_DebounceTime += C_ExeTime;
+
+  if (V_ADAS_BT_DebounceTime >= K_ADAS_UT_LightDelayTIme)
+    {
+    L_ADAS_BT_State = E_ADAS_BT_AutoCenter;
+    V_ADAS_BT_DebounceTime = 0;
+    }
+
+  return (L_ADAS_BT_State);
+  }
+
+
+/******************************************************************************
  * Function:     ADAS_BT_AutoCenter
  *
  * Description:  Rotates the robot to face the ball target.
@@ -54,7 +94,8 @@ T_ADAS_BT_BallTarget ADAS_BT_AutoCenter(double *L_Pct_FwdRev,
                                         double *L_RPM_Launcher,
                                         double *L_Pct_Intake,
                                         double *L_Pct_Elevator,
-                                        bool   *L_CameraLightCmndOn,
+                                        bool   *L_CameraUpperLightCmndOn,
+                                        bool   *L_CameraLowerLightCmndOn,
                                         double  L_VisionBottomTargetAquired,
                                         double  L_VisionBottomYaw)
   {
@@ -62,7 +103,7 @@ T_ADAS_BT_BallTarget ADAS_BT_AutoCenter(double *L_Pct_FwdRev,
   double L_RotateErrorCalc = 0;
 
   /* Next, let's set all the other items we aren't trying to control to off: */
-  *L_CameraLightCmndOn = false;
+  *L_CameraUpperLightCmndOn = false;
   *L_Pct_FwdRev = 0;
   *L_Pct_Strafe = 0;
   *L_Pct_Intake = 0;
@@ -133,15 +174,18 @@ T_ADAS_BT_BallTarget ADAS_BT_IntakeAndRun(double *L_Pct_FwdRev,
                                           double *L_RPM_Launcher,
                                           double *L_Pct_Intake,
                                           double *L_Pct_Elevator,
-                                          bool   *L_CameraLightCmndOn,
+                                          bool   *L_CameraUpperLightCmndOn,
+                                          bool   *L_CameraLowerLightCmndOn,
                                           double  L_VisionBottomTargetAquired,
                                           double  L_VisionBottomTargetDistanceMeters)
   {
   T_ADAS_BT_BallTarget L_ADAS_BT_State = E_ADAS_BT_IntakeAndRun;
   bool                 L_DistanceFound = false;
 
+  *L_CameraLowerLightCmndOn = true;
+
   /* Next, let's set all the other items we aren't trying to control to off: */
-  *L_CameraLightCmndOn = false;
+  *L_CameraUpperLightCmndOn = false;
   *L_Pct_Strafe = 0;
   *L_Pct_Rotate = 0;
   *L_Pct_Elevator = 0;
@@ -180,6 +224,7 @@ T_ADAS_BT_BallTarget ADAS_BT_IntakeAndRun(double *L_Pct_FwdRev,
       {
       *L_Pct_FwdRev = 0;
       *L_Pct_Intake = 0;
+      *L_CameraLowerLightCmndOn = false;
       L_ADAS_BT_State = E_ADAS_BT_Disabled;
       }
     }
@@ -204,7 +249,8 @@ T_ADAS_ActiveFeature ADAS_BT_Main(double               *L_Pct_FwdRev,
                                   double               *L_RPM_Launcher,
                                   double               *L_Pct_Intake,
                                   double               *L_Pct_Elevator,
-                                  bool                 *L_CameraLightCmndOn,
+                                  bool                 *L_CameraUpperLightCmndOn,
+                                  bool                 *L_CameraLowerLightCmndOn,
                                   T_ADAS_ActiveFeature  L_ADAS_ActiveFeature,
                                   bool                  L_VisionBottomTargetAquired,
                                   double                L_VisionBottomYaw,
@@ -212,12 +258,20 @@ T_ADAS_ActiveFeature ADAS_BT_Main(double               *L_Pct_FwdRev,
                                   T_RobotState          L_RobotState,
                                   bool                  L_BallDetected)
   {
-
   if (L_ADAS_ActiveFeature == E_ADAS_AutoBallTarget)
     {
     switch (V_ADAS_BT_State)
       {
       case E_ADAS_BT_Disabled:
+          V_ADAS_BT_State = ADAS_BT_CameraLightOn(L_Pct_FwdRev,
+                                                  L_Pct_Strafe,
+                                                  L_Pct_Rotate,
+                                                  L_RPM_Launcher,
+                                                  L_Pct_Intake,
+                                                  L_Pct_Elevator,
+                                                  L_CameraUpperLightCmndOn,
+                                                  L_CameraLowerLightCmndOn);
+      break;
       case E_ADAS_BT_AutoCenter:
           V_ADAS_BT_State = ADAS_BT_AutoCenter(L_Pct_FwdRev,
                                                L_Pct_Strafe,
@@ -225,7 +279,8 @@ T_ADAS_ActiveFeature ADAS_BT_Main(double               *L_Pct_FwdRev,
                                                L_RPM_Launcher,
                                                L_Pct_Intake,
                                                L_Pct_Elevator,
-                                               L_CameraLightCmndOn,
+                                               L_CameraUpperLightCmndOn,
+                                               L_CameraLowerLightCmndOn,
                                                L_VisionBottomTargetAquired,
                                                L_VisionBottomYaw);
       break;
@@ -236,7 +291,8 @@ T_ADAS_ActiveFeature ADAS_BT_Main(double               *L_Pct_FwdRev,
                                                  L_RPM_Launcher,
                                                  L_Pct_Intake,
                                                  L_Pct_Elevator,
-                                                 L_CameraLightCmndOn,
+                                                 L_CameraUpperLightCmndOn,
+                                                 L_CameraLowerLightCmndOn,
                                                  L_VisionBottomTargetAquired,
                                                  L_VisionBottomTargetDistanceMeters);
       break;

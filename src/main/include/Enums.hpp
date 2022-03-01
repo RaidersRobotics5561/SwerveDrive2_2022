@@ -137,6 +137,7 @@ typedef enum T_GetDaBalls
 typedef enum T_ADAS_BT_BallTarget /* aka GetDaBalls */
 {
   E_ADAS_BT_Disabled,
+  E_ADAS_BT_CameraLightOn,
   E_ADAS_BT_AutoCenter,
   E_ADAS_BT_IntakeAndRun
 } T_ADAS_BT_BallTarget;

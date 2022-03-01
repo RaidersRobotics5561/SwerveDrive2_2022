@@ -106,21 +106,26 @@ bool CameraLightControl(bool             L_AutoAlignRequest,
  *                 take action.
  ******************************************************************************/
 double VanityLightControl(double L_MatchTimeRemaining,
-                          frc::DriverStation::Alliance L_AllianceColor)
+                          frc::DriverStation::Alliance L_AllianceColor,
+                          bool   L_BallTargetingRequest)
   {
     double L_LED_Command = 0;
 
-    if (L_MatchTimeRemaining <= C_End_game_time)
+    if (L_BallTargetingRequest == true)
+      {
+      L_LED_Command = C_BlinkinLED_SolidWhite;
+      }
+    else if (L_MatchTimeRemaining <= C_End_game_time)
       {
       L_LED_Command = C_BlinkinLED_RainbowWithGlitter;
       }
     else if (L_AllianceColor == frc::DriverStation::Alliance::kRed)
       {
-      L_LED_Command = C_BlinkinLED_FixedRed;
+      L_LED_Command = C_BlinkinLED_BreathRed;
       }
     else if (L_AllianceColor == frc::DriverStation::Alliance::kBlue)
       {
-      L_LED_Command = C_BlinkinLED_FixedBlue;
+      L_LED_Command = C_BlinkinLED_BreathBlue;
       }
     else
       {
@@ -144,6 +149,7 @@ void LightControlMain(bool                         L_AutoAlignRequest,
                       bool                         L_SwerveTargetLocking,
                       bool                         L_Driver_CameraLight,
                       bool                         L_ShooterTargetSpeedReached,
+                      bool                         L_BallTargeting,
                       bool                        *L_CameraLightCmndOn,
                       double                      *L_VanityLightCmnd)
   {
@@ -155,5 +161,6 @@ void LightControlMain(bool                         L_AutoAlignRequest,
                                             L_ShooterTargetSpeedReached);
 
   *L_VanityLightCmnd = VanityLightControl(L_MatchTimeRemaining,
-                                          L_AllianceColor);
+                                          L_AllianceColor,
+                                          L_BallTargeting);
   }

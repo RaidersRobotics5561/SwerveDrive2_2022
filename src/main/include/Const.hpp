@@ -61,8 +61,9 @@ const units::radian_t K_VisionCameraPitch2 = 50_deg;
 // Cals / constants for Light Control
 const double K_CameraLightDelay = 0.01; // Delay time between enabling the camera light and allowing the data feed to be used. [seconds]
 const double K_CameraLightMaxOnTime = 5.0; // Max amount of time to have the camera light enabled. [seconds]
-const double C_BlinkinLED_FixedRed = -0.17;
-const double C_BlinkinLED_FixedBlue = -0.15;
+const double C_BlinkinLED_SolidWhite = 0.93;
+const double C_BlinkinLED_BreathRed = -0.17;
+const double C_BlinkinLED_BreathBlue = -0.15;
 const double C_BlinkinLED_LightChaseGray = -0.27;
 const double C_BlinkinLED_RainbowWithGlitter = -0.89;
 
@@ -348,6 +349,9 @@ const double K_ADAS_UT_RotateDeadbandAngle = 0.5;
 
 /* K_ADAS_UT_TargetVisionAngle: This is the desired target angle for the auto vision targeting.  This is due to the offset of the camera. For 2020 - 3.3 */
 const double K_ADAS_UT_TargetVisionAngle = 0.0;
+
+/* K_ADAS_BT_LightDelayTIme - Amount of time wait for the camera to have sufficent light before proceeding. [Seconds] */
+const double K_ADAS_BT_LightDelayTIme = 0.060;
 
 /* K_ADAS_BT_LostTargetGx - When the camera has lost the target, the previous error value will be used,
    but multiplied against this gain so that we don't go too far before getting another good value. */

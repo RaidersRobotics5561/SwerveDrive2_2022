@@ -22,5 +22,6 @@ void LightControlMain(bool                         L_AutoAlignRequest,
                       bool                         L_SwerveTargetLocking,
                       bool                         L_Driver_CameraLight,
                       bool                         L_ShooterTargetSpeedReached,
+                      bool                         L_BallTargeting,
                       bool                        *L_CameraLightCmndOn,
                       double                      *L_VanityLightCmnd);
