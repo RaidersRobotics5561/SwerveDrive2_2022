@@ -12,6 +12,8 @@
 
 
 void ADAS_UT_Reset(void);
+void ADAS_UT_ConfigsCal(void);
+void ADAS_UT_ConfigsInit(void);
 
 T_ADAS_ActiveFeature ADAS_UT_Main(double               *L_Pct_FwdRev,
                                   double               *L_Pct_Strafe,

@@ -26,6 +26,8 @@
 #include "Auton.hpp"
 #include "AutoTarget.hpp"
 #include "ADAS.hpp"
+#include "ADAS_BT.hpp"
+#include "ADAS_UT.hpp"
 
 T_RobotState                 V_RobotState        = E_Init;
 frc::DriverStation::Alliance V_AllianceColor     = frc::DriverStation::Alliance::kInvalid;
@@ -91,6 +93,9 @@ void Robot::RobotInit()
 
   LiftMotorConfigsInit(m_liftpidYD,
                        m_liftpidXD);
+
+  ADAS_UT_ConfigsInit();
+  ADAS_BT_ConfigsInit();
 
   VisionInit(V_AllianceColor);
 
@@ -246,6 +251,9 @@ void Robot::RobotPeriodic()
 
   LiftMotorConfigsCal(m_liftpidYD,
                       m_liftpidXD);
+
+  ADAS_UT_ConfigsCal();
+  ADAS_BT_ConfigsCal();
 
 /* Output all of the content to the dashboard here: */
   frc::SmartDashboard::PutBoolean("XD Limit Detected", V_XD_LimitDetected);

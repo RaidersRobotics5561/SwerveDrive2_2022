@@ -11,6 +11,8 @@
  */
 
 void ADAS_BT_Reset(void);
+void ADAS_BT_ConfigsCal(void);
+void ADAS_BT_ConfigsInit(void);
 
 T_ADAS_ActiveFeature ADAS_BT_Main(double               *L_Pct_FwdRev,
                                   double               *L_Pct_Strafe,

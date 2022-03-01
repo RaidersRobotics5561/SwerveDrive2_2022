@@ -14,6 +14,7 @@
 
 #include <math.h>
 
+#include <frc/smartdashboard/SmartDashboard.h>
 #include "control_pid.hpp"
 #include "Lookup.hpp"
 #include "Const.hpp"
@@ -23,6 +24,70 @@ double                V_ADAS_UT_DebounceTime      = 0;
 double                V_ADAS_UT_RotateErrorPrev   = 0;
 double                V_ADAS_UT_LauncherSpeedPrev = 0;
 bool                  V_ADAS_UT_TargetAquiredPrev = false;
+
+/* Configuration cals: */
+double KV_ADAS_UT_LightDelayTIme;
+double KV_ADAS_UT_LostTargetGx;
+double KV_ADAS_UT_NoTargetError;
+double KV_ADAS_UT_DebounceTime;
+double KV_ADAS_UT_AllowedLauncherError;
+double KV_ADAS_UT_AllowedLauncherTime;
+double KV_ADAS_UT_RotateDeadbandAngle;
+double KV_ADAS_UT_TargetVisionAngle;
+
+
+/******************************************************************************
+ * Function:     ADAS_UT_ConfigsInit
+ *
+ * Description:  Contains the configurations for the UT.
+ ******************************************************************************/
+void ADAS_UT_ConfigsInit()
+  {
+  // set coefficients
+  KV_ADAS_UT_LightDelayTIme = K_ADAS_UT_LightDelayTIme;
+  KV_ADAS_UT_LostTargetGx = K_ADAS_UT_LostTargetGx;
+  KV_ADAS_UT_NoTargetError = K_ADAS_UT_NoTargetError;
+  KV_ADAS_UT_DebounceTime = K_ADAS_UT_DebounceTime;
+  KV_ADAS_UT_AllowedLauncherError = K_ADAS_UT_AllowedLauncherError;
+  KV_ADAS_UT_AllowedLauncherTime = K_ADAS_UT_AllowedLauncherTime;
+  KV_ADAS_UT_RotateDeadbandAngle = K_ADAS_UT_RotateDeadbandAngle;
+  KV_ADAS_UT_TargetVisionAngle = K_ADAS_UT_TargetVisionAngle;
+
+  #ifdef ADAS_UT_Test
+  // display coefficients on SmartDashboard
+  frc::SmartDashboard::PutNumber("KV_ADAS_UT_LightDelayTIme", KV_ADAS_UT_LightDelayTIme);
+  frc::SmartDashboard::PutNumber("KV_ADAS_UT_LostTargetGx", KV_ADAS_UT_LostTargetGx);
+  frc::SmartDashboard::PutNumber("KV_ADAS_UT_NoTargetError", KV_ADAS_UT_NoTargetError);
+  frc::SmartDashboard::PutNumber("KV_ADAS_UT_DebounceTime", KV_ADAS_UT_DebounceTime);
+  frc::SmartDashboard::PutNumber("KV_ADAS_UT_AllowedLauncherError", KV_ADAS_UT_AllowedLauncherError);
+  frc::SmartDashboard::PutNumber("KV_ADAS_UT_AllowedLauncherTime", KV_ADAS_UT_AllowedLauncherTime);
+  frc::SmartDashboard::PutNumber("KV_ADAS_UT_RotateDeadbandAngle", KV_ADAS_UT_RotateDeadbandAngle);
+  frc::SmartDashboard::PutNumber("KV_ADAS_UT_TargetVisionAngle", KV_ADAS_UT_TargetVisionAngle);
+  #endif
+  }
+
+
+/******************************************************************************
+ * Function:     ADAS_UT_ConfigsCal
+ *
+ * Description:  Contains the motor configurations for the lift motors.  This 
+ *               allows for rapid calibration, but must not be used for comp.
+ ******************************************************************************/
+void ADAS_UT_ConfigsCal()
+  {
+  // read coefficients from SmartDashboard
+  #ifdef ADAS_UT_Test
+  KV_ADAS_UT_LightDelayTIme = frc::SmartDashboard::GetNumber("KV_ADAS_UT_LightDelayTIme", KV_ADAS_UT_LightDelayTIme);
+  KV_ADAS_UT_LostTargetGx = frc::SmartDashboard::GetNumber("KV_ADAS_UT_LostTargetGx", KV_ADAS_UT_LostTargetGx);
+  KV_ADAS_UT_NoTargetError = frc::SmartDashboard::GetNumber("KV_ADAS_UT_NoTargetError", KV_ADAS_UT_NoTargetError);
+  KV_ADAS_UT_DebounceTime = frc::SmartDashboard::GetNumber("KV_ADAS_UT_DebounceTime", KV_ADAS_UT_DebounceTime);
+  KV_ADAS_UT_AllowedLauncherError = frc::SmartDashboard::GetNumber("KV_ADAS_UT_AllowedLauncherError", KV_ADAS_UT_AllowedLauncherError);
+  KV_ADAS_UT_AllowedLauncherTime = frc::SmartDashboard::GetNumber("KV_ADAS_UT_AllowedLauncherTime", KV_ADAS_UT_AllowedLauncherTime);
+  KV_ADAS_UT_RotateDeadbandAngle = frc::SmartDashboard::GetNumber("KV_ADAS_UT_RotateDeadbandAngle", KV_ADAS_UT_RotateDeadbandAngle);
+  KV_ADAS_UT_TargetVisionAngle = frc::SmartDashboard::GetNumber("KV_ADAS_UT_TargetVisionAngle", KV_ADAS_UT_TargetVisionAngle);
+  #endif
+  }
+
 
 /******************************************************************************
  * Function:     ADAS_UT_Reset
@@ -72,7 +137,7 @@ T_ADAS_UT_UpperTarget ADAS_UT_CameraLightOn(double *L_Pct_FwdRev,
   /* Start incremeting a debounce time.  We want to give a bit of time for the camera to have light: */
   V_ADAS_UT_DebounceTime += C_ExeTime;
 
-  if (V_ADAS_UT_DebounceTime >= K_ADAS_UT_LightDelayTIme)
+  if (V_ADAS_UT_DebounceTime >= KV_ADAS_UT_LightDelayTIme)
     {
     L_ADAS_UT_State = E_ADAS_UT_AutoCenter;
     V_ADAS_UT_DebounceTime = 0;
@@ -119,33 +184,33 @@ T_ADAS_UT_UpperTarget ADAS_UT_AutoCenter(double *L_Pct_FwdRev,
   /* Ok, now let's focus on the auto centering: */
   if (L_VisionTopTargetAquired == true)
     {
-    L_RotateErrorCalc = K_ADAS_UT_TargetVisionAngle - L_TopTargetYawDegrees;
+    L_RotateErrorCalc = KV_ADAS_UT_TargetVisionAngle - L_TopTargetYawDegrees;
     V_ADAS_UT_RotateErrorPrev = L_RotateErrorCalc;
     V_ADAS_UT_TargetAquiredPrev = true;
     }
   else if (V_ADAS_UT_TargetAquiredPrev == true)
     {
     /* Hmm, we see to have lost the target.  Use previous value, but reduce so that we don't go too far. */
-    L_RotateErrorCalc = V_ADAS_UT_RotateErrorPrev * K_ADAS_UT_LostTargetGx;
+    L_RotateErrorCalc = V_ADAS_UT_RotateErrorPrev * KV_ADAS_UT_LostTargetGx;
     }
   else
     {
     /* Ehh, we don't seem to have observed a good value from the camera yet.
        Let's take a stab in the dark and hope that we can see something... */
-    L_RotateErrorCalc = K_ADAS_UT_NoTargetError;
+    L_RotateErrorCalc = KV_ADAS_UT_NoTargetError;
     }
   
 
-  if (fabs(L_RotateErrorCalc) <= K_ADAS_UT_RotateDeadbandAngle && V_ADAS_UT_DebounceTime < K_ADAS_UT_DebounceTime)
+  if (fabs(L_RotateErrorCalc) <= KV_ADAS_UT_RotateDeadbandAngle && V_ADAS_UT_DebounceTime < KV_ADAS_UT_DebounceTime)
     {
     V_ADAS_UT_DebounceTime += C_ExeTime;
     }
-  else if (fabs(L_RotateErrorCalc) > K_ADAS_UT_RotateDeadbandAngle)
+  else if (fabs(L_RotateErrorCalc) > KV_ADAS_UT_RotateDeadbandAngle)
     {
     /* Reset the timer, we have gone out of bounds */
     V_ADAS_UT_DebounceTime = 0;
     }
-  else if (V_ADAS_UT_DebounceTime >= K_ADAS_UT_DebounceTime)
+  else if (V_ADAS_UT_DebounceTime >= KV_ADAS_UT_DebounceTime)
     {
     /* Reset the time, proceed to next state. */
     L_ADAS_UT_State = E_ADAS_UT_LauncherSpeed;
@@ -223,7 +288,7 @@ T_ADAS_UT_UpperTarget ADAS_UT_LauncherSpeed(double *L_Pct_FwdRev,
     V_ADAS_UT_DebounceTime = 0;
     }
   
-  if (V_ADAS_UT_DebounceTime >= K_ADAS_UT_DebounceTime)
+  if (V_ADAS_UT_DebounceTime >= KV_ADAS_UT_DebounceTime)
     {
     /* Ok, we have had enough good camera values/time to beleive we have a decent distance estimate. */
     L_ADAS_UT_State = E_ADAS_UT_ElevatorControl;
@@ -287,7 +352,7 @@ T_ADAS_UT_UpperTarget ADAS_UT_ElevatorControl(double       *L_Pct_FwdRev,
       *L_Pct_Elevator = K_ElevatorPowerDwn;
       }
     else if ((L_BallDetected == false) ||
-             (L_LauncherError <= K_ADAS_UT_AllowedLauncherError))
+             (L_LauncherError <= KV_ADAS_UT_AllowedLauncherError))
       {
       *L_Pct_Intake = K_IntakePower;
       *L_Pct_Elevator = K_ElevatorPowerUp;
@@ -307,9 +372,9 @@ T_ADAS_UT_UpperTarget ADAS_UT_ElevatorControl(double       *L_Pct_FwdRev,
     V_ADAS_UT_DebounceTime += C_ExeTime;
 
     if (((L_BallDetected == false) ||
-         (L_LauncherError <= K_ADAS_UT_AllowedLauncherError)) &&
+         (L_LauncherError <= KV_ADAS_UT_AllowedLauncherError)) &&
 
-        (V_ADAS_UT_DebounceTime < K_ADAS_UT_AllowedLauncherTime))
+        (V_ADAS_UT_DebounceTime < KV_ADAS_UT_AllowedLauncherTime))
       {
       *L_Pct_Intake = K_IntakePower;
       *L_Pct_Elevator = K_ElevatorPowerUp;
@@ -320,7 +385,7 @@ T_ADAS_UT_UpperTarget ADAS_UT_ElevatorControl(double       *L_Pct_FwdRev,
       *L_Pct_Elevator = 0;
       }
 
-    if (V_ADAS_UT_DebounceTime >= K_ADAS_UT_AllowedLauncherTime)
+    if (V_ADAS_UT_DebounceTime >= KV_ADAS_UT_AllowedLauncherTime)
       {
       /* Once time has expired, exit elevator control */
       L_ADAS_UT_State = E_ADAS_UT_Disabled;

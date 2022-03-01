@@ -3,8 +3,8 @@
 #include <units/angle.h>
 #include <units/length.h>
 
-// Define the desired test state here: COMP (no test), BallHandlerTest, LiftXY_Test, DriveMotorTest, WheelAngleTest
-#define COMP 
+// Define the desired test state here: COMP (no test), BallHandlerTest, LiftXY_Test, DriveMotorTest, WheelAngleTest, ADAS_UT_Test, ADAS_BT_Test
+#define ADAS_UT_Test 
 // Define the version of vision to use: VISION1 VISION2
 #define VISION2
 

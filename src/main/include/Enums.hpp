@@ -127,13 +127,6 @@ typedef enum T_RobotState
   E_Teleop
 } T_RobotState;
 
-typedef enum T_GetDaBalls
-{
-  E_GetDaOff,
-  E_GetDaRotation,
-  E_GetDaIntakeAndRun
-} T_GetDaBalls;
-
 typedef enum T_ADAS_BT_BallTarget /* aka GetDaBalls */
 {
   E_ADAS_BT_Disabled,

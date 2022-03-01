@@ -14,6 +14,7 @@
 
 #include <math.h>
 
+#include <frc/smartdashboard/SmartDashboard.h>
 #include "control_pid.hpp"
 #include "Lookup.hpp"
 #include "Const.hpp"
@@ -24,6 +25,106 @@ double               V_ADAS_BT_RotateErrorPrev   = 0;
 bool                 V_ADAS_BT_TargetAquiredPrev = false;
 bool                 V_ADAS_BT_DriveForwardInitiated = false;
 double               V_ADAS_BT_DriveForwardTime     = 0;
+
+double KV_ADAS_BT_LightDelayTIme;
+double KV_ADAS_BT_LostTargetGx;
+double KV_ADAS_BT_NoTargetError;
+double KV_ADAS_BT_DebounceTime;
+double KV_ADAS_BT_RotateDeadbandAngle;
+double KV_ADAS_BT_TargetVisionAngle;
+double KV_ADAS_BT_DriveTimeAxis[6];
+double KV_ADAS_BT_DriveTime[6];
+double KV_ADAS_BT_MaxTimeToWaitForCamera;
+double KV_ADAS_BT_TimedOutDriveForward;
+double KV_ADAS_BT_DriveForwardPct;
+
+/******************************************************************************
+ * Function:     ADAS_BT_ConfigsInit
+ *
+ * Description:  Contains the configurations for the UT.
+ ******************************************************************************/
+void ADAS_BT_ConfigsInit()
+  {
+  int L_Index = 0;
+  // set coefficients
+  for (L_Index = 0;
+       L_Index < 6;
+       L_Index += 1)
+      {
+      KV_ADAS_BT_DriveTimeAxis[L_Index] = K_ADAS_BT_DriveTimeAxis[L_Index];
+      KV_ADAS_BT_DriveTime[L_Index] = K_ADAS_BT_DriveTime[L_Index];
+      }
+
+  KV_ADAS_BT_LightDelayTIme = K_ADAS_BT_LightDelayTIme;
+  KV_ADAS_BT_LostTargetGx = K_ADAS_BT_LostTargetGx;
+  KV_ADAS_BT_NoTargetError = K_ADAS_BT_NoTargetError;
+  KV_ADAS_BT_DebounceTime = K_ADAS_BT_DebounceTime;
+  KV_ADAS_BT_RotateDeadbandAngle = K_ADAS_BT_RotateDeadbandAngle;
+  KV_ADAS_BT_TargetVisionAngle = K_ADAS_BT_TargetVisionAngle;
+  KV_ADAS_BT_MaxTimeToWaitForCamera = K_ADAS_BT_MaxTimeToWaitForCamera;
+  KV_ADAS_BT_TimedOutDriveForward = K_ADAS_BT_TimedOutDriveForward;
+  KV_ADAS_BT_DriveForwardPct = K_ADAS_BT_DriveForwardPct;
+
+  #ifdef ADAS_BT_Test
+  // display coefficients on SmartDashboard
+  frc::SmartDashboard::PutNumber("KV_ADAS_BT_DriveTimeAxis[0]", KV_ADAS_BT_DriveTimeAxis[0]);
+  frc::SmartDashboard::PutNumber("KV_ADAS_BT_DriveTimeAxis[1]", KV_ADAS_BT_DriveTimeAxis[1]);
+  frc::SmartDashboard::PutNumber("KV_ADAS_BT_DriveTimeAxis[2]", KV_ADAS_BT_DriveTimeAxis[2]);
+  frc::SmartDashboard::PutNumber("KV_ADAS_BT_DriveTimeAxis[3]", KV_ADAS_BT_DriveTimeAxis[3]);
+  frc::SmartDashboard::PutNumber("KV_ADAS_BT_DriveTimeAxis[4]", KV_ADAS_BT_DriveTimeAxis[4]);
+  frc::SmartDashboard::PutNumber("KV_ADAS_BT_DriveTimeAxis[5]", KV_ADAS_BT_DriveTimeAxis[5]);
+  frc::SmartDashboard::PutNumber("KV_ADAS_BT_DriveTime[0]", KV_ADAS_BT_DriveTime[0]);
+  frc::SmartDashboard::PutNumber("KV_ADAS_BT_DriveTime[1]", KV_ADAS_BT_DriveTime[1]);
+  frc::SmartDashboard::PutNumber("KV_ADAS_BT_DriveTime[2]", KV_ADAS_BT_DriveTime[2]);
+  frc::SmartDashboard::PutNumber("KV_ADAS_BT_DriveTime[3]", KV_ADAS_BT_DriveTime[3]);
+  frc::SmartDashboard::PutNumber("KV_ADAS_BT_DriveTime[4]", KV_ADAS_BT_DriveTime[4]);
+  frc::SmartDashboard::PutNumber("KV_ADAS_BT_DriveTime[5]", KV_ADAS_BT_DriveTime[5]);
+  frc::SmartDashboard::PutNumber("KV_ADAS_BT_LightDelayTIme", KV_ADAS_BT_LightDelayTIme);
+  frc::SmartDashboard::PutNumber("KV_ADAS_BT_LostTargetGx", KV_ADAS_BT_LostTargetGx);
+  frc::SmartDashboard::PutNumber("KV_ADAS_BT_NoTargetError", KV_ADAS_BT_NoTargetError);
+  frc::SmartDashboard::PutNumber("KV_ADAS_BT_DebounceTime", KV_ADAS_BT_DebounceTime);
+  frc::SmartDashboard::PutNumber("KV_ADAS_BT_RotateDeadbandAngle", KV_ADAS_BT_RotateDeadbandAngle);
+  frc::SmartDashboard::PutNumber("KV_ADAS_BT_TargetVisionAngle", KV_ADAS_BT_TargetVisionAngle);
+  frc::SmartDashboard::PutNumber("KV_ADAS_BT_MaxTimeToWaitForCamera", KV_ADAS_BT_MaxTimeToWaitForCamera);
+  frc::SmartDashboard::PutNumber("KV_ADAS_BT_TimedOutDriveForward", KV_ADAS_BT_TimedOutDriveForward);
+  frc::SmartDashboard::PutNumber("KV_ADAS_BT_DriveForwardPct", KV_ADAS_BT_DriveForwardPct);
+  #endif
+  }
+
+
+/******************************************************************************
+ * Function:     ADAS_BT_ConfigsCal
+ *
+ * Description:  Contains the motor configurations for the lift motors.  This 
+ *               allows for rapid calibration, but must not be used for comp.
+ ******************************************************************************/
+void ADAS_BT_ConfigsCal()
+  {
+  // read coefficients from SmartDashboard
+  #ifdef ADAS_BT_Test
+  KV_ADAS_BT_DriveTimeAxis[0] = frc::SmartDashboard::GetNumber("KV_ADAS_BT_DriveTimeAxis[0]", KV_ADAS_BT_DriveTimeAxis[0]);
+  KV_ADAS_BT_DriveTimeAxis[1] = frc::SmartDashboard::GetNumber("KV_ADAS_BT_DriveTimeAxis[1]", KV_ADAS_BT_DriveTimeAxis[1]);
+  KV_ADAS_BT_DriveTimeAxis[2] = frc::SmartDashboard::GetNumber("KV_ADAS_BT_DriveTimeAxis[2]", KV_ADAS_BT_DriveTimeAxis[2]);
+  KV_ADAS_BT_DriveTimeAxis[3] = frc::SmartDashboard::GetNumber("KV_ADAS_BT_DriveTimeAxis[3]", KV_ADAS_BT_DriveTimeAxis[3]);
+  KV_ADAS_BT_DriveTimeAxis[4] = frc::SmartDashboard::GetNumber("KV_ADAS_BT_DriveTimeAxis[4]", KV_ADAS_BT_DriveTimeAxis[4]);
+  KV_ADAS_BT_DriveTimeAxis[5] = frc::SmartDashboard::GetNumber("KV_ADAS_BT_DriveTimeAxis[5]", KV_ADAS_BT_DriveTimeAxis[5]);
+  KV_ADAS_BT_DriveTime[0] = frc::SmartDashboard::GetNumber("KV_ADAS_BT_DriveTime[0]", KV_ADAS_BT_DriveTime[0]);
+  KV_ADAS_BT_DriveTime[1] = frc::SmartDashboard::GetNumber("KV_ADAS_BT_DriveTime[1]", KV_ADAS_BT_DriveTime[1]);
+  KV_ADAS_BT_DriveTime[2] = frc::SmartDashboard::GetNumber("KV_ADAS_BT_DriveTime[2]", KV_ADAS_BT_DriveTime[2]);
+  KV_ADAS_BT_DriveTime[3] = frc::SmartDashboard::GetNumber("KV_ADAS_BT_DriveTime[3]", KV_ADAS_BT_DriveTime[3]);
+  KV_ADAS_BT_DriveTime[4] = frc::SmartDashboard::GetNumber("KV_ADAS_BT_DriveTime[4]", KV_ADAS_BT_DriveTime[4]);
+  KV_ADAS_BT_DriveTime[5] = frc::SmartDashboard::GetNumber("KV_ADAS_BT_DriveTime[5]", KV_ADAS_BT_DriveTime[5]);
+  KV_ADAS_BT_LightDelayTIme = frc::SmartDashboard::GetNumber("KV_ADAS_BT_LightDelayTIme", KV_ADAS_BT_LightDelayTIme);
+  KV_ADAS_BT_LostTargetGx = frc::SmartDashboard::GetNumber("KV_ADAS_BT_LostTargetGx", KV_ADAS_BT_LostTargetGx);
+  KV_ADAS_BT_NoTargetError = frc::SmartDashboard::GetNumber("KV_ADAS_BT_NoTargetError", KV_ADAS_BT_NoTargetError);
+  KV_ADAS_BT_DebounceTime = frc::SmartDashboard::GetNumber("KV_ADAS_BT_DebounceTime", KV_ADAS_BT_DebounceTime);
+  KV_ADAS_BT_RotateDeadbandAngle = frc::SmartDashboard::GetNumber("KV_ADAS_BT_RotateDeadbandAngle", KV_ADAS_BT_RotateDeadbandAngle);
+  KV_ADAS_BT_TargetVisionAngle = frc::SmartDashboard::GetNumber("KV_ADAS_BT_TargetVisionAngle", KV_ADAS_BT_TargetVisionAngle);
+  KV_ADAS_BT_MaxTimeToWaitForCamera = frc::SmartDashboard::GetNumber("KV_ADAS_BT_MaxTimeToWaitForCamera", KV_ADAS_BT_MaxTimeToWaitForCamera);
+  KV_ADAS_BT_TimedOutDriveForward = frc::SmartDashboard::GetNumber("KV_ADAS_BT_TimedOutDriveForward", KV_ADAS_BT_TimedOutDriveForward);
+  KV_ADAS_BT_DriveForwardPct = frc::SmartDashboard::GetNumber("KV_ADAS_BT_DriveForwardPct", KV_ADAS_BT_DriveForwardPct);
+  #endif
+  }
 
 
 /******************************************************************************
@@ -75,7 +176,7 @@ T_ADAS_BT_BallTarget ADAS_BT_CameraLightOn(double *L_Pct_FwdRev,
   /* Start incremeting a debounce time.  We want to give a bit of time for the camera to have light: */
   V_ADAS_BT_DebounceTime += C_ExeTime;
 
-  if (V_ADAS_BT_DebounceTime >= K_ADAS_UT_LightDelayTIme)
+  if (V_ADAS_BT_DebounceTime >= KV_ADAS_BT_LightDelayTIme)
     {
     L_ADAS_BT_State = E_ADAS_BT_AutoCenter;
     V_ADAS_BT_DebounceTime = 0;
@@ -118,33 +219,33 @@ T_ADAS_BT_BallTarget ADAS_BT_AutoCenter(double *L_Pct_FwdRev,
   /* Ok, now let's focus on the auto centering: */
   if (L_VisionBottomTargetAquired == true)
     {
-    L_RotateErrorCalc = K_ADAS_BT_TargetVisionAngle - L_VisionBottomYaw;
+    L_RotateErrorCalc = KV_ADAS_BT_TargetVisionAngle - L_VisionBottomYaw;
     V_ADAS_BT_RotateErrorPrev = L_RotateErrorCalc;
     V_ADAS_BT_TargetAquiredPrev = true;
     }
   else if (V_ADAS_BT_TargetAquiredPrev == true)
     {
     /* Hmm, we see to have lost the target.  Use previous value, but reduce so that we don't go too far. */
-    L_RotateErrorCalc = V_ADAS_BT_RotateErrorPrev * K_ADAS_BT_LostTargetGx;
+    L_RotateErrorCalc = V_ADAS_BT_RotateErrorPrev * KV_ADAS_BT_LostTargetGx;
     }
   else
     {
     /* Ehh, we don't seem to have observed a good value from the camera yet.
        Let's take a stab in the dark and hope that we can see something... */
-    L_RotateErrorCalc = K_ADAS_BT_NoTargetError;
+    L_RotateErrorCalc = KV_ADAS_BT_NoTargetError;
     }
   
 
-  if (fabs(L_RotateErrorCalc) <= K_ADAS_BT_RotateDeadbandAngle && V_ADAS_BT_DebounceTime < K_ADAS_BT_DebounceTime)
+  if (fabs(L_RotateErrorCalc) <= KV_ADAS_BT_RotateDeadbandAngle && V_ADAS_BT_DebounceTime < KV_ADAS_BT_DebounceTime)
     {
     V_ADAS_BT_DebounceTime += C_ExeTime;
     }
-  else if (fabs(L_RotateErrorCalc) > K_ADAS_BT_RotateDeadbandAngle)
+  else if (fabs(L_RotateErrorCalc) > KV_ADAS_BT_RotateDeadbandAngle)
     {
     /* Reset the timer, we have gone out of bounds */
     V_ADAS_BT_DebounceTime = 0;
     }
-  else if (V_ADAS_BT_DebounceTime >= K_ADAS_BT_DebounceTime)
+  else if (V_ADAS_BT_DebounceTime >= KV_ADAS_BT_DebounceTime)
     {
     /* Reset the time, proceed to next state. */
     L_ADAS_BT_State = E_ADAS_BT_IntakeAndRun;
@@ -208,10 +309,10 @@ T_ADAS_BT_BallTarget ADAS_BT_IntakeAndRun(double *L_Pct_FwdRev,
       {
       /* Hmm, we see to have lost the target.  Let's wait a bit... */
       V_ADAS_BT_DebounceTime += C_ExeTime;
-      if (V_ADAS_BT_DebounceTime >= K_ADAS_BT_TimedOutDriveForward)
+      if (V_ADAS_BT_DebounceTime >= KV_ADAS_BT_TimedOutDriveForward)
         {
         /* Well, we have waited long enough.  Let's pick a value and go!! */
-        V_ADAS_BT_DriveForwardTime = K_ADAS_BT_TimedOutDriveForward;
+        V_ADAS_BT_DriveForwardTime = KV_ADAS_BT_TimedOutDriveForward;
         V_ADAS_BT_DriveForwardInitiated = true;
         V_ADAS_BT_DebounceTime = 0;
         }
@@ -223,7 +324,7 @@ T_ADAS_BT_BallTarget ADAS_BT_IntakeAndRun(double *L_Pct_FwdRev,
     V_ADAS_BT_DebounceTime += C_ExeTime;
     if (V_ADAS_BT_DebounceTime < V_ADAS_BT_DriveForwardTime)
       {
-      *L_Pct_FwdRev = K_ADAS_BT_DriveForwardPct;
+      *L_Pct_FwdRev = KV_ADAS_BT_DriveForwardPct;
       *L_Pct_Intake = K_IntakePower;
       }
     else
