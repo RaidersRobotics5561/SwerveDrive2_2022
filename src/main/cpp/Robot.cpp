@@ -250,18 +250,19 @@ void Robot::RobotPeriodic()
 /* Output all of the content to the dashboard here: */
   frc::SmartDashboard::PutBoolean("XD Limit Detected", V_XD_LimitDetected);
   frc::SmartDashboard::PutBoolean("YD Limit Detected", V_YD_LimitDetected);
-  frc::SmartDashboard::PutBoolean("Ball Detected", V_BallDetectedUpper);
-
+  frc::SmartDashboard::PutBoolean("Ball Detected Upper", V_BallDetectedUpper);
+  frc::SmartDashboard::PutBoolean("Ball Detected Lower", V_BallDetectedLower);
+  frc::SmartDashboard::PutBoolean("Lift Ready to Advance", V_Lift_WaitingForDriverINS);
+  
   frc::SmartDashboard::PutNumber("Lift postition YD", V_LiftPostitionYD);
   frc::SmartDashboard::PutNumber("Lift postition XD", V_LiftPostitionXD);
 
   frc::SmartDashboard::PutNumber("V_b_DriveStraight", V_b_DriveStraight);
   frc::SmartDashboard::PutNumber("V_RotateErrorCalc", V_RotateErrorCalc);
-  frc::SmartDashboard::PutNumber("Speed Cmnd", V_ShooterRPM_Cmnd);
-    frc::SmartDashboard::PutNumber("Launcher Speed",  V_ShooterSpeedCurr);
+  frc::SmartDashboard::PutNumber("Speed Cmnd",        V_ShooterRPM_Cmnd);
+  frc::SmartDashboard::PutNumber("Launcher Speed",    V_ShooterSpeedCurr);
 
-  frc::SmartDashboard::PutNumber("GYRO",                 V_GyroYawAngleDegrees);
-  frc::SmartDashboard::PutBoolean("Ball Detected Lower", V_BallDetectedLower);
+  frc::SmartDashboard::PutNumber("GYRO",            V_GyroYawAngleDegrees);
 
   frc::SmartDashboard::PutBoolean("Top Target?",    V_VisionTopTargetAquired);
   frc::SmartDashboard::PutNumber("Top Yaw",         V_VisionTopYaw);

@@ -92,22 +92,34 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
   {
   T_ADAS_ActiveFeature L_ADAS_ActiveFeaturePrev = L_ADAS_ActiveFeature;
 
-  /* Enable criteria goes here: */
-  if (L_Driver_SwerveGoalAutoCenter == true)
+  if (L_RobotState == E_Teleop)
     {
-    L_ADAS_ActiveFeature = E_ADAS_AutoUpperTarget;
+    /* Enable criteria goes here: */
+    if (L_Driver_SwerveGoalAutoCenter == true)
+      {
+      L_ADAS_ActiveFeature = E_ADAS_AutoUpperTarget;
+      }
+    else if (L_Driver_AutoIntake == true)
+      {
+      L_ADAS_ActiveFeature = E_ADAS_AutoBallTarget;
+      }
+  
+    /* Abort criteria goes here: */
+    if ((L_Driver1_JoystickActive == true) || (L_Driver_stops_shooter == true))
+      {
+      /* Abort criteria goes here. */
+      L_ADAS_ActiveFeature = E_ADAS_Disabled;
+      }
     }
-  else if (L_Driver_AutoIntake == true)
+  else if (L_RobotState == E_Auton)
     {
-    L_ADAS_ActiveFeature = E_ADAS_AutoBallTarget;
+    L_ADAS_ActiveFeature = E_ADAS_Disabled;  // Need to create Auton!!!
     }
-
-  /* Abort criteria goes here: */
-  if ((L_Driver1_JoystickActive == true) || (L_Driver_stops_shooter == true))
+  else
     {
-    /* Abort criteria goes here. */
     L_ADAS_ActiveFeature = E_ADAS_Disabled;
     }
+
 
   if (L_ADAS_ActiveFeature != L_ADAS_ActiveFeaturePrev)
     {

@@ -16,6 +16,7 @@ extern double V_LiftYD_TestPowerCmnd;
 extern double V_LiftXD_TestPowerCmnd;
 extern double V_LiftMotorYD_MaxCurrent[E_Lift_State_Sz];
 extern double V_LiftMotorXD_MaxCurrent[E_Lift_State_Sz];
+extern bool   V_Lift_WaitingForDriverINS;
 
 void LiftMotorConfigsCal(rev::SparkMaxPIDController m_liftpidYD,
                          rev::SparkMaxPIDController m_liftpidXD);
