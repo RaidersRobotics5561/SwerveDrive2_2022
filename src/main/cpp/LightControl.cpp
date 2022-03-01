@@ -34,22 +34,14 @@ double  V_VanityLightCmnd = 0;
  *               - Informs targeting logic when camera feed should have had 
  *                 enough time with light on for accurate data.
  ******************************************************************************/
-bool CameraLightControl(bool             L_AutoAlignRequest,
-                        bool             L_AutoLauncherRequest,
-                        T_LauncherStates L_LauncherState,
-                        bool             L_SwerveTargetLocking,
-                        bool             L_Driver_CameraLight,
-                        bool             L_ShooterTargetSpeedReached)
+bool CameraLightControl(bool                 L_Driver_CameraLight,
+                        T_ADAS_ActiveFeature L_ADAS_ActiveFeature,
+                        bool                 L_ADAS_CameraUpperLightCmndOn)
   {
     bool L_CameraLightCmndOn = false;
 
-    if ((L_AutoAlignRequest == true) ||    /* Swerve drive targeting has been requested or is in process */
-        (L_SwerveTargetLocking == true) ||
-
-        ((L_ShooterTargetSpeedReached == false) &&  /* Ball targeting has been requested or is in process */
-         (L_AutoLauncherRequest == true) ||
-         (L_LauncherState == E_LauncherAutoTargetActive)) ||
-        
+    if (((L_ADAS_ActiveFeature > E_ADAS_Disabled) &&    /* Swerve drive targeting has been requested or is in process */
+         (L_ADAS_CameraUpperLightCmndOn == true)) ||
         (L_Driver_CameraLight == true))  /* Driver override is present */
       {
       L_CameraLightCmndOn = true;
@@ -105,13 +97,15 @@ bool CameraLightControl(bool             L_AutoAlignRequest,
  *               - Will change color when in end game to help inform driver to
  *                 take action.
  ******************************************************************************/
-double VanityLightControl(double L_MatchTimeRemaining,
+double VanityLightControl(double                       L_MatchTimeRemaining,
                           frc::DriverStation::Alliance L_AllianceColor,
-                          bool   L_BallTargetingRequest)
+                          T_ADAS_ActiveFeature         L_ADAS_ActiveFeature,
+                          bool                         L_ADAS_CameraLowerLightCmndOn)
   {
     double L_LED_Command = 0;
 
-    if (L_BallTargetingRequest == true)
+    if ((L_ADAS_ActiveFeature > E_ADAS_Disabled) &&
+        (L_ADAS_CameraLowerLightCmndOn == true))
       {
       L_LED_Command = C_BlinkinLED_SolidWhite;
       }
@@ -142,26 +136,21 @@ double VanityLightControl(double L_MatchTimeRemaining,
  * Description:  Contains the functionality for controlling the camera 
  *               illumination lights and LED vanity lights.
  ******************************************************************************/
-void LightControlMain(bool                         L_AutoAlignRequest,
-                      bool                         L_AutoLauncherRequest,
-                      double                       L_MatchTimeRemaining,
+void LightControlMain(double                       L_MatchTimeRemaining,
                       frc::DriverStation::Alliance L_AllianceColor,
-                      T_LauncherStates             L_LauncherState,
-                      bool                         L_SwerveTargetLocking,
                       bool                         L_Driver_CameraLight,
-                      bool                         L_ShooterTargetSpeedReached,
-                      bool                         L_BallTargeting,
+                      T_ADAS_ActiveFeature         L_ADAS_ActiveFeature,
+                      bool                         L_ADAS_CameraUpperLightCmndOn,
+                      bool                         L_ADAS_CameraLowerLightCmndOn,
                       bool                        *L_CameraLightCmndOn,
                       double                      *L_VanityLightCmnd)
   {
-  *L_CameraLightCmndOn = CameraLightControl(L_AutoAlignRequest,
-                                            L_AutoLauncherRequest,
-                                            L_LauncherState,
-                                            L_SwerveTargetLocking,
-                                            L_Driver_CameraLight,
-                                            L_ShooterTargetSpeedReached);
+  *L_CameraLightCmndOn = CameraLightControl(L_Driver_CameraLight,
+                                            L_ADAS_ActiveFeature,
+                                            L_ADAS_CameraUpperLightCmndOn);
 
   *L_VanityLightCmnd = VanityLightControl(L_MatchTimeRemaining,
                                           L_AllianceColor,
-                                          L_BallTargeting);
+                                          L_ADAS_ActiveFeature,
+                                          L_ADAS_CameraLowerLightCmndOn);
   }

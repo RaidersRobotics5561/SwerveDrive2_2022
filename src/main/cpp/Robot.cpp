@@ -3,14 +3,14 @@
  *
  * This code runs the 2020 robot which is capable of the following:
  * - Swerve Drive (beta 02/10/2020)
- * - Shooting balls (beta 02/15/2020)
+ * - Shooting balls without vision (beta 02/26/2022)
+ * - Climber active (beta 02/26/2022)
  *
  * */
 
 #include "Robot.h"
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/DriverStation.h>
-// #include <frc/livewindow/LiveWindow.h>
 
 #include "Encoders.hpp"
 #include "Gyro.hpp"
@@ -26,8 +26,6 @@
 #include "Auton.hpp"
 #include "AutoTarget.hpp"
 #include "ADAS.hpp"
-
-// nt::NetworkTableInstance inst;
 
 T_RobotState                 V_RobotState        = E_Init;
 frc::DriverStation::Alliance V_AllianceColor     = frc::DriverStation::Alliance::kInvalid;
@@ -98,10 +96,6 @@ void Robot::RobotInit()
 
   VisionDashboard();
 
-  // inst = nt::NetworkTableInstance::Create();
-  // inst.StartClient("10.55.61.24");
-  // inst.StartDSClient();
-  
 // m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
 // m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
 // frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
@@ -161,9 +155,85 @@ void Robot::RobotPeriodic()
                   di_XD_LimitSwitch.Get(),
                   di_XY_LimitSwitch.Get());
 
+  DtrmnSwerveBotLocation( V_GyroYawAngleRad,
+                         &V_Rad_WheelAngleFwd[0],
+                         &V_M_WheelDeltaDistance[0]);
+
+  V_ADAS_ActiveFeature = ADAS_ControlMainTeleop(&V_ADAS_Pct_SD_FwdRev,
+                                              &V_ADAS_Pct_SD_Strafe,
+                                              &V_ADAS_Pct_SD_Rotate,
+                                              &V_ADAS_RPM_BH_Launcher,
+                                              &V_ADAS_Pct_BH_Intake,
+                                              &V_ADAS_Pct_BH_Elevator,
+                                              &V_ADAS_CameraUpperLightCmndOn,
+                                              &V_ADAS_CameraLowerLightCmndOn,
+                                              &V_ADAS_SD_RobotOriented,
+                                               V_Driver_JoystickActive,
+                                               V_Driver_StopShooterAutoClimbResetGyro,
+                                               V_Driver_SwerveGoalAutoCenter,
+                                               V_Driver_AutoIntake,
+                                               V_GyroYawAngleDegrees,
+                                               V_VisionTopTargetAquired,
+                                               V_VisionTopYaw,
+                                               V_VisionTopTargetDistanceMeters,
+                                               V_VisionBottomTargetAquired,
+                                               V_VisionBottomYaw,
+                                               V_VisionBottomTargetDistanceMeters,
+                                               V_RobotState,
+                                               V_ShooterSpeedCurr,
+                                               V_BallDetectedUpper,
+                                               V_Driver_elevator_up,
+                                               V_Driver_elevator_down,
+                                               V_ADAS_ActiveFeature);
+
+  DriveControlMain( V_Driver_SwerveForwardBack,  // swerve control forward/back
+                  V_Driver_SwerveStrafe,  // swerve control strafe
+                  V_Driver_SwerveRotate,  // rotate the robot joystick
+                  V_Driver_SwerveSpeed,   // extra speed trigger
+                  V_Driver_SwerveRotateTo0, // auto rotate to 0 degrees
+                  V_Driver_SwerveRotateTo90, // auto rotate to 90 degrees
+                  V_ADAS_ActiveFeature,
+                  V_ADAS_Pct_SD_FwdRev,
+                  V_ADAS_Pct_SD_Strafe,
+                  V_ADAS_Pct_SD_Rotate,
+                  V_ADAS_SD_RobotOriented,
+                  V_GyroYawAngleDegrees,
+                  V_GyroYawAngleRad,
+                 &V_WheelAngleFwd[0],
+                 &V_WheelAngleRev[0],
+                 &V_WheelSpeedCmnd[0],
+                 &V_WheelAngleCmnd[0]);
+
+    BallHandlerControlMain( V_Driver_intake_in,
+                          V_Driver_intake_out,
+                          V_BallDetectedUpper,
+                          V_Driver_elevator_up,
+                          V_Driver_elevator_down,
+                          V_Driver_StopShooterAutoClimbResetGyro,
+                          V_Driver_auto_setspeed_shooter,
+                          V_ShooterSpeedCurr,
+                          V_Driver_manual_shooter_desired_speed,
+                          V_ADAS_ActiveFeature,
+                          V_ADAS_RPM_BH_Launcher,
+                          V_ADAS_Pct_BH_Intake,
+                          V_ADAS_Pct_BH_Elevator,
+                         &V_IntakePowerCmnd,
+                         &V_ElevatorPowerCmnd,
+                         &V_ShooterRPM_Cmnd);
+
+  LightControlMain(V_MatchTimeRemaining,
+                   V_AllianceColor,
+                   V_Driver_CameraLight,
+                   V_ADAS_ActiveFeature,
+                   V_ADAS_CameraUpperLightCmndOn,
+                   V_ADAS_CameraLowerLightCmndOn,
+                  &V_CameraLightCmndOn,
+                  &V_VanityLightCmnd);
+
   VisionRun(pc_Camera1.GetLatestResult(),
             pc_Camera2.GetLatestResult());
 
+  /* These function calls are for test mode calibration. */
   SwerveDriveMotorConfigsCal(m_frontLeftDrivePID,
                              m_frontRightDrivePID,
                              m_rearLeftDrivePID,
@@ -175,20 +245,7 @@ void Robot::RobotPeriodic()
   LiftMotorConfigsCal(m_liftpidYD,
                       m_liftpidXD);
 
-  LightControlMain( V_Driver_SwerveGoalAutoCenter,
-                    V_Driver_auto_setspeed_shooter,
-                    V_MatchTimeRemaining,
-                    V_AllianceColor,
-                    E_LauncherNotActive,
-                    V_SwerveTargetLockingUpper,
-                    V_Driver_CameraLight,
-                    V_ShooterTargetSpeedReached,
-                    false, // request for ball targeting
-                   &V_CameraLightCmndOn,
-                   &V_VanityLightCmnd);
-
-  do_CameraLightControl.Set(V_CameraLightCmndOn);
-
+/* Output all of the content to the dashboard here: */
   frc::SmartDashboard::PutBoolean("XD Limit Detected", V_XD_LimitDetected);
   frc::SmartDashboard::PutBoolean("YD Limit Detected", V_YD_LimitDetected);
   frc::SmartDashboard::PutBoolean("Ball Detected", V_BallDetectedUpper);
@@ -234,6 +291,10 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutNumber("Lift XD S10", V_LiftMotorXD_MaxCurrent[E_S10_final_YD]);
 
   frc::SmartDashboard::PutNumber("Launcher Speed",    V_ShooterSpeedCurr);
+
+  /* Set light control outputs here */
+  do_CameraLightControl.Set(V_CameraLightCmndOn);
+  m_vanityLightControler.Set(V_VanityLightCmnd);
   }
 
 
@@ -266,187 +327,8 @@ void Robot::AutonomousInit()
  ******************************************************************************/
 void Robot::AutonomousPeriodic()
   {
-  double driveforward = 0;
-  double strafe = 0;
-  double speen = 0;
-    
-    DtrmnSwerveBotLocation(V_GyroYawAngleRad,
-                           &V_Rad_WheelAngleFwd[0],
-                           &V_M_WheelDeltaDistance[0]);
-  
-    AutonDriveMain();
-
-    DriveControlMain( driveforward,
-                      strafe,
-                      speen,
-                      0, // May need to add additional speed control/command
-                      V_autonTargetCmd,
-                      c_joyStick.GetRawButton(3),
-                      c_joyStick.GetRawButton(4),
-                      V_GyroYawAngleDegrees,
-                      V_GyroYawAngleRad,
-                      V_VisionTopTargetAquired,
-                      V_VisionTopYaw,
-                     &V_WheelAngleFwd[0],
-                     &V_WheelAngleRev[0],
-                     &V_WheelSpeedCmnd[0],
-                     &V_WheelAngleCmnd[0],
-                     &V_autonTargetFin,
-                      V_RobotState,
-                      V_Driver_AutoIntake,
-                      V_VisionBottomTargetDistanceMeters,
-                      V_VisionBottomTargetAquired,
-                      V_VisionBottomYaw);
-
   // Motor output commands:
-    #ifdef DriveMotorTest
-    m_frontLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kSmartVelocity);
-    m_frontRightDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kSmartVelocity);
-    m_rearLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_RearLeft],     rev::ControlType::kSmartVelocity);
-    m_rearRightDrivePID.SetReference(V_WheelSpeedCmnd[E_RearRight],   rev::ControlType::kSmartVelocity);
-    #endif
-    #ifndef DriveMotorTest
-    m_frontLeftDriveMotor.Set(V_WheelSpeedCmnd[E_FrontLeft]);
-    m_frontRightDriveMotor.Set(V_WheelSpeedCmnd[E_FrontRight]);
-    m_rearLeftDriveMotor.Set(V_WheelSpeedCmnd[E_RearLeft]);
-    m_rearRightDriveMotor.Set(V_WheelSpeedCmnd[E_RearRight]);
-    #endif
-
-    m_frontLeftSteerMotor.Set(V_WheelAngleCmnd[E_FrontLeft]);
-    m_frontRightSteerMotor.Set(V_WheelAngleCmnd[E_FrontRight]);
-    m_rearLeftSteerMotor.Set(V_WheelAngleCmnd[E_RearLeft]);
-    m_rearRightSteerMotor.Set(V_WheelAngleCmnd[E_RearRight]);
-
-    if (V_BH_LauncherActive == true)
-      {
-      m_rightShooterpid.SetReference(V_ShooterRPM_Cmnd, rev::ControlType::kVelocity);
-      m_leftShooterpid.SetReference(-V_ShooterRPM_Cmnd, rev::ControlType::kVelocity);
-      }
-    else
-      {
-      m_rightShooterMotor.Set(0);
-      m_leftShooterMotor.Set(0);
-      }
-
-    m_intake.Set(ControlMode::PercentOutput, V_IntakePowerCmnd); //must be positive (don't be a fool)
-    m_elevator.Set(ControlMode::PercentOutput, V_ElevatorPowerCmnd);
-
-    m_liftpidYD.SetReference(V_lift_command_YD, rev::ControlType::kSmartMotion); // positive is up
-    m_liftpidXD.SetReference(V_lift_command_XD, rev::ControlType::kSmartMotion); // This is temporary.  We actually want to use position, but need to force this off temporarily
-
-    m_vanityLightControler.Set(V_VanityLightCmnd);
-  }
-
-
-/******************************************************************************
- * Function:     TeleopInit
- *
- * Description:  Function called when starting out in teleop mode.
- *               We should zero out all of our global varibles.
- ******************************************************************************/
-void Robot::TeleopInit()
-  {
-  V_RobotState = E_Teleop;
-  V_AllianceColor = frc::DriverStation::GetInstance().GetAlliance();
-
-  DriveControlInit();
-  BallHandlerInit();
-  LiftControlInit();
-  OdometryInit();
-  VisionInit(V_AllianceColor);
-  m_encoderrightShooter.SetPosition(0);
-  m_encoderleftShooter.SetPosition(0);
-}
-
-
-/******************************************************************************
- * Function:     TeleopPeriodic
- *
- * Description:  Primary function called when in teleop mode.
- ******************************************************************************/
-void Robot::TeleopPeriodic()
-  {
-  DtrmnSwerveBotLocation(V_GyroYawAngleRad,
-                         &V_Rad_WheelAngleFwd[0],
-                         &V_M_WheelDeltaDistance[0]);
-
-  V_ADAS_ActiveFeature = ADAS_ControlMainTeleop(&V_ADAS_Pct_SD_FwdRev,
-                                                &V_ADAS_Pct_SD_Strafe,
-                                                &V_ADAS_Pct_SD_Rotate,
-                                                &V_ADAS_RPM_BH_Launcher,
-                                                &V_ADAS_Pct_BH_Intake,
-                                                &V_ADAS_Pct_BH_Elevator,
-                                                &V_ADAS_CameraUpperLightCmndOn,
-                                                &V_ADAS_CameraLowerLightCmndOn,
-                                                 V_Driver_JoystickActive,
-                                                 V_Driver_StopShooterAutoClimbResetGyro,
-                                                 V_Driver_SwerveGoalAutoCenter,
-                                                 V_Driver_AutoIntake,
-                                                 V_GyroYawAngleDegrees,
-                                                 V_VisionTopTargetAquired,
-                                                 V_VisionTopYaw,
-                                                 V_VisionTopTargetDistanceMeters,
-                                                 V_VisionBottomTargetAquired,
-                                                 V_VisionBottomYaw,
-                                                 V_VisionBottomTargetDistanceMeters,
-                                                 V_RobotState,
-                                                 V_ShooterSpeedCurr,
-                                                 V_BallDetectedUpper,
-                                                 V_Driver_elevator_up,
-                                                 V_Driver_elevator_down,
-                                                 V_ADAS_ActiveFeature);
-
-  DriveControlMain( V_Driver_SwerveForwardBack,
-                    V_Driver_SwerveStrafe,
-                    V_Driver_SwerveRotate,
-                    V_Driver_SwerveSpeed,
-                    V_Driver_SwerveGoalAutoCenter,
-                    V_Driver_SwerveRotateTo0,
-                    V_Driver_SwerveRotateTo90,
-                    V_GyroYawAngleDegrees,
-                    V_GyroYawAngleRad,
-                    V_VisionTopTargetAquired,
-                    V_VisionTopYaw,
-                   &V_WheelAngleFwd[0],
-                   &V_WheelAngleRev[0],
-                   &V_WheelSpeedCmnd[0],
-                   &V_WheelAngleCmnd[0],
-                   &V_autonTargetFin,
-                    V_RobotState,
-                    V_Driver_AutoIntake,
-                    V_VisionBottomTargetDistanceMeters,
-                    V_VisionBottomTargetAquired,
-                    V_VisionBottomYaw);
-
-  V_Lift_state = Lift_Control_Dictator(V_Driver_lift_control,
-                                       V_Driver_StopShooterAutoClimbResetGyro,
-                                       V_Driver_Lift_Cmnd_Direction,
-                                       V_MatchTimeRemaining,
-                                       V_Lift_state,
-                                       V_LiftPostitionYD,
-                                       V_LiftPostitionXD,
-                                       &V_lift_command_YD,
-                                       &V_lift_command_XD,
-                                       V_GyroYawAngleDegrees,
-                                       m_liftMotorYD.GetOutputCurrent(),
-                                       m_liftMotorXD.GetOutputCurrent());
-
-  BallHandlerControlMain( V_Driver_intake_in,
-                          V_Driver_intake_out,
-                          V_BallDetectedUpper,
-                          V_Driver_elevator_up,
-                          V_Driver_elevator_down,
-                          V_Driver_StopShooterAutoClimbResetGyro,
-                          V_Driver_auto_setspeed_shooter,
-                          V_ShooterSpeedCurr,
-                          V_Driver_manual_shooter_desired_speed,
-                          0, // auto shoot command
-                         &V_IntakePowerCmnd,
-                         &V_ElevatorPowerCmnd,
-                         &V_ShooterRPM_Cmnd);
-
-  // Motor output commands:
-    #ifdef DriveMotorTest
+  #ifdef DriveMotorTest
     if (V_SD_DriveWheelsInPID == true)
       {
       m_frontLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kVelocity);
@@ -485,15 +367,100 @@ void Robot::TeleopPeriodic()
       m_leftShooterMotor.Set(0);
       }
 
+    m_intake.Set(ControlMode::PercentOutput, V_IntakePowerCmnd); //must be positive (don't be a fool)
+    m_elevator.Set(ControlMode::PercentOutput, V_ElevatorPowerCmnd);
+
+    m_liftpidYD.SetReference(0, rev::ControlType::kPosition); // Hold at 0 position while in auton
+    m_liftpidXD.SetReference(0, rev::ControlType::kPosition); // Hold at 0 position while in auton
+  }
+
+
+/******************************************************************************
+ * Function:     TeleopInit
+ *
+ * Description:  Function called when starting out in teleop mode.
+ *               We should zero out all of our global varibles.
+ ******************************************************************************/
+void Robot::TeleopInit()
+  {
+  V_RobotState = E_Teleop;
+  V_AllianceColor = frc::DriverStation::GetInstance().GetAlliance();
+
+  DriveControlInit();
+  BallHandlerInit();
+  LiftControlInit();
+  OdometryInit();
+  VisionInit(V_AllianceColor);
+  m_encoderrightShooter.SetPosition(0);
+  m_encoderleftShooter.SetPosition(0);
+}
+
+
+/******************************************************************************
+ * Function:     TeleopPeriodic
+ *
+ * Description:  Primary function called when in teleop mode.
+ ******************************************************************************/
+void Robot::TeleopPeriodic()
+  {
+  V_Lift_state = Lift_Control_Dictator(V_Driver_lift_control,
+                                       V_Driver_StopShooterAutoClimbResetGyro,
+                                       V_Driver_Lift_Cmnd_Direction,
+                                       V_MatchTimeRemaining,
+                                       V_Lift_state,
+                                       V_LiftPostitionYD,
+                                       V_LiftPostitionXD,
+                                       &V_lift_command_YD,
+                                       &V_lift_command_XD,
+                                       V_GyroYawAngleDegrees,
+                                       m_liftMotorYD.GetOutputCurrent(),
+                                       m_liftMotorXD.GetOutputCurrent());
+
+  // Motor output commands:
+  #ifdef DriveMotorTest
+    if (V_SD_DriveWheelsInPID == true)
+      {
+      m_frontLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kVelocity);
+      m_frontRightDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kVelocity);
+      m_rearLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_RearLeft],     rev::ControlType::kVelocity);
+      m_rearRightDrivePID.SetReference(V_WheelSpeedCmnd[E_RearRight],   rev::ControlType::kVelocity);
+      }
+    else
+      {
+      m_frontLeftDriveMotor.Set(0);
+      m_frontRightDriveMotor.Set(0);
+      m_rearLeftDriveMotor.Set(0);
+      m_rearRightDriveMotor.Set(0);
+      }
+    #endif
+    #ifndef DriveMotorTest
+    m_frontLeftDriveMotor.Set(V_WheelSpeedCmnd[E_FrontLeft]);
+    m_frontRightDriveMotor.Set(V_WheelSpeedCmnd[E_FrontRight]);
+    m_rearLeftDriveMotor.Set(V_WheelSpeedCmnd[E_RearLeft]);
+    m_rearRightDriveMotor.Set(V_WheelSpeedCmnd[E_RearRight]);
+    #endif
+
+    m_frontLeftSteerMotor.Set(V_WheelAngleCmnd[E_FrontLeft]);
+    m_frontRightSteerMotor.Set(V_WheelAngleCmnd[E_FrontRight]);
+    m_rearLeftSteerMotor.Set(V_WheelAngleCmnd[E_RearLeft]);
+    m_rearRightSteerMotor.Set(V_WheelAngleCmnd[E_RearRight]);
+
+    if (V_BH_LauncherActive == true)
+      {
+      m_rightShooterpid.SetReference(V_ShooterRPM_Cmnd, rev::ControlType::kVelocity);
+      m_leftShooterpid.SetReference(-V_ShooterRPM_Cmnd, rev::ControlType::kVelocity);
+      }
+    else
+      {
+      m_rightShooterMotor.Set(0);
+      m_leftShooterMotor.Set(0);
+      }
 
     m_intake.Set(ControlMode::PercentOutput, V_IntakePowerCmnd); //must be positive (don't be a fool)
     m_elevator.Set(ControlMode::PercentOutput, V_ElevatorPowerCmnd);
 
     m_liftpidYD.SetReference(V_lift_command_YD, rev::ControlType::kPosition); // positive is up
     m_liftpidXD.SetReference(V_lift_command_XD, rev::ControlType::kPosition); // This is temporary.  We actually want to use position, but need to force this off temporarily
-
-    do_CameraLightControl.Set(V_CameraLightCmndOn);
-    m_vanityLightControler.Set(V_VanityLightCmnd);
 }
 
 
@@ -512,9 +479,6 @@ void Robot::TestPeriodic()
                                V_YD_LimitDetected,
                                V_XD_LimitDetected);
  
-  m_liftMotorYD.Set(V_LiftYD_TestPowerCmnd);
-  m_liftMotorXD.Set(V_LiftXD_TestPowerCmnd);
-
   if (V_Driver_StopShooterAutoClimbResetGyro == true)
     {
     EncodersInit(m_encoderFrontRightSteer,
@@ -531,6 +495,9 @@ void Robot::TestPeriodic()
                  m_encoderleftShooter);
     }
 
+  m_liftMotorYD.Set(V_LiftYD_TestPowerCmnd);
+  m_liftMotorXD.Set(V_LiftXD_TestPowerCmnd);
+
   m_frontLeftDriveMotor.Set(0);
   m_frontRightDriveMotor.Set(0);
   m_rearLeftDriveMotor.Set(0);
@@ -546,9 +513,6 @@ void Robot::TestPeriodic()
 
   m_intake.Set(ControlMode::PercentOutput, 0);
   m_elevator.Set(ControlMode::PercentOutput, 0);
-
-  do_CameraLightControl.Set(V_CameraLightCmndOn); // I believe this is backwards, so true is off??
-  m_vanityLightControler.Set(V_VanityLightCmnd);
   }
 
 

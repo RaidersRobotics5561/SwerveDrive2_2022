@@ -26,7 +26,7 @@ double V_ShooterRPM_Cmnd   = 0;
 double V_ShooterTestSpeed  = 0;
 bool   V_ShooterTargetSpeedReached = false;
 double V_ShooterRPM_CmndPrev = 0;
-bool   V_BH_LauncherActive = false;
+bool   V_BH_LauncherActive = false; // Indicates when the launcher is being controlled.  When false, motors should be in 0 power command
 double KV_ShooterRampRate = 0;
 // double V_LauncherPID_Gx[E_PID_SparkMaxCalSz];
 
@@ -160,38 +160,40 @@ void BallHandlerInit()
  * Description:  Contains the functionality for controlling the launch 
  *               mechanism.
  ******************************************************************************/
-double BallLauncher(bool   L_DisableShooter,
-                    bool   L_AutoShootReq,
-                    double L_AutoShootCmnd,
-                    double L_ManualShooter,
-                    double L_LauncherCurrentSpeed)
+double BallLauncher(bool                 L_DisableShooter,
+                    bool                 L_AutoShootReq,
+                    T_ADAS_ActiveFeature L_ADAS_ActiveFeature,
+                    double               L_ADAS_RPM_BH_Launcher,
+                    double               L_ManualShooter,
+                    double               L_LauncherCurrentSpeed)
   {
-  double           L_ShooterSpeedCmnd     = 0;
-  double           L_ShooterSpeedCmndTemp = 0;
-  T_LauncherStates L_LauncherState        = E_LauncherNotActive;
+  double           L_ShooterSpeedCmnd       = 0;
+  double           L_ShooterSpeedCmndTarget = 0;
+  T_LauncherStates L_LauncherState          = E_LauncherNotActive;
 
   if (V_BallHandlerTest == true)
     {
     // This is only used when in test mode
-    L_ShooterSpeedCmndTemp = V_ShooterTestSpeed;
+    L_ShooterSpeedCmndTarget = V_ShooterTestSpeed;
     L_LauncherState = E_LauncherManualActive;
     }
-  else if (L_AutoShootReq == true)
+  else if (L_ADAS_ActiveFeature > E_ADAS_Disabled)
     {
-    L_ShooterSpeedCmndTemp = L_AutoShootCmnd;
+    /* ADAS is active, pass through the request: */
+    L_ShooterSpeedCmndTarget = L_ADAS_RPM_BH_Launcher;
     L_LauncherState = E_LauncherAutoTargetActive;
     }
   else if (L_ManualShooter >= K_BH_LauncherManualDb)
     {
-    L_ShooterSpeedCmndTemp = DtrmnManualLauncherSpeed(L_ManualShooter);
+    L_ShooterSpeedCmndTarget = DtrmnManualLauncherSpeed(L_ManualShooter);
     L_LauncherState = E_LauncherManualActive;
     }
   
-  L_ShooterSpeedCmnd = RampTo(L_ShooterSpeedCmndTemp, V_ShooterRPM_CmndPrev, KV_ShooterRampRate);
+  L_ShooterSpeedCmnd = RampTo(L_ShooterSpeedCmndTarget, V_ShooterRPM_CmndPrev, KV_ShooterRampRate);
 
   V_ShooterRPM_CmndPrev = L_ShooterSpeedCmnd;
   
-  if ((fabs(L_ShooterSpeedCmnd - L_LauncherCurrentSpeed) <= K_BH_LauncherSpeedDb) == true)
+  if ((fabs(L_ShooterSpeedCmndTarget - L_LauncherCurrentSpeed) <= K_BH_LauncherSpeedDb) == true)
     {
     V_ShooterTargetSpeedReached = true;
     }
@@ -200,6 +202,7 @@ double BallLauncher(bool   L_DisableShooter,
     V_ShooterTargetSpeedReached = false;
     }
 
+  /* Determine when to transition into 0 power command: */
   if (fabs(L_ShooterSpeedCmnd) >= K_BH_LauncherMinCmndSpd)
     {
     V_BH_LauncherActive = true;
@@ -218,12 +221,18 @@ double BallLauncher(bool   L_DisableShooter,
  * Description:  Contains the functionality for controlling the intake 
  *               mechanism.
  ******************************************************************************/
-double BallIntake(bool L_DriverIntakeInCmnd,
-                  bool L_DriverIntakeOutCmnd)
+double BallIntake(bool                 L_DriverIntakeInCmnd,
+                  bool                 L_DriverIntakeOutCmnd,
+                  T_ADAS_ActiveFeature L_ADAS_ActiveFeature,
+                  double               L_ADAS_Pct_BH_Intake)
   {
   double L_IntakeMotorCmnd = 0;
 
-  if (L_DriverIntakeInCmnd == true)
+  if (L_ADAS_ActiveFeature > E_ADAS_Disabled)
+    {
+    L_IntakeMotorCmnd = L_ADAS_Pct_BH_Intake;
+    }
+  else if (L_DriverIntakeInCmnd == true)
     {
     L_IntakeMotorCmnd = K_IntakePower;
     }
@@ -247,11 +256,18 @@ double BallIntake(bool L_DriverIntakeInCmnd,
 double BallElevator(bool L_BallDetected,
                     bool L_ElevatorCmndUp,
                     bool L_ElevatorCmndDwn,
-                    bool L_LauncherTargetSpeedReached)
+                    bool L_LauncherTargetSpeedReached,
+                    T_ADAS_ActiveFeature L_ADAS_ActiveFeature,
+                    bool L_ADAS_Pct_BH_Elevator)
   {
     double L_ElevatorPowerCmnd = 0;
 
-    if(L_ElevatorCmndUp == true)
+    if (L_ADAS_ActiveFeature > E_ADAS_Disabled)
+      {
+      /* ADAS is active, pass through the command: */
+      L_ElevatorPowerCmnd = L_ADAS_Pct_BH_Elevator;
+      }
+    else if(L_ElevatorCmndUp == true)
       {
         if ((L_BallDetected == false) ||
             (L_LauncherTargetSpeedReached == true))
@@ -285,7 +301,10 @@ void BallHandlerControlMain(bool L_IntakeInCmnd,
                             bool L_AutoShootReq,
                             double L_LauncherCurrentSpeed,
                             double L_ManualShooter,
-                            bool   L_AutoShootCmndRPM,
+                            T_ADAS_ActiveFeature L_ADAS_ActiveFeature,
+                            double L_ADAS_RPM_BH_Launcher,
+                            double L_ADAS_Pct_BH_Intake,
+                            double L_ADAS_Pct_BH_Elevator,
                             double *L_Intake,
                             double *L_Elevator,
                             double *L_Shooter)
@@ -296,17 +315,22 @@ void BallHandlerControlMain(bool L_IntakeInCmnd,
 
     L_LauncherRPM = BallLauncher( L_DisableShooter,
                                   L_AutoShootReq,
-                                  L_AutoShootCmndRPM,
+                                  L_ADAS_ActiveFeature,
+                                  L_ADAS_RPM_BH_Launcher,
                                   L_ManualShooter,
                                   L_LauncherCurrentSpeed);
 
     L_IntakePowerCmnd = BallIntake(L_IntakeInCmnd,
-                                   L_IntakeOutCmnd);
+                                   L_IntakeOutCmnd,
+                                   L_ADAS_ActiveFeature,
+                                   L_ADAS_Pct_BH_Intake);
     
     L_ElevatorPowerCmnd = BallElevator(L_BallDetected,
                                        L_ElevatorCmndUp,
                                        L_ElevatorCmndDwn,
-                                       V_ShooterTargetSpeedReached);
+                                       V_ShooterTargetSpeedReached,
+                                       L_ADAS_ActiveFeature,
+                                       L_ADAS_Pct_BH_Elevator);
 
     *L_Intake = L_IntakePowerCmnd;
 

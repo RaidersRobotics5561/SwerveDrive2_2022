@@ -11,7 +11,6 @@
 
 extern double V_WheelAngleCmnd[E_RobotCornerSz];
 extern double V_WheelSpeedCmnd[E_RobotCornerSz];
-extern bool   V_SwerveTargetLockingUpper;
 extern bool   V_b_DriveStraight;
 extern double V_RotateErrorCalc;
 extern bool   V_SD_DriveWheelsInPID;
@@ -28,25 +27,21 @@ void SwerveDriveMotorConfigsCal(rev::SparkMaxPIDController m_frontLeftDrivePID,
 
 void DriveControlInit(void);
 
-void DriveControlMain(double       L_JoyStick1Axis1Y,
-                      double       L_JoyStick1Axis1X,
-                      double       L_JoyStick1Axis2X,
-                      double       L_JoyStick1Axis3,
-                      bool         L_JoyStick1Button1,
-                      bool         L_JoyStick1Button3,
-                      bool         L_JoyStick1Button4,
-                      double       L_GyroAngleDegrees,
-                      double       L_GyroAngleRadians,
-                      bool         L_VisionTopTargetAquired,
-                      double       L_TopTargetYawDegrees,
-                      double      *L_WheelAngleFwd,
-                      double      *L_WheelAngleRev,
-                      double      *L_WheelSpeedCmnd,
-                      double      *L_WheelAngleCmnd,
-                      bool        *L_TargetFin,
-                      T_RobotState L_RobotState,
-                      bool         L_Driver_AutoIntake,
-                      double       L_VisionBottomTargetDistanceMeters,
-                      bool         L_VisionBottomTargetAquired,
-                      double       L_VisionBottomYaw);
+void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control forward/back
+                      double              L_JoyStick1Axis1X,  // swerve control strafe
+                      double              L_JoyStick1Axis2X,  // rotate the robot joystick
+                      double              L_JoyStick1Axis3,   // extra speed trigger
+                      bool                L_JoyStick1Button3, // auto rotate to 0 degrees
+                      bool                L_JoyStick1Button4, // auto rotate to 90 degrees
+                      T_ADAS_ActiveFeature L_ADAS_ActiveFeature,
+                      double               L_ADAS_Pct_SD_FwdRev,
+                      double               L_ADAS_Pct_SD_Strafe,
+                      double               L_ADAS_Pct_SD_Rotate,
+                      bool                 L_ADAS_SD_RobotOriented,
+                      double              L_GyroAngleDegrees,
+                      double              L_GyroAngleRadians,
+                      double             *L_WheelAngleFwd,
+                      double             *L_WheelAngleRev,
+                      double             *L_WheelSpeedCmnd,
+                      double             *L_WheelAngleCmnd);
 

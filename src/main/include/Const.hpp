@@ -60,7 +60,7 @@ const units::radian_t K_VisionCameraPitch2 = 50_deg;
 
 // Cals / constants for Light Control
 const double K_CameraLightDelay = 0.01; // Delay time between enabling the camera light and allowing the data feed to be used. [seconds]
-const double K_CameraLightMaxOnTime = 5.0; // Max amount of time to have the camera light enabled. [seconds]
+const double K_CameraLightMaxOnTime = 10.0; // Max amount of time to have the camera light enabled. [seconds]
 const double C_BlinkinLED_SolidWhite = 0.93;
 const double C_BlinkinLED_BreathRed = -0.17;
 const double C_BlinkinLED_BreathBlue = -0.15;

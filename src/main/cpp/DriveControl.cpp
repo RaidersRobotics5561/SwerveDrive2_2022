@@ -21,15 +21,13 @@ double desiredAngle;
 double rotateDeBounce;
 double rotateErrorCalc;
 bool   rotateMode;
-bool   V_SwerveTargetLockingUpper;
 bool   V_b_DriveStraight;
 double V_RotateErrorCalc;
-bool   V_AutoRotateComplete;
 double V_Deg_DesiredAngPrev = 0;
 double V_WheelAngleError[E_RobotCornerSz];
 double V_WheelAngleIntegral[E_RobotCornerSz];
-double V_WheelAngleCmnd[E_RobotCornerSz];
-double V_WheelSpeedCmnd[E_RobotCornerSz];
+double V_WheelAngleCmnd[E_RobotCornerSz]; // Command sent to motor controller.  Command is power based.
+double V_WheelSpeedCmnd[E_RobotCornerSz]; // Command sent to motor controller   Command is either in power or speed request.
 double V_WheelSpeedError[E_RobotCornerSz];
 double V_WheelSpeedIntergral[E_RobotCornerSz];
 double V_WheelAngleArb[E_RobotCornerSz]; // This is the arbitrated wheel angle that is used in the PID controller
@@ -225,8 +223,6 @@ void DriveControlInit()
         V_SD_WheelSpeedCmndPrev[L_Index] = 0;
         V_SD_WheelAngleCmndPrev[L_Index] = 0;
       }
-  
-  V_SwerveTargetLockingUpper = false;
 
   V_b_DriveStraight = false;
   V_RotateErrorCalc = 0;
@@ -280,28 +276,24 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
                       double              L_JoyStick1Axis1X,  // swerve control strafe
                       double              L_JoyStick1Axis2X,  // rotate the robot joystick
                       double              L_JoyStick1Axis3,   // extra speed trigger
-                      bool                L_UpperTargetButtonCentering, // goal auto center
                       bool                L_JoyStick1Button3, // auto rotate to 0 degrees
                       bool                L_JoyStick1Button4, // auto rotate to 90 degrees
+                      T_ADAS_ActiveFeature L_ADAS_ActiveFeature,
+                      double               L_ADAS_Pct_SD_FwdRev,
+                      double               L_ADAS_Pct_SD_Strafe,
+                      double               L_ADAS_Pct_SD_Rotate,
+                      bool                 L_ADAS_SD_RobotOriented,
                       double              L_GyroAngleDegrees,
                       double              L_GyroAngleRadians,
-                      bool                L_VisionTopTargetAquired,
-                      double              L_TopTargetYawDegrees,
                       double             *L_WheelAngleFwd,
                       double             *L_WheelAngleRev,
                       double             *L_WheelSpeedCmnd,
-                      double             *L_WheelAngleCmnd,
-                      bool               *L_TargetFin,
-                      T_RobotState        L_RobotState,
-                      bool                L_Driver_AutoIntake,
-                      double              L_VisionBottomTargetDistanceMeters,
-                      bool                L_VisionBottomTargetAquired,
-                      double              L_VisionBottomYaw)
+                      double             *L_WheelAngleCmnd)
   {
   double L_FWD = 0;
   double L_STR = 0;
   double L_RCW = 0;
-  int    L_Index;
+  T_RobotCorner L_Index;
   double L_temp;
   double L_A;
   double L_B;
@@ -316,36 +308,39 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
   double L_WA[E_RobotCornerSz];
   double L_WS[E_RobotCornerSz];
   double L_RotateErrorCalc;
-  double L_JoyStick1Axis1Y_Scaled;
-  double L_JoyStick1Axis1X_Scaled;
-  double L_JoyStick1Axis2X_Scaled;
   bool   L_SD_DriveWheelsPowered = false;
 
   /* Scale the joysticks based on a calibratable lookup when in teleop: */
-  if (L_RobotState == E_Teleop)
+  if (L_ADAS_ActiveFeature > E_ADAS_Disabled)
     {
+    /* ADAS is active, pass throught the commands: */
+      L_FWD = -L_ADAS_Pct_SD_FwdRev;
+      L_STR = -L_ADAS_Pct_SD_Strafe;
+      L_RCW = L_ADAS_Pct_SD_Rotate;
+
+      if (L_ADAS_SD_RobotOriented == true)
+        {
+        /* When true, we want to force the robot into robot orientation (i.e. don't use the gyro) */
+        L_GyroAngleDegrees = 0;
+        L_GyroAngleRadians = 0;
+        }
+    }
+  else /* In ADAS, just past through the commands: */
+    {
+    /* ADAS is disabled, use the driver joysticks */
       L_FWD = -L_JoyStick1Axis1Y;
       L_STR = -L_JoyStick1Axis1X;
       L_RCW = -L_JoyStick1Axis2X;
-    }
-  else /* In auton, just past through the commands: */
-    {
-      L_FWD = -L_JoyStick1Axis1Y;
-      L_STR = -L_JoyStick1Axis1X;
-      L_RCW = L_JoyStick1Axis2X;
-    }
 
-   //turning rotatemode on/off & setting desired angle
-    if ((fabs(L_JoyStick1Axis1Y_Scaled) > 0) ||
-        (fabs(L_JoyStick1Axis1X_Scaled) > 0) ||
-        (fabs(L_JoyStick1Axis2X_Scaled) > 0))
+    //turning rotatemode on/off & setting desired angle
+    if ((fabs(L_FWD) > 0) ||
+        (fabs(L_STR) > 0) ||
+        (fabs(L_RCW) > 0))
       {
       // Abort out of auto rotate and/or auto target if the driver moves the joysticks
-      V_SwerveTargetLockingUpper = false;
-      V_AutoRotateComplete = false;
       rotateMode = false;
 
-      if (fabs(L_JoyStick1Axis2X_Scaled) > 0)
+      if (fabs(L_RCW) > 0)
         {
         // Ok, the driver is attempting to rotate the robot 
         desiredAngle = L_GyroAngleDegrees;
@@ -359,19 +354,6 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
         V_b_DriveStraight   = true;
         }  
       }
-    else if(L_UpperTargetButtonCentering || V_SwerveTargetLockingUpper == true)
-      {
-      /* Auto targeting Shooter */
-      V_b_DriveStraight = false;
-      V_SwerveTargetLockingUpper = true;
-      desiredAngle = K_TargetVisionAngleUpper; // This is due to the offset of the camera
-      }
-    else if(L_Driver_AutoIntake)
-      {
-      /* Auto targeting Balls */
-      V_b_DriveStraight = false;
-      desiredAngle = K_TargetVisionAngleLower; // This is due to the offset of the camera
-      }
     else if (L_JoyStick1Button4)
       {
       V_b_DriveStraight = false;
@@ -384,9 +366,9 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       rotateMode = true;
       desiredAngle = 0;
       }
-    else if ((fabs(L_JoyStick1Axis1Y_Scaled) == 0) &&
-             (fabs(L_JoyStick1Axis1X_Scaled) == 0) &&
-             (fabs(L_JoyStick1Axis2X_Scaled) == 0))
+    else if ((fabs(L_FWD) == 0) &&
+             (fabs(L_STR) == 0) &&
+             (fabs(L_RCW) == 0))
       {
       // No driver input
       desiredAngle      = L_GyroAngleDegrees;
@@ -399,35 +381,22 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       // Use gyro as target when in auto rotate or drive straight mode
       L_RotateErrorCalc = desiredAngle - L_GyroAngleDegrees;
       }
-    else if((V_SwerveTargetLockingUpper == true) &&
-            (L_VisionTopTargetAquired == true))
-      {
-      // Use photon vison as target when in auto beam lock
-      L_RotateErrorCalc = desiredAngle - L_TopTargetYawDegrees;
-      V_AutoRotateComplete = false;
-      }
     else
       {
       L_RotateErrorCalc = 0;
       }
 
     if ((V_b_DriveStraight     == true           && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime) ||
-        (rotateMode            == true           && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime) || 
-        (V_SwerveTargetLockingUpper == true      && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime))
+        (rotateMode            == true           && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime))
       {
-      V_AutoRotateComplete = false;
-      // V_SwerveTargetLockingUpper = true;
       rotateDeBounce += C_ExeTime;
       }
     else if ((V_b_DriveStraight     == true      && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime) ||
-             (rotateMode            == true      && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime) ||
-             (V_SwerveTargetLockingUpper == true && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime))
+             (rotateMode            == true      && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime))
       {
       rotateMode = false;
-      V_SwerveTargetLockingUpper = false;
+
       rotateDeBounce = 0;
-      V_AutoRotateComplete = true;
-      *L_TargetFin = true;
       }
 
     if (rotateMode == true)
@@ -438,11 +407,14 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       {
       L_RCW = DesiredAutoRotateSpeed(L_RotateErrorCalc);
       }
-    else if (V_SwerveTargetLockingUpper == true)
+    else
       {
-      L_RCW = -DesiredRotateSpeed(L_RotateErrorCalc);
+      /* Leave RCW as the driver input value */
       }
-  
+    }
+
+
+    /* Swerve drive calculaltions: */
     L_temp =  L_FWD * cos(L_GyroAngleRadians) + L_STR * sin(L_GyroAngleRadians);
     L_STR  = -L_FWD * sin(L_GyroAngleRadians) + L_STR * cos(L_GyroAngleRadians);
     L_FWD  =  L_temp;
@@ -503,8 +475,7 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       /* Additional speed trigger from driver: */
       L_Gain = L_JoyStick1Axis3;
       }
-    else if ((rotateMode   == true) ||
-             (V_SwerveTargetLockingUpper == true))
+    else if (rotateMode   == true)
       {
       L_Gain = K_SD_AutoRotateGx;
       }
@@ -600,11 +571,15 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
                                                K_SD_WheelSpeedPID_Gx[E_Max_Ll]);
       #endif
       }
-
+ 
+    #ifdef DriveMotorTest
     frc::SmartDashboard::PutNumber("L_WheelSpeedCmnd[E_FrontLeft]", L_WheelSpeedCmnd[E_FrontLeft]);
     frc::SmartDashboard::PutNumber("V_WheelVelocity[E_FrontLeft]", V_WheelVelocity[E_FrontLeft]);
+    #endif
+    #ifdef WheelAngleTest
     frc::SmartDashboard::PutNumber("L_WA[E_FrontLeft]", L_WA[E_FrontLeft]);
     frc::SmartDashboard::PutNumber("V_WheelAngleArb[E_FrontLeft]", V_WheelAngleArb[E_FrontLeft]);
+    #endif
 
     V_SD_DriveWheelsInPID = L_SD_DriveWheelsPowered;
     V_Deg_DesiredAngPrev = desiredAngle;

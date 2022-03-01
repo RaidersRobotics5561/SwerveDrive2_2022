@@ -21,11 +21,7 @@
   2022-02-25 -> Beta
  */
 
-#include <math.h>
-
-#include "control_pid.hpp"
-#include "Lookup.hpp"
-#include "Const.hpp"
+#include "Enums.hpp"
 #include "ADAS_UT.hpp"
 #include "ADAS_BT.hpp"
 
@@ -39,6 +35,7 @@ double               V_ADAS_Pct_BH_Intake = 0;
 double               V_ADAS_Pct_BH_Elevator = 0;
 bool                 V_ADAS_CameraUpperLightCmndOn = false;
 bool                 V_ADAS_CameraLowerLightCmndOn = false;
+bool                 V_ADAS_SD_RobotOriented = false;
 
 /******************************************************************************
  * Function:     ADAS_Main_Reset
@@ -56,6 +53,7 @@ void ADAS_Main_Reset(void)
   V_ADAS_Pct_BH_Elevator = 0;
   V_ADAS_CameraUpperLightCmndOn = false;
   V_ADAS_CameraLowerLightCmndOn = false;
+  V_ADAS_SD_RobotOriented = false;
   }
 
 /******************************************************************************
@@ -73,6 +71,7 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
                                             double               *L_Pct_Elevator,
                                             bool                 *L_CameraUpperLightCmndOn,
                                             bool                 *L_CameraLowerLightCmndOn,
+                                            bool                 *L_SD_RobotOriented,
                                             bool                  L_Driver1_JoystickActive,
                                             bool                  L_Driver_stops_shooter,
                                             bool                  L_Driver_SwerveGoalAutoCenter,
@@ -97,8 +96,6 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
   if (L_Driver_SwerveGoalAutoCenter == true)
     {
     L_ADAS_ActiveFeature = E_ADAS_AutoUpperTarget;
-
-    
     }
   else if (L_Driver_AutoIntake == true)
     {
@@ -130,6 +127,7 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
                                               L_Pct_Elevator,
                                               L_CameraUpperLightCmndOn,
                                               L_CameraLowerLightCmndOn,
+                                              L_SD_RobotOriented,
                                               L_ADAS_ActiveFeature,
                                               L_VisionTopTargetAquired,
                                               L_TopTargetYawDegrees,
@@ -149,6 +147,7 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
                                               L_Pct_Elevator,
                                               L_CameraUpperLightCmndOn,
                                               L_CameraLowerLightCmndOn,
+                                              L_SD_RobotOriented,
                                               L_ADAS_ActiveFeature,
                                               L_VisionBottomTargetAquired,
                                               L_VisionBottomYaw,
