@@ -59,6 +59,8 @@ void Robot::RobotInit()
 
   IO_SensorsInit();
 
+  ADAS_Main_Reset();
+
   m_frontLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
   m_frontRightSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
   m_rearLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
@@ -256,6 +258,7 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutNumber("V_b_DriveStraight", V_b_DriveStraight);
   frc::SmartDashboard::PutNumber("V_RotateErrorCalc", V_RotateErrorCalc);
   frc::SmartDashboard::PutNumber("Speed Cmnd", V_ShooterRPM_Cmnd);
+    frc::SmartDashboard::PutNumber("Launcher Speed",  V_ShooterSpeedCurr);
 
   frc::SmartDashboard::PutNumber("GYRO",                 V_GyroYawAngleDegrees);
   frc::SmartDashboard::PutBoolean("Ball Detected Lower", V_BallDetectedLower);
@@ -267,6 +270,17 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutBoolean("Bottom Target?", V_VisionBottomTargetAquired);
   frc::SmartDashboard::PutNumber("Bottom Yaw",      V_VisionBottomYaw);
   frc::SmartDashboard::PutNumber("Bottom Index",    V_VisionBottomIndex); 
+
+  frc::SmartDashboard::PutNumber("ADAS ActiveFeature",     float(V_ADAS_ActiveFeature));
+  frc::SmartDashboard::PutNumber("ADAS SD_FwdRev",               V_ADAS_Pct_SD_FwdRev);
+  frc::SmartDashboard::PutNumber("ADAS SD_Strafe",               V_ADAS_Pct_SD_Strafe);
+  frc::SmartDashboard::PutNumber("ADAS SD_Rotate",               V_ADAS_Pct_SD_Rotate);
+  frc::SmartDashboard::PutNumber("ADAS RPM_BH_Launcher",         V_ADAS_RPM_BH_Launcher);
+  frc::SmartDashboard::PutNumber("ADAS BH_Intake",               V_ADAS_Pct_BH_Intake);
+  frc::SmartDashboard::PutNumber("ADAS BH_Elevator",             V_ADAS_Pct_BH_Elevator);
+  frc::SmartDashboard::PutBoolean("ADAS CameraUpperLightCmndOn", V_ADAS_CameraUpperLightCmndOn);
+  frc::SmartDashboard::PutBoolean("ADAS CameraLowerLightCmndOn", V_ADAS_CameraLowerLightCmndOn);
+  frc::SmartDashboard::PutBoolean("ADAS SD_RobotOriented",       V_ADAS_SD_RobotOriented);
 
   frc::SmartDashboard::PutNumber("Lift YD S0",  V_LiftMotorYD_MaxCurrent[E_S0_BEGONE]);
   frc::SmartDashboard::PutNumber("Lift YD S2",  V_LiftMotorYD_MaxCurrent[E_S2_lift_down_YD]);
@@ -290,8 +304,6 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutNumber("Lift XD S9",  V_LiftMotorXD_MaxCurrent[E_S9_back_rest_XD]);
   frc::SmartDashboard::PutNumber("Lift XD S10", V_LiftMotorXD_MaxCurrent[E_S10_final_YD]);
 
-  frc::SmartDashboard::PutNumber("Launcher Speed",    V_ShooterSpeedCurr);
-
   /* Set light control outputs here */
   do_CameraLightControl.Set(V_CameraLightCmndOn);
   m_vanityLightControler.Set(V_VanityLightCmnd);
@@ -312,7 +324,7 @@ void Robot::AutonomousInit()
     DriveControlInit();
     BallHandlerInit();
     LiftControlInit();
-    AutonDriveReset();
+    ADAS_Main_Reset();
     OdometryInit();
     VisionInit(V_AllianceColor);
     pc_Camera2.SetPipelineIndex(V_VisionBottomIndex);
@@ -386,6 +398,7 @@ void Robot::TeleopInit()
   V_RobotState = E_Teleop;
   V_AllianceColor = frc::DriverStation::GetInstance().GetAlliance();
 
+  ADAS_Main_Reset();
   DriveControlInit();
   BallHandlerInit();
   LiftControlInit();
