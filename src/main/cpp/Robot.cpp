@@ -97,10 +97,6 @@ void Robot::RobotInit()
 
   VisionDashboard();
 
-  m_led.SetLength(K_LED_NumberOfLEDs);
-  m_led.SetData(m_ledBuffer);
-  m_led.Start();
-
   // inst = nt::NetworkTableInstance::Create();
   // inst.StartClient("10.55.61.24");
   // inst.StartDSClient();
@@ -120,8 +116,6 @@ void Robot::RobotInit()
  ******************************************************************************/
 void Robot::RobotPeriodic()
   {
-  int L_Index = 0;
-
   V_MatchTimeRemaining = frc::Timer::GetMatchTime().value();
 
   Joystick_robot_mapping(c_joyStick2.GetRawButton(1),
@@ -189,16 +183,8 @@ void Robot::RobotPeriodic()
                     V_Driver_CameraLight,
                     V_ShooterTargetSpeedReached,
                    &V_CameraLightCmndOn,
-                   &V_VanityLED_Red,
-                   &V_VanityLED_Green,
-                   &V_VanityLED_Blue);
+                   &V_VanityLightCmnd);
 
-  for (L_Index = 0; L_Index < K_LED_NumberOfLEDs; L_Index++)
-    {
-    m_ledBuffer[L_Index].SetRGB(V_VanityLED_Red, V_VanityLED_Green, V_VanityLED_Blue);
-    }
-
-  m_led.SetData(m_ledBuffer);
   do_CameraLightControl.Set(V_CameraLightCmndOn);
 
   frc::SmartDashboard::PutBoolean("XD Limit Detected", V_XD_LimitDetected);
@@ -345,6 +331,8 @@ void Robot::AutonomousPeriodic()
 
     m_liftpidYD.SetReference(V_lift_command_YD, rev::ControlType::kSmartMotion); // positive is up
     m_liftpidXD.SetReference(V_lift_command_XD, rev::ControlType::kSmartMotion); // This is temporary.  We actually want to use position, but need to force this off temporarily
+
+    m_vanityLightControler.Set(V_VanityLightCmnd);
   }
 
 
@@ -477,6 +465,7 @@ void Robot::TeleopPeriodic()
     m_liftpidXD.SetReference(V_lift_command_XD, rev::ControlType::kPosition); // This is temporary.  We actually want to use position, but need to force this off temporarily
 
     do_CameraLightControl.Set(V_CameraLightCmndOn);
+    m_vanityLightControler.Set(V_VanityLightCmnd);
 }
 
 
@@ -531,6 +520,7 @@ void Robot::TestPeriodic()
   m_elevator.Set(ControlMode::PercentOutput, 0);
 
   do_CameraLightControl.Set(V_CameraLightCmndOn); // I believe this is backwards, so true is off??
+  m_vanityLightControler.Set(V_VanityLightCmnd);
   }
 
 

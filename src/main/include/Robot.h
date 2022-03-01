@@ -16,7 +16,6 @@
 #include "rev/CANSparkMax.h"
 #include <frc/motorcontrol/Spark.h>
 #include <frc/DutyCycleEncoder.h>
-#include <frc/AddressableLED.h>
 // #include <networktables/NetworkTable.h>
 #include <photonlib/PhotonCamera.h>
 // #include <photonlib/PhotonUtils.h>
@@ -80,11 +79,7 @@ class Robot : public frc::TimedRobot {
   ctre::phoenix::motorcontrol::can::TalonSRX m_elevator            {C_elevatorID};
 
   // PWM Motor / Light Controllers
-  frc::AddressableLED                        m_led{C_VanityLight_ID};
-  std::array<frc::AddressableLED::LEDData, K_LED_NumberOfLEDs> m_ledBuffer; 
-  
-  // frc::Spark                                 m_vanityLightControler {C_VanityLight_ID};
-
+  frc::Spark                                 m_vanityLightControler {C_VanityLight_ID};
 
   // CAN Encoders
   rev::SparkMaxRelativeEncoder               m_encoderFrontLeftSteer  = m_frontLeftSteerMotor.GetEncoder();

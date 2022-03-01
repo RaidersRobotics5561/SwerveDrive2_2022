@@ -58,10 +58,14 @@ const units::meter_t K_VisionTargetHeight2 = .12_m; // radius of the ball in cm
 const units::radian_t K_VisionCameraPitch2 = 50_deg;
 
 
-// Cals for Light Control
+// Cals / constants for Light Control
 const double K_CameraLightDelay = 0.01; // Delay time between enabling the camera light and allowing the data feed to be used. [seconds]
 const double K_CameraLightMaxOnTime = 5.0; // Max amount of time to have the camera light enabled. [seconds]
-const int    K_LED_NumberOfLEDs = 60; 
+const double C_BlinkinLED_FixedRed = -0.17;
+const double C_BlinkinLED_FixedBlue = -0.15;
+const double C_BlinkinLED_LightChaseGray = -0.27;
+const double C_BlinkinLED_RainbowWithGlitter = -0.89;
+
 
 
 // Encoder / speed calculation related cals
