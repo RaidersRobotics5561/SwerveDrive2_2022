@@ -71,28 +71,10 @@ void Joystick_robot_mapping(bool    L_Driver2_buttonA,
   V_Driver_lift_control = L_Driver2_buttonRB;                     //Controller 2, X button (3), (Lift.cpp) starts automated states machine
   V_Driver_intake_in = L_Driver2_ButtonX;                         //Controller 2 (3), controlls the intake in on trigger pressed 
   V_Driver_intake_out = L_Driver2_ButtonY;                         //Controller 2 (4), controlls the intake out on trigger pressed 
-  // V_Driver_SwerveForwardBack =  L_Driver1_left_Axis_y;
-  if (fabs(L_Driver1_left_Axis_y) > 0.1)
-  {
-  V_Driver_SwerveForwardBack =  L_Driver1_left_Axis_y;  // Scale the axis, also used for debouncing
-  }
-  else
-  {
-  V_Driver_SwerveForwardBack =  0;  // Scale the axis, also used for debouncing  
-  }
-
+  V_Driver_SwerveForwardBack =  ScaleJoystickAxis(L_Driver1_left_Axis_y);  // Scale the axis, also used for debouncing
   V_Driver_SwerveStrafe = ScaleJoystickAxis(L_Driver1_left_Axis_x);        // Scale the axis, also used for debouncing
   V_Driver_SwerveRotate =  ScaleJoystickAxis(L_Driver1_right_Axis_x);      // Scale the axis, also used for debouncing
-  // V_Driver_SwerveSpeed =  ScaleJoystickAxis(L_Driver1_left_trigger_Axis);  // Scale the axis, also used for debouncing
-  // if (fabs(L_Driver1_left_trigger_Axis) > 0.1)
-  // {
   V_Driver_SwerveSpeed = ScaleJoystickAxis(L_Driver1_left_trigger_Axis);  // Scale the axis, also used for debouncing
-  // }
-  // else
-  // {
-  // V_Driver_SwerveSpeed =  0;  // Scale the axis, also used for debouncing  
-  // }
-  
   V_Driver_SwerveGoalAutoCenter = L_Driver1_buttonA;
   V_Driver_SwerveRotateTo0 = L_Driver1_ButtonX;
   V_Driver_SwerveRotateTo90 = L_Driver1_ButtonY;

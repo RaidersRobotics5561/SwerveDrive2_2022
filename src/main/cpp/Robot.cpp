@@ -193,8 +193,6 @@ void Robot::RobotPeriodic()
                                                V_Driver_elevator_down,
                                                V_ADAS_ActiveFeature);
 
-  frc::SmartDashboard::PutNumber("L_FWD 0", V_Driver_SwerveForwardBack);
-
   DriveControlMain( V_Driver_SwerveForwardBack,  // swerve control forward/back
                   V_Driver_SwerveStrafe,  // swerve control strafe
                   V_Driver_SwerveRotate,  // rotate the robot joystick
@@ -297,8 +295,6 @@ void Robot::RobotPeriodic()
 
   frc::SmartDashboard::PutNumber("JoystickY",               V_Driver_SwerveSpeed);
   
-  
-
   // frc::SmartDashboard::PutNumber("Lift YD S0",  V_LiftMotorYD_MaxCurrent[E_S0_BEGONE]);
   // frc::SmartDashboard::PutNumber("Lift YD S2",  V_LiftMotorYD_MaxCurrent[E_S2_lift_down_YD]);
   // frc::SmartDashboard::PutNumber("Lift YD S3",  V_LiftMotorYD_MaxCurrent[E_S3_move_forward_XD]);
@@ -357,28 +353,20 @@ void Robot::AutonomousInit()
 void Robot::AutonomousPeriodic()
   {
   // Motor output commands:
-  #ifdef DriveMotorTest
-    if (V_SD_DriveWheelsInPID == true)
-      {
-      m_frontLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kVelocity);
-      m_frontRightDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kVelocity);
-      m_rearLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_RearLeft],     rev::ControlType::kVelocity);
-      m_rearRightDrivePID.SetReference(V_WheelSpeedCmnd[E_RearRight],   rev::ControlType::kVelocity);
-      }
-    else
-      {
-      m_frontLeftDriveMotor.Set(0);
-      m_frontRightDriveMotor.Set(0);
-      m_rearLeftDriveMotor.Set(0);
-      m_rearRightDriveMotor.Set(0);
-      }
-    #endif
-    #ifndef DriveMotorTest
-    m_frontLeftDriveMotor.Set(V_WheelSpeedCmnd[E_FrontLeft]);
-    m_frontRightDriveMotor.Set(V_WheelSpeedCmnd[E_FrontRight]);
-    m_rearLeftDriveMotor.Set(V_WheelSpeedCmnd[E_RearLeft]);
-    m_rearRightDriveMotor.Set(V_WheelSpeedCmnd[E_RearRight]);
-    #endif
+  if (V_SD_DriveWheelsInPID == true)
+    {
+    m_frontLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kVelocity);
+    m_frontRightDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kVelocity);
+    m_rearLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_RearLeft],     rev::ControlType::kVelocity);
+    m_rearRightDrivePID.SetReference(V_WheelSpeedCmnd[E_RearRight],   rev::ControlType::kVelocity);
+    }
+  else
+    {
+    m_frontLeftDriveMotor.Set(0);
+    m_frontRightDriveMotor.Set(0);
+    m_rearLeftDriveMotor.Set(0);
+    m_rearRightDriveMotor.Set(0);
+    }
 
     m_frontLeftSteerMotor.Set(V_WheelAngleCmnd[E_FrontLeft]);
     m_frontRightSteerMotor.Set(V_WheelAngleCmnd[E_FrontRight]);
@@ -423,7 +411,7 @@ void Robot::TeleopInit()
   VisionInit(V_AllianceColor);
   m_encoderrightShooter.SetPosition(0);
   m_encoderleftShooter.SetPosition(0);
-}
+  }
 
 
 /******************************************************************************
@@ -447,45 +435,36 @@ void Robot::TeleopPeriodic()
                                        m_liftMotorXD.GetOutputCurrent());
 
   // Motor output commands:
-  // #ifdef DriveMotorTest
-    if (V_SD_DriveWheelsInPID == true)
-      {
-      m_frontLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kVelocity);
-      m_frontRightDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kVelocity);
-      m_rearLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_RearLeft],     rev::ControlType::kVelocity);
-      m_rearRightDrivePID.SetReference(V_WheelSpeedCmnd[E_RearRight],   rev::ControlType::kVelocity);
-      }
-    else
-      {
-      m_frontLeftDriveMotor.Set(0);
-      m_frontRightDriveMotor.Set(0);
-      m_rearLeftDriveMotor.Set(0);
-      m_rearRightDriveMotor.Set(0);
-      }
-      frc::SmartDashboard::PutNumber("Final CMND", V_WheelSpeedCmnd[E_FrontLeft]);
-    // #endif
-    // #ifndef DriveMotorTest
-    m_frontLeftDriveMotor.Set(V_WheelSpeedCmnd[E_FrontLeft]);
-    m_frontRightDriveMotor.Set(V_WheelSpeedCmnd[E_FrontRight]);
-    m_rearLeftDriveMotor.Set(V_WheelSpeedCmnd[E_RearLeft]);
-    m_rearRightDriveMotor.Set(V_WheelSpeedCmnd[E_RearRight]);
-    // #endif
+  if (V_SD_DriveWheelsInPID == true)
+    {
+    m_frontLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kVelocity);
+    m_frontRightDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kVelocity);
+    m_rearLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_RearLeft],     rev::ControlType::kVelocity);
+    m_rearRightDrivePID.SetReference(V_WheelSpeedCmnd[E_RearRight],   rev::ControlType::kVelocity);
+    }
+  else
+    {
+    m_frontLeftDriveMotor.Set(0);
+    m_frontRightDriveMotor.Set(0);
+    m_rearLeftDriveMotor.Set(0);
+    m_rearRightDriveMotor.Set(0);
+    }
 
-    m_frontLeftSteerMotor.Set(V_WheelAngleCmnd[E_FrontLeft]);
-    m_frontRightSteerMotor.Set(V_WheelAngleCmnd[E_FrontRight]);
-    m_rearLeftSteerMotor.Set(V_WheelAngleCmnd[E_RearLeft]);
-    m_rearRightSteerMotor.Set(V_WheelAngleCmnd[E_RearRight]);
+  m_frontLeftSteerMotor.Set(V_WheelAngleCmnd[E_FrontLeft]);
+  m_frontRightSteerMotor.Set(V_WheelAngleCmnd[E_FrontRight]);
+  m_rearLeftSteerMotor.Set(V_WheelAngleCmnd[E_RearLeft]);
+  m_rearRightSteerMotor.Set(V_WheelAngleCmnd[E_RearRight]);
 
-    if (V_BH_LauncherActive == true)
-      {
-      m_rightShooterpid.SetReference(V_ShooterRPM_Cmnd, rev::ControlType::kVelocity);
-      m_leftShooterpid.SetReference(-V_ShooterRPM_Cmnd, rev::ControlType::kVelocity);
-      }
-    else
-      {
-      m_rightShooterMotor.Set(0);
-      m_leftShooterMotor.Set(0);
-      }
+  if (V_BH_LauncherActive == true)
+    {
+    m_rightShooterpid.SetReference(V_ShooterRPM_Cmnd, rev::ControlType::kVelocity);
+    m_leftShooterpid.SetReference(-V_ShooterRPM_Cmnd, rev::ControlType::kVelocity);
+    }
+  else
+    {
+    m_rightShooterMotor.Set(0);
+    m_leftShooterMotor.Set(0);
+    }
 
     m_intake.Set(ControlMode::PercentOutput, V_IntakePowerCmnd); //must be positive (don't be a fool)
     m_elevator.Set(ControlMode::PercentOutput, V_ElevatorPowerCmnd);
