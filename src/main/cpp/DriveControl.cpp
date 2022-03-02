@@ -39,6 +39,8 @@ double KV_WheelSpeedRampRate = 0;
 double V_SD_WheelAngleCmndPrev[E_RobotCornerSz];
 double KV_SD_WheelAnglePID_Gx[E_PID_CalSz];
 double KV_SD_WheelAngleRampRate = 0;
+double V_TestWheelSpeed = 0;
+double KV_SD_WheelGx[E_RobotCornerSz];
 
 /******************************************************************************
  * Function:     SwerveDriveMotorConfigsInit
@@ -92,7 +94,16 @@ void SwerveDriveMotorConfigsInit(rev::SparkMaxPIDController m_frontLeftDrivePID,
       KV_SD_WheelAnglePID_Gx[L_Index2] = K_SD_WheelAnglePID_Gx[L_Index2];
       }
 
-  KV_SD_WheelAngleRampRate = KV_SD_WheelAnglePID_Gx[E_kMaxAcc];
+T_RobotCorner L_Index3;
+  for (L_Index3 = E_FrontLeft;
+       L_Index3 < E_RobotCornerSz;
+       L_Index3 = T_RobotCorner(int(L_Index3) + 1))
+      {
+      KV_SD_WheelGx[L_Index3] = K_SD_WheelGx[L_Index3];
+      }
+
+
+  KV_SD_WheelAngleRampRate = 25;
 
   #ifdef DriveMotorTest
   T_PID_SparkMaxCal L_Index = E_kP;
@@ -118,6 +129,11 @@ void SwerveDriveMotorConfigsInit(rev::SparkMaxPIDController m_frontLeftDrivePID,
   frc::SmartDashboard::PutNumber("Min Velocity", K_SD_WheelSpeedPID_V2_Gx[E_kMinVel]);
   frc::SmartDashboard::PutNumber("Max Acceleration", K_SD_WheelSpeedPID_V2_Gx[E_kMaxAcc]);
   frc::SmartDashboard::PutNumber("Allowed Closed Loop Error", K_SD_WheelSpeedPID_V2_Gx[E_kAllErr]);
+
+  frc::SmartDashboard::PutNumber("KV_SD_WheelGx[E_FrontLeft]", KV_SD_WheelGx[E_FrontLeft]);
+  frc::SmartDashboard::PutNumber("KV_SD_WheelGx[E_FrontRight]", KV_SD_WheelGx[E_FrontRight]);
+  frc::SmartDashboard::PutNumber("KV_SD_WheelGx[E_RearLeft]", KV_SD_WheelGx[E_RearLeft]);
+  frc::SmartDashboard::PutNumber("KV_SD_WheelGx[E_RearRight]", KV_SD_WheelGx[E_RearRight]);
   #endif
   #ifdef WheelAngleTest
   // display PID coefficients on SmartDashboard
@@ -164,13 +180,18 @@ void SwerveDriveMotorConfigsCal(rev::SparkMaxPIDController m_frontLeftDrivePID,
   double L_maxA = frc::SmartDashboard::GetNumber("Max Acceleration", 0);
   double L_allE = frc::SmartDashboard::GetNumber("Allowed Closed Loop Error", 0);
 
+  KV_SD_WheelGx[E_FrontLeft] = frc::SmartDashboard::GetNumber("KV_SD_WheelGx[E_FrontLeft]", KV_SD_WheelGx[E_FrontLeft]);
+  KV_SD_WheelGx[E_FrontRight] = frc::SmartDashboard::GetNumber("KV_SD_WheelGx[E_FrontRight]", KV_SD_WheelGx[E_FrontRight]);
+  KV_SD_WheelGx[E_RearLeft] = frc::SmartDashboard::GetNumber("KV_SD_WheelGx[E_RearLeft]", KV_SD_WheelGx[E_RearLeft]);
+  KV_SD_WheelGx[E_RearRight] = frc::SmartDashboard::GetNumber("KV_SD_WheelGx[E_RearRight]", KV_SD_WheelGx[E_RearRight]);
+
   if((L_p != V_WheelSpeedPID_V2_Gx[E_kP]))   { m_frontLeftDrivePID.SetP(L_p); m_frontRightDrivePID.SetP(L_p); m_rearLeftDrivePID.SetP(L_p); m_rearRightDrivePID.SetP(L_p); V_WheelSpeedPID_V2_Gx[E_kP] = L_p; }
   if((L_i != V_WheelSpeedPID_V2_Gx[E_kI]))   { m_frontLeftDrivePID.SetI(L_i); m_frontRightDrivePID.SetI(L_i); m_rearLeftDrivePID.SetI(L_i); m_rearRightDrivePID.SetI(L_i); V_WheelSpeedPID_V2_Gx[E_kI] = L_i; }
   if((L_d != V_WheelSpeedPID_V2_Gx[E_kD]))   { m_frontLeftDrivePID.SetD(L_d); m_frontRightDrivePID.SetD(L_d); m_rearLeftDrivePID.SetD(L_d); m_rearRightDrivePID.SetD(L_d); V_WheelSpeedPID_V2_Gx[E_kD] = L_d; }
   if((L_iz != V_WheelSpeedPID_V2_Gx[E_kIz])) { m_frontLeftDrivePID.SetIZone(L_iz); m_frontRightDrivePID.SetIZone(L_iz); m_rearLeftDrivePID.SetIZone(L_iz); m_rearRightDrivePID.SetIZone(L_iz); V_WheelSpeedPID_V2_Gx[E_kIz] = L_iz; }
   if((L_ff != V_WheelSpeedPID_V2_Gx[E_kFF])) { m_frontLeftDrivePID.SetFF(L_ff); m_frontRightDrivePID.SetFF(L_ff); m_rearLeftDrivePID.SetFF(L_ff); m_rearRightDrivePID.SetFF(L_ff); V_WheelSpeedPID_V2_Gx[E_kFF] = L_ff; }
   if((L_max != V_WheelSpeedPID_V2_Gx[E_kMaxOutput]) || (L_min != V_WheelSpeedPID_V2_Gx[E_kMinOutput])) { m_frontLeftDrivePID.SetOutputRange(L_min, L_max); m_frontRightDrivePID.SetOutputRange(L_min, L_max);  m_rearLeftDrivePID.SetOutputRange(L_min, L_max); m_rearRightDrivePID.SetOutputRange(L_min, L_max); V_WheelSpeedPID_V2_Gx[E_kMinOutput] = L_min; V_WheelSpeedPID_V2_Gx[E_kMaxOutput] = L_max; }
-  // if((L_maxV != V_WheelSpeedPID_V2_Gx[E_kMaxVel])) { m_frontLeftDrivePID.SetSmartMotionMaxVelocity(L_maxV); m_frontRightDrivePID.SetSmartMotionMaxVelocity(L_maxV); m_rearLeftDrivePID.SetSmartMotionMaxVelocity(L_maxV); m_rearRightDrivePID.SetSmartMotionMaxVelocity(L_maxV); V_WheelSpeedPID_V2_Gx[E_kMaxVel] = L_maxV; }
+  if((L_maxV != V_WheelSpeedPID_V2_Gx[E_kMaxVel])) { V_WheelSpeedPID_V2_Gx[E_kMaxVel] = L_maxV; }
   // if((L_minV != V_WheelSpeedPID_V2_Gx[E_kMinVel])) { m_frontLeftDrivePID.SetSmartMotionMinOutputVelocity(L_minV); m_frontRightDrivePID.SetSmartMotionMinOutputVelocity(L_minV); m_rearLeftDrivePID.SetSmartMotionMinOutputVelocity(L_minV); m_rearRightDrivePID.SetSmartMotionMinOutputVelocity(L_minV); V_WheelSpeedPID_V2_Gx[E_kMinVel] = L_minV; }
   if((L_maxA != V_WheelSpeedPID_V2_Gx[E_kMaxAcc])) { KV_WheelSpeedRampRate = L_maxA; V_WheelSpeedPID_V2_Gx[E_kMaxAcc] = L_maxA; }
   // if((L_allE != V_WheelSpeedPID_V2_Gx[E_kAllErr])) { m_frontLeftDrivePID.SetSmartMotionAllowedClosedLoopError(L_allE); m_frontRightDrivePID.SetSmartMotionAllowedClosedLoopError(L_allE); m_rearLeftDrivePID.SetSmartMotionAllowedClosedLoopError(L_allE); m_rearRightDrivePID.SetSmartMotionAllowedClosedLoopError(L_allE); V_WheelSpeedPID_V2_Gx[E_kAllErr] = L_allE; }
@@ -196,8 +217,8 @@ double KV_SD_WheelAnglePID_Gx[E_PID_CalSz];
   if((L_max != KV_SD_WheelAnglePID_Gx[E_Max_Ul]) || (L_min != KV_SD_WheelAnglePID_Gx[E_Max_Ll])) { KV_SD_WheelAnglePID_Gx[E_Max_Ul] = L_max; KV_SD_WheelAnglePID_Gx[E_Max_Ll] = L_min;}
   // if((L_maxV != V_WheelSpeedPID_V2_Gx[E_kMaxVel])) { m_frontLeftDrivePID.SetSmartMotionMaxVelocity(L_maxV); m_frontRightDrivePID.SetSmartMotionMaxVelocity(L_maxV); m_rearLeftDrivePID.SetSmartMotionMaxVelocity(L_maxV); m_rearRightDrivePID.SetSmartMotionMaxVelocity(L_maxV); V_WheelSpeedPID_V2_Gx[E_kMaxVel] = L_maxV; }
   // if((L_minV != V_WheelSpeedPID_V2_Gx[E_kMinVel])) { m_frontLeftDrivePID.SetSmartMotionMinOutputVelocity(L_minV); m_frontRightDrivePID.SetSmartMotionMinOutputVelocity(L_minV); m_rearLeftDrivePID.SetSmartMotionMinOutputVelocity(L_minV); m_rearRightDrivePID.SetSmartMotionMinOutputVelocity(L_minV); V_WheelSpeedPID_V2_Gx[E_kMinVel] = L_minV; }
-  if((L_maxA != KV_SD_WheelAnglePID_Gx[E_kMaxAcc])) { KV_SD_WheelAngleRampRate = L_maxA; KV_SD_WheelAnglePID_Gx[E_kMaxAcc] = L_maxA; }
-  // if((L_allE != V_WheelSpeedPID_V2_Gx[E_kAllErr])) { m_frontLeftDrivePID.SetSmartMotionAllowedClosedLoopError(L_allE); m_frontRightDrivePID.SetSmartMotionAllowedClosedLoopError(L_allE); m_rearLeftDrivePID.SetSmartMotionAllowedClosedLoopError(L_allE); m_rearRightDrivePID.SetSmartMotionAllowedClosedLoopError(L_allE); V_WheelSpeedPID_V2_Gx[E_kAllErr] = L_allE; }
+  if((L_maxA != KV_SD_WheelAnglePID_Gx[E_kMaxAcc])) { KV_SD_WheelAngleRampRate = L_maxA; }
+  if((L_allE != V_WheelSpeedPID_V2_Gx[E_kAllErr])) { V_WheelSpeedPID_V2_Gx[E_kAllErr] = L_allE; }
   #endif
   }
 
@@ -310,6 +331,8 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
   double L_RotateErrorCalc;
   bool   L_SD_DriveWheelsPowered = false;
 
+  frc::SmartDashboard::PutNumber("L_FWD 1", L_JoyStick1Axis1Y);
+
   /* Scale the joysticks based on a calibratable lookup when in teleop: */
   if (L_ADAS_ActiveFeature > E_ADAS_Disabled)
     {
@@ -331,86 +354,86 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       L_FWD = -L_JoyStick1Axis1Y;
       L_STR = -L_JoyStick1Axis1X;
       L_RCW = -L_JoyStick1Axis2X;
-
+frc::SmartDashboard::PutNumber("L_FWD 2", L_FWD);
     //turning rotatemode on/off & setting desired angle
-    if ((fabs(L_FWD) > 0) ||
-        (fabs(L_STR) > 0) ||
-        (fabs(L_RCW) > 0))
-      {
-      // Abort out of auto rotate and/or auto target if the driver moves the joysticks
-      rotateMode = false;
+    // if ((fabs(L_FWD) > 0) ||
+    //     (fabs(L_STR) > 0) ||
+    //     (fabs(L_RCW) > 0))
+    //   {
+    //   // Abort out of auto rotate and/or auto target if the driver moves the joysticks
+    //   rotateMode = false;
 
-      if (fabs(L_RCW) > 0)
-        {
-        // Ok, the driver is attempting to rotate the robot 
-        desiredAngle = L_GyroAngleDegrees;
-        V_b_DriveStraight   = false;
-        }
-      else
-        {
-        // Ok, the driver is attempting to not rotate the robot (i.e. drive straight and/or strafe)
-        // Set the desired angle of the robot equal to the previously measured/commanded angle and enable rotate mode
-        desiredAngle = V_Deg_DesiredAngPrev;
-        V_b_DriveStraight   = true;
-        }  
-      }
-    else if (L_JoyStick1Button4)
-      {
-      V_b_DriveStraight = false;
-      rotateMode = true;
-      desiredAngle = 90;
-      }
-    else if (L_JoyStick1Button3)
-      {
-      V_b_DriveStraight = false;
-      rotateMode = true;
-      desiredAngle = 0;
-      }
-    else if ((fabs(L_FWD) == 0) &&
-             (fabs(L_STR) == 0) &&
-             (fabs(L_RCW) == 0))
-      {
-      // No driver input
-      desiredAngle      = L_GyroAngleDegrees;
-      V_b_DriveStraight = false;
-      }
+    //   if (fabs(L_RCW) > 0)
+    //     {
+    //     // Ok, the driver is attempting to rotate the robot 
+    //     desiredAngle = L_GyroAngleDegrees;
+    //     V_b_DriveStraight   = false;
+    //     }
+    //   else
+    //     {
+    //     // Ok, the driver is attempting to not rotate the robot (i.e. drive straight and/or strafe)
+    //     // Set the desired angle of the robot equal to the previously measured/commanded angle and enable rotate mode
+    //     desiredAngle = V_Deg_DesiredAngPrev;
+    //     V_b_DriveStraight   = true;
+    //     }  
+    //   }
+    // else if (L_JoyStick1Button4)
+    //   {
+    //   V_b_DriveStraight = false;
+    //   rotateMode = true;
+    //   desiredAngle = 90;
+    //   }
+    // else if (L_JoyStick1Button3)
+    //   {
+    //   V_b_DriveStraight = false;
+    //   rotateMode = true;
+    //   desiredAngle = 0;
+    //   }
+    // else if ((fabs(L_FWD) == 0) &&
+    //          (fabs(L_STR) == 0) &&
+    //          (fabs(L_RCW) == 0))
+    //   {
+    //   // No driver input
+    //   desiredAngle      = L_GyroAngleDegrees;
+    //   V_b_DriveStraight = false;
+    //   }
       
-    if ((rotateMode == true) ||
-        (V_b_DriveStraight == true))
-      {
-      // Use gyro as target when in auto rotate or drive straight mode
-      L_RotateErrorCalc = desiredAngle - L_GyroAngleDegrees;
-      }
-    else
-      {
-      L_RotateErrorCalc = 0;
-      }
+    // if ((rotateMode == true) ||
+    //     (V_b_DriveStraight == true))
+    //   {
+    //   // Use gyro as target when in auto rotate or drive straight mode
+    //   L_RotateErrorCalc = desiredAngle - L_GyroAngleDegrees;
+    //   }
+    // else
+    //   {
+    //   L_RotateErrorCalc = 0;
+    //   }
 
-    if ((V_b_DriveStraight     == true           && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime) ||
-        (rotateMode            == true           && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime))
-      {
-      rotateDeBounce += C_ExeTime;
-      }
-    else if ((V_b_DriveStraight     == true      && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime) ||
-             (rotateMode            == true      && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime))
-      {
-      rotateMode = false;
+    // if ((V_b_DriveStraight     == true           && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime) ||
+    //     (rotateMode            == true           && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce <= K_RotateDebounceTime))
+    //   {
+    //   rotateDeBounce += C_ExeTime;
+    //   }
+    // else if ((V_b_DriveStraight     == true      && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime) ||
+    //          (rotateMode            == true      && fabs(L_RotateErrorCalc) <= K_RotateDeadbandAngle && rotateDeBounce >= K_RotateDebounceTime))
+    //   {
+    //   rotateMode = false;
 
-      rotateDeBounce = 0;
-      }
+    //   rotateDeBounce = 0;
+    //   }
 
-    if (rotateMode == true)
-      {
-      L_RCW = DesiredRotateSpeed(L_RotateErrorCalc);
-      }
-    else if (V_b_DriveStraight == true)
-      {
-      L_RCW = DesiredAutoRotateSpeed(L_RotateErrorCalc);
-      }
-    else
-      {
-      /* Leave RCW as the driver input value */
-      }
+    // if (rotateMode == true)
+    //   {
+    //   L_RCW = DesiredRotateSpeed(L_RotateErrorCalc);
+    //   }
+    // else if (V_b_DriveStraight == true)
+    //   {
+    //   L_RCW = DesiredAutoRotateSpeed(L_RotateErrorCalc);
+    //   }
+    // else
+    //   {
+    //   /* Leave RCW as the driver input value */
+    //   }
     }
 
 
@@ -418,7 +441,7 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
     L_temp =  L_FWD * cos(L_GyroAngleRadians) + L_STR * sin(L_GyroAngleRadians);
     L_STR  = -L_FWD * sin(L_GyroAngleRadians) + L_STR * cos(L_GyroAngleRadians);
     L_FWD  =  L_temp;
-
+frc::SmartDashboard::PutNumber("L_FWD 3", L_FWD);
     //Ws1: fr, Ws2: fl, ws3: rl, ws4: rr
     L_A = L_STR - L_RCW * (C_SD_L/C_SD_R);
     L_B = L_STR + L_RCW * (C_SD_L/C_SD_R);
@@ -444,7 +467,7 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
     L_WA[E_FrontLeft]  = atan2(L_B, L_C) *180/C_PI;
     L_WA[E_RearLeft]   = atan2(L_A, L_C) *180/C_PI;
     L_WA[E_RearRight]  = atan2(L_A, L_D) *180/C_PI;
-
+frc::SmartDashboard::PutNumber("L_FWD 4",  L_WS[E_FrontLeft]);
     L_Max = L_WS[E_FrontRight];
 
     if (L_WS[E_FrontLeft] > L_Max)
@@ -467,7 +490,7 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       L_WS[E_RearLeft]   /= L_Max;
       L_WS[E_RearRight]  /= L_Max;
       }
-
+frc::SmartDashboard::PutNumber("L_FWD 5",  L_WS[E_FrontLeft]);
     L_Gain = K_SD_MinGain;
     
     if (L_JoyStick1Axis3 > L_Gain)
@@ -489,7 +512,7 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
     L_WS[E_FrontLeft]  *= (K_SD_WheelMaxSpeed * L_Gain);
     L_WS[E_RearLeft]   *= (K_SD_WheelMaxSpeed * L_Gain);
     L_WS[E_RearRight]  *= (K_SD_WheelMaxSpeed * L_Gain);
-
+frc::SmartDashboard::PutNumber("L_FWD 6",  L_WS[E_FrontLeft]);
     for (L_Index = E_FrontLeft;
          L_Index < E_RobotCornerSz;
          L_Index = T_RobotCorner(int(L_Index) + 1))
@@ -514,7 +537,7 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
           L_WS[L_Index] *= (-1); // Need to flip sign of drive wheel to account for reverse direction
         }
       }
-
+frc::SmartDashboard::PutNumber("L_FWD 7",  L_WS[E_FrontLeft]);
   /* Output the wheel speed and angle targets along with init state: */
     for (L_Index = E_FrontLeft;
          L_Index < E_RobotCornerSz;
@@ -542,44 +565,45 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
                                                 KV_SD_WheelAnglePID_Gx[E_Max_Ul],
                                                 KV_SD_WheelAnglePID_Gx[E_Max_Ll]);
 
-      #ifdef DriveMotorTest
-      L_WheelSpeedCmnd[L_Index] = RampTo(L_WS[L_Index], V_SD_WheelSpeedCmndPrev[L_Index], KV_WheelSpeedRampRate);
+      // #ifdef DriveMotorTest
+      L_WheelSpeedCmnd[L_Index] = RampTo((L_WS[L_Index] * KV_SD_WheelGx[L_Index]), V_SD_WheelSpeedCmndPrev[L_Index], KV_WheelSpeedRampRate);
+      // L_WheelSpeedCmnd[L_Index] = RampTo(V_WheelSpeedPID_V2_Gx[E_kMaxVel], L_WheelSpeedCmnd[L_Index], KV_WheelSpeedRampRate);
+      L_SD_DriveWheelsPowered = true;
       V_SD_WheelSpeedCmndPrev[L_Index] = L_WheelSpeedCmnd[L_Index];
-      if (L_SD_DriveWheelsPowered == false && 
-          (fabs(L_WheelSpeedCmnd[L_Index]) >= K_SD_WheelMinCmndSpeed) &&
-          (fabs(V_WheelVelocity[L_Index]) >= K_SD_WheelMinActualSpeed))
-        {
-        // Ok, so we have at least one wheel that is still either trying to command a non zero speed and/or one wheel is still coming down to a stop
-        L_SD_DriveWheelsPowered = true;
-        }
-      #endif
+
+      // if ((fabs(L_WheelSpeedCmnd[L_Index]) >= K_SD_WheelMinCmndSpeed))
+      //   {
+      //   // Ok, so we have at least one wheel that is still either trying to command a non zero speed and/or one wheel is still coming down to a stop
+      //   L_SD_DriveWheelsPowered = true;
+      //   }
+      // #endif
       #ifndef DriveMotorTest
-      L_WheelSpeedCmnd[L_Index] = Control_PID( L_WS[L_Index],
-                                               V_WheelVelocity[L_Index],
-                                              &V_WheelSpeedError[L_Index],
-                                              &V_WheelSpeedIntergral[L_Index],
-                                               K_SD_WheelSpeedPID_Gx[E_P_Gx],
-                                               K_SD_WheelSpeedPID_Gx[E_I_Gx],
-                                               K_SD_WheelSpeedPID_Gx[E_D_Gx],
-                                               K_SD_WheelSpeedPID_Gx[E_P_Ul],
-                                               K_SD_WheelSpeedPID_Gx[E_P_Ll],
-                                               K_SD_WheelSpeedPID_Gx[E_I_Ul],
-                                               K_SD_WheelSpeedPID_Gx[E_I_Ll],
-                                               K_SD_WheelSpeedPID_Gx[E_D_Ul],
-                                               K_SD_WheelSpeedPID_Gx[E_D_Ll],
-                                               K_SD_WheelSpeedPID_Gx[E_Max_Ul],
-                                               K_SD_WheelSpeedPID_Gx[E_Max_Ll]);
+      // L_WheelSpeedCmnd[L_Index] = Control_PID( L_WS[L_Index],
+      //                                          V_WheelVelocity[L_Index],
+      //                                         &V_WheelSpeedError[L_Index],
+      //                                         &V_WheelSpeedIntergral[L_Index],
+      //                                          K_SD_WheelSpeedPID_Gx[E_P_Gx],
+      //                                          K_SD_WheelSpeedPID_Gx[E_I_Gx],
+      //                                          K_SD_WheelSpeedPID_Gx[E_D_Gx],
+      //                                          K_SD_WheelSpeedPID_Gx[E_P_Ul],
+      //                                          K_SD_WheelSpeedPID_Gx[E_P_Ll],
+      //                                          K_SD_WheelSpeedPID_Gx[E_I_Ul],
+      //                                          K_SD_WheelSpeedPID_Gx[E_I_Ll],
+      //                                          K_SD_WheelSpeedPID_Gx[E_D_Ul],
+      //                                          K_SD_WheelSpeedPID_Gx[E_D_Ll],
+      //                                          K_SD_WheelSpeedPID_Gx[E_Max_Ul],
+      //                                          K_SD_WheelSpeedPID_Gx[E_Max_Ll]);
       #endif
       }
  
-    #ifdef DriveMotorTest
-    frc::SmartDashboard::PutNumber("L_WheelSpeedCmnd[E_FrontLeft]", L_WheelSpeedCmnd[E_FrontLeft]);
-    frc::SmartDashboard::PutNumber("V_WheelVelocity[E_FrontLeft]", V_WheelVelocity[E_FrontLeft]);
-    #endif
-    #ifdef WheelAngleTest
-    frc::SmartDashboard::PutNumber("L_WA[E_FrontLeft]", L_WA[E_FrontLeft]);
+    // #ifdef DriveMotorTest
+    frc::SmartDashboard::PutNumber("WheelSpeedCmnd FL", L_WheelSpeedCmnd[E_FrontLeft]);
+    frc::SmartDashboard::PutNumber("L_WS_FL", L_WS[E_FrontLeft]);
+    // #endif
+    // #ifdef WheelAngleTest
+    frc::SmartDashboard::PutNumber("L_FWD", L_FWD);
     frc::SmartDashboard::PutNumber("V_WheelAngleArb[E_FrontLeft]", V_WheelAngleArb[E_FrontLeft]);
-    #endif
+    // #endif
 
     V_SD_DriveWheelsInPID = L_SD_DriveWheelsPowered;
     V_Deg_DesiredAngPrev = desiredAngle;

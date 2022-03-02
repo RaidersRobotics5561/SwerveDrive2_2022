@@ -4,7 +4,7 @@
 #include <units/length.h>
 
 // Define the desired test state here: COMP (no test), BallHandlerTest, LiftXY_Test, DriveMotorTest, WheelAngleTest, ADAS_UT_Test, ADAS_BT_Test
-#define ADAS_UT_Test 
+#define DriveMotorTest
 // Define the version of vision to use: VISION1 VISION2
 #define VISION2
 
@@ -215,6 +215,13 @@ const double K_SD_WheelOffsetAngle[E_RobotCornerSz] = {169.527239,   // E_FrontL
                                                         33.112801,   // E_RearLeft
                                                        246.813891};  // E_RearRight 
 
+/* K_SD_WheelGx: Offset angle for each respective corder of the swerve drive wheel.  This is the angle 
+   reading from the absolute encoder that is indicated in order for the wheel to point straight. */
+const double K_SD_WheelGx[E_RobotCornerSz] = {0.9,   // E_FrontLeft
+                                              0.9,   // E_FrontRight 
+                                              1.0,   // E_RearLeft
+                                              1.0};  // E_RearRight 
+
 /* K_SD_MinGain: Min gain applied to the wheel speed for swerve drive. */
 const double K_SD_MinGain = 0.1;
 
@@ -225,7 +232,7 @@ const double K_SD_MaxGain = 0.75;
 const double K_SD_AutoRotateGx = 0.1;
 
 /* K_SD_WheelMaxSpeed: Max in/sec speed of the swerve drive wheel.*/
-const double K_SD_WheelMaxSpeed = 225;
+const double K_SD_WheelMaxSpeed = 7;
 
 /* K_SD_WheelMinCmndSpeed: Min in/sec speed of the swerve drive wheel to keep it under PID control.  
   If the absolute value of the command, wheels will transition to 0 power (but still in brake 
@@ -238,16 +245,16 @@ const double K_SD_WheelMinCmndSpeed = 0.2;
 const double K_SD_WheelMinActualSpeed = 3;
 
 /* K_SD_WheelSpeedPID_V2_Gx: PID gains for the driven wheels that is within the motor controllers. */
-const double K_SD_WheelSpeedPID_V2_Gx[E_PID_SparkMaxCalSz] = { 0.00055,  // kP
+const double K_SD_WheelSpeedPID_V2_Gx[E_PID_SparkMaxCalSz] = { 0.000420,  // kP
                                                                0.000001, // kI
-                                                               0.0001,   // kD
+                                                               0.000001,   // kD
                                                                0.0,      // kIz
                                                                0.0,      // kFF
                                                                1.0,      // kMaxOutput
                                                               -1.0,      // kMinOutput
                                                                0.0,      // kMaxVel
                                                                0.0,      // kMinVel
-                                                              45.0,      // kMaxAcc
+                                                              150.0,      // kMaxAcc
                                                                0.0};     // kAllErr
 
 /* K_SD_WheelSpeedPID_Gx: PID gains for the driven wheels.   PID control is within the RoboRio.  */
@@ -285,10 +292,10 @@ const double K_SD_DesiredDriveSpeedAxis[20] = {-0.95,
                                             -0.45,
                                             -0.35,
                                             -0.25,
-                                            -0.15,
+                                            -0.20,
                                             -0.10,
                                              0.10,
-                                             0.15,
+                                             0.20,
                                              0.25,
                                              0.35,
                                              0.45,
@@ -307,10 +314,10 @@ const double K_SD_DesiredDriveSpeed[20] = {-1.00,  //-0.95
                                         -0.44,  //-0.45
                                         -0.33,  //-0.35
                                         -0.22,  //-0.25
-                                        -0.11,  //-0.15
+                                        -0.15,  //-0.15
                                          0.00,  //-0.10
                                          0.00,  // 0.10
-                                         0.11,  // 0.15
+                                         0.15,  // 0.15
                                          0.22,  // 0.25
                                          0.33,  // 0.35
                                          0.44,  // 0.45

@@ -193,6 +193,8 @@ void Robot::RobotPeriodic()
                                                V_Driver_elevator_down,
                                                V_ADAS_ActiveFeature);
 
+  frc::SmartDashboard::PutNumber("L_FWD 0", V_Driver_SwerveForwardBack);
+
   DriveControlMain( V_Driver_SwerveForwardBack,  // swerve control forward/back
                   V_Driver_SwerveStrafe,  // swerve control strafe
                   V_Driver_SwerveRotate,  // rotate the robot joystick
@@ -269,7 +271,7 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutNumber("V_RotateErrorCalc", V_RotateErrorCalc);
   frc::SmartDashboard::PutNumber("Speed Cmnd",        V_ShooterRPM_Cmnd);
   frc::SmartDashboard::PutNumber("Launcher Speed",    V_ShooterSpeedCurr);
-
+  frc::SmartDashboard::PutNumber("Front Left Speed Cmnd", m_encoderFrontLeftDrive.GetVelocity());
   frc::SmartDashboard::PutNumber("GYRO",            V_GyroYawAngleDegrees);
 
   frc::SmartDashboard::PutBoolean("Top Target?",    V_VisionTopTargetAquired);
@@ -291,27 +293,33 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutBoolean("ADAS CameraLowerLightCmndOn", V_ADAS_CameraLowerLightCmndOn);
   frc::SmartDashboard::PutBoolean("ADAS SD_RobotOriented",       V_ADAS_SD_RobotOriented);
 
-  frc::SmartDashboard::PutNumber("Lift YD S0",  V_LiftMotorYD_MaxCurrent[E_S0_BEGONE]);
-  frc::SmartDashboard::PutNumber("Lift YD S2",  V_LiftMotorYD_MaxCurrent[E_S2_lift_down_YD]);
-  frc::SmartDashboard::PutNumber("Lift YD S3",  V_LiftMotorYD_MaxCurrent[E_S3_move_forward_XD]);
-  frc::SmartDashboard::PutNumber("Lift YD S4",  V_LiftMotorYD_MaxCurrent[E_S4_stretch_up_YD]);
-  frc::SmartDashboard::PutNumber("Lift YD S5",  V_LiftMotorYD_MaxCurrent[E_S5_more_forward_XD]);
-  frc::SmartDashboard::PutNumber("Lift YD S6",  V_LiftMotorYD_MaxCurrent[E_S6_lift_up_more_YD]);
-  frc::SmartDashboard::PutNumber("Lift YD S7",  V_LiftMotorYD_MaxCurrent[E_S7_move_back_XD]);
-  frc::SmartDashboard::PutNumber("Lift YD S8",  V_LiftMotorYD_MaxCurrent[E_S8_more_down_some_YD]);
-  frc::SmartDashboard::PutNumber("Lift YD S9",  V_LiftMotorYD_MaxCurrent[E_S9_back_rest_XD]);
-  frc::SmartDashboard::PutNumber("Lift YD S10", V_LiftMotorYD_MaxCurrent[E_S10_final_YD]);
+  frc::SmartDashboard::PutBoolean("SD Drive Wheels In PID",      V_SD_DriveWheelsInPID);
+
+  frc::SmartDashboard::PutNumber("JoystickY",               V_Driver_SwerveSpeed);
   
-  frc::SmartDashboard::PutNumber("Lift XD S0",  V_LiftMotorXD_MaxCurrent[E_S0_BEGONE]);
-  frc::SmartDashboard::PutNumber("Lift XD S2",  V_LiftMotorXD_MaxCurrent[E_S2_lift_down_YD]);
-  frc::SmartDashboard::PutNumber("Lift XD S3",  V_LiftMotorXD_MaxCurrent[E_S3_move_forward_XD]);
-  frc::SmartDashboard::PutNumber("Lift XD S4",  V_LiftMotorXD_MaxCurrent[E_S4_stretch_up_YD]);
-  frc::SmartDashboard::PutNumber("Lift XD S5",  V_LiftMotorXD_MaxCurrent[E_S5_more_forward_XD]);
-  frc::SmartDashboard::PutNumber("Lift XD S6",  V_LiftMotorXD_MaxCurrent[E_S6_lift_up_more_YD]);
-  frc::SmartDashboard::PutNumber("Lift XD S7",  V_LiftMotorXD_MaxCurrent[E_S7_move_back_XD]);
-  frc::SmartDashboard::PutNumber("Lift XD S8",  V_LiftMotorXD_MaxCurrent[E_S8_more_down_some_YD]);
-  frc::SmartDashboard::PutNumber("Lift XD S9",  V_LiftMotorXD_MaxCurrent[E_S9_back_rest_XD]);
-  frc::SmartDashboard::PutNumber("Lift XD S10", V_LiftMotorXD_MaxCurrent[E_S10_final_YD]);
+  
+
+  // frc::SmartDashboard::PutNumber("Lift YD S0",  V_LiftMotorYD_MaxCurrent[E_S0_BEGONE]);
+  // frc::SmartDashboard::PutNumber("Lift YD S2",  V_LiftMotorYD_MaxCurrent[E_S2_lift_down_YD]);
+  // frc::SmartDashboard::PutNumber("Lift YD S3",  V_LiftMotorYD_MaxCurrent[E_S3_move_forward_XD]);
+  // frc::SmartDashboard::PutNumber("Lift YD S4",  V_LiftMotorYD_MaxCurrent[E_S4_stretch_up_YD]);
+  // frc::SmartDashboard::PutNumber("Lift YD S5",  V_LiftMotorYD_MaxCurrent[E_S5_more_forward_XD]);
+  // frc::SmartDashboard::PutNumber("Lift YD S6",  V_LiftMotorYD_MaxCurrent[E_S6_lift_up_more_YD]);
+  // frc::SmartDashboard::PutNumber("Lift YD S7",  V_LiftMotorYD_MaxCurrent[E_S7_move_back_XD]);
+  // frc::SmartDashboard::PutNumber("Lift YD S8",  V_LiftMotorYD_MaxCurrent[E_S8_more_down_some_YD]);
+  // frc::SmartDashboard::PutNumber("Lift YD S9",  V_LiftMotorYD_MaxCurrent[E_S9_back_rest_XD]);
+  // frc::SmartDashboard::PutNumber("Lift YD S10", V_LiftMotorYD_MaxCurrent[E_S10_final_YD]);
+  
+  // frc::SmartDashboard::PutNumber("Lift XD S0",  V_LiftMotorXD_MaxCurrent[E_S0_BEGONE]);
+  // frc::SmartDashboard::PutNumber("Lift XD S2",  V_LiftMotorXD_MaxCurrent[E_S2_lift_down_YD]);
+  // frc::SmartDashboard::PutNumber("Lift XD S3",  V_LiftMotorXD_MaxCurrent[E_S3_move_forward_XD]);
+  // frc::SmartDashboard::PutNumber("Lift XD S4",  V_LiftMotorXD_MaxCurrent[E_S4_stretch_up_YD]);
+  // frc::SmartDashboard::PutNumber("Lift XD S5",  V_LiftMotorXD_MaxCurrent[E_S5_more_forward_XD]);
+  // frc::SmartDashboard::PutNumber("Lift XD S6",  V_LiftMotorXD_MaxCurrent[E_S6_lift_up_more_YD]);
+  // frc::SmartDashboard::PutNumber("Lift XD S7",  V_LiftMotorXD_MaxCurrent[E_S7_move_back_XD]);
+  // frc::SmartDashboard::PutNumber("Lift XD S8",  V_LiftMotorXD_MaxCurrent[E_S8_more_down_some_YD]);
+  // frc::SmartDashboard::PutNumber("Lift XD S9",  V_LiftMotorXD_MaxCurrent[E_S9_back_rest_XD]);
+  // frc::SmartDashboard::PutNumber("Lift XD S10", V_LiftMotorXD_MaxCurrent[E_S10_final_YD]);
 
   /* Set light control outputs here */
   do_CameraLightControl.Set(V_CameraLightCmndOn);
@@ -439,7 +447,7 @@ void Robot::TeleopPeriodic()
                                        m_liftMotorXD.GetOutputCurrent());
 
   // Motor output commands:
-  #ifdef DriveMotorTest
+  // #ifdef DriveMotorTest
     if (V_SD_DriveWheelsInPID == true)
       {
       m_frontLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kVelocity);
@@ -454,13 +462,14 @@ void Robot::TeleopPeriodic()
       m_rearLeftDriveMotor.Set(0);
       m_rearRightDriveMotor.Set(0);
       }
-    #endif
-    #ifndef DriveMotorTest
+      frc::SmartDashboard::PutNumber("Final CMND", V_WheelSpeedCmnd[E_FrontLeft]);
+    // #endif
+    // #ifndef DriveMotorTest
     m_frontLeftDriveMotor.Set(V_WheelSpeedCmnd[E_FrontLeft]);
     m_frontRightDriveMotor.Set(V_WheelSpeedCmnd[E_FrontRight]);
     m_rearLeftDriveMotor.Set(V_WheelSpeedCmnd[E_RearLeft]);
     m_rearRightDriveMotor.Set(V_WheelSpeedCmnd[E_RearRight]);
-    #endif
+    // #endif
 
     m_frontLeftSteerMotor.Set(V_WheelAngleCmnd[E_FrontLeft]);
     m_frontRightSteerMotor.Set(V_WheelAngleCmnd[E_FrontRight]);

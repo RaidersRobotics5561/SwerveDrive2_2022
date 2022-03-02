@@ -100,12 +100,14 @@ bool CameraLightControl(bool                 L_Driver_CameraLight,
 double VanityLightControl(double                       L_MatchTimeRemaining,
                           frc::DriverStation::Alliance L_AllianceColor,
                           T_ADAS_ActiveFeature         L_ADAS_ActiveFeature,
-                          bool                         L_ADAS_CameraLowerLightCmndOn)
+                          bool                         L_ADAS_CameraLowerLightCmndOn,
+                          bool                         L_Driver_CameraLight)
   {
     double L_LED_Command = 0;
 
-    if ((L_ADAS_ActiveFeature > E_ADAS_Disabled) &&
-        (L_ADAS_CameraLowerLightCmndOn == true))
+    if (((L_ADAS_ActiveFeature > E_ADAS_Disabled) &&
+         (L_ADAS_CameraLowerLightCmndOn == true)) ||
+         (L_Driver_CameraLight == true))
       {
       L_LED_Command = C_BlinkinLED_SolidWhite;
       }
@@ -152,5 +154,6 @@ void LightControlMain(double                       L_MatchTimeRemaining,
   *L_VanityLightCmnd = VanityLightControl(L_MatchTimeRemaining,
                                           L_AllianceColor,
                                           L_ADAS_ActiveFeature,
-                                          L_ADAS_CameraLowerLightCmndOn);
+                                          L_ADAS_CameraLowerLightCmndOn,
+                                          L_Driver_CameraLight);
   }
