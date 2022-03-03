@@ -7,10 +7,10 @@
    Contains content from vision.
  */
 
-extern int    V_VisionBottomIndex;
 extern bool   V_VisionTargetAquired[E_CamLocSz];
 extern double V_VisionYaw[E_CamLocSz];
 extern double V_VisionTargetDistanceMeters[E_CamLocSz];
+extern int    V_VisionCameraIndex[E_CamSz];
 
 void VisionRobotInit();
 

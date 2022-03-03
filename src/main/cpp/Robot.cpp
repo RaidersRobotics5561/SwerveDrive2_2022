@@ -100,8 +100,8 @@ void Robot::RobotInit()
 
   VisionRobotInit();
   VisionInit(V_AllianceColor);
-  pc_Camera1.SetPipelineIndex(V_VisionBottomIndex);
-  pc_Camera2.SetPipelineIndex(V_VisionBottomIndex);
+  pc_Camera1.SetPipelineIndex(V_VisionCameraIndex[E_Cam1]);
+  pc_Camera2.SetPipelineIndex(V_VisionCameraIndex[E_Cam2]);
 
 // m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
 // m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
@@ -279,7 +279,7 @@ void Robot::RobotPeriodic()
   // frc::SmartDashboard::PutNumber("Bottom Range",    V_VisionTargetDistanceMeters[E_CamBottom]);
   // frc::SmartDashboard::PutBoolean("Bottom Target?", V_VisionTargetAquired[E_CamBottom]);
   // frc::SmartDashboard::PutNumber("Bottom Yaw",      V_VisionYaw[E_CamBottom]);
-  // frc::SmartDashboard::PutNumber("Bottom Index",    V_VisionBottomIndex); 
+  // frc::SmartDashboard::PutNumber("Bottom Index",    V_VisionCameraIndex[V_VisionCamNumber[E_CamBottom]]); 
 
   // frc::SmartDashboard::PutNumber("ADAS ActiveFeature",     float(V_ADAS_ActiveFeature));
   // frc::SmartDashboard::PutNumber("ADAS SD_FwdRev",               V_ADAS_Pct_SD_FwdRev);
@@ -341,8 +341,8 @@ void Robot::AutonomousInit()
     ADAS_Main_Reset();
     OdometryInit();
     VisionInit(V_AllianceColor);
-    pc_Camera1.SetPipelineIndex(V_VisionBottomIndex);
-    pc_Camera2.SetPipelineIndex(V_VisionBottomIndex);
+    pc_Camera1.SetPipelineIndex(V_VisionCameraIndex[E_Cam1]);
+    pc_Camera2.SetPipelineIndex(V_VisionCameraIndex[E_Cam2]);
   }
 
 
@@ -411,8 +411,8 @@ void Robot::TeleopInit()
   LiftControlInit();
   OdometryInit();
   VisionInit(V_AllianceColor);
-  pc_Camera1.SetPipelineIndex(V_VisionBottomIndex);
-  pc_Camera2.SetPipelineIndex(V_VisionBottomIndex);
+  pc_Camera1.SetPipelineIndex(V_VisionCameraIndex[E_Cam2]);
+  pc_Camera2.SetPipelineIndex(V_VisionCameraIndex[E_Cam2]);
   m_encoderrightShooter.SetPosition(0);
   m_encoderleftShooter.SetPosition(0);
   }

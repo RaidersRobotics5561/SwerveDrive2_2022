@@ -17,7 +17,7 @@
 
 // all our favorite variables
 double         V_VisionTopCamNumberTemp = 1;
-int            V_VisionBottomIndex = 0;
+int            V_VisionCameraIndex[E_CamSz];
 T_CameraNumber V_VisionCamNumber[E_CamLocSz];
 
 bool           V_VisionTargetAquired[E_CamLocSz];
@@ -58,14 +58,24 @@ void VisionInit(frc::DriverStation::Alliance L_AllianceColor)
     V_VisionCamNumber[E_CamBottom] = E_Cam1;
     }
 
+int            V_VisionCameraIndex[E_CamSz];
+typedef enum T_CameraNumber
+{
+  E_Cam1,
+  E_Cam2,
+  E_CamSz
+} T_CameraNumber;
+
   // gets flag from the driver station to choose between alliance colors
   if (L_AllianceColor == frc::DriverStation::Alliance::kRed)
     {
-    V_VisionBottomIndex = 1; // 1 is the index for a red ball
+    V_VisionCameraIndex[V_VisionCamNumber[E_CamBottom]] = 1; // 1 is the index for a red ball
+    V_VisionCameraIndex[V_VisionCamNumber[E_CamTop]] = 3; // 3 is the top camera targeting index
     }
   else // if (L_AllianceColor == frc::DriverStation::Alliance::kBlue) -> must be either red or blue
     {
-    V_VisionBottomIndex = 2; // 2 is the index for a blue ball
+    V_VisionCameraIndex[V_VisionCamNumber[E_CamBottom]] = 2; // 2 is the index for a blue ball
+    V_VisionCameraIndex[V_VisionCamNumber[E_CamTop]] = 3; // 3 is the top camera targeting index
     }
   }
 
