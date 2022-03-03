@@ -105,7 +105,7 @@ void VisionRun(photonlib::PhotonPipelineResult pc_L_TopResult,
           {
           L_Range = 0_m;
           }
-        V_VisionTargetDistanceMeters[E_CamTop] = L_Range.value();
+        V_VisionTargetDistanceMeters[L_Index] = L_Range.value();
         }
       }
 
