@@ -48,14 +48,24 @@ const double K_SteerMotorCurrentLimit = 25;
 
 // Vision Cals:
 // cals for top target cam
-const units::meter_t K_VisionHeight1 = 0.725_m; // 725 mm to camera lense
-const units::meter_t K_VisionTargetHeight1 = 2.58_m; // bottom of tape to carpet 
-const units::radian_t K_VisionCameraPitch1 = 45_deg; // camera on a 45 degree tilt
+// const units::meter_t K_VisionHeight1 = 0.725_m; // 725 mm to camera lense
+// const units::meter_t K_VisionTargetHeight1 = 2.58_m; // bottom of tape to carpet 
+// const units::radian_t K_VisionCameraPitch1 = 45_deg; // camera on a 45 degree tilt
 
-// cals for bottom ball cam
-const units::meter_t K_VisionHeight2 = 0.367_m;
-const units::meter_t K_VisionTargetHeight2 = .12_m; // radius of the ball in cm
-const units::radian_t K_VisionCameraPitch2 = 50_deg;
+// // cals for bottom ball cam
+// const units::meter_t K_VisionHeight2 = 0.367_m;
+// const units::meter_t K_VisionTargetHeight2 = .12_m; // radius of the ball in cm
+// const units::radian_t K_VisionCameraPitch2 = 50_deg;
+
+const units::meter_t K_VisionHeight[E_CamLocSz] = {0.725_m,  // 725 mm to camera lense  -> top
+                                                   0.367_m}; //                         -> bottom
+
+const units::meter_t K_VisionTargetHeight[E_CamLocSz] = {2.58_m,  // bottom of tape to carpet  -> top
+                                                         0.12_m};  // radius of the ball in cm -> bottom
+
+const units::radian_t K_VisionCameraPitch[E_CamLocSz] = {45_deg,  // camera on a 45 degree tilt  -> top
+                                                         50_deg}; //                             -> bottom
+
 
 
 // Cals / constants for Light Control

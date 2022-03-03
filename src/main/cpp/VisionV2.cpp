@@ -8,6 +8,7 @@
   
  */
 
+#include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/DriverStation.h>
 #include <photonlib/PhotonCamera.h>
 #include <photonlib/PhotonUtils.h>
@@ -15,23 +16,23 @@
 #ifdef VISION2
 
 // all our favorite variables
-bool   V_VisionTopTargetAquired = false;
-double V_VisionTopYaw = 0;
-double V_VisionTopTargetDistanceMeters = 0; // Distance from front of robot to top target
-double V_VisionBottomTargetDistanceMeters = 0;
-bool   V_VisionBottomTargetAquired = false;
-double V_VisionBottomYaw = 0;
-int    V_VisionBottomIndex = 0;
+double         V_VisionTopCamNumberTemp = 1;
+int            V_VisionBottomIndex = 0;
+T_CameraNumber V_VisionCamNumber[E_CamLocSz];
 
+bool           V_VisionTargetAquired[E_CamLocSz];
+double         V_VisionYaw[E_CamLocSz];
+double         V_VisionTargetDistanceMeters[E_CamLocSz];
 
 /******************************************************************************
- * Function:     VisionDashboard
+ * Function:     VisionRobotInit
  *
- * Description:  Initialize vision dashboard.
+ * Description:  Initializes the camera selector at robot init.
  ******************************************************************************/
-void VisionDashboard()
+void VisionRobotInit()
   {
-
+  /* Place an input on the dash.  A value of 1 indicates top camera is cam 1, 2 is camera 2 */
+  frc::SmartDashboard::PutNumber("Top Camera Number", V_VisionTopCamNumberTemp);
   }
 
 
@@ -42,6 +43,19 @@ void VisionDashboard()
  ******************************************************************************/
 void VisionInit(frc::DriverStation::Alliance L_AllianceColor)
   {
+  V_VisionTopCamNumberTemp = frc::SmartDashboard::GetNumber("Top Camera Number", V_VisionTopCamNumberTemp);
+
+  if (fabs(V_VisionTopCamNumberTemp) < 1.5)
+    {
+    V_VisionCamNumber[E_CamTop] = E_Cam1;
+    V_VisionCamNumber[E_CamBottom] = E_Cam2;
+    }
+  else
+    {
+    V_VisionCamNumber[E_CamTop] = E_Cam2;
+    V_VisionCamNumber[E_CamBottom] = E_Cam1;
+    }
+
   // gets flag from the driver station to choose between alliance colors
   if (L_AllianceColor == frc::DriverStation::Alliance::kRed)
     {
@@ -63,48 +77,38 @@ void VisionInit(frc::DriverStation::Alliance L_AllianceColor)
 void VisionRun(photonlib::PhotonPipelineResult pc_L_TopResult,
                photonlib::PhotonPipelineResult pc_L_BottomResult)
   {
-  units::meter_t L_TopRange;
-  photonlib::PhotonTrackedTarget L_TargetTop;
-  photonlib::PhotonTrackedTarget L_TargetBottom;
-  units::meter_t L_BottomRange;
+  T_CameraLocation L_Index = E_CamTop;
+  units::meter_t L_Range = 0_m;
+  photonlib::PhotonTrackedTarget L_Target;
+  photonlib::PhotonPipelineResult pc_L_Result[E_CamSz];
 
-  // Camera 1 - Top Target Detection:
-  V_VisionTopTargetAquired = pc_L_TopResult.HasTargets(); //returns true if the camera has a target  
-
-  if (V_VisionTopTargetAquired == true){
-  L_TargetTop = pc_L_TopResult.GetBestTarget(); //gets the best target  
-
-  V_VisionTopYaw = L_TargetTop.GetYaw(); // Yaw of the best target
+  pc_L_Result[E_Cam1] = pc_L_TopResult;
+  pc_L_Result[E_Cam2] = pc_L_BottomResult;
   
-  if(photonlib::PhotonUtils::CalculateDistanceToTarget(
-        K_VisionHeight1, K_VisionTargetHeight1, K_VisionCameraPitch1,
-        units::degree_t{pc_L_TopResult.GetBestTarget().GetPitch()}).value() > 0){
-
-
-  L_TopRange = photonlib::PhotonUtils::CalculateDistanceToTarget(
-        K_VisionHeight1, K_VisionTargetHeight1, K_VisionCameraPitch1,
-        units::degree_t{pc_L_TopResult.GetBestTarget().GetPitch()}); // first 3 variables are constants from Const.hpp  
-
-
+  for (L_Index = E_CamTop;
+       L_Index < E_CamLocSz;
+       L_Index = T_CameraLocation(int(L_Index) + 1))
+      {
+      V_VisionTargetAquired[L_Index] = pc_L_Result[V_VisionCamNumber[L_Index]].HasTargets(); //returns true if the camera has a target  
+    
+      if (V_VisionTargetAquired[L_Index] == true)
+        {
+        L_Target = pc_L_Result[V_VisionCamNumber[L_Index]].GetBestTarget(); //gets the best target  
+    
+        V_VisionYaw[L_Index] = L_Target.GetYaw(); // Yaw of the best target
+      
+        L_Range = photonlib::PhotonUtils::CalculateDistanceToTarget(
+                     K_VisionHeight[L_Index], K_VisionTargetHeight[L_Index], K_VisionCameraPitch[L_Index],
+                     units::degree_t{pc_L_Result[V_VisionCamNumber[L_Index]].GetBestTarget().GetPitch()}); // first 3 variables are constants from Const.hpp  
+        
+        if (L_Range < 0_m)
+          {
+          L_Range = 0_m;
+          }
+        V_VisionTargetDistanceMeters[E_CamTop] = L_Range.value();
         }
-    V_VisionTopTargetDistanceMeters = L_TopRange.value();
-  } 
-  
-  // second camera for cargo detection
-  V_VisionBottomTargetAquired = pc_L_BottomResult.HasTargets();
+      }
 
-if (V_VisionTopTargetAquired == true){
-  L_TargetBottom = pc_L_BottomResult.GetBestTarget();
-
-  V_VisionBottomYaw = L_TargetBottom.GetYaw();  
-  
-  L_BottomRange = photonlib::PhotonUtils::CalculateDistanceToTarget(
-        K_VisionHeight2, K_VisionTargetHeight2, K_VisionCameraPitch2,
-        units::degree_t{pc_L_BottomResult.GetBestTarget().GetPitch()});
-
-  V_VisionBottomTargetDistanceMeters = L_BottomRange.value(); 
-  } 
-
- 
+  // Set the interfaces used in the other places in software:
   }
 #endif

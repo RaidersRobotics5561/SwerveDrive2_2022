@@ -127,6 +127,20 @@ typedef enum T_RobotState
   E_Teleop
 } T_RobotState;
 
+typedef enum T_CameraNumber
+{
+  E_Cam1,
+  E_Cam2,
+  E_CamSz
+} T_CameraNumber;
+
+typedef enum T_CameraLocation
+{
+  E_CamTop,
+  E_CamBottom,
+  E_CamLocSz
+} T_CameraLocation;
+
 typedef enum T_ADAS_BT_BallTarget /* aka GetDaBalls */
 {
   E_ADAS_BT_Disabled,

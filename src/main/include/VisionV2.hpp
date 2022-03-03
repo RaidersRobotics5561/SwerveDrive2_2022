@@ -7,17 +7,14 @@
    Contains content from vision.
  */
 
-extern bool   V_VisionTopTargetAquired;
-extern double V_VisionTopYaw;
-extern double V_VisionTopTargetDistanceMeters;
-extern double V_VisionBottomTargetDistanceMeters;
-extern bool   V_VisionBottomTargetAquired;
-extern double V_VisionBottomYaw;
 extern int    V_VisionBottomIndex;
+extern bool   V_VisionTargetAquired[E_CamLocSz];
+extern double V_VisionYaw[E_CamLocSz];
+extern double V_VisionTargetDistanceMeters[E_CamLocSz];
+
+void VisionRobotInit();
 
 void VisionInit(frc::DriverStation::Alliance L_AllianceColor);
 
 void VisionRun(photonlib::PhotonPipelineResult pc_L_TopResult,
                photonlib::PhotonPipelineResult pc_L_BottomResult);
-
-void VisionDashboard();

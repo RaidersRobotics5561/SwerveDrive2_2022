@@ -98,11 +98,10 @@ void Robot::RobotInit()
   ADAS_UT_ConfigsInit();
   ADAS_BT_ConfigsInit();
 
+  VisionRobotInit();
   VisionInit(V_AllianceColor);
-
+  pc_Camera1.SetPipelineIndex(V_VisionBottomIndex);
   pc_Camera2.SetPipelineIndex(V_VisionBottomIndex);
-
-  VisionDashboard();
 
 // m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
 // m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
@@ -181,12 +180,12 @@ void Robot::RobotPeriodic()
                                                V_Driver_SwerveGoalAutoCenter,
                                                V_Driver_AutoIntake,
                                                V_GyroYawAngleDegrees,
-                                               V_VisionTopTargetAquired,
-                                               V_VisionTopYaw,
-                                               V_VisionTopTargetDistanceMeters,
-                                               V_VisionBottomTargetAquired,
-                                               V_VisionBottomYaw,
-                                               V_VisionBottomTargetDistanceMeters,
+                                               V_VisionTargetAquired[E_CamTop],
+                                               V_VisionYaw[E_CamTop],
+                                               V_VisionTargetDistanceMeters[E_CamTop],
+                                               V_VisionTargetAquired[E_CamBottom],
+                                               V_VisionYaw[E_CamBottom],
+                                               V_VisionTargetDistanceMeters[E_CamBottom],
                                                V_RobotState,
                                                V_ShooterSpeedCurr,
                                                V_BallDetectedUpper,
@@ -274,12 +273,12 @@ void Robot::RobotPeriodic()
   // frc::SmartDashboard::PutNumber("Front Left Speed Cmnd", m_encoderFrontLeftDrive.GetVelocity());
   frc::SmartDashboard::PutNumber("GYRO",            V_GyroYawAngleDegrees);
 
-  // frc::SmartDashboard::PutBoolean("Top Target?",    V_VisionTopTargetAquired);
-  // frc::SmartDashboard::PutNumber("Top Yaw",         V_VisionTopYaw);
-  // frc::SmartDashboard::PutNumber("Top Distance",    V_VisionTopTargetDistanceMeters);
-  // frc::SmartDashboard::PutNumber("Bottom Range",    V_VisionBottomTargetDistanceMeters);
-  // frc::SmartDashboard::PutBoolean("Bottom Target?", V_VisionBottomTargetAquired);
-  // frc::SmartDashboard::PutNumber("Bottom Yaw",      V_VisionBottomYaw);
+  // frc::SmartDashboard::PutBoolean("Top Target?",    V_VisionTargetAquired[E_CamTop]);
+  // frc::SmartDashboard::PutNumber("Top Yaw",         V_VisionYaw[E_CamTop]);
+  // frc::SmartDashboard::PutNumber("Top Distance",    V_VisionTargetDistanceMeters[E_CamTop]);
+  // frc::SmartDashboard::PutNumber("Bottom Range",    V_VisionTargetDistanceMeters[E_CamBottom]);
+  // frc::SmartDashboard::PutBoolean("Bottom Target?", V_VisionTargetAquired[E_CamBottom]);
+  // frc::SmartDashboard::PutNumber("Bottom Yaw",      V_VisionYaw[E_CamBottom]);
   // frc::SmartDashboard::PutNumber("Bottom Index",    V_VisionBottomIndex); 
 
   // frc::SmartDashboard::PutNumber("ADAS ActiveFeature",     float(V_ADAS_ActiveFeature));
@@ -342,6 +341,7 @@ void Robot::AutonomousInit()
     ADAS_Main_Reset();
     OdometryInit();
     VisionInit(V_AllianceColor);
+    pc_Camera1.SetPipelineIndex(V_VisionBottomIndex);
     pc_Camera2.SetPipelineIndex(V_VisionBottomIndex);
   }
 
@@ -411,6 +411,8 @@ void Robot::TeleopInit()
   LiftControlInit();
   OdometryInit();
   VisionInit(V_AllianceColor);
+  pc_Camera1.SetPipelineIndex(V_VisionBottomIndex);
+  pc_Camera2.SetPipelineIndex(V_VisionBottomIndex);
   m_encoderrightShooter.SetPosition(0);
   m_encoderleftShooter.SetPosition(0);
   }
