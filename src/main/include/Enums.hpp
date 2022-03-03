@@ -147,8 +147,8 @@ typedef enum T_ADAS_UT_UpperTarget
 typedef enum T_ADAS_DM_DriveManuvering
 {
   E_ADAS_DM_Disabled,
-  E_ADAS_DM_DriveStraight,
-  E_ADAS_DM_Rotate
+  E_ADAS_DM_BlindLaunch,
+  E_ADAS_DM_DriveStraight
 } T_ADAS_DM_DriveManuvering;
 
 typedef enum T_ADAS_ActiveFeature
@@ -156,8 +156,7 @@ typedef enum T_ADAS_ActiveFeature
   E_ADAS_Disabled,
   E_ADAS_AutoUpperTarget,
   E_ADAS_AutoBallTarget,
-  E_ADAS_DriveStraight, // Drive straight, robot oriented
-  E_ADAS_Rotate    // Rotate the robot
+  E_ADAS_DriveAndShootBlind    // Drive straight, robot oriented 
 } T_ADAS_ActiveFeature;
 
 #endif

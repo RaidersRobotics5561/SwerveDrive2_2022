@@ -26,6 +26,8 @@ bool V_CameraLightCmndOn = false;
 /* V_VanityLightCmnd: PWM command to be sent to the blinkin controller. */
 double  V_VanityLightCmnd = 0;
 
+bool V_CameraLightLatch = false;
+
 /******************************************************************************
  * Function:     CameraLightControl
  *
@@ -39,6 +41,13 @@ bool CameraLightControl(bool                 L_Driver_CameraLight,
                         bool                 L_ADAS_CameraUpperLightCmndOn)
   {
     bool L_CameraLightCmndOn = false;
+
+    // if ((V_CameraLightLatch == false && L_Driver_CameraLight == true) ||
+    //     ())
+    //   {
+    //   L_CameraLightCmndOn = true;
+    //   V_CameraLightLatch = true;
+    //   }
 
     if (((L_ADAS_ActiveFeature > E_ADAS_Disabled) &&    /* Swerve drive targeting has been requested or is in process */
          (L_ADAS_CameraUpperLightCmndOn == true)) ||
@@ -66,6 +75,7 @@ bool CameraLightControl(bool                 L_Driver_CameraLight,
              (V_CameraLightOnTime >= K_CameraLightMaxOnTime))
       {
         L_CameraLightCmndOn = false; // turn light off, give time to cool down
+        V_CameraLightLatch = false;
 
         V_CameraLightStatus = E_LightForcedOffDueToOvertime;
       }
@@ -73,6 +83,7 @@ bool CameraLightControl(bool                 L_Driver_CameraLight,
       {
       V_CameraLightOnTime = 0;
       L_CameraLightCmndOn = false;
+      V_CameraLightLatch = false;
       V_CameraLightStatus = E_LightTurnedOff;
       }
   

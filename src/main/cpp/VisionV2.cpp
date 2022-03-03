@@ -76,10 +76,17 @@ void VisionRun(photonlib::PhotonPipelineResult pc_L_TopResult,
 
   V_VisionTopYaw = L_TargetTop.GetYaw(); // Yaw of the best target
   
+  if(photonlib::PhotonUtils::CalculateDistanceToTarget(
+        K_VisionHeight1, K_VisionTargetHeight1, K_VisionCameraPitch1,
+        units::degree_t{pc_L_TopResult.GetBestTarget().GetPitch()}).value() > 0){
+
+
   L_TopRange = photonlib::PhotonUtils::CalculateDistanceToTarget(
         K_VisionHeight1, K_VisionTargetHeight1, K_VisionCameraPitch1,
         units::degree_t{pc_L_TopResult.GetBestTarget().GetPitch()}); // first 3 variables are constants from Const.hpp  
 
+
+        }
     V_VisionTopTargetDistanceMeters = L_TopRange.value();
   } 
   

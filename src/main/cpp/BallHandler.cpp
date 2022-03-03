@@ -64,6 +64,8 @@ void BallHandlerMotorConfigsInit(rev::SparkMaxPIDController m_rightShooterpid,
   m_leftShooterpid.SetFF(K_BH_LauncherPID_Gx[E_kFF]);
   m_leftShooterpid.SetOutputRange(K_BH_LauncherPID_Gx[E_kMinOutput], K_BH_LauncherPID_Gx[E_kMaxOutput]);
 
+  KV_ShooterRampRate = K_BH_LauncherPID_Gx[E_kMaxAcc];
+
   #ifdef BallHandlerTest
   T_PID_SparkMaxCal L_Index = E_kP;
 
@@ -74,7 +76,7 @@ void BallHandlerMotorConfigsInit(rev::SparkMaxPIDController m_rightShooterpid,
       V_LauncherPID_Gx[L_Index] = K_BH_LauncherPID_Gx[L_Index];
       }
 
-  KV_ShooterRampRate = V_LauncherPID_Gx[E_kMaxAcc];
+  // KV_ShooterRampRate = V_LauncherPID_Gx[E_kMaxAcc];
   
   // display PID coefficients on SmartDashboard
   frc::SmartDashboard::PutNumber("P Gain", K_BH_LauncherPID_Gx[E_kP]);
@@ -183,12 +185,19 @@ double BallLauncher(bool                 L_DisableShooter,
     L_ShooterSpeedCmndTarget = L_ADAS_RPM_BH_Launcher;
     L_LauncherState = E_LauncherAutoTargetActive;
     }
-  else if (L_ManualShooter >= K_BH_LauncherManualDb)
+  else if (fabs(L_ManualShooter) >= K_BH_LauncherManualDb)
     {
-    L_ShooterSpeedCmndTarget = DtrmnManualLauncherSpeed(L_ManualShooter);
+    if (L_ManualShooter < 0)
+      {
+      L_ShooterSpeedCmndTarget = K_BH_LauncherManualHi;
+      }
+    else
+      {
+      L_ShooterSpeedCmndTarget = K_BH_LauncherManualLo;
+      }
     L_LauncherState = E_LauncherManualActive;
     }
-  
+
   L_ShooterSpeedCmnd = RampTo(L_ShooterSpeedCmndTarget, V_ShooterRPM_CmndPrev, KV_ShooterRampRate);
 
   V_ShooterRPM_CmndPrev = L_ShooterSpeedCmnd;
@@ -224,7 +233,9 @@ double BallLauncher(bool                 L_DisableShooter,
 double BallIntake(bool                 L_DriverIntakeInCmnd,
                   bool                 L_DriverIntakeOutCmnd,
                   T_ADAS_ActiveFeature L_ADAS_ActiveFeature,
-                  double               L_ADAS_Pct_BH_Intake)
+                  double               L_ADAS_Pct_BH_Intake,
+                  bool                 L_LowerBallDetected,
+                  bool                 L_UpperBallDetected)
   {
   double L_IntakeMotorCmnd = 0;
 
@@ -232,7 +243,10 @@ double BallIntake(bool                 L_DriverIntakeInCmnd,
     {
     L_IntakeMotorCmnd = L_ADAS_Pct_BH_Intake;
     }
-  else if (L_DriverIntakeInCmnd == true)
+  else if ((L_DriverIntakeInCmnd == true) && 
+           ((L_LowerBallDetected == true && L_UpperBallDetected == false) ||
+            (L_LowerBallDetected == false && L_UpperBallDetected == true) ||
+            (L_UpperBallDetected == false)))
     {
     L_IntakeMotorCmnd = K_IntakePower;
     }
@@ -254,25 +268,35 @@ double BallIntake(bool                 L_DriverIntakeInCmnd,
  *               ToDo: What do we want to do with the IR sensor?
  ******************************************************************************/
 double BallElevator(bool L_BallDetected,
+                    bool L_BallDetectedLower,
                     bool L_ElevatorCmndUp,
                     bool L_ElevatorCmndDwn,
                     bool L_LauncherTargetSpeedReached,
                     T_ADAS_ActiveFeature L_ADAS_ActiveFeature,
-                    bool L_ADAS_Pct_BH_Elevator)
+                    bool L_ADAS_Pct_BH_Elevator,
+                    bool L_Intake,
+                    double L_LauncherRPM_Cmnd)
   {
     double L_ElevatorPowerCmnd = 0;
 
-    if (L_ADAS_ActiveFeature > E_ADAS_Disabled)
-      {
-      /* ADAS is active, pass through the command: */
-      L_ElevatorPowerCmnd = L_ADAS_Pct_BH_Elevator;
-      }
-    else if(L_ElevatorCmndUp == true)
+    if(((L_ElevatorCmndUp == true) || 
+        (L_Intake == true)) ||
+
+       ((L_ADAS_ActiveFeature > E_ADAS_Disabled) &&
+        (L_ADAS_Pct_BH_Elevator > 0)))
       {
         if ((L_BallDetected == false) ||
-            (L_LauncherTargetSpeedReached == true))
+            ((L_LauncherTargetSpeedReached == true) && (fabs(L_LauncherRPM_Cmnd) > K_BH_LauncherMinCmndSpd)))
           {
-          L_ElevatorPowerCmnd = K_ElevatorPowerUp;
+          if (L_ADAS_ActiveFeature == E_ADAS_Disabled)
+            {
+            L_ElevatorPowerCmnd = K_ElevatorPowerUp;
+            }
+          else
+            {
+            /* ADAS is active and we are meeting the criteria, elevate da ball */
+            L_ElevatorPowerCmnd = L_ADAS_Pct_BH_Elevator;
+            }
           }
       }
     else if(L_ElevatorCmndDwn == true)
@@ -295,6 +319,7 @@ double BallElevator(bool L_BallDetected,
 void BallHandlerControlMain(bool L_IntakeInCmnd,
                             bool L_IntakeOutCmnd,
                             bool L_BallDetected,
+                            bool L_BallDetectedLower,
                             bool L_ElevatorCmndUp,
                             bool L_ElevatorCmndDwn,
                             bool L_DisableShooter,
@@ -323,14 +348,19 @@ void BallHandlerControlMain(bool L_IntakeInCmnd,
     L_IntakePowerCmnd = BallIntake(L_IntakeInCmnd,
                                    L_IntakeOutCmnd,
                                    L_ADAS_ActiveFeature,
-                                   L_ADAS_Pct_BH_Intake);
+                                   L_ADAS_Pct_BH_Intake,
+                                   L_BallDetectedLower,
+                                   L_BallDetected);
     
     L_ElevatorPowerCmnd = BallElevator(L_BallDetected,
+                                       L_BallDetectedLower,
                                        L_ElevatorCmndUp,
                                        L_ElevatorCmndDwn,
                                        V_ShooterTargetSpeedReached,
                                        L_ADAS_ActiveFeature,
-                                       L_ADAS_Pct_BH_Elevator);
+                                       L_ADAS_Pct_BH_Elevator,
+                                       L_IntakeInCmnd,
+                                       L_LauncherRPM);
 
     *L_Intake = L_IntakePowerCmnd;
 

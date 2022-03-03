@@ -47,7 +47,7 @@ void BallDetectionSensor(bool L_IR_SensorDetect,
       L_BallDetected = true;
       }
 
-    if (L_BallSensorLower == true)
+    if (L_BallSensorLower == false)
       {
       L_BallDetectedLower = true;
       }

@@ -24,6 +24,7 @@
 #include "Enums.hpp"
 #include "ADAS_UT.hpp"
 #include "ADAS_BT.hpp"
+#include "ADAS_DM.hpp"
 
 T_ADAS_ActiveFeature V_ADAS_ActiveFeature;
 
@@ -36,6 +37,7 @@ double               V_ADAS_Pct_BH_Elevator = 0;
 bool                 V_ADAS_CameraUpperLightCmndOn = false;
 bool                 V_ADAS_CameraLowerLightCmndOn = false;
 bool                 V_ADAS_SD_RobotOriented = false;
+bool                 V_ADAS_AutonActive = false;
 
 /******************************************************************************
  * Function:     ADAS_Main_Reset
@@ -54,6 +56,7 @@ void ADAS_Main_Reset(void)
   V_ADAS_CameraUpperLightCmndOn = false;
   V_ADAS_CameraLowerLightCmndOn = false;
   V_ADAS_SD_RobotOriented = false;
+  V_ADAS_AutonActive = false;
   }
 
 /******************************************************************************
@@ -92,6 +95,7 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
   {
   T_ADAS_ActiveFeature L_ADAS_ActiveFeaturePrev = L_ADAS_ActiveFeature;
 
+  /* First, let's determine what we are going to do: */
   if (L_RobotState == E_Teleop)
     {
     /* Enable criteria goes here: */
@@ -113,7 +117,11 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
     }
   else if (L_RobotState == E_Auton)
     {
-    L_ADAS_ActiveFeature = E_ADAS_Disabled;  // Need to create Auton!!!
+    if (V_ADAS_AutonActive == false)
+      {
+      L_ADAS_ActiveFeature = E_ADAS_DriveAndShootBlind;
+      V_ADAS_AutonActive = true;
+      }
     }
   else
     {
@@ -126,6 +134,7 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
     /* Hmm, there was a transition, let's go ahead and reset all of the variables before we start: */
     ADAS_UT_Reset();
     ADAS_BT_Reset();
+    ADAS_DM_Reset();
     }
 
   switch (L_ADAS_ActiveFeature)
@@ -166,6 +175,26 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
                                               L_VisionBottomTargetDistanceMeters,
                                               L_RobotState,
                                               L_BallDetected);
+      break;
+      case E_ADAS_DriveAndShootBlind:
+          L_ADAS_ActiveFeature = ADAS_DM_Main(L_Pct_FwdRev,
+                                              L_Pct_Strafe,
+                                              L_Pct_Rotate,
+                                              L_RPM_Launcher,
+                                              L_Pct_Intake,
+                                              L_Pct_Elevator,
+                                              L_CameraUpperLightCmndOn,
+                                              L_CameraLowerLightCmndOn,
+                                              L_SD_RobotOriented,
+                                              L_ADAS_ActiveFeature,
+                                              L_VisionTopTargetAquired,
+                                              L_TopTargetYawDegrees,
+                                              L_VisionTopTargetDistanceMeters,
+                                              L_RobotState,
+                                              L_LauncherRPM_Measured,
+                                              L_BallDetected,
+                                              L_DriverRequestElevatorUp,
+                                              L_DriverRequestElevatorDwn);
       break;
       case E_ADAS_Disabled:
           *L_Pct_FwdRev = 0;

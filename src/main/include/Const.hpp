@@ -4,7 +4,7 @@
 #include <units/length.h>
 
 // Define the desired test state here: COMP (no test), BallHandlerTest, LiftXY_Test, DriveMotorTest, WheelAngleTest, ADAS_UT_Test, ADAS_BT_Test
-#define DriveMotorTest
+#define ADAS_UT_Test
 // Define the version of vision to use: VISION1 VISION2
 #define VISION2
 
@@ -121,7 +121,7 @@ const double K_LiftPID_Gx[E_PID_SparkMaxCalSz] = { 0.1,      // kP
                                                    0.0,      // kFF
                                                    1.0,      // kMaxOutput
                                                   -1.0,      // kMinOutput
-                                                   1.35,     // kMaxVel - 0.93
+                                                   1.10,     // kMaxVel - 0.93
                                                    0.5,      // kMinVel
                                                    0.0,      // kMaxAcc
                                                    0.0};     // kAllErr
@@ -135,7 +135,9 @@ const double K_ElevatorPowerUp = 0.9; // Amount of power to apply to elevator ba
 
 const double K_ElevatorPowerDwn = -0.9; // Amount of power to apply to elevator band when commanded down.  Must be -1 to 0.
 
-/* K_BH_LauncherMinCmndSpd: Min speed for launcher control.  Below this speed, launcher will transition to 0 power. */
+/* K_BH_LauncherMinCmndSpd: Min speed for launcher control.  Below this speed, launcher will transition to 0 power.  Also 
+   acts as the indicator for allowing the elevator to run.  If the commanded launcher speed is above this threshold, then 
+   we will use the upper ball sensor to determine when to allow the elevator to proceed based on launcher RPM deadband.  */
 const double K_BH_LauncherMinCmndSpd = 10;
 
 /* K_BH_LauncherPID_Gx: PID gains for the launcher. */
@@ -178,6 +180,12 @@ const double K_BH_LauncherSpeed[10] = {3300,  // 3 ft
 /* K_BH_LauncherManualDb: Deadband around the manual ball launcher axis. */
 const double K_BH_LauncherManualDb = 0.1;
 
+/* K_BH_LauncherManualHi: Manual speed single point. */
+const double K_BH_LauncherManualHi = 4600;
+
+/* K_BH_LauncherManualLo: Manual speed single point. */
+const double K_BH_LauncherManualLo = 3500;
+
 /* K_BH_LauncherManualSpeed: Manual launcher speed control values. */
 const double K_BH_LauncherManualSpeed[5] = {0,
                                             3300,
@@ -216,9 +224,9 @@ const double K_SD_WheelOffsetAngle[E_RobotCornerSz] = {169.527239,   // E_FrontL
                                                        246.813891};  // E_RearRight 
 
 /* K_SD_WheelGx: Gain multiplied by each calculated desired speed.  Intended to account for variation in wheel size. */
-const double K_SD_WheelGx[E_RobotCornerSz] = {0.94,   // E_FrontLeft
-                                              0.99,   // E_FrontRight 
-                                              0.94,   // E_RearLeft
+const double K_SD_WheelGx[E_RobotCornerSz] = {1.0,   // E_FrontLeft
+                                              1.0,   // E_FrontRight 
+                                              1.0,   // E_RearLeft
                                               1.0};  // E_RearRight 
 
 /* K_SD_MinGain: Min gain applied to the wheel speed for swerve drive. */
@@ -231,7 +239,7 @@ const double K_SD_MaxGain = 0.75;
 const double K_SD_AutoRotateGx = 0.1;
 
 /* K_SD_WheelMaxSpeed: Max in/sec speed of the swerve drive wheel.*/
-const double K_SD_WheelMaxSpeed = 1500; // 7
+const double K_SD_WheelMaxSpeed = 6000;
 
 /* K_SD_WheelMinCmndSpeed: Min in/sec speed of the swerve drive wheel to keep it under PID control.  
   If the absolute value of the command, wheels will transition to 0 power (but still in brake 
@@ -239,9 +247,9 @@ const double K_SD_WheelMaxSpeed = 1500; // 7
 const double K_SD_WheelMinCmndSpeed = 0.2;
 
 /* K_SD_WheelSpeedPID_V2_Gx: PID gains for the driven wheels that is within the motor controllers. */
-const double K_SD_WheelSpeedPID_V2_Gx[E_PID_SparkMaxCalSz] = { 0.000002,  // kP 0.000420
+const double K_SD_WheelSpeedPID_V2_Gx[E_PID_SparkMaxCalSz] = { 0.000350,  // kP
                                                                0.000001, // kI
-                                                               0.000003,   // kD  0.000001
+                                                               0.000001,   // kD
                                                                0.0,      // kIz
                                                                0.0,      // kFF
                                                                1.0,      // kMaxOutput
@@ -250,19 +258,6 @@ const double K_SD_WheelSpeedPID_V2_Gx[E_PID_SparkMaxCalSz] = { 0.000002,  // kP 
                                                                0.0,      // kMinVel
                                                               150.0,      // kMaxAcc
                                                                0.0};     // kAllErr
-
-/* K_SD_WheelSpeedPID_Gx: PID gains for the driven wheels.   PID control is within the RoboRio.  */
-double const K_SD_WheelSpeedPID_Gx[E_PID_CalSz] = { 0.009,     // P Gx
-                                                    0.0009,     // I Gx
-                                                    0.00000005, // D Gx
-                                                    1.0,        // P UL
-                                                   -1.0,        // P LL
-                                                    0.5,        // I UL
-                                                   -0.5,        // I LL
-                                                    0.2,        // D UL
-                                                   -0.2,        // D LL
-                                                    1.0,        // Max upper
-                                                   -1.0};       // Max lower
 
 /* K_SD_WheelAnglePID_Gx: PID gains for the angle of the swerve drive wheels.  PID control is within the RoboRio.  */
 const double K_SD_WheelAnglePID_Gx[E_PID_CalSz] = { 0.007,     // P Gx
@@ -396,6 +391,21 @@ const double K_ADAS_BT_TimedOutDriveForward = 1.0;
 /* K_ADAS_BT_DriveForwardPct: This is the percent of swerve drive control to go forward to pickup the ball. */
 const double K_ADAS_BT_DriveForwardPct = 0.8;
 
+
+/* K_ADAS_DM_BlindShotTime: This is the amount of time to remain in blind shoot. [Seconds] */
+const double K_ADAS_DM_BlindShotTime = 4.0;
+
+/* K_ADAS_DM_BlindShotElevator: This is the amount of time to remain in blind shoot. [Seconds] */
+const double K_ADAS_DM_BlindShotElevator = 0.7;
+
+/* K_ADAS_DM_BlindShotLauncher: This is the speed the launcher will be shot at while in shoot. [RPM] */
+const double K_ADAS_DM_BlindShotLauncher = 3300;
+
+/* K_ADAS_DM_DriveTime: This is the default drive forward time. [Seconds] */
+const double K_ADAS_DM_DriveTime = 4.0;
+
+/* K_ADAS_DM_DriveFWD_Pct: This is the default drive forward Pct. [Pct] */
+const double K_ADAS_DM_DriveFWD_Pct = 1.0;
 
 
 /*  Rotation calibrations */

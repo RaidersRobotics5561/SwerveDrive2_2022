@@ -28,6 +28,7 @@
 #include "ADAS.hpp"
 #include "ADAS_BT.hpp"
 #include "ADAS_UT.hpp"
+#include "ADAS_DM.hpp"
 
 T_RobotState                 V_RobotState        = E_Init;
 frc::DriverStation::Alliance V_AllianceColor     = frc::DriverStation::Alliance::kInvalid;
@@ -214,6 +215,7 @@ void Robot::RobotPeriodic()
     BallHandlerControlMain( V_Driver_intake_in,
                           V_Driver_intake_out,
                           V_BallDetectedUpper,
+                          V_BallDetectedLower,
                           V_Driver_elevator_up,
                           V_Driver_elevator_down,
                           V_Driver_StopShooterAutoClimbResetGyro,
@@ -265,35 +267,35 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutNumber("Lift postition YD", V_LiftPostitionYD);
   frc::SmartDashboard::PutNumber("Lift postition XD", V_LiftPostitionXD);
 
-  frc::SmartDashboard::PutNumber("V_b_DriveStraight", V_b_DriveStraight);
-  frc::SmartDashboard::PutNumber("V_RotateErrorCalc", V_RotateErrorCalc);
-  frc::SmartDashboard::PutNumber("Speed Cmnd",        V_ShooterRPM_Cmnd);
-  frc::SmartDashboard::PutNumber("Launcher Speed",    V_ShooterSpeedCurr);
-  frc::SmartDashboard::PutNumber("Front Left Speed Cmnd", m_encoderFrontLeftDrive.GetVelocity());
+  // frc::SmartDashboard::PutNumber("V_b_DriveStraight", V_b_DriveStraight);
+  // frc::SmartDashboard::PutNumber("V_RotateErrorCalc", V_RotateErrorCalc);
+  frc::SmartDashboard::PutNumber("Launcher Speed Cmnd",      V_ShooterRPM_Cmnd);
+  frc::SmartDashboard::PutNumber("Launcher Speed Actual",    V_ShooterSpeedCurr);
+  // frc::SmartDashboard::PutNumber("Front Left Speed Cmnd", m_encoderFrontLeftDrive.GetVelocity());
   frc::SmartDashboard::PutNumber("GYRO",            V_GyroYawAngleDegrees);
 
-  frc::SmartDashboard::PutBoolean("Top Target?",    V_VisionTopTargetAquired);
-  frc::SmartDashboard::PutNumber("Top Yaw",         V_VisionTopYaw);
-  frc::SmartDashboard::PutNumber("Top Distance",    V_VisionTopTargetDistanceMeters);
-  frc::SmartDashboard::PutNumber("Bottom Range",    V_VisionBottomTargetDistanceMeters);
-  frc::SmartDashboard::PutBoolean("Bottom Target?", V_VisionBottomTargetAquired);
-  frc::SmartDashboard::PutNumber("Bottom Yaw",      V_VisionBottomYaw);
-  frc::SmartDashboard::PutNumber("Bottom Index",    V_VisionBottomIndex); 
+  // frc::SmartDashboard::PutBoolean("Top Target?",    V_VisionTopTargetAquired);
+  // frc::SmartDashboard::PutNumber("Top Yaw",         V_VisionTopYaw);
+  // frc::SmartDashboard::PutNumber("Top Distance",    V_VisionTopTargetDistanceMeters);
+  // frc::SmartDashboard::PutNumber("Bottom Range",    V_VisionBottomTargetDistanceMeters);
+  // frc::SmartDashboard::PutBoolean("Bottom Target?", V_VisionBottomTargetAquired);
+  // frc::SmartDashboard::PutNumber("Bottom Yaw",      V_VisionBottomYaw);
+  // frc::SmartDashboard::PutNumber("Bottom Index",    V_VisionBottomIndex); 
 
-  frc::SmartDashboard::PutNumber("ADAS ActiveFeature",     float(V_ADAS_ActiveFeature));
-  frc::SmartDashboard::PutNumber("ADAS SD_FwdRev",               V_ADAS_Pct_SD_FwdRev);
-  frc::SmartDashboard::PutNumber("ADAS SD_Strafe",               V_ADAS_Pct_SD_Strafe);
-  frc::SmartDashboard::PutNumber("ADAS SD_Rotate",               V_ADAS_Pct_SD_Rotate);
-  frc::SmartDashboard::PutNumber("ADAS RPM_BH_Launcher",         V_ADAS_RPM_BH_Launcher);
-  frc::SmartDashboard::PutNumber("ADAS BH_Intake",               V_ADAS_Pct_BH_Intake);
-  frc::SmartDashboard::PutNumber("ADAS BH_Elevator",             V_ADAS_Pct_BH_Elevator);
-  frc::SmartDashboard::PutBoolean("ADAS CameraUpperLightCmndOn", V_ADAS_CameraUpperLightCmndOn);
-  frc::SmartDashboard::PutBoolean("ADAS CameraLowerLightCmndOn", V_ADAS_CameraLowerLightCmndOn);
-  frc::SmartDashboard::PutBoolean("ADAS SD_RobotOriented",       V_ADAS_SD_RobotOriented);
+  // frc::SmartDashboard::PutNumber("ADAS ActiveFeature",     float(V_ADAS_ActiveFeature));
+  // frc::SmartDashboard::PutNumber("ADAS SD_FwdRev",               V_ADAS_Pct_SD_FwdRev);
+  // frc::SmartDashboard::PutNumber("ADAS SD_Strafe",               V_ADAS_Pct_SD_Strafe);
+  // frc::SmartDashboard::PutNumber("ADAS SD_Rotate",               V_ADAS_Pct_SD_Rotate);
+  // frc::SmartDashboard::PutNumber("ADAS RPM_BH_Launcher",         V_ADAS_RPM_BH_Launcher);
+  // frc::SmartDashboard::PutNumber("ADAS BH_Intake",               V_ADAS_Pct_BH_Intake);
+  // frc::SmartDashboard::PutNumber("ADAS BH_Elevator",             V_ADAS_Pct_BH_Elevator);
+  // frc::SmartDashboard::PutBoolean("ADAS CameraUpperLightCmndOn", V_ADAS_CameraUpperLightCmndOn);
+  // frc::SmartDashboard::PutBoolean("ADAS CameraLowerLightCmndOn", V_ADAS_CameraLowerLightCmndOn);
+  // frc::SmartDashboard::PutBoolean("ADAS SD_RobotOriented",       V_ADAS_SD_RobotOriented);
 
-  frc::SmartDashboard::PutBoolean("SD Drive Wheels In PID",      V_SD_DriveWheelsInPID);
+  // frc::SmartDashboard::PutBoolean("SD Drive Wheels In PID",      V_SD_DriveWheelsInPID);
 
-  frc::SmartDashboard::PutNumber("JoystickY",               V_Driver_SwerveSpeed);
+  // frc::SmartDashboard::PutNumber("JoystickY",               V_Driver_SwerveSpeed);
   
   // frc::SmartDashboard::PutNumber("Lift YD S0",  V_LiftMotorYD_MaxCurrent[E_S0_BEGONE]);
   // frc::SmartDashboard::PutNumber("Lift YD S2",  V_LiftMotorYD_MaxCurrent[E_S2_lift_down_YD]);
