@@ -337,7 +337,7 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
     /* ADAS is active, pass throught the commands: */
       L_FWD = -L_ADAS_Pct_SD_FwdRev;
       L_STR = -L_ADAS_Pct_SD_Strafe;
-      L_RCW = L_ADAS_Pct_SD_Rotate;
+      L_RCW = -L_ADAS_Pct_SD_Rotate;
 
       if (L_ADAS_SD_RobotOriented == true)
         {

@@ -241,7 +241,13 @@ double BallIntake(bool                 L_DriverIntakeInCmnd,
 
   if (L_ADAS_ActiveFeature > E_ADAS_Disabled)
     {
-    L_IntakeMotorCmnd = L_ADAS_Pct_BH_Intake;
+    if ((L_ADAS_Pct_BH_Intake > 0) && 
+        ((L_LowerBallDetected == true && L_UpperBallDetected == false) ||
+         (L_LowerBallDetected == false && L_UpperBallDetected == true) ||
+         (L_UpperBallDetected == false)))
+         {
+         L_IntakeMotorCmnd = L_ADAS_Pct_BH_Intake;
+         }
     }
   else if ((L_DriverIntakeInCmnd == true) && 
            ((L_LowerBallDetected == true && L_UpperBallDetected == false) ||

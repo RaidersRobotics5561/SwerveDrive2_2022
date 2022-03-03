@@ -347,8 +347,8 @@ const double K_ADAS_UT_DebounceTime = 0.080;
 /* K_ADAS_UT_AllowedLauncherError - Amount of error allowed in launcher speed before attempting to launch balls. [RPM] */
 const double K_ADAS_UT_AllowedLauncherError = 100;
 
-/* K_ADAS_UT_AllowedLauncherTime - Amount of time to remain in auto elevator mode.  For auton only. [Seconds] */
-const double K_ADAS_UT_AllowedLauncherTime = 5;
+/* K_ADAS_UT_AllowedLauncherTime - Amount of time to remain in auto elevator mode.  For auton only.  Each time a ball is detected, this timer will reset. [Seconds] */
+const double K_ADAS_UT_AllowedLauncherTime = 2;
 
 /* K_ADAS_UT_RotateDeadbandAngle: Deadband angle for upper targeting */
 const double K_ADAS_UT_RotateDeadbandAngle = 0.5;

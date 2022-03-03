@@ -351,8 +351,7 @@ T_ADAS_UT_UpperTarget ADAS_UT_ElevatorControl(double       *L_Pct_FwdRev,
       *L_Pct_Intake = 0;
       *L_Pct_Elevator = K_ElevatorPowerDwn;
       }
-    else if ((L_BallDetected == false) ||
-             (L_LauncherError <= KV_ADAS_UT_AllowedLauncherError))
+    else if (L_DriverRequestElevatorUp == true)
       {
       *L_Pct_Intake = K_IntakePower;
       *L_Pct_Elevator = K_ElevatorPowerUp;
@@ -371,25 +370,24 @@ T_ADAS_UT_UpperTarget ADAS_UT_ElevatorControl(double       *L_Pct_FwdRev,
        the elevator to move up.*/
     V_ADAS_UT_DebounceTime += C_ExeTime;
 
-    if (((L_BallDetected == false) ||
-         (L_LauncherError <= KV_ADAS_UT_AllowedLauncherError)) &&
+    if (L_BallDetected == true)
+      {
+      /* Reset the timer each time we detect a ball: */
+      V_ADAS_UT_DebounceTime = 0;
+      }
 
-        (V_ADAS_UT_DebounceTime < KV_ADAS_UT_AllowedLauncherTime))
+    if (V_ADAS_UT_DebounceTime < KV_ADAS_UT_AllowedLauncherTime)
       {
       *L_Pct_Intake = K_IntakePower;
       *L_Pct_Elevator = K_ElevatorPowerUp;
       }
-    else
-      {
-      *L_Pct_Intake = 0;
-      *L_Pct_Elevator = 0;
-      }
-
-    if (V_ADAS_UT_DebounceTime >= KV_ADAS_UT_AllowedLauncherTime)
+    else // V_ADAS_UT_DebounceTime >= KV_ADAS_UT_AllowedLauncherTime
       {
       /* Once time has expired, exit elevator control */
       L_ADAS_UT_State = E_ADAS_UT_Disabled;
       V_ADAS_UT_DebounceTime = 0;
+      *L_Pct_Intake = 0;
+      *L_Pct_Elevator = 0;
       }
     }
 
