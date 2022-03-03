@@ -31,7 +31,8 @@ double         V_VisionTargetDistanceMeters[E_CamLocSz];
  ******************************************************************************/
 void VisionRobotInit()
   {
-  /* Place an input on the dash.  A value of 1 indicates top camera is cam 1, 2 is camera 2 */
+  /* Place an input on the dash.  A value of 1 indicates top camera is cam 1, 
+     otherwise it is camera 2 */
   frc::SmartDashboard::PutNumber("Top Camera Number", V_VisionTopCamNumberTemp);
   }
 
@@ -43,6 +44,7 @@ void VisionRobotInit()
  ******************************************************************************/
 void VisionInit(frc::DriverStation::Alliance L_AllianceColor)
   {
+  /* Check the driver station for what the top camera number should be: */
   V_VisionTopCamNumberTemp = frc::SmartDashboard::GetNumber("Top Camera Number", V_VisionTopCamNumberTemp);
 
   if (fabs(V_VisionTopCamNumberTemp) < 1.5)
@@ -108,7 +110,5 @@ void VisionRun(photonlib::PhotonPipelineResult pc_L_TopResult,
         V_VisionTargetDistanceMeters[L_Index] = L_Range.value();
         }
       }
-
-  // Set the interfaces used in the other places in software:
   }
 #endif
