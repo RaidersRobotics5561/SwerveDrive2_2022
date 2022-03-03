@@ -58,14 +58,6 @@ void VisionInit(frc::DriverStation::Alliance L_AllianceColor)
     V_VisionCamNumber[E_CamBottom] = E_Cam1;
     }
 
-int            V_VisionCameraIndex[E_CamSz];
-typedef enum T_CameraNumber
-{
-  E_Cam1,
-  E_Cam2,
-  E_CamSz
-} T_CameraNumber;
-
   // gets flag from the driver station to choose between alliance colors
   if (L_AllianceColor == frc::DriverStation::Alliance::kRed)
     {
