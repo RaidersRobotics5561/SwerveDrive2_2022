@@ -17,6 +17,7 @@ extern double V_LiftXD_TestPowerCmnd;
 extern double V_LiftMotorYD_MaxCurrent[E_Lift_State_Sz];
 extern double V_LiftMotorXD_MaxCurrent[E_Lift_State_Sz];
 extern bool   V_Lift_WaitingForDriverINS;
+extern bool   V_LiftInitialized;
 
 void LiftMotorConfigsCal(rev::SparkMaxPIDController m_liftpidYD,
                          rev::SparkMaxPIDController m_liftpidXD);
@@ -43,6 +44,12 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_auto_climb_butto
                                    double              L_lift_measured_position_XD,
                                    double             *L_lift_command_YD,
                                    double             *L_lift_command_XD,
+                                   double             *L_Lift_CommandPwr_YD,
+                                   double             *L_Lift_CommandPwr_XD,
+                                   bool                L_YD_LimitDetected,
+                                   bool                L_XD_LimitDetected,
                                    double              L_gyro_yawangledegrees,
                                    double              L_liftMotorYD_CurrentOut,
-                                   double              L_liftMotorXD_CurrentOut);
+                                   double              L_liftMotorXD_CurrentOut,
+                                   rev::SparkMaxRelativeEncoder m_encoderLiftYD,
+                                   rev::SparkMaxRelativeEncoder m_encoderLiftXD);

@@ -79,6 +79,19 @@ void EncodersInit(rev::SparkMaxRelativeEncoder m_encoderFrontRightSteer,
   }
 
 /******************************************************************************
+ * Function:     EncodersInit
+ *
+ * Description:  Initialize all of the applicable encoder variables.
+ ******************************************************************************/
+void EncodersLiftInit(rev::SparkMaxRelativeEncoder m_encoderLiftYD,
+                      rev::SparkMaxRelativeEncoder m_encoderLiftXD)
+  {
+    m_encoderLiftYD.SetPosition(0);
+    m_encoderLiftXD.SetPosition(0);
+  }
+
+
+/******************************************************************************
  * Function:     Read_Encoders
  *
  * Description:  Run all of the encoder decoding logic.

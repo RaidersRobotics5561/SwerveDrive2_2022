@@ -16,11 +16,13 @@
 #include "Lookup.hpp"
 #include "Lift_sub_functions.hpp"
 #include "Driver_inputs.hpp"
+#include "Encoders.hpp"
 
 T_Lift_State V_Lift_state = E_S0_BEGONE;
 int    V_lift_counter = 0;
 double V_LiftDebounceTimer = 0; // owo, because Chloe
 bool   V_criteria_met = false;
+bool   V_LiftInitialized = false;
 
 double V_lift_command_YD = 0;
 double V_lift_command_XD = 0;
@@ -175,6 +177,8 @@ void LiftControlInit()
 
   V_Lift_WaitingForDriverINS = false;
 
+  V_LiftInitialized = false;
+
   for (L_Index = E_S0_BEGONE;
        L_Index < E_Lift_State_Sz;
        L_Index = T_Lift_State(int(L_Index) + 1))
@@ -268,21 +272,52 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_auto_climb_butto
                                    double              L_lift_measured_position_XD,
                                    double             *L_lift_command_YD,
                                    double             *L_lift_command_XD,
+                                   double             *L_Lift_CommandPwr_YD,
+                                   double             *L_Lift_CommandPwr_XD,
+                                   bool                L_YD_LimitDetected,
+                                   bool                L_XD_LimitDetected,
                                    double              L_gyro_yawangledegrees,
                                    double              L_liftMotorYD_CurrentOut,
-                                   double              L_liftMotorXD_CurrentOut)
+                                   double              L_liftMotorXD_CurrentOut,
+                                   rev::SparkMaxRelativeEncoder m_encoderLiftYD,
+                                   rev::SparkMaxRelativeEncoder m_encoderLiftXD)
   {
   T_Lift_State L_Commanded_State = L_current_state;
   double L_lift_command_YD_Temp = 0;
   double L_lift_command_XD_Temp = 0;
   double L_lift_command_rate_YD = KV_LiftMotorXDYD_MaxRampRate;
   double L_lift_command_rate_XD = KV_LiftMotorXDYD_MaxRampRate;
+  double L_LiftYD_Power = 0;
+  double L_LiftXD_Power = 0;
 
   if (V_LiftXY_Test == true)
     {
     /* Only used for testing. */
     L_lift_command_YD_Temp = V_LiftYD_TestLocation;
     L_lift_command_XD_Temp = V_LiftXD_TestLocation;
+    }
+  else if (V_LiftInitialized == false)
+    {
+    if (L_YD_LimitDetected == false)
+      {
+      L_LiftYD_Power = K_lift_autoResetDown_YD;
+      }
+
+    if (L_XD_LimitDetected == false)
+      {
+      L_LiftXD_Power = K_lift_driver_manual_back_XD;
+      }
+    
+    if (L_YD_LimitDetected == true && 
+        L_XD_LimitDetected == true)
+      {
+      L_LiftYD_Power = 0;
+      L_LiftXD_Power = 0;
+      V_LiftInitialized = true;
+
+      EncodersLiftInit(m_encoderLiftYD,
+                       m_encoderLiftXD);
+      }
     }
   else if ((L_driver_auto_climb_pause == true) && (V_Lift_Paused == false))
     {
@@ -429,6 +464,10 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_auto_climb_butto
   *L_lift_command_YD= RampTo(L_lift_command_YD_Temp, *L_lift_command_YD, L_lift_command_rate_YD);
 
   *L_lift_command_XD= RampTo(L_lift_command_XD_Temp, *L_lift_command_XD, L_lift_command_rate_XD);
+
+  *L_Lift_CommandPwr_YD = L_LiftYD_Power;
+  
+  *L_Lift_CommandPwr_XD = L_LiftXD_Power;
 
   RecordLiftMotorMaxCurrent(L_current_state,
                             L_liftMotorYD_CurrentOut,

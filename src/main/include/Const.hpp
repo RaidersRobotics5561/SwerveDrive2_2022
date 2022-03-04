@@ -105,6 +105,7 @@ const double K_lift_driver_up_rate_YD = 1.2; // This is the amount of traversal 
 const double K_lift_driver_down_rate_YD = 0.3; // This is the amount of traversal added per loop (0.02 sec)
 const double K_lift_driver_manual_up_YD = 0.25; // Manual override power
 const double K_lift_driver_manual_down_YD = -0.25; // Manual override power
+const double K_lift_autoResetDown_YD = -0.20; // Auto reset power
 
 const double K_lift_S3_XD = 30; //move XD onto the rungs
 const double K_lift_S4_XD = 30; //stays the same

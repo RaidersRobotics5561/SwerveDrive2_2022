@@ -32,6 +32,9 @@
                    rev::SparkMaxRelativeEncoder m_encoderLiftYD,
                    rev::SparkMaxRelativeEncoder m_encoderLiftXD);
 
+void EncodersLiftInit(rev::SparkMaxRelativeEncoder m_encoderLiftYD,
+                      rev::SparkMaxRelativeEncoder m_encoderLiftXD);
+                      
 void EncodersInit(rev::SparkMaxRelativeEncoder m_encoderFrontRightSteer,
                   rev::SparkMaxRelativeEncoder m_encoderFrontLeftSteer,
                   rev::SparkMaxRelativeEncoder m_encoderRearRightSteer,

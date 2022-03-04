@@ -241,6 +241,25 @@ void Robot::RobotPeriodic()
   VisionRun(pc_Camera1.GetLatestResult(),
             pc_Camera2.GetLatestResult());
 
+  V_Lift_state = Lift_Control_Dictator(V_Driver_lift_control,
+                                       V_Driver_StopShooterAutoClimbResetGyro,
+                                       V_Driver_Lift_Cmnd_Direction,
+                                       V_MatchTimeRemaining,
+                                       V_Lift_state,
+                                       V_LiftPostitionYD,
+                                       V_LiftPostitionXD,
+                                       &V_lift_command_YD,
+                                       &V_lift_command_XD,
+                                       &V_LiftYD_TestPowerCmnd,
+                                       &V_LiftXD_TestPowerCmnd,
+                                       V_YD_LimitDetected,
+                                       V_XD_LimitDetected,
+                                       V_GyroYawAngleDegrees,
+                                       m_liftMotorYD.GetOutputCurrent(),
+                                       m_liftMotorXD.GetOutputCurrent(),
+                                       m_encoderLiftYD,
+                                       m_encoderLiftXD);
+
   /* These function calls are for test mode calibration. */
   SwerveDriveMotorConfigsCal(m_frontLeftDrivePID,
                              m_frontRightDrivePID,
@@ -389,8 +408,16 @@ void Robot::AutonomousPeriodic()
     m_intake.Set(ControlMode::PercentOutput, V_IntakePowerCmnd); //must be positive (don't be a fool)
     m_elevator.Set(ControlMode::PercentOutput, V_ElevatorPowerCmnd);
 
-    m_liftpidYD.SetReference(0, rev::ControlType::kPosition); // Hold at 0 position while in auton
-    m_liftpidXD.SetReference(0, rev::ControlType::kPosition); // Hold at 0 position while in auton
+  if (V_LiftInitialized == false)
+    {
+    m_liftMotorYD.Set(V_LiftYD_TestPowerCmnd);
+    m_liftMotorXD.Set(V_LiftXD_TestPowerCmnd);
+    }
+  else
+    {
+    m_liftpidYD.SetReference(V_lift_command_YD, rev::ControlType::kPosition); // positive is up
+    m_liftpidXD.SetReference(V_lift_command_XD, rev::ControlType::kPosition); // This is temporary.  We actually want to use position, but need to force this off temporarily
+    }
   }
 
 
@@ -411,7 +438,7 @@ void Robot::TeleopInit()
   LiftControlInit();
   OdometryInit();
   VisionInit(V_AllianceColor);
-  pc_Camera1.SetPipelineIndex(V_VisionCameraIndex[E_Cam2]);
+  pc_Camera1.SetPipelineIndex(V_VisionCameraIndex[E_Cam1]);
   pc_Camera2.SetPipelineIndex(V_VisionCameraIndex[E_Cam2]);
   m_encoderrightShooter.SetPosition(0);
   m_encoderleftShooter.SetPosition(0);
@@ -425,19 +452,6 @@ void Robot::TeleopInit()
  ******************************************************************************/
 void Robot::TeleopPeriodic()
   {
-  V_Lift_state = Lift_Control_Dictator(V_Driver_lift_control,
-                                       V_Driver_StopShooterAutoClimbResetGyro,
-                                       V_Driver_Lift_Cmnd_Direction,
-                                       V_MatchTimeRemaining,
-                                       V_Lift_state,
-                                       V_LiftPostitionYD,
-                                       V_LiftPostitionXD,
-                                       &V_lift_command_YD,
-                                       &V_lift_command_XD,
-                                       V_GyroYawAngleDegrees,
-                                       m_liftMotorYD.GetOutputCurrent(),
-                                       m_liftMotorXD.GetOutputCurrent());
-
   // Motor output commands:
   if (V_SD_DriveWheelsInPID == true)
     {
@@ -473,9 +487,17 @@ void Robot::TeleopPeriodic()
     m_intake.Set(ControlMode::PercentOutput, V_IntakePowerCmnd); //must be positive (don't be a fool)
     m_elevator.Set(ControlMode::PercentOutput, V_ElevatorPowerCmnd);
 
+  if (V_LiftInitialized == false)
+    {
+    m_liftMotorYD.Set(V_LiftYD_TestPowerCmnd);
+    m_liftMotorXD.Set(V_LiftXD_TestPowerCmnd);
+    }
+  else
+    {
     m_liftpidYD.SetReference(V_lift_command_YD, rev::ControlType::kPosition); // positive is up
     m_liftpidXD.SetReference(V_lift_command_XD, rev::ControlType::kPosition); // This is temporary.  We actually want to use position, but need to force this off temporarily
-}
+    }
+  }
 
 
 /******************************************************************************
