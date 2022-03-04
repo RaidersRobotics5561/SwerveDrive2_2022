@@ -295,10 +295,13 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutBoolean("Top Target?",    V_VisionTargetAquired[E_CamTop]);
   frc::SmartDashboard::PutNumber("Top Yaw",         V_VisionYaw[E_CamTop]);
   frc::SmartDashboard::PutNumber("Top Distance",    V_VisionTargetDistanceMeters[E_CamTop]);
+    frc::SmartDashboard::PutNumber("Cam1 Index",    float(V_VisionCameraIndex[E_Cam1]));
   // frc::SmartDashboard::PutNumber("Bottom Range",    V_VisionTargetDistanceMeters[E_CamBottom]);
-  // frc::SmartDashboard::PutBoolean("Bottom Target?", V_VisionTargetAquired[E_CamBottom]);
+  frc::SmartDashboard::PutBoolean("Bottom Target?", V_VisionTargetAquired[E_CamBottom]);
   // frc::SmartDashboard::PutNumber("Bottom Yaw",      V_VisionYaw[E_CamBottom]);
-  // frc::SmartDashboard::PutNumber("Bottom Index",    V_VisionCameraIndex[V_VisionCamNumber[E_CamBottom]]); 
+  frc::SmartDashboard::PutNumber("Cam2 Index",    float(V_VisionCameraIndex[E_Cam2])); 
+frc::SmartDashboard::PutNumber("V_VisionTopCamNumberTemp", V_VisionTopCamNumberTemp);
+
 
   // frc::SmartDashboard::PutNumber("ADAS ActiveFeature",     float(V_ADAS_ActiveFeature));
   // frc::SmartDashboard::PutNumber("ADAS SD_FwdRev",               V_ADAS_Pct_SD_FwdRev);

@@ -61,13 +61,13 @@ void VisionInit(frc::DriverStation::Alliance L_AllianceColor)
   // gets flag from the driver station to choose between alliance colors
   if (L_AllianceColor == frc::DriverStation::Alliance::kRed)
     {
-    V_VisionCameraIndex[V_VisionCamNumber[E_CamBottom]] = 1; // 1 is the index for a red ball
-    V_VisionCameraIndex[V_VisionCamNumber[E_CamTop]] = 3; // 3 is the top camera targeting index
+    V_VisionCameraIndex[V_VisionCamNumber[E_CamBottom]] = 2; // 2 is the index for a red ball
+    V_VisionCameraIndex[V_VisionCamNumber[E_CamTop]] = 1; // 1 is the top camera targeting index
     }
   else // if (L_AllianceColor == frc::DriverStation::Alliance::kBlue) -> must be either red or blue
     {
-    V_VisionCameraIndex[V_VisionCamNumber[E_CamBottom]] = 2; // 2 is the index for a blue ball
-    V_VisionCameraIndex[V_VisionCamNumber[E_CamTop]] = 3; // 3 is the top camera targeting index
+    V_VisionCameraIndex[V_VisionCamNumber[E_CamBottom]] = 3; // 3 is the index for a blue ball
+    V_VisionCameraIndex[V_VisionCamNumber[E_CamTop]] = 1; // 1 is the top camera targeting index
     }
   }
 

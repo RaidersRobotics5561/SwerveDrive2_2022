@@ -4,7 +4,7 @@
 #include <units/length.h>
 
 // Define the desired test state here: COMP (no test), BallHandlerTest, LiftXY_Test, DriveMotorTest, WheelAngleTest, ADAS_UT_Test, ADAS_BT_Test
-#define ADAS_UT_Test
+#define COMP
 // Define the version of vision to use: VISION1 VISION2
 #define VISION2
 
@@ -271,13 +271,13 @@ const double K_SD_WheelSpeedPID_V2_Gx[E_PID_SparkMaxCalSz] = { 0.000350,  // kP
                                                                0.0};     // kAllErr
 
 /* K_SD_WheelAnglePID_Gx: PID gains for the angle of the swerve drive wheels.  PID control is within the RoboRio.  */
-const double K_SD_WheelAnglePID_Gx[E_PID_CalSz] = { 0.007,     // P Gx
-                                                    0.0005,    // I Gx
-                                                    0.0000005, // D Gx
+const double K_SD_WheelAnglePID_Gx[E_PID_CalSz] = { 0.0035,     // P Gx
+                                                    0.000001,    // I Gx
+                                                    0.000005, // D Gx
                                                     1.0,       // P UL - 0.4
                                                    -1.0,       // P LL - -0.4
-                                                    0.1000,      // I UL - 0.1
-                                                   -0.1000,      // I LL - -0.1
+                                                    0.1500,      // I UL - 0.1
+                                                   -0.1500,      // I LL - -0.1
                                                     1.0,       // D UL 0.5
                                                    -1.0,       // D LL -0.5
                                                     1.0,       // Max upper 0.9
@@ -413,7 +413,7 @@ const double K_ADAS_DM_BlindShotElevator = 0.7;
 const double K_ADAS_DM_BlindShotLauncher = 1600;
 
 /* K_ADAS_DM_DriveTime: This is the default drive forward time. [Seconds] */
-const double K_ADAS_DM_DriveTime = 4.0;
+const double K_ADAS_DM_DriveTime = 5.5;
 
 /* K_ADAS_DM_DriveFWD_Pct: This is the default drive forward Pct. [Pct] */
 const double K_ADAS_DM_DriveFWD_Pct = 1.0;
