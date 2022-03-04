@@ -191,11 +191,11 @@ const double K_BH_LauncherSpeed[10] = {3300,  // 3 ft
 /* K_BH_LauncherManualDb: Deadband around the manual ball launcher axis. */
 const double K_BH_LauncherManualDb = 0.1;
 
-/* K_BH_LauncherManualHi: Manual speed single point. */
-const double K_BH_LauncherManualHi = 4600;
+/* K_BH_LauncherManualHi: Manual speed single point.4600 */
+const double K_BH_LauncherManualHi = 3300;
 
 /* K_BH_LauncherManualLo: Manual speed single point. */
-const double K_BH_LauncherManualLo = 3500;
+const double K_BH_LauncherManualLo = 1600;
 
 /* K_BH_LauncherManualSpeed: Manual launcher speed control values. */
 const double K_BH_LauncherManualSpeed[5] = {0,
@@ -410,7 +410,7 @@ const double K_ADAS_DM_BlindShotTime = 4.0;
 const double K_ADAS_DM_BlindShotElevator = 0.7;
 
 /* K_ADAS_DM_BlindShotLauncher: This is the speed the launcher will be shot at while in shoot. [RPM] */
-const double K_ADAS_DM_BlindShotLauncher = 3300;
+const double K_ADAS_DM_BlindShotLauncher = 1600;
 
 /* K_ADAS_DM_DriveTime: This is the default drive forward time. [Seconds] */
 const double K_ADAS_DM_DriveTime = 4.0;

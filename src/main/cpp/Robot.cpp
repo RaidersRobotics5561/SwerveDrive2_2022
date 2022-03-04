@@ -292,9 +292,9 @@ void Robot::RobotPeriodic()
   // frc::SmartDashboard::PutNumber("Front Left Speed Cmnd", m_encoderFrontLeftDrive.GetVelocity());
   frc::SmartDashboard::PutNumber("GYRO",            V_GyroYawAngleDegrees);
 
-  // frc::SmartDashboard::PutBoolean("Top Target?",    V_VisionTargetAquired[E_CamTop]);
-  // frc::SmartDashboard::PutNumber("Top Yaw",         V_VisionYaw[E_CamTop]);
-  // frc::SmartDashboard::PutNumber("Top Distance",    V_VisionTargetDistanceMeters[E_CamTop]);
+  frc::SmartDashboard::PutBoolean("Top Target?",    V_VisionTargetAquired[E_CamTop]);
+  frc::SmartDashboard::PutNumber("Top Yaw",         V_VisionYaw[E_CamTop]);
+  frc::SmartDashboard::PutNumber("Top Distance",    V_VisionTargetDistanceMeters[E_CamTop]);
   // frc::SmartDashboard::PutNumber("Bottom Range",    V_VisionTargetDistanceMeters[E_CamBottom]);
   // frc::SmartDashboard::PutBoolean("Bottom Target?", V_VisionTargetAquired[E_CamBottom]);
   // frc::SmartDashboard::PutNumber("Bottom Yaw",      V_VisionYaw[E_CamBottom]);
