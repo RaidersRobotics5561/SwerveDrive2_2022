@@ -22,6 +22,7 @@
 
 T_ADAS_DM_DriveManuvering V_ADAS_DM_State             = E_ADAS_DM_Disabled;
 double                    V_ADAS_DM_DebounceTime      = 0;
+double                    V_ADAS_DM_AutonSelection;
 
 /* Configuration cals: */
 // double KV_ADAS_DM_DebounceTime;
@@ -35,6 +36,10 @@ double                    V_ADAS_DM_DebounceTime      = 0;
  ******************************************************************************/
 void ADAS_DM_ConfigsInit()
   {
+
+      frc::SmartDashboard::PutNumber("Auton Selection (the cooler one", V_ADAS_DM_AutonSelection);
+
+    
   // set coefficients
   // KV_ADAS_UT_LightDelayTIme = K_ADAS_UT_LightDelayTIme;
   // KV_ADAS_UT_LostTargetGx = K_ADAS_UT_LostTargetGx;
@@ -150,9 +155,12 @@ T_ADAS_DM_DriveManuvering ADAS_DM_BlindShot(double       *L_Pct_FwdRev,
                                             double       *L_Pct_Elevator,
                                             bool         *L_CameraUpperLightCmndOn,
                                             bool         *L_CameraLowerLightCmndOn,
-                                            bool         *L_SD_RobotOriented)
+                                            bool         *L_SD_RobotOriented,
+                                            double        L_ADAS_DM_AutonSelection)
   {
   T_ADAS_DM_DriveManuvering L_ADAS_DM_State = E_ADAS_DM_BlindLaunch;
+  double L_ADAS_DM_ShooterSpeed;
+
 
   *L_SD_RobotOriented = false;
   /* Next, let's set all the other items we aren't trying to control to off: */
@@ -167,15 +175,27 @@ T_ADAS_DM_DriveManuvering ADAS_DM_BlindShot(double       *L_Pct_FwdRev,
 
   V_ADAS_DM_DebounceTime += C_ExeTime;
 
+  // if (fabs(L_ADAS_DM_AutonSelection) < 1.5){
+  //   L_ADAS_DM_ShooterSpeed = K_ADAS_DM_BlindShotLauncherLow;
+
+  // }
+  // else{
+  //   L_ADAS_DM_ShooterSpeed = K_ADAS_DM_BlindShotLauncherHigh;
+  // }
+
+
   if (V_ADAS_DM_DebounceTime <= K_ADAS_DM_BlindShotTime)
     {
+      
     *L_Pct_Elevator = K_ADAS_DM_BlindShotElevator;
-    *L_RPM_Launcher = K_ADAS_DM_BlindShotLauncher;
+    *L_RPM_Launcher = K_ADAS_DM_BlindShotLauncherLow;
     }
   else
     {
     V_ADAS_DM_DebounceTime = 0;
     L_ADAS_DM_State = E_ADAS_DM_DriveStraight;
+    *L_Pct_Elevator = 0;
+    *L_RPM_Launcher = 0;
     }
   return (L_ADAS_DM_State);
   }
@@ -206,6 +226,9 @@ T_ADAS_ActiveFeature ADAS_DM_Main(double               *L_Pct_FwdRev,
                                   bool                  L_DriverRequestElevatorDwn)
   {
 
+
+  V_ADAS_DM_AutonSelection = frc::SmartDashboard::GetNumber("Auton Selection (the cooler one", V_ADAS_DM_AutonSelection);
+
   if (L_ADAS_ActiveFeature == E_ADAS_DriveAndShootBlind)
     {
     switch (V_ADAS_DM_State)
@@ -220,7 +243,8 @@ T_ADAS_ActiveFeature ADAS_DM_Main(double               *L_Pct_FwdRev,
                                                     L_Pct_Elevator,
                                                     L_CameraUpperLightCmndOn,
                                                     L_CameraLowerLightCmndOn,
-                                                    L_SD_RobotOriented);
+                                                    L_SD_RobotOriented,
+                                                    V_ADAS_DM_AutonSelection);
       break;
       case E_ADAS_DM_DriveStraight:
           V_ADAS_DM_State = ADAS_DM_DriveStraight(L_Pct_FwdRev,

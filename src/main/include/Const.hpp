@@ -132,7 +132,7 @@ const double K_LiftPID_Gx[E_PID_SparkMaxCalSz] = { 0.1,      // kP
                                                    0.0,      // kFF
                                                    1.0,      // kMaxOutput
                                                   -1.0,      // kMinOutput
-                                                   1.10,     // kMaxVel - 0.93
+                                                   1.05,     // kMaxVel - 0.93
                                                    0.5,      // kMinVel
                                                    0.0,      // kMaxAcc
                                                    0.0};     // kAllErr
@@ -410,7 +410,10 @@ const double K_ADAS_DM_BlindShotTime = 4.0;
 const double K_ADAS_DM_BlindShotElevator = 0.7;
 
 /* K_ADAS_DM_BlindShotLauncher: This is the speed the launcher will be shot at while in shoot. [RPM] */
-const double K_ADAS_DM_BlindShotLauncher = 1600;
+const double K_ADAS_DM_BlindShotLauncherLow = 1650;
+
+/* K_ADAS_DM_BlindShotLauncher: This is the speed the launcher will be shot at while in shoot. [RPM] */
+const double K_ADAS_DM_BlindShotLauncherHigh = 3300;
 
 /* K_ADAS_DM_DriveTime: This is the default drive forward time. [Seconds] */
 const double K_ADAS_DM_DriveTime = 5.5;

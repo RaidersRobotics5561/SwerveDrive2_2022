@@ -23,6 +23,7 @@ T_CameraNumber V_VisionCamNumber[E_CamLocSz];
 bool           V_VisionTargetAquired[E_CamLocSz];
 double         V_VisionYaw[E_CamLocSz];
 double         V_VisionTargetDistanceMeters[E_CamLocSz];
+bool           V_VisionDriverMode;
 
 /******************************************************************************
  * Function:     VisionRobotInit
@@ -34,6 +35,7 @@ void VisionRobotInit()
   /* Place an input on the dash.  A value of 1 indicates top camera is cam 1, 
      otherwise it is camera 2 */
   frc::SmartDashboard::PutNumber("Top Camera Number", V_VisionTopCamNumberTemp);
+  frc::SmartDashboard::PutBoolean("Driver Mode", V_VisionDriverMode);
   }
 
 
@@ -46,6 +48,7 @@ void VisionInit(frc::DriverStation::Alliance L_AllianceColor)
   {
   /* Check the driver station for what the top camera number should be: */
   V_VisionTopCamNumberTemp = frc::SmartDashboard::GetNumber("Top Camera Number", V_VisionTopCamNumberTemp);
+  V_VisionDriverMode = frc::SmartDashboard::GetBoolean("Driver Mode", V_VisionDriverMode);
 
   if (fabs(V_VisionTopCamNumberTemp) < 1.5)
     {
@@ -69,6 +72,9 @@ void VisionInit(frc::DriverStation::Alliance L_AllianceColor)
     V_VisionCameraIndex[V_VisionCamNumber[E_CamBottom]] = 3; // 3 is the index for a blue ball
     V_VisionCameraIndex[V_VisionCamNumber[E_CamTop]] = 1; // 1 is the top camera targeting index
     }
+
+    
+
   }
 
 

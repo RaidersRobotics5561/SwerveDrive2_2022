@@ -30,9 +30,14 @@
 #include "ADAS_UT.hpp"
 #include "ADAS_DM.hpp"
 
+#include <wpi/PortForwarder.h>
+
+
 T_RobotState                 V_RobotState        = E_Init;
 frc::DriverStation::Alliance V_AllianceColor     = frc::DriverStation::Alliance::kInvalid;
 double                       V_MatchTimeRemaining = 0;
+
+
 
 /******************************************************************************
  * Function:     RobotInit
@@ -63,6 +68,8 @@ void Robot::RobotInit()
   IO_SensorsInit();
 
   ADAS_Main_Reset();
+
+  ADAS_DM_ConfigsInit();
 
   m_frontLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
   m_frontRightSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
@@ -100,13 +107,34 @@ void Robot::RobotInit()
 
   VisionRobotInit();
   VisionInit(V_AllianceColor);
+
+  // pc_Camera1.SetDriverMode(true);
+  // pc_Camera2.SetDriverMode(true);
+  
+
+if (V_VisionDriverMode == false){
+
+
   pc_Camera1.SetPipelineIndex(V_VisionCameraIndex[E_Cam1]);
   pc_Camera2.SetPipelineIndex(V_VisionCameraIndex[E_Cam2]);
+
+}
+else{
+  pc_Camera1.SetDriverMode(V_VisionDriverMode);
+  pc_Camera2.SetDriverMode(V_VisionDriverMode);
+
+}
 
 // m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
 // m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
 // frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
 // frc::SmartDashboard::PutNumber("cooler int", 1);
+
+
+  wpi::PortForwarder::GetInstance().Add(5800, "10.55.61.5", 1214);
+  wpi::PortForwarder::GetInstance().Add(1212, "10.55.61.5", 1212);
+
+
   }
 
 
@@ -241,6 +269,13 @@ void Robot::RobotPeriodic()
   VisionRun(pc_Camera1.GetLatestResult(),
             pc_Camera2.GetLatestResult());
 
+
+  VisionInit(V_AllianceColor);
+  // pc_Camera1.SetPipelineIndex(V_VisionCameraIndex[E_Cam1]);
+  // pc_Camera2.SetPipelineIndex(V_VisionCameraIndex[E_Cam2]);
+pc_Camera1.SetDriverMode(V_VisionDriverMode);
+pc_Camera2.SetDriverMode(V_VisionDriverMode);
+
   V_Lift_state = Lift_Control_Dictator(V_Driver_lift_control,
                                        V_Driver_StopShooterAutoClimbResetGyro,
                                        V_Driver_Lift_Cmnd_Direction,
@@ -276,6 +311,8 @@ void Robot::RobotPeriodic()
   ADAS_BT_ConfigsCal();
 
 /* Output all of the content to the dashboard here: */
+frc::SmartDashboard::PutBoolean("Driver Mode state", pc_Camera1.GetDriverMode());
+
   frc::SmartDashboard::PutBoolean("XD Limit Detected", V_XD_LimitDetected);
   frc::SmartDashboard::PutBoolean("YD Limit Detected", V_YD_LimitDetected);
   frc::SmartDashboard::PutBoolean("Ball Detected Upper", V_BallDetectedUpper);
@@ -287,8 +324,8 @@ void Robot::RobotPeriodic()
 
   // frc::SmartDashboard::PutNumber("V_b_DriveStraight", V_b_DriveStraight);
   // frc::SmartDashboard::PutNumber("V_RotateErrorCalc", V_RotateErrorCalc);
-  frc::SmartDashboard::PutNumber("Launcher Speed Cmnd",      V_ShooterRPM_Cmnd);
-  frc::SmartDashboard::PutNumber("Launcher Speed Actual",    V_ShooterSpeedCurr);
+  // frc::SmartDashboard::PutNumber("Launcher Speed Cmnd",      V_ShooterRPM_Cmnd);
+  // frc::SmartDashboard::PutNumber("Launcher Speed Actual",    V_ShooterSpeedCurr);
   // frc::SmartDashboard::PutNumber("Front Left Speed Cmnd", m_encoderFrontLeftDrive.GetVelocity());
   frc::SmartDashboard::PutNumber("GYRO",            V_GyroYawAngleDegrees);
 
@@ -300,7 +337,10 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutBoolean("Bottom Target?", V_VisionTargetAquired[E_CamBottom]);
   // frc::SmartDashboard::PutNumber("Bottom Yaw",      V_VisionYaw[E_CamBottom]);
   frc::SmartDashboard::PutNumber("Cam2 Index",    float(V_VisionCameraIndex[E_Cam2])); 
-frc::SmartDashboard::PutNumber("V_VisionTopCamNumberTemp", V_VisionTopCamNumberTemp);
+// frc::SmartDashboard::PutNumber("V_VisionTopCamNumberTemp", V_VisionTopCamNumberTemp);
+
+  frc::SmartDashboard::PutNumber("Camera 1 Pipeline Index", float(pc_Camera1.GetPipelineIndex()));
+  frc::SmartDashboard::PutNumber("Camera 2 Pipeline Index", float(pc_Camera2.GetPipelineIndex()));
 
 
   // frc::SmartDashboard::PutNumber("ADAS ActiveFeature",     float(V_ADAS_ActiveFeature));

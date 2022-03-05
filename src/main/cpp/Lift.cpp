@@ -532,7 +532,7 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_auto_climb_butto
 
   if (L_lift_measured_position_XD <= (K_lift_S3_XD + K_lift_deadband_XD) && L_lift_measured_position_XD >= (K_lift_S3_XD - K_lift_deadband_XD)) {
     V_LiftDebounceTimer += C_ExeTime;
-    if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
+    if (V_LiftDebounceTimer >= K_Lift_deadband_timer && L_driver_auto_climb_button == true){
           L_criteria_met = true;
           V_LiftDebounceTimer = 0;
     }

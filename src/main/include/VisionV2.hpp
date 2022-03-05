@@ -13,6 +13,7 @@ extern double V_VisionTargetDistanceMeters[E_CamLocSz];
 extern int    V_VisionCameraIndex[E_CamSz];
 extern T_CameraNumber V_VisionCamNumber[E_CamLocSz];
 extern double V_VisionTopCamNumberTemp;
+extern bool V_VisionDriverMode;
 
 void VisionRobotInit();
 
