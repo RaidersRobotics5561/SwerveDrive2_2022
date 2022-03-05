@@ -229,10 +229,10 @@ const double C_SD_R = 0.8441;
 
 /* K_SD_WheelOffsetAngle: Offset angle for each respective corder of the swerve drive wheel.  This is the angle 
    reading from the absolute encoder that is indicated in order for the wheel to point straight. */
-const double K_SD_WheelOffsetAngle[E_RobotCornerSz] = {169.527239,   // E_FrontLeft
+const double K_SD_WheelOffsetAngle[E_RobotCornerSz] = {174.527239,   // E_FrontLeft  169.527239
                                                        128.487963,   // E_FrontRight 
                                                         33.112801,   // E_RearLeft
-                                                       246.813891};  // E_RearRight 
+                                                       250.813891};  // E_RearRight 246.813891
 
 /* K_SD_WheelGx: Gain multiplied by each calculated desired speed.  Intended to account for variation in wheel size. */
 const double K_SD_WheelGx[E_RobotCornerSz] = {1.0,   // E_FrontLeft
@@ -410,7 +410,7 @@ const double K_ADAS_DM_BlindShotTime = 4.0;
 const double K_ADAS_DM_BlindShotElevator = 0.7;
 
 /* K_ADAS_DM_BlindShotLauncher: This is the speed the launcher will be shot at while in shoot. [RPM] */
-const double K_ADAS_DM_BlindShotLauncherLow = 1650;
+const double K_ADAS_DM_BlindShotLauncherLow = 3300;
 
 /* K_ADAS_DM_BlindShotLauncher: This is the speed the launcher will be shot at while in shoot. [RPM] */
 const double K_ADAS_DM_BlindShotLauncherHigh = 3300;

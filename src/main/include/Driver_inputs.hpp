@@ -33,7 +33,7 @@
 void Joystick_robot_mapping(bool  L_Driver2_buttonA, //Controller 2, A button (1), (robot.cpp) Elevator goes up
                             bool  L_Driver2_buttonB, //Controller 2, B button (2), (robot.cpp) Elevator goes down
                             bool L_Driver2_buttonRB, //Controller 2, X button (3)
-                            bool L_Driver2_buttonback, //Controller 2 back button (7)
+                            bool L_Driver2_buttonLB, //Controller 2 back button (7)
                             bool  L_Driver2_buttonstart, //controller 2 start button (8)
                             bool  L_Driver1_buttonback, //Controller 1, Back button (7)
                             bool    L_Driver1_buttonstart, //Controller 1, start button (8)

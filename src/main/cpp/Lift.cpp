@@ -532,7 +532,7 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_auto_climb_butto
 
   if (L_lift_measured_position_XD <= (K_lift_S3_XD + K_lift_deadband_XD) && L_lift_measured_position_XD >= (K_lift_S3_XD - K_lift_deadband_XD)) {
     V_LiftDebounceTimer += C_ExeTime;
-    if (V_LiftDebounceTimer >= K_Lift_deadband_timer && L_driver_auto_climb_button == true){
+    if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
           L_criteria_met = true;
           V_LiftDebounceTimer = 0;
     }
@@ -765,8 +765,13 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_auto_climb_butto
   if (L_lift_measured_position_XD <= (K_lift_S9_XD + K_lift_deadband_XD) && L_lift_measured_position_XD >= (K_lift_S9_XD - K_lift_deadband_XD)) {
     V_LiftDebounceTimer += C_ExeTime;
     if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
-          L_criteria_met = true;
-          V_LiftDebounceTimer = 0;
+      V_Lift_WaitingForDriverINS = true;
+      if (L_driver_auto_climb_button == true){
+         /* Let the driver determine when we are not swinging and can proceed */
+         L_criteria_met = true;
+         V_LiftDebounceTimer = 0;
+         V_Lift_WaitingForDriverINS = false;
+      }
     }
   }
   else {

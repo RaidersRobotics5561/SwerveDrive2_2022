@@ -41,7 +41,7 @@
 void Joystick_robot_mapping(bool    L_Driver2_buttonA,
                             bool    L_Driver2_buttonB,
                             bool    L_Driver2_buttonRB,
-                            bool    L_Driver2_buttonback,
+                            bool    L_Driver2_buttonLB,
                             bool    L_Driver2_buttonstart,
                             bool    L_Driver1_buttonback,
                             bool    L_Driver1_buttonstart,
@@ -65,7 +65,7 @@ void Joystick_robot_mapping(bool    L_Driver2_buttonA,
   V_Driver_elevator_up = L_Driver2_buttonA;                       //Controller 2, A button (1), (robot.cpp) Elevator goes up
   V_Driver_elevator_down = L_Driver2_buttonB;                     //Controller 2, B button (2), (robot.cpp) Elevator goes down
   V_Driver_zero_gyro = (L_Driver1_buttonback || L_Driver1_buttonstart);     //Controller 1, Back button (7), (robot.cpp, gyro.cpp) zeroes out the gyro  
-  V_Driver_StopShooterAutoClimbResetGyro = L_Driver2_buttonback;     //Controller 2 back button (7), (robot.cpp) Stops the shooter- pretty self-explain, pauses auto climb and resets encoders in test mode
+  V_Driver_StopShooterAutoClimbResetGyro = L_Driver2_buttonLB;     //Controller 2 back button (7), (robot.cpp) Stops the shooter- pretty self-explain, pauses auto climb and resets encoders in test mode
   V_Driver_auto_setspeed_shooter = L_Driver2_buttonstart;         //controller 2 start button (8), (robot.cpp) Starts robot shooter speed based on distance
   V_Driver_manual_shooter_desired_speed = L_Driver2_left_Axis_y;  //Controller 2, left axis, uses y axis (1), (robot.cpp) sets desired speed for the shooter moter
   V_Driver_lift_control = L_Driver2_buttonRB;                     //Controller 2, X button (3), (Lift.cpp) starts automated states machine

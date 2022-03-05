@@ -30,13 +30,9 @@
 #include "ADAS_UT.hpp"
 #include "ADAS_DM.hpp"
 
-#include <wpi/PortForwarder.h>
-
-
 T_RobotState                 V_RobotState        = E_Init;
 frc::DriverStation::Alliance V_AllianceColor     = frc::DriverStation::Alliance::kInvalid;
 double                       V_MatchTimeRemaining = 0;
-
 
 
 /******************************************************************************
@@ -49,6 +45,11 @@ void Robot::RobotInit()
   V_RobotState         = E_Init;
   V_AllianceColor      = frc::DriverStation::GetInstance().GetAlliance();
   V_MatchTimeRemaining = frc::Timer::GetMatchTime().value();
+
+  // frc::CameraServer::StartAutomaticCapture("Camera 1", "/dev/video0");
+  // frc::CameraServer::StartAutomaticCapture("Camera 2", "/dev/video1");
+  // // frc::CameraServer::StartAutomaticCapture("Camera 3", "/dev/video2");
+  frc::CameraServer::StartAutomaticCapture();
 
   EncodersInit(m_encoderFrontRightSteer,
                m_encoderFrontLeftSteer,
@@ -112,18 +113,18 @@ void Robot::RobotInit()
   // pc_Camera2.SetDriverMode(true);
   
 
-if (V_VisionDriverMode == false){
+// if (V_VisionDriverMode == false){
 
 
-  pc_Camera1.SetPipelineIndex(V_VisionCameraIndex[E_Cam1]);
-  pc_Camera2.SetPipelineIndex(V_VisionCameraIndex[E_Cam2]);
+//   pc_Camera1.SetPipelineIndex(V_VisionCameraIndex[E_Cam1]);
+//   pc_Camera2.SetPipelineIndex(V_VisionCameraIndex[E_Cam2]);
 
-}
-else{
-  pc_Camera1.SetDriverMode(V_VisionDriverMode);
-  pc_Camera2.SetDriverMode(V_VisionDriverMode);
+// }
+// else{
+//   pc_Camera1.SetDriverMode(V_VisionDriverMode);
+//   pc_Camera2.SetDriverMode(V_VisionDriverMode);
 
-}
+// }
 
 // m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
 // m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
@@ -131,8 +132,6 @@ else{
 // frc::SmartDashboard::PutNumber("cooler int", 1);
 
 
-  wpi::PortForwarder::GetInstance().Add(5800, "10.55.61.5", 1214);
-  wpi::PortForwarder::GetInstance().Add(1212, "10.55.61.5", 1212);
 
 
   }
@@ -151,7 +150,7 @@ void Robot::RobotPeriodic()
   Joystick_robot_mapping(c_joyStick2.GetRawButton(1),
                          c_joyStick2.GetRawButton(2),
                          c_joyStick2.GetRawButton(6), 
-                         c_joyStick2.GetRawButton(7),
+                         c_joyStick2.GetRawButton(5),
                          c_joyStick2.GetRawButton(8),
                          c_joyStick.GetRawButton(7),
                          c_joyStick.GetRawButton(8),
@@ -266,15 +265,15 @@ void Robot::RobotPeriodic()
                   &V_CameraLightCmndOn,
                   &V_VanityLightCmnd);
 
-  VisionRun(pc_Camera1.GetLatestResult(),
-            pc_Camera2.GetLatestResult());
+  // VisionRun(pc_Camera1.GetLatestResult(),
+  //           pc_Camera2.GetLatestResult());
 
 
   VisionInit(V_AllianceColor);
   // pc_Camera1.SetPipelineIndex(V_VisionCameraIndex[E_Cam1]);
   // pc_Camera2.SetPipelineIndex(V_VisionCameraIndex[E_Cam2]);
-pc_Camera1.SetDriverMode(V_VisionDriverMode);
-pc_Camera2.SetDriverMode(V_VisionDriverMode);
+// pc_Camera1.SetDriverMode(V_VisionDriverMode);
+// pc_Camera2.SetDriverMode(V_VisionDriverMode);
 
   V_Lift_state = Lift_Control_Dictator(V_Driver_lift_control,
                                        V_Driver_StopShooterAutoClimbResetGyro,
@@ -311,7 +310,7 @@ pc_Camera2.SetDriverMode(V_VisionDriverMode);
   ADAS_BT_ConfigsCal();
 
 /* Output all of the content to the dashboard here: */
-frc::SmartDashboard::PutBoolean("Driver Mode state", pc_Camera1.GetDriverMode());
+// frc::SmartDashboard::PutBoolean("Driver Mode state", pc_Camera1.GetDriverMode());
 
   frc::SmartDashboard::PutBoolean("XD Limit Detected", V_XD_LimitDetected);
   frc::SmartDashboard::PutBoolean("YD Limit Detected", V_YD_LimitDetected);
@@ -339,8 +338,8 @@ frc::SmartDashboard::PutBoolean("Driver Mode state", pc_Camera1.GetDriverMode())
   frc::SmartDashboard::PutNumber("Cam2 Index",    float(V_VisionCameraIndex[E_Cam2])); 
 // frc::SmartDashboard::PutNumber("V_VisionTopCamNumberTemp", V_VisionTopCamNumberTemp);
 
-  frc::SmartDashboard::PutNumber("Camera 1 Pipeline Index", float(pc_Camera1.GetPipelineIndex()));
-  frc::SmartDashboard::PutNumber("Camera 2 Pipeline Index", float(pc_Camera2.GetPipelineIndex()));
+  // frc::SmartDashboard::PutNumber("Camera 1 Pipeline Index", float(pc_Camera1.GetPipelineIndex()));
+  // frc::SmartDashboard::PutNumber("Camera 2 Pipeline Index", float(pc_Camera2.GetPipelineIndex()));
 
 
   // frc::SmartDashboard::PutNumber("ADAS ActiveFeature",     float(V_ADAS_ActiveFeature));
@@ -403,8 +402,8 @@ void Robot::AutonomousInit()
     ADAS_Main_Reset();
     OdometryInit();
     VisionInit(V_AllianceColor);
-    pc_Camera1.SetPipelineIndex(V_VisionCameraIndex[E_Cam1]);
-    pc_Camera2.SetPipelineIndex(V_VisionCameraIndex[E_Cam2]);
+    // pc_Camera1.SetPipelineIndex(V_VisionCameraIndex[E_Cam1]);
+    // pc_Camera2.SetPipelineIndex(V_VisionCameraIndex[E_Cam2]);
   }
 
 
@@ -481,8 +480,8 @@ void Robot::TeleopInit()
   LiftControlInit();
   OdometryInit();
   VisionInit(V_AllianceColor);
-  pc_Camera1.SetPipelineIndex(V_VisionCameraIndex[E_Cam1]);
-  pc_Camera2.SetPipelineIndex(V_VisionCameraIndex[E_Cam2]);
+  // pc_Camera1.SetPipelineIndex(V_VisionCameraIndex[E_Cam1]);
+  // pc_Camera2.SetPipelineIndex(V_VisionCameraIndex[E_Cam2]);
   m_encoderrightShooter.SetPosition(0);
   m_encoderleftShooter.SetPosition(0);
   }
