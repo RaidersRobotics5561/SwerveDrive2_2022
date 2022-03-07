@@ -41,11 +41,11 @@ bool   V_Lift_Paused = false;
 double V_Lift_PausedXD_Position = 0;
 double V_Lift_PausedYD_Position = 0;
 
-
-
+double KV_LiftRampRateYD[E_Lift_State_Sz][E_LiftIterationSz];
+double KV_LiftRampRateXD[E_Lift_State_Sz][E_LiftIterationSz];
 
 #ifdef LiftXY_Test
-bool   V_LiftXY_Test = true;
+bool   V_LiftXY_Test = false; // temporary, we don't want to use the manual overrides
 double V_LiftPID_Gx[E_PID_SparkMaxCalSz];
 #else
 bool V_LiftXY_Test = false;
@@ -61,6 +61,9 @@ bool V_LiftXY_Test = false;
 void LiftMotorConfigsInit(rev::SparkMaxPIDController m_liftpidYD,
                           rev::SparkMaxPIDController m_liftpidXD)
   {
+  T_Lift_State     L_Index1;
+  T_Lift_Iteration L_Index2;
+
   // set PID coefficients
   m_liftpidYD.SetP(K_LiftPID_Gx[E_kP]);
   m_liftpidYD.SetI(K_LiftPID_Gx[E_kI]);
@@ -75,6 +78,19 @@ void LiftMotorConfigsInit(rev::SparkMaxPIDController m_liftpidYD,
   m_liftpidXD.SetIZone(K_LiftPID_Gx[E_kIz]);
   m_liftpidXD.SetFF(K_LiftPID_Gx[E_kFF]);
   m_liftpidXD.SetOutputRange(K_LiftPID_Gx[E_kMinOutput], K_LiftPID_Gx[E_kMaxOutput]);
+
+  for (L_Index2 = E_LiftIteration1;
+       L_Index2 < E_LiftIterationSz;
+       L_Index2 = T_Lift_Iteration(int(L_Index2) + 1))
+      {
+      for (L_Index1 = E_S0_BEGONE;
+           L_Index1 < E_Lift_State_Sz;
+           L_Index1 = T_Lift_State(int(L_Index1) + 1))
+          {
+          KV_LiftRampRateYD[L_Index1][L_Index2] = K_LiftRampRateYD[L_Index1][L_Index2];
+          KV_LiftRampRateXD[L_Index1][L_Index2] = K_LiftRampRateXD[L_Index1][L_Index2];
+          }
+      }
   
   #ifdef LiftXY_Test
   T_PID_SparkMaxCal L_Index = E_kP;
@@ -87,19 +103,63 @@ void LiftMotorConfigsInit(rev::SparkMaxPIDController m_liftpidYD,
       }
   
   // display PID coefficients on SmartDashboard
-  frc::SmartDashboard::PutNumber("P Gain", K_LiftPID_Gx[E_kP]);
-  frc::SmartDashboard::PutNumber("I Gain", K_LiftPID_Gx[E_kI]);
-  frc::SmartDashboard::PutNumber("D Gain", K_LiftPID_Gx[E_kD]);
-  frc::SmartDashboard::PutNumber("I Zone", K_LiftPID_Gx[E_kIz]);
-  frc::SmartDashboard::PutNumber("Feed Forward", K_LiftPID_Gx[E_kFF]);
-  frc::SmartDashboard::PutNumber("Max Output", K_LiftPID_Gx[E_kMaxOutput]);
-  frc::SmartDashboard::PutNumber("Min Output", K_LiftPID_Gx[E_kMinOutput]);
+  // frc::SmartDashboard::PutNumber("P Gain", K_LiftPID_Gx[E_kP]);
+  // frc::SmartDashboard::PutNumber("I Gain", K_LiftPID_Gx[E_kI]);
+  // frc::SmartDashboard::PutNumber("D Gain", K_LiftPID_Gx[E_kD]);
+  // frc::SmartDashboard::PutNumber("I Zone", K_LiftPID_Gx[E_kIz]);
+  // frc::SmartDashboard::PutNumber("Feed Forward", K_LiftPID_Gx[E_kFF]);
+  // frc::SmartDashboard::PutNumber("Max Output", K_LiftPID_Gx[E_kMaxOutput]);
+  // frc::SmartDashboard::PutNumber("Min Output", K_LiftPID_Gx[E_kMinOutput]);
 
   // display secondary coefficients
-  frc::SmartDashboard::PutNumber("Max Acceleration", K_LiftPID_Gx[E_kMaxAcc]);
-  frc::SmartDashboard::PutNumber("Allowed Closed Loop Error", K_LiftPID_Gx[E_kAllErr]);
-  frc::SmartDashboard::PutNumber("Set Position Y", 0);
-  frc::SmartDashboard::PutNumber("Set Position X", 0);
+  // frc::SmartDashboard::PutNumber("Set Position Y", 0);
+  // frc::SmartDashboard::PutNumber("Set Position X", 0);
+
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S0_BEGONE][E_LiftIteration1]",            K_LiftRampRateXD[E_S0_BEGONE][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S2_lift_down_YD][E_LiftIteration1]",      K_LiftRampRateXD[E_S2_lift_down_YD][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S3_move_forward_XD][E_LiftIteration1]",   K_LiftRampRateXD[E_S3_move_forward_XD][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S4_stretch_up_YD][E_LiftIteration1]",     K_LiftRampRateXD[E_S4_stretch_up_YD][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S5_more_forward_XD][E_LiftIteration1]",   K_LiftRampRateXD[E_S5_more_forward_XD][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S6_lift_up_more_YD][E_LiftIteration1]",   K_LiftRampRateXD[E_S6_lift_up_more_YD][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S7_move_back_XD][E_LiftIteration1]",      K_LiftRampRateXD[E_S7_move_back_XD][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S8_more_down_some_YD][E_LiftIteration1]", K_LiftRampRateXD[E_S8_more_down_some_YD][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S9_back_rest_XD][E_LiftIteration1]",      K_LiftRampRateXD[E_S9_back_rest_XD][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S10_final_YD][E_LiftIteration1]",         K_LiftRampRateXD[E_S10_final_YD][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S11_final_OWO][E_LiftIteration1]",        K_LiftRampRateXD[E_S11_final_OWO][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S0_BEGONE][E_LiftIteration2]",            K_LiftRampRateXD[E_S0_BEGONE][E_LiftIteration2]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S2_lift_down_YD][E_LiftIteration2]",      K_LiftRampRateXD[E_S2_lift_down_YD][E_LiftIteration2]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S3_move_forward_XD][E_LiftIteration2]",   K_LiftRampRateXD[E_S3_move_forward_XD][E_LiftIteration2]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S4_stretch_up_YD][E_LiftIteration2]",     K_LiftRampRateXD[E_S4_stretch_up_YD][E_LiftIteration2]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S5_more_forward_XD][E_LiftIteration2]",   K_LiftRampRateXD[E_S5_more_forward_XD][E_LiftIteration2]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S6_lift_up_more_YD][E_LiftIteration2]",   K_LiftRampRateXD[E_S6_lift_up_more_YD][E_LiftIteration2]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S7_move_back_XD][E_LiftIteration2]",      K_LiftRampRateXD[E_S7_move_back_XD][E_LiftIteration2]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S8_more_down_some_YD][E_LiftIteration2]", K_LiftRampRateXD[E_S8_more_down_some_YD][E_LiftIteration2]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S9_back_rest_XD][E_LiftIteration2]",      K_LiftRampRateXD[E_S9_back_rest_XD][E_LiftIteration2]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S10_final_YD][E_LiftIteration2]",         K_LiftRampRateXD[E_S10_final_YD][E_LiftIteration2]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S11_final_OWO][E_LiftIteration2]",        K_LiftRampRateXD[E_S11_final_OWO][E_LiftIteration2]);
+
+  frc::SmartDashboard::PutNumber("K_LiftRampRateYD[E_S0_BEGONE][E_LiftIteration1]",            K_LiftRampRateYD[E_S0_BEGONE][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateYD[E_S2_lift_down_YD][E_LiftIteration1]",      K_LiftRampRateYD[E_S2_lift_down_YD][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateYD[E_S3_move_forward_XD][E_LiftIteration1]",   K_LiftRampRateYD[E_S3_move_forward_XD][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateYD[E_S4_stretch_up_YD][E_LiftIteration1]",     K_LiftRampRateYD[E_S4_stretch_up_YD][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateYD[E_S5_more_forward_XD][E_LiftIteration1]",   K_LiftRampRateYD[E_S5_more_forward_XD][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateYD[E_S6_lift_up_more_YD][E_LiftIteration1]",   K_LiftRampRateYD[E_S6_lift_up_more_YD][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateYD[E_S7_move_back_XD][E_LiftIteration1]",      K_LiftRampRateYD[E_S7_move_back_XD][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateYD[E_S8_more_down_some_YD][E_LiftIteration1]", K_LiftRampRateYD[E_S8_more_down_some_YD][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateYD[E_S9_back_rest_XD][E_LiftIteration1]",      K_LiftRampRateYD[E_S9_back_rest_XD][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateYD[E_S10_final_YD][E_LiftIteration1]",         K_LiftRampRateYD[E_S10_final_YD][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateYD[E_S11_final_OWO][E_LiftIteration1]",        K_LiftRampRateYD[E_S11_final_OWO][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateYD[E_S0_BEGONE][E_LiftIteration2]",            K_LiftRampRateYD[E_S0_BEGONE][E_LiftIteration2]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateYD[E_S2_lift_down_YD][E_LiftIteration2]",      K_LiftRampRateYD[E_S2_lift_down_YD][E_LiftIteration2]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateYD[E_S3_move_forward_XD][E_LiftIteration2]",   K_LiftRampRateYD[E_S3_move_forward_XD][E_LiftIteration2]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateYD[E_S4_stretch_up_YD][E_LiftIteration2]",     K_LiftRampRateYD[E_S4_stretch_up_YD][E_LiftIteration2]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateYD[E_S5_more_forward_XD][E_LiftIteration2]",   K_LiftRampRateYD[E_S5_more_forward_XD][E_LiftIteration2]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateYD[E_S6_lift_up_more_YD][E_LiftIteration2]",   K_LiftRampRateYD[E_S6_lift_up_more_YD][E_LiftIteration2]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateYD[E_S7_move_back_XD][E_LiftIteration2]",      K_LiftRampRateYD[E_S7_move_back_XD][E_LiftIteration2]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateYD[E_S8_more_down_some_YD][E_LiftIteration2]", K_LiftRampRateYD[E_S8_more_down_some_YD][E_LiftIteration2]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateYD[E_S9_back_rest_XD][E_LiftIteration2]",      K_LiftRampRateYD[E_S9_back_rest_XD][E_LiftIteration2]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateYD[E_S10_final_YD][E_LiftIteration2]",         K_LiftRampRateYD[E_S10_final_YD][E_LiftIteration2]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateYD[E_S11_final_OWO][E_LiftIteration2]",        K_LiftRampRateYD[E_S11_final_OWO][E_LiftIteration2]);
   #endif
   }
 
@@ -115,27 +175,73 @@ void LiftMotorConfigsCal(rev::SparkMaxPIDController m_liftpidYD,
   {
   // read PID coefficients from SmartDashboard
   #ifdef LiftXY_Test
-  double L_p = frc::SmartDashboard::GetNumber("P Gain", 0);
-  double L_i = frc::SmartDashboard::GetNumber("I Gain", 0);
-  double L_d = frc::SmartDashboard::GetNumber("D Gain", 0);
-  double L_iz = frc::SmartDashboard::GetNumber("I Zone", 0);
-  double L_ff = frc::SmartDashboard::GetNumber("Feed Forward", 0);
-  double L_max = frc::SmartDashboard::GetNumber("Max Output", 0);
-  double L_min = frc::SmartDashboard::GetNumber("Min Output", 0);
-  double L_maxV = frc::SmartDashboard::GetNumber("Max Velocity", 0);
-  double L_minV = frc::SmartDashboard::GetNumber("Min Velocity", 0);
-  double L_maxA = frc::SmartDashboard::GetNumber("Max Acceleration", 0);
-  double L_allE = frc::SmartDashboard::GetNumber("Allowed Closed Loop Error", 0);
+  // double L_p = frc::SmartDashboard::GetNumber("P Gain", 0);
+  // double L_i = frc::SmartDashboard::GetNumber("I Gain", 0);
+  // double L_d = frc::SmartDashboard::GetNumber("D Gain", 0);
+  // double L_iz = frc::SmartDashboard::GetNumber("I Zone", 0);
+  // double L_ff = frc::SmartDashboard::GetNumber("Feed Forward", 0);
+  // double L_max = frc::SmartDashboard::GetNumber("Max Output", 0);
+  // double L_min = frc::SmartDashboard::GetNumber("Min Output", 0);
+  // double L_maxV = frc::SmartDashboard::GetNumber("Max Velocity", 0);
+  // double L_minV = frc::SmartDashboard::GetNumber("Min Velocity", 0);
+  // double L_maxA = frc::SmartDashboard::GetNumber("Max Acceleration", 0);
+  // double L_allE = frc::SmartDashboard::GetNumber("Allowed Closed Loop Error", 0);
 
-  V_LiftYD_TestLocation = frc::SmartDashboard::GetNumber("Set Position Y", 0);
-  V_LiftXD_TestLocation = frc::SmartDashboard::GetNumber("Set Position X", 0);
+  // V_LiftYD_TestLocation = frc::SmartDashboard::GetNumber("Set Position Y", 0);
+  // V_LiftXD_TestLocation = frc::SmartDashboard::GetNumber("Set Position X", 0);
 
-  if((L_p != V_LiftPID_Gx[E_kP]))   { m_liftpidYD.SetP(L_p); m_liftpidXD.SetP(L_p); V_LiftPID_Gx[E_kP] = L_p; }
-  if((L_i != V_LiftPID_Gx[E_kI]))   { m_liftpidYD.SetI(L_i); m_liftpidXD.SetI(L_i); V_LiftPID_Gx[E_kI] = L_i; }
-  if((L_d != V_LiftPID_Gx[E_kD]))   { m_liftpidYD.SetD(L_d); m_liftpidXD.SetD(L_d); V_LiftPID_Gx[E_kD] = L_d; }
-  if((L_iz != V_LiftPID_Gx[E_kIz])) { m_liftpidYD.SetIZone(L_iz); m_liftpidXD.SetIZone(L_iz); V_LiftPID_Gx[E_kIz] = L_iz; }
-  if((L_ff != V_LiftPID_Gx[E_kFF])) { m_liftpidYD.SetFF(L_ff); m_liftpidXD.SetFF(L_ff); V_LiftPID_Gx[E_kFF] = L_ff; }
-  if((L_max != V_LiftPID_Gx[E_kMaxOutput]) || (L_min != V_LiftPID_Gx[E_kMinOutput])) { m_liftpidYD.SetOutputRange(L_min, L_max); m_liftpidXD.SetOutputRange(L_min, L_max); V_LiftPID_Gx[E_kMinOutput] = L_min; V_LiftPID_Gx[E_kMaxOutput] = L_max; }
+  // if((L_p != V_LiftPID_Gx[E_kP]))   { m_liftpidYD.SetP(L_p); m_liftpidXD.SetP(L_p); V_LiftPID_Gx[E_kP] = L_p; }
+  // if((L_i != V_LiftPID_Gx[E_kI]))   { m_liftpidYD.SetI(L_i); m_liftpidXD.SetI(L_i); V_LiftPID_Gx[E_kI] = L_i; }
+  // if((L_d != V_LiftPID_Gx[E_kD]))   { m_liftpidYD.SetD(L_d); m_liftpidXD.SetD(L_d); V_LiftPID_Gx[E_kD] = L_d; }
+  // if((L_iz != V_LiftPID_Gx[E_kIz])) { m_liftpidYD.SetIZone(L_iz); m_liftpidXD.SetIZone(L_iz); V_LiftPID_Gx[E_kIz] = L_iz; }
+  // if((L_ff != V_LiftPID_Gx[E_kFF])) { m_liftpidYD.SetFF(L_ff); m_liftpidXD.SetFF(L_ff); V_LiftPID_Gx[E_kFF] = L_ff; }
+  // if((L_max != V_LiftPID_Gx[E_kMaxOutput]) || (L_min != V_LiftPID_Gx[E_kMinOutput])) { m_liftpidYD.SetOutputRange(L_min, L_max); m_liftpidXD.SetOutputRange(L_min, L_max); V_LiftPID_Gx[E_kMinOutput] = L_min; V_LiftPID_Gx[E_kMaxOutput] = L_max; }
+  
+  KV_LiftRampRateXD[E_S0_BEGONE][E_LiftIteration1]            = frc::SmartDashboard::GetNumber("K_LiftRampRateXD[E_S0_BEGONE][E_LiftIteration1]",            KV_LiftRampRateXD[E_S0_BEGONE][E_LiftIteration1]);
+  KV_LiftRampRateXD[E_S2_lift_down_YD][E_LiftIteration1]      = frc::SmartDashboard::GetNumber("K_LiftRampRateXD[E_S2_lift_down_YD][E_LiftIteration1]",      KV_LiftRampRateXD[E_S2_lift_down_YD][E_LiftIteration1]);
+  KV_LiftRampRateXD[E_S3_move_forward_XD][E_LiftIteration1]   = frc::SmartDashboard::GetNumber("K_LiftRampRateXD[E_S3_move_forward_XD][E_LiftIteration1]",   KV_LiftRampRateXD[E_S3_move_forward_XD][E_LiftIteration1]);
+  KV_LiftRampRateXD[E_S4_stretch_up_YD][E_LiftIteration1]     = frc::SmartDashboard::GetNumber("K_LiftRampRateXD[E_S4_stretch_up_YD][E_LiftIteration1]",     KV_LiftRampRateXD[E_S4_stretch_up_YD][E_LiftIteration1]);
+  KV_LiftRampRateXD[E_S5_more_forward_XD][E_LiftIteration1]   = frc::SmartDashboard::GetNumber("K_LiftRampRateXD[E_S5_more_forward_XD][E_LiftIteration1]",   KV_LiftRampRateXD[E_S5_more_forward_XD][E_LiftIteration1]);
+  KV_LiftRampRateXD[E_S6_lift_up_more_YD][E_LiftIteration1]   = frc::SmartDashboard::GetNumber("K_LiftRampRateXD[E_S6_lift_up_more_YD][E_LiftIteration1]",   KV_LiftRampRateXD[E_S6_lift_up_more_YD][E_LiftIteration1]);
+  KV_LiftRampRateXD[E_S7_move_back_XD][E_LiftIteration1]      = frc::SmartDashboard::GetNumber("K_LiftRampRateXD[E_S7_move_back_XD][E_LiftIteration1]",      KV_LiftRampRateXD[E_S7_move_back_XD][E_LiftIteration1]);
+  KV_LiftRampRateXD[E_S8_more_down_some_YD][E_LiftIteration1] = frc::SmartDashboard::GetNumber("K_LiftRampRateXD[E_S8_more_down_some_YD][E_LiftIteration1]", KV_LiftRampRateXD[E_S8_more_down_some_YD][E_LiftIteration1]);
+  KV_LiftRampRateXD[E_S9_back_rest_XD][E_LiftIteration1]      = frc::SmartDashboard::GetNumber("K_LiftRampRateXD[E_S9_back_rest_XD][E_LiftIteration1]",      KV_LiftRampRateXD[E_S9_back_rest_XD][E_LiftIteration1]);
+  KV_LiftRampRateXD[E_S10_final_YD][E_LiftIteration1]         = frc::SmartDashboard::GetNumber("K_LiftRampRateXD[E_S10_final_YD][E_LiftIteration1]",         KV_LiftRampRateXD[E_S10_final_YD][E_LiftIteration1]);
+  KV_LiftRampRateXD[E_S11_final_OWO][E_LiftIteration1]        = frc::SmartDashboard::GetNumber("K_LiftRampRateXD[E_S11_final_OWO][E_LiftIteration1]",        KV_LiftRampRateXD[E_S11_final_OWO][E_LiftIteration1]);
+  KV_LiftRampRateXD[E_S0_BEGONE][E_LiftIteration2]            = frc::SmartDashboard::GetNumber("K_LiftRampRateXD[E_S0_BEGONE][E_LiftIteration2]",            KV_LiftRampRateXD[E_S0_BEGONE][E_LiftIteration2]);
+  KV_LiftRampRateXD[E_S2_lift_down_YD][E_LiftIteration2]      = frc::SmartDashboard::GetNumber("K_LiftRampRateXD[E_S2_lift_down_YD][E_LiftIteration2]",      KV_LiftRampRateXD[E_S2_lift_down_YD][E_LiftIteration2]);
+  KV_LiftRampRateXD[E_S3_move_forward_XD][E_LiftIteration2]   = frc::SmartDashboard::GetNumber("K_LiftRampRateXD[E_S3_move_forward_XD][E_LiftIteration2]",   KV_LiftRampRateXD[E_S3_move_forward_XD][E_LiftIteration2]);
+  KV_LiftRampRateXD[E_S4_stretch_up_YD][E_LiftIteration2]     = frc::SmartDashboard::GetNumber("K_LiftRampRateXD[E_S4_stretch_up_YD][E_LiftIteration2]",     KV_LiftRampRateXD[E_S4_stretch_up_YD][E_LiftIteration2]);
+  KV_LiftRampRateXD[E_S5_more_forward_XD][E_LiftIteration2]   = frc::SmartDashboard::GetNumber("K_LiftRampRateXD[E_S5_more_forward_XD][E_LiftIteration2]",   KV_LiftRampRateXD[E_S5_more_forward_XD][E_LiftIteration2]);
+  KV_LiftRampRateXD[E_S6_lift_up_more_YD][E_LiftIteration2]   = frc::SmartDashboard::GetNumber("K_LiftRampRateXD[E_S6_lift_up_more_YD][E_LiftIteration2]",   KV_LiftRampRateXD[E_S6_lift_up_more_YD][E_LiftIteration2]);
+  KV_LiftRampRateXD[E_S7_move_back_XD][E_LiftIteration2]      = frc::SmartDashboard::GetNumber("K_LiftRampRateXD[E_S7_move_back_XD][E_LiftIteration2]",      KV_LiftRampRateXD[E_S7_move_back_XD][E_LiftIteration2]);
+  KV_LiftRampRateXD[E_S8_more_down_some_YD][E_LiftIteration2] = frc::SmartDashboard::GetNumber("K_LiftRampRateXD[E_S8_more_down_some_YD][E_LiftIteration2]", KV_LiftRampRateXD[E_S8_more_down_some_YD][E_LiftIteration2]);
+  KV_LiftRampRateXD[E_S9_back_rest_XD][E_LiftIteration2]      = frc::SmartDashboard::GetNumber("K_LiftRampRateXD[E_S9_back_rest_XD][E_LiftIteration2]",      KV_LiftRampRateXD[E_S9_back_rest_XD][E_LiftIteration2]);
+  KV_LiftRampRateXD[E_S10_final_YD][E_LiftIteration2]         = frc::SmartDashboard::GetNumber("K_LiftRampRateXD[E_S10_final_YD][E_LiftIteration2]",         KV_LiftRampRateXD[E_S10_final_YD][E_LiftIteration2]);
+  KV_LiftRampRateXD[E_S11_final_OWO][E_LiftIteration2]        = frc::SmartDashboard::GetNumber("K_LiftRampRateXD[E_S11_final_OWO][E_LiftIteration2]",        KV_LiftRampRateXD[E_S11_final_OWO][E_LiftIteration2]);
+
+  KV_LiftRampRateYD[E_S0_BEGONE][E_LiftIteration1]            = frc::SmartDashboard::GetNumber("K_LiftRampRateYD[E_S0_BEGONE][E_LiftIteration1]",            KV_LiftRampRateYD[E_S0_BEGONE][E_LiftIteration1]);
+  KV_LiftRampRateYD[E_S2_lift_down_YD][E_LiftIteration1]      = frc::SmartDashboard::GetNumber("K_LiftRampRateYD[E_S2_lift_down_YD][E_LiftIteration1]",      KV_LiftRampRateYD[E_S2_lift_down_YD][E_LiftIteration1]);
+  KV_LiftRampRateYD[E_S3_move_forward_XD][E_LiftIteration1]   = frc::SmartDashboard::GetNumber("K_LiftRampRateYD[E_S3_move_forward_XD][E_LiftIteration1]",   KV_LiftRampRateYD[E_S3_move_forward_XD][E_LiftIteration1]);
+  KV_LiftRampRateYD[E_S4_stretch_up_YD][E_LiftIteration1]     = frc::SmartDashboard::GetNumber("K_LiftRampRateYD[E_S4_stretch_up_YD][E_LiftIteration1]",     KV_LiftRampRateYD[E_S4_stretch_up_YD][E_LiftIteration1]);
+  KV_LiftRampRateYD[E_S5_more_forward_XD][E_LiftIteration1]   = frc::SmartDashboard::GetNumber("K_LiftRampRateYD[E_S5_more_forward_XD][E_LiftIteration1]",   KV_LiftRampRateYD[E_S5_more_forward_XD][E_LiftIteration1]);
+  KV_LiftRampRateYD[E_S6_lift_up_more_YD][E_LiftIteration1]   = frc::SmartDashboard::GetNumber("K_LiftRampRateYD[E_S6_lift_up_more_YD][E_LiftIteration1]",   KV_LiftRampRateYD[E_S6_lift_up_more_YD][E_LiftIteration1]);
+  KV_LiftRampRateYD[E_S7_move_back_XD][E_LiftIteration1]      = frc::SmartDashboard::GetNumber("K_LiftRampRateYD[E_S7_move_back_XD][E_LiftIteration1]",      KV_LiftRampRateYD[E_S7_move_back_XD][E_LiftIteration1]);
+  KV_LiftRampRateYD[E_S8_more_down_some_YD][E_LiftIteration1] = frc::SmartDashboard::GetNumber("K_LiftRampRateYD[E_S8_more_down_some_YD][E_LiftIteration1]", KV_LiftRampRateYD[E_S8_more_down_some_YD][E_LiftIteration1]);
+  KV_LiftRampRateYD[E_S9_back_rest_XD][E_LiftIteration1]      = frc::SmartDashboard::GetNumber("K_LiftRampRateYD[E_S9_back_rest_XD][E_LiftIteration1]",      KV_LiftRampRateYD[E_S9_back_rest_XD][E_LiftIteration1]);
+  KV_LiftRampRateYD[E_S10_final_YD][E_LiftIteration1]         = frc::SmartDashboard::GetNumber("K_LiftRampRateYD[E_S10_final_YD][E_LiftIteration1]",         KV_LiftRampRateYD[E_S10_final_YD][E_LiftIteration1]);
+  KV_LiftRampRateYD[E_S11_final_OWO][E_LiftIteration1]        = frc::SmartDashboard::GetNumber("K_LiftRampRateYD[E_S11_final_OWO][E_LiftIteration1]",        KV_LiftRampRateYD[E_S11_final_OWO][E_LiftIteration1]);
+  KV_LiftRampRateYD[E_S0_BEGONE][E_LiftIteration2]            = frc::SmartDashboard::GetNumber("K_LiftRampRateYD[E_S0_BEGONE][E_LiftIteration2]",            KV_LiftRampRateYD[E_S0_BEGONE][E_LiftIteration2]);
+  KV_LiftRampRateYD[E_S2_lift_down_YD][E_LiftIteration2]      = frc::SmartDashboard::GetNumber("K_LiftRampRateYD[E_S2_lift_down_YD][E_LiftIteration2]",      KV_LiftRampRateYD[E_S2_lift_down_YD][E_LiftIteration2]);
+  KV_LiftRampRateYD[E_S3_move_forward_XD][E_LiftIteration2]   = frc::SmartDashboard::GetNumber("K_LiftRampRateYD[E_S3_move_forward_XD][E_LiftIteration2]",   KV_LiftRampRateYD[E_S3_move_forward_XD][E_LiftIteration2]);
+  KV_LiftRampRateYD[E_S4_stretch_up_YD][E_LiftIteration2]     = frc::SmartDashboard::GetNumber("K_LiftRampRateYD[E_S4_stretch_up_YD][E_LiftIteration2]",     KV_LiftRampRateYD[E_S4_stretch_up_YD][E_LiftIteration2]);
+  KV_LiftRampRateYD[E_S5_more_forward_XD][E_LiftIteration2]   = frc::SmartDashboard::GetNumber("K_LiftRampRateYD[E_S5_more_forward_XD][E_LiftIteration2]",   KV_LiftRampRateYD[E_S5_more_forward_XD][E_LiftIteration2]);
+  KV_LiftRampRateYD[E_S6_lift_up_more_YD][E_LiftIteration2]   = frc::SmartDashboard::GetNumber("K_LiftRampRateYD[E_S6_lift_up_more_YD][E_LiftIteration2]",   KV_LiftRampRateYD[E_S6_lift_up_more_YD][E_LiftIteration2]);
+  KV_LiftRampRateYD[E_S7_move_back_XD][E_LiftIteration2]      = frc::SmartDashboard::GetNumber("K_LiftRampRateYD[E_S7_move_back_XD][E_LiftIteration2]",      KV_LiftRampRateYD[E_S7_move_back_XD][E_LiftIteration2]);
+  KV_LiftRampRateYD[E_S8_more_down_some_YD][E_LiftIteration2] = frc::SmartDashboard::GetNumber("K_LiftRampRateYD[E_S8_more_down_some_YD][E_LiftIteration2]", KV_LiftRampRateYD[E_S8_more_down_some_YD][E_LiftIteration2]);
+  KV_LiftRampRateYD[E_S9_back_rest_XD][E_LiftIteration2]      = frc::SmartDashboard::GetNumber("K_LiftRampRateYD[E_S9_back_rest_XD][E_LiftIteration2]",      KV_LiftRampRateYD[E_S9_back_rest_XD][E_LiftIteration2]);
+  KV_LiftRampRateYD[E_S10_final_YD][E_LiftIteration2]         = frc::SmartDashboard::GetNumber("K_LiftRampRateYD[E_S10_final_YD][E_LiftIteration2]",         KV_LiftRampRateYD[E_S10_final_YD][E_LiftIteration2]);
+  KV_LiftRampRateYD[E_S11_final_OWO][E_LiftIteration2]        = frc::SmartDashboard::GetNumber("K_LiftRampRateYD[E_S11_final_OWO][E_LiftIteration2]",        KV_LiftRampRateYD[E_S11_final_OWO][E_LiftIteration2]);
   #endif
   }
 
@@ -269,9 +375,9 @@ void Lift_Control_ManualOverride(double *L_lift_command_YD,
 
   *L_lift_command_XD = K_lift_min_XD;
 
-  *L_lift_command_rate_YD = K_LiftRampRateYD[E_S2_lift_down_YD][L_LiftIteration];
+  *L_lift_command_rate_YD = KV_LiftRampRateYD[E_S2_lift_down_YD][L_LiftIteration];
 
-  *L_lift_command_rate_XD = K_LiftRampRateXD[E_S2_lift_down_YD][L_LiftIteration];
+  *L_lift_command_rate_XD = KV_LiftRampRateXD[E_S2_lift_down_YD][L_LiftIteration];
 
   if (L_lift_measured_position_YD <= (K_lift_S2_YD + K_lift_deadband_YD) && L_lift_measured_position_YD >= (K_lift_S2_YD - K_lift_deadband_YD)) {
     L_criteria_met = true;
@@ -300,9 +406,9 @@ void Lift_Control_ManualOverride(double *L_lift_command_YD,
 
   *L_lift_command_YD = K_lift_S3_YD;
 
-  *L_lift_command_rate_YD = K_LiftRampRateYD[E_S3_move_forward_XD][L_LiftIteration];
+  *L_lift_command_rate_YD = KV_LiftRampRateYD[E_S3_move_forward_XD][L_LiftIteration];
 
-  *L_lift_command_rate_XD = K_LiftRampRateXD[E_S3_move_forward_XD][L_LiftIteration];
+  *L_lift_command_rate_XD = KV_LiftRampRateXD[E_S3_move_forward_XD][L_LiftIteration];
 
   if (L_lift_measured_position_XD <= (K_lift_S3_XD + K_lift_deadband_XD) && L_lift_measured_position_XD >= (K_lift_S3_XD - K_lift_deadband_XD)) {
     V_LiftDebounceTimer += C_ExeTime;
@@ -338,9 +444,9 @@ void Lift_Control_ManualOverride(double *L_lift_command_YD,
 
   *L_lift_command_XD = K_lift_S4_XD;
 
-  *L_lift_command_rate_YD = K_LiftRampRateYD[E_S4_stretch_up_YD][L_LiftIteration];
+  *L_lift_command_rate_YD = KV_LiftRampRateYD[E_S4_stretch_up_YD][L_LiftIteration];
 
-  *L_lift_command_rate_XD = K_LiftRampRateXD[E_S4_stretch_up_YD][L_LiftIteration];
+  *L_lift_command_rate_XD = KV_LiftRampRateXD[E_S4_stretch_up_YD][L_LiftIteration];
 
   if (L_lift_measured_position_YD <= (K_lift_S4_YD + K_lift_deadband_YD) && L_lift_measured_position_YD >= (K_lift_S4_YD - K_lift_deadband_YD)) {
     V_LiftDebounceTimer += C_ExeTime;
@@ -376,9 +482,9 @@ void Lift_Control_ManualOverride(double *L_lift_command_YD,
 
   *L_lift_command_YD = K_lift_S5_YD;
 
-  *L_lift_command_rate_YD = K_LiftRampRateYD[E_S5_more_forward_XD][L_LiftIteration];
+  *L_lift_command_rate_YD = KV_LiftRampRateYD[E_S5_more_forward_XD][L_LiftIteration];
 
-  *L_lift_command_rate_XD = K_LiftRampRateXD[E_S5_more_forward_XD][L_LiftIteration];
+  *L_lift_command_rate_XD = KV_LiftRampRateXD[E_S5_more_forward_XD][L_LiftIteration];
 
   if (L_lift_measured_position_XD <= (K_lift_S5_XD + K_lift_deadband_XD) && L_lift_measured_position_XD >= (K_lift_S5_XD - K_lift_deadband_XD)) {
     V_LiftDebounceTimer += C_ExeTime;
@@ -414,9 +520,9 @@ void Lift_Control_ManualOverride(double *L_lift_command_YD,
 
   *L_lift_command_XD = K_lift_S6_XD;
 
-  *L_lift_command_rate_YD = K_LiftRampRateYD[E_S6_lift_up_more_YD][L_LiftIteration];
+  *L_lift_command_rate_YD = KV_LiftRampRateYD[E_S6_lift_up_more_YD][L_LiftIteration];
 
-  *L_lift_command_rate_XD = K_LiftRampRateXD[E_S6_lift_up_more_YD][L_LiftIteration];
+  *L_lift_command_rate_XD = KV_LiftRampRateXD[E_S6_lift_up_more_YD][L_LiftIteration];
 
   if (L_lift_measured_position_YD <= (K_lift_S6_YD + K_lift_deadband_YD) && L_lift_measured_position_YD >= (K_lift_S6_YD - K_lift_deadband_YD)) {
     V_LiftDebounceTimer += C_ExeTime;
@@ -453,9 +559,9 @@ void Lift_Control_ManualOverride(double *L_lift_command_YD,
 
   *L_lift_command_YD = K_lift_S7_YD;
 
-  *L_lift_command_rate_YD = K_LiftRampRateYD[E_S7_move_back_XD][L_LiftIteration];
+  *L_lift_command_rate_YD = KV_LiftRampRateYD[E_S7_move_back_XD][L_LiftIteration];
 
-  *L_lift_command_rate_XD = K_LiftRampRateXD[E_S7_move_back_XD][L_LiftIteration]; // Don't go too fast, going slower will help to reduce rocking
+  *L_lift_command_rate_XD = KV_LiftRampRateXD[E_S7_move_back_XD][L_LiftIteration]; // Don't go too fast, going slower will help to reduce rocking
 
   if (L_lift_measured_position_XD <= (K_lift_S7_XD + K_lift_deadband_XD)  && L_lift_measured_position_XD >= (K_lift_S7_XD - K_lift_deadband_XD)) {
     V_LiftDebounceTimer += C_ExeTime;
@@ -495,9 +601,9 @@ void Lift_Control_ManualOverride(double *L_lift_command_YD,
 
   *L_lift_command_XD = K_lift_S8_XD;
 
-  *L_lift_command_rate_YD = K_LiftRampRateYD[E_S8_more_down_some_YD][L_LiftIteration];
+  *L_lift_command_rate_YD = KV_LiftRampRateYD[E_S8_more_down_some_YD][L_LiftIteration];
 
-  *L_lift_command_rate_XD = K_LiftRampRateXD[E_S8_more_down_some_YD][L_LiftIteration];
+  *L_lift_command_rate_XD = KV_LiftRampRateXD[E_S8_more_down_some_YD][L_LiftIteration];
 
   if (L_lift_measured_position_YD <= (K_lift_S8_YD + K_lift_deadband_YD) && L_lift_measured_position_YD >= (K_lift_S8_YD - K_lift_deadband_YD)) {
     V_LiftDebounceTimer += C_ExeTime;
@@ -538,9 +644,9 @@ void Lift_Control_ManualOverride(double *L_lift_command_YD,
 
   *L_lift_command_YD = K_lift_S9_YD;
 
-  *L_lift_command_rate_YD = K_LiftRampRateYD[E_S9_back_rest_XD][L_LiftIteration];
+  *L_lift_command_rate_YD = KV_LiftRampRateYD[E_S9_back_rest_XD][L_LiftIteration];
 
-  *L_lift_command_rate_XD = K_LiftRampRateXD[E_S9_back_rest_XD][L_LiftIteration];
+  *L_lift_command_rate_XD = KV_LiftRampRateXD[E_S9_back_rest_XD][L_LiftIteration];
 
   if (L_lift_measured_position_XD <= (K_lift_S9_XD + K_lift_deadband_XD) && L_lift_measured_position_XD >= (K_lift_S9_XD - K_lift_deadband_XD)) {
     V_LiftDebounceTimer += C_ExeTime;
@@ -581,9 +687,9 @@ void Lift_Control_ManualOverride(double *L_lift_command_YD,
 
   *L_lift_command_XD = K_lift_S10_XD;
 
-  *L_lift_command_rate_YD = K_LiftRampRateYD[E_S10_final_YD][L_LiftIteration]; // Slow down, don't yank too hard
+  *L_lift_command_rate_YD = KV_LiftRampRateYD[E_S10_final_YD][L_LiftIteration]; // Slow down, don't yank too hard
 
-  *L_lift_command_rate_XD = K_LiftRampRateXD[E_S10_final_YD][L_LiftIteration];
+  *L_lift_command_rate_XD = KV_LiftRampRateXD[E_S10_final_YD][L_LiftIteration];
 
   if (L_lift_measured_position_YD <= (K_lift_S10_YD + K_lift_deadband_YD) && L_lift_measured_position_YD >= (K_lift_S10_YD - K_lift_deadband_YD)) {
     V_LiftDebounceTimer += C_ExeTime;
@@ -619,9 +725,9 @@ void Lift_Control_ManualOverride(double *L_lift_command_YD,
 
   *L_lift_command_XD = K_lift_S11_XD;
 
-  *L_lift_command_rate_YD = K_LiftRampRateYD[E_S11_final_OWO][L_LiftIteration];
+  *L_lift_command_rate_YD = KV_LiftRampRateYD[E_S11_final_OWO][L_LiftIteration];
 
-  *L_lift_command_rate_XD = K_LiftRampRateXD[E_S11_final_OWO][L_LiftIteration];
+  *L_lift_command_rate_XD = KV_LiftRampRateXD[E_S11_final_OWO][L_LiftIteration];
 
   if (L_lift_measured_position_YD <= (K_lift_S11_YD + K_lift_deadband_YD) && L_lift_measured_position_YD >= (K_lift_S11_YD - K_lift_deadband_YD)) {
     V_LiftDebounceTimer += C_ExeTime;
@@ -670,8 +776,8 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_auto_climb_butto
   T_Lift_State L_Commanded_State = L_current_state;
   double L_lift_command_YD_Temp = 0;
   double L_lift_command_XD_Temp = 0;
-  double L_lift_command_rate_YD = K_LiftRampRateYD[E_S0_BEGONE][E_LiftIteration1];
-  double L_lift_command_rate_XD = K_LiftRampRateXD[E_S0_BEGONE][E_LiftIteration1];;
+  double L_lift_command_rate_YD = KV_LiftRampRateYD[E_S0_BEGONE][E_LiftIteration1];
+  double L_lift_command_rate_XD = KV_LiftRampRateXD[E_S0_BEGONE][E_LiftIteration1];;
   double L_LiftYD_Power = 0;
   double L_LiftXD_Power = 0;
 
