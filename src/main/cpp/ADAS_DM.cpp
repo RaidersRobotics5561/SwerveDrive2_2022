@@ -22,7 +22,7 @@
 
 T_ADAS_DM_DriveManuvering V_ADAS_DM_State             = E_ADAS_DM_Disabled;
 double                    V_ADAS_DM_DebounceTime      = 0;
-double                    V_ADAS_DM_AutonSelection;
+double                    V_ADAS_DM_AutonSelectionRaw;
 
 /* Configuration cals: */
 // double KV_ADAS_DM_DebounceTime;
@@ -37,7 +37,7 @@ double                    V_ADAS_DM_AutonSelection;
 void ADAS_DM_ConfigsInit()
   {
 
-      frc::SmartDashboard::PutNumber("Auton Selection (the cooler one", V_ADAS_DM_AutonSelection);
+  frc::SmartDashboard::PutNumber("Auton Selection (DM)", V_ADAS_DM_AutonSelectionRaw);
 
     
   // set coefficients
@@ -93,6 +93,12 @@ void ADAS_DM_ConfigsCal()
  ******************************************************************************/
 void ADAS_DM_Reset(void)
   {
+  V_ADAS_DM_AutonSelectionRaw = frc::SmartDashboard::GetNumber("Blind Shot Auton Selection", V_ADAS_DM_AutonSelectionRaw);
+
+  if (V_ADAS_DM_AutonSelectionRaw )
+
+  
+
   V_ADAS_DM_State             = E_ADAS_DM_Disabled;
   V_ADAS_DM_DebounceTime      = 0;
   }
@@ -227,10 +233,7 @@ T_ADAS_ActiveFeature ADAS_DM_Main(double               *L_Pct_FwdRev,
                                   bool                  L_DriverRequestElevatorDwn)
   {
 
-
-  V_ADAS_DM_AutonSelection = frc::SmartDashboard::GetNumber("Blind Shot Auton Selection", V_ADAS_DM_AutonSelection);
-
-  if (L_ADAS_ActiveFeature == E_ADAS_DriveAndShootBlind)
+  if (L_ADAS_ActiveFeature == E_ADAS_DriveAndShootBlind1)
     {
     switch (V_ADAS_DM_State)
       {
@@ -245,7 +248,7 @@ T_ADAS_ActiveFeature ADAS_DM_Main(double               *L_Pct_FwdRev,
                                                     L_CameraUpperLightCmndOn,
                                                     L_CameraLowerLightCmndOn,
                                                     L_SD_RobotOriented,
-                                                    V_ADAS_DM_AutonSelection);
+                                                    V_ADAS_DM_AutonSelectionRaw);
       break;
       case E_ADAS_DM_DriveStraight:
           V_ADAS_DM_State = ADAS_DM_DriveStraight(L_Pct_FwdRev,

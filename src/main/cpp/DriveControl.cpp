@@ -32,6 +32,10 @@ double V_WheelSpeedError[E_RobotCornerSz];
 double V_WheelSpeedIntergral[E_RobotCornerSz];
 double V_WheelAngleArb[E_RobotCornerSz]; // This is the arbitrated wheel angle that is used in the PID controller
 
+bool V_SD_DriverRobotOrientedRequested; // Requested driver mode override
+bool V_SD_DriverRobotOrientedRequestedLatched; // Latched state of the driver requested mode
+bool V_SD_DriverRobotOrientedRequestedPrev; // Requested driver mode override previous
+
 double V_WheelSpeedPID_V2_Gx[E_PID_SparkMaxCalSz];
 double V_SD_WheelSpeedCmndPrev[E_RobotCornerSz];
 bool   V_SD_DriveWheelsInPID = false;
@@ -243,6 +247,9 @@ void DriveControlInit()
   V_RotateErrorCalc = 0;
   
   V_SD_DriveWheelsInPID = false;
+
+  V_SD_DriverRobotOrientedRequestedPrev = false;
+  V_SD_DriverRobotOrientedRequestedLatched = false;
   }
 
 
@@ -293,6 +300,7 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
                       double              L_JoyStick1Axis3,   // extra speed trigger
                       bool                L_JoyStick1Button3, // auto rotate to 0 degrees
                       bool                L_JoyStick1Button4, // auto rotate to 90 degrees
+                      bool                L_Driver_RobotFieldOrientedReq,
                       T_ADAS_ActiveFeature L_ADAS_ActiveFeature,
                       double               L_ADAS_Pct_SD_FwdRev,
                       double               L_ADAS_Pct_SD_Strafe,
@@ -346,6 +354,30 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       L_FWD = -L_JoyStick1Axis1Y;
       L_STR = -L_JoyStick1Axis1X;
       L_RCW = -L_JoyStick1Axis2X;
+
+      /* Check to see what the driver wants for the driver mode: */
+      if (L_Driver_RobotFieldOrientedReq != V_SD_DriverRobotOrientedRequestedPrev)
+        {
+        /* Ok, we seem to have experienced a button press.  Let's flip the latched state*/
+        if (V_SD_DriverRobotOrientedRequestedLatched == true)
+          {
+          V_SD_DriverRobotOrientedRequestedLatched = false; // When false, the driver is requesting to have the robot in field oriented mode
+          }
+        else
+          {
+          V_SD_DriverRobotOrientedRequestedLatched = true;  // When true, the driver is requesting to have the robot in robot oriented mode
+          }
+        }
+
+    /* Save the previous version to help determine when there is a transition in the driver button press. */
+      V_SD_DriverRobotOrientedRequestedPrev = L_Driver_RobotFieldOrientedReq;
+
+      if (V_SD_DriverRobotOrientedRequestedLatched == true)
+        {
+        /* When true, we want to force the robot into robot orientation (i.e. don't use the gyro) */
+        L_GyroAngleDegrees = 0;
+        L_GyroAngleRadians = 0;
+        }
 
     //turning rotatemode on/off & setting desired angle
     // if ((fabs(L_FWD) > 0) ||

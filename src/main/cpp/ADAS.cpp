@@ -20,6 +20,7 @@
   Changes:
   2022-02-25 -> Beta
  */
+#include <frc/smartdashboard/SendableChooser.h>
 
 #include "Enums.hpp"
 #include "ADAS_UT.hpp"
@@ -40,6 +41,21 @@ bool                 V_ADAS_SD_RobotOriented = false;
 bool                 V_ADAS_AutonActive = false;
 bool                 V_ADAS_Vision_RequestedTargeting = false; 
 
+
+
+
+
+/******************************************************************************
+ * Function:     ADAS_Main_Reset
+ *
+ * Description:  Reset all applicable ADAS variables.
+ ******************************************************************************/
+void ADAS_DetermineMode(void)
+  {
+  // frc::SendableChooser<Pos> m_chooser;
+  }
+
+
 /******************************************************************************
  * Function:     ADAS_Main_Reset
  *
@@ -59,7 +75,13 @@ void ADAS_Main_Reset(void)
   V_ADAS_SD_RobotOriented = false;
   V_ADAS_AutonActive = false;
   V_ADAS_Vision_RequestedTargeting = false;
+  
+  /* Trigger the resets for all of the sub tasks/functions as well: */
+  ADAS_UT_Reset();
+  ADAS_BT_Reset();
+  ADAS_DM_Reset();
   }
+
 
 /******************************************************************************
  * Function:     ADAS_ControlMainTeleop
@@ -122,7 +144,7 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
     {
     if (V_ADAS_AutonActive == false)
       {
-      L_ADAS_ActiveFeature = E_ADAS_DriveAndShootBlind;
+      L_ADAS_ActiveFeature = E_ADAS_DriveAndShootBlind1;
       V_ADAS_AutonActive = true;
       }
     }
@@ -181,7 +203,8 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
                                               L_RobotState,
                                               L_BallDetected);
       break;
-      case E_ADAS_DriveAndShootBlind:
+      case E_ADAS_DriveAndShootBlind1:
+      case E_ADAS_DriveAndShootBlind2:
           L_ADAS_ActiveFeature = ADAS_DM_Main(L_Pct_FwdRev,
                                               L_Pct_Strafe,
                                               L_Pct_Rotate,

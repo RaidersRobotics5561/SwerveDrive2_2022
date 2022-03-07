@@ -12,6 +12,7 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/DriverStation.h>
 
+
 #include "Encoders.hpp"
 #include "Gyro.hpp"
 #include "IO_Sensors.hpp"
@@ -145,7 +146,8 @@ void Robot::RobotPeriodic()
                          c_joyStick2.GetPOV(),
                          c_joyStick.GetRawButton(6),
                          c_joyStick.GetRawButton(2),
-                         c_joyStick.GetRawButton(5));
+                         c_joyStick.GetRawButton(5),
+                         c_joyStick2.GetRawButton(7));
 
   Read_Encoders(a_encoderWheelAngleFrontLeft.Get().value(),
                 a_encoderWheelAngleFrontRight.Get().value(),
@@ -205,6 +207,7 @@ void Robot::RobotPeriodic()
                     V_Driver_SwerveSpeed,   // extra speed trigger
                     V_Driver_SwerveRotateTo0, // auto rotate to 0 degrees
                     V_Driver_SwerveRotateTo90, // auto rotate to 90 degrees
+                    V_Driver_RobotFieldOrientedReq,
                     V_ADAS_ActiveFeature,
                     V_ADAS_Pct_SD_FwdRev,
                     V_ADAS_Pct_SD_Strafe,
@@ -386,8 +389,6 @@ void Robot::AutonomousInit()
     ADAS_Main_Reset();
     OdometryInit();
     VisionInit(V_AllianceColor);
-    // pc_Camera1.SetPipelineIndex(V_VisionCameraIndex[E_Cam1]);
-    // pc_Camera2.SetPipelineIndex(V_VisionCameraIndex[E_Cam2]);
   }
 
 
@@ -464,8 +465,6 @@ void Robot::TeleopInit()
   LiftControlInit();
   OdometryInit();
   VisionInit(V_AllianceColor);
-  // pc_Camera1.SetPipelineIndex(V_VisionCameraIndex[E_Cam1]);
-  // pc_Camera2.SetPipelineIndex(V_VisionCameraIndex[E_Cam2]);
   m_encoderrightShooter.SetPosition(0);
   m_encoderleftShooter.SetPosition(0);
   }

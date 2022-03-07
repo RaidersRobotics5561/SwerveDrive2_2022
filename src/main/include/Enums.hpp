@@ -176,7 +176,15 @@ typedef enum T_ADAS_ActiveFeature
   E_ADAS_Disabled,
   E_ADAS_AutoUpperTarget,
   E_ADAS_AutoBallTarget,
-  E_ADAS_DriveAndShootBlind    // Drive straight, robot oriented 
+  E_ADAS_DriveAndShootBlind1,    // Shoot preloaded ball, drive straight, robot oriented
+  E_ADAS_DriveAndShootBlind2     // Drive into preplaced ball, intake, rotate 180*, shoot 2 balls
 } T_ADAS_ActiveFeature;
+
+typedef enum T_ADAS_ActiveAutonFeature
+{
+  E_ADAS_AutonDisabled,
+  E_ADAS_AutonDriveAndShootBlind1,    // Shoot preloaded ball, drive straight, robot oriented
+  E_ADAS_AutonDriveAndShootBlind2     // Drive into preplaced ball, intake, rotate 180*, shoot 2 balls
+} T_ADAS_ActiveAutonFeature;
 
 #endif

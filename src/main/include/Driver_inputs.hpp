@@ -30,6 +30,7 @@
  extern bool                V_Driver_AutoIntake;
  extern bool                V_Driver_JoystickActive;
  extern bool                V_Driver_VisionDriverModeOverride;
+ extern bool                V_Driver_RobotFieldOrientedReq;
 
 void Joystick_robot_mapping(bool  L_Driver2_buttonA, //Controller 2, A button (1), (robot.cpp) Elevator goes up
                             bool  L_Driver2_buttonB, //Controller 2, B button (2), (robot.cpp) Elevator goes down
@@ -52,5 +53,6 @@ void Joystick_robot_mapping(bool  L_Driver2_buttonA, //Controller 2, A button (1
                             int     L_Driver2_POV,
                             bool    L_Driver1_buttonRB,
                             bool    L_Driver1_buttonB,
-                            bool    L_Driver1_ButtonLB);
+                            bool    L_Driver1_ButtonLB,
+                            bool    L_Driver2_buttonback);
  
