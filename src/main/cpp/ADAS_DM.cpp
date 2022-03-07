@@ -21,8 +21,11 @@
 #include "Const.hpp"
 
 T_ADAS_DM_DriveManuvering V_ADAS_DM_State             = E_ADAS_DM_Disabled;
+bool                      V_ADAS_DM_StateComplete     = false;
 double                    V_ADAS_DM_DebounceTime      = 0;
 double                    V_ADAS_DM_AutonSelectionRaw;
+bool                      V_ADAS_DM_StateInit = false;
+double                    V_ADAS_DM_Rotate180TargetAngle = 0;
 
 /* Configuration cals: */
 // double KV_ADAS_DM_DebounceTime;
@@ -100,7 +103,92 @@ void ADAS_DM_Reset(void)
   
 
   V_ADAS_DM_State             = E_ADAS_DM_Disabled;
+  V_ADAS_DM_StateComplete     = false;
   V_ADAS_DM_DebounceTime      = 0;
+  V_ADAS_DM_StateInit = false;
+  V_ADAS_DM_Rotate180TargetAngle = 0;
+  }
+
+
+/******************************************************************************
+ * Function:     ADAS_DM_Rotate180
+ *
+ * Description:  Rotate 180 degrees control.
+ ******************************************************************************/
+bool ADAS_DM_Rotate180(double     *L_Pct_FwdRev,
+                       double     *L_Pct_Strafe,
+                       double     *L_Pct_Rotate,
+                       double     *L_RPM_Launcher,
+                       double     *L_Pct_Intake,
+                       double     *L_Pct_Elevator,
+                       bool       *L_CameraUpperLightCmndOn,
+                       bool       *L_CameraLowerLightCmndOn,
+                       bool       *L_SD_RobotOriented,
+                       double      L_Deg_GyroAngleDeg)
+  {
+  bool L_ADAS_DM_StateComplete = false;
+  double L_RotateError = 0;
+
+  *L_SD_RobotOriented = false;
+  /* Next, let's set all the other items we aren't trying to control to off: */
+  *L_CameraUpperLightCmndOn = false;
+  *L_CameraLowerLightCmndOn = false;
+  *L_Pct_FwdRev = 0;
+  *L_Pct_Strafe = 0;
+  *L_RPM_Launcher = 0;
+  *L_Pct_Intake = 0;
+  *L_Pct_Elevator = 0;
+
+  if (V_ADAS_DM_StateInit == false)
+    {
+    /* Need to find the target angle.  The gyro in use will only report values of -180 to 180. Need to account for this:*/
+    V_ADAS_DM_Rotate180TargetAngle = L_Deg_GyroAngleDeg + 180;
+
+    if (V_ADAS_DM_Rotate180TargetAngle > 180)
+      {
+      V_ADAS_DM_Rotate180TargetAngle -= 360;
+      }
+    else if (V_ADAS_DM_Rotate180TargetAngle < 180)
+      {
+      V_ADAS_DM_Rotate180TargetAngle += 360;
+      }
+
+    V_ADAS_DM_StateInit = true;
+    }
+
+  L_RotateError = V_ADAS_DM_Rotate180TargetAngle - L_Deg_GyroAngleDeg;
+
+    if (fabs(L_RotateError) <= K_ADAS_DM_RotateDeadbandAngle && V_ADAS_DM_DebounceTime < K_ADAS_DM_RotateDebounceTime)
+    {
+    V_ADAS_DM_DebounceTime += C_ExeTime;
+    }
+  else if (fabs(L_RotateError) > K_ADAS_DM_RotateDeadbandAngle)
+    {
+    /* Reset the timer, we have gone out of bounds */
+    V_ADAS_DM_DebounceTime = 0;
+    }
+  else if (V_ADAS_DM_DebounceTime >= K_ADAS_DM_RotateDebounceTime)
+    {
+    /* Reset the time, proceed to next state. */
+    L_ADAS_DM_StateComplete = true;
+    V_ADAS_DM_DebounceTime = 0;
+    }
+
+  if (L_ADAS_DM_StateComplete == false)
+    {
+    *L_Pct_Rotate = DesiredRotateSpeed(L_RotateError);
+    }
+  else
+    {
+    /* We have been at the correct location for the set amount of time.
+       We have previously set the state to the next one, now set the rotate command to off. */
+    *L_Pct_Rotate = 0;
+    V_ADAS_DM_DebounceTime = 0;
+    L_ADAS_DM_StateComplete = true;
+    V_ADAS_DM_StateInit = false;
+    }
+  
+  return (L_ADAS_DM_StateComplete);
   }
 
 
@@ -109,17 +197,17 @@ void ADAS_DM_Reset(void)
  *
  * Description:  Drive straight control.
  ******************************************************************************/
-T_ADAS_DM_DriveManuvering ADAS_DM_DriveStraight(double     *L_Pct_FwdRev,
-                                              double       *L_Pct_Strafe,
-                                              double       *L_Pct_Rotate,
-                                              double       *L_RPM_Launcher,
-                                              double       *L_Pct_Intake,
-                                              double       *L_Pct_Elevator,
-                                              bool         *L_CameraUpperLightCmndOn,
-                                              bool         *L_CameraLowerLightCmndOn,
-                                              bool         *L_SD_RobotOriented)
+bool ADAS_DM_DriveStraight(double     *L_Pct_FwdRev,
+                           double     *L_Pct_Strafe,
+                           double     *L_Pct_Rotate,
+                           double     *L_RPM_Launcher,
+                           double     *L_Pct_Intake,
+                           double     *L_Pct_Elevator,
+                           bool       *L_CameraUpperLightCmndOn,
+                           bool       *L_CameraLowerLightCmndOn,
+                           bool       *L_SD_RobotOriented)
   {
-  T_ADAS_DM_DriveManuvering L_ADAS_DM_State = E_ADAS_DM_DriveStraight;
+  bool L_ADAS_DM_StateComplete = false;
 
   *L_SD_RobotOriented = true;
   /* Next, let's set all the other items we aren't trying to control to off: */
@@ -128,8 +216,8 @@ T_ADAS_DM_DriveManuvering ADAS_DM_DriveStraight(double     *L_Pct_FwdRev,
   *L_Pct_Strafe = 0;
   *L_Pct_Rotate = 0;
   *L_RPM_Launcher = 0;
-  *L_Pct_Intake = 0;
-  *L_Pct_Elevator = 0;
+  *L_Pct_Intake = K_ADAS_DM_BlindShotIntake;
+  *L_Pct_Elevator = 0; // Elevator should automatically enable when necessary when intake is commanded on
 
   V_ADAS_DM_DebounceTime += C_ExeTime;
 
@@ -142,9 +230,9 @@ T_ADAS_DM_DriveManuvering ADAS_DM_DriveStraight(double     *L_Pct_FwdRev,
     *L_Pct_FwdRev = 0;
     *L_SD_RobotOriented = false;
     V_ADAS_DM_DebounceTime = 0;
-    L_ADAS_DM_State = E_ADAS_DM_Disabled;
+    L_ADAS_DM_StateComplete = true;
     }
-  return (L_ADAS_DM_State);
+  return (L_ADAS_DM_StateComplete);
   }
 
 
@@ -153,20 +241,19 @@ T_ADAS_DM_DriveManuvering ADAS_DM_DriveStraight(double     *L_Pct_FwdRev,
  *
  * Description:  Blindly shoot the ball at a prescribed speed.
  ******************************************************************************/
-T_ADAS_DM_DriveManuvering ADAS_DM_BlindShot(double       *L_Pct_FwdRev,
-                                            double       *L_Pct_Strafe,
-                                            double       *L_Pct_Rotate,
-                                            double       *L_RPM_Launcher,
-                                            double       *L_Pct_Intake,
-                                            double       *L_Pct_Elevator,
-                                            bool         *L_CameraUpperLightCmndOn,
-                                            bool         *L_CameraLowerLightCmndOn,
-                                            bool         *L_SD_RobotOriented,
-                                            double        L_ADAS_DM_AutonSelection)
+bool ADAS_DM_BlindShot(double       *L_Pct_FwdRev,
+                       double       *L_Pct_Strafe,
+                       double       *L_Pct_Rotate,
+                       double       *L_RPM_Launcher,
+                       double       *L_Pct_Intake,
+                       double       *L_Pct_Elevator,
+                       bool         *L_CameraUpperLightCmndOn,
+                       bool         *L_CameraLowerLightCmndOn,
+                       bool         *L_SD_RobotOriented,
+                       double        L_ADAS_DM_AutonSelection)
   {
-  T_ADAS_DM_DriveManuvering L_ADAS_DM_State = E_ADAS_DM_BlindLaunch;
+  bool L_ADAS_DM_StateComplete = false;
   double L_ADAS_DM_ShooterSpeed;
-
 
   *L_SD_RobotOriented = false;
   /* Next, let's set all the other items we aren't trying to control to off: */
@@ -181,29 +268,19 @@ T_ADAS_DM_DriveManuvering ADAS_DM_BlindShot(double       *L_Pct_FwdRev,
 
   V_ADAS_DM_DebounceTime += C_ExeTime;
 
-  // if (fabs(L_ADAS_DM_AutonSelection) < 1.5){
-  //   L_ADAS_DM_ShooterSpeed = K_ADAS_DM_BlindShotLauncherLow;
-
-  // }
-  // else{
-  //   L_ADAS_DM_ShooterSpeed = K_ADAS_DM_BlindShotLauncherHigh;
-  // }
-
-
   if (V_ADAS_DM_DebounceTime <= K_ADAS_DM_BlindShotTime)
     {
-      
     *L_Pct_Elevator = K_ADAS_DM_BlindShotElevator;
-    *L_RPM_Launcher = K_ADAS_DM_BlindShotLauncherLow;
+    *L_RPM_Launcher = K_ADAS_DM_BlindShotLauncherHigh;
     }
   else
     {
     V_ADAS_DM_DebounceTime = 0;
-    L_ADAS_DM_State = E_ADAS_DM_DriveStraight;
+    L_ADAS_DM_StateComplete = true;
     *L_Pct_Elevator = 0;
     *L_RPM_Launcher = 0;
     }
-  return (L_ADAS_DM_State);
+  return (L_ADAS_DM_StateComplete);
   }
 
 
@@ -230,16 +307,59 @@ T_ADAS_ActiveFeature ADAS_DM_Main(double               *L_Pct_FwdRev,
                                   double                L_LauncherRPM_Measured,
                                   bool                  L_BallDetected,
                                   bool                  L_DriverRequestElevatorUp,
-                                  bool                  L_DriverRequestElevatorDwn)
+                                  bool                  L_DriverRequestElevatorDwn,
+                                  double                L_Deg_GyroAngleDeg)
   {
 
   if (L_ADAS_ActiveFeature == E_ADAS_DriveAndShootBlind1)
     {
-    switch (V_ADAS_DM_State)
+    if (V_ADAS_DM_State == E_ADAS_Disabled)
       {
-      case E_ADAS_DM_Disabled:
-      case E_ADAS_DM_BlindLaunch:
-          V_ADAS_DM_State = ADAS_DM_BlindShot(L_Pct_FwdRev,
+      V_ADAS_DM_State = E_ADAS_DM_BlindLaunch;
+      }
+    else if ((V_ADAS_DM_State == E_ADAS_DM_BlindLaunch) &&
+             (V_ADAS_DM_StateComplete == true))
+      {
+      V_ADAS_DM_State == E_ADAS_DM_DriveStraight;
+      }
+    else if ((V_ADAS_DM_State == E_ADAS_DM_DriveStraight) &&
+             (V_ADAS_DM_StateComplete == true))
+      {
+      V_ADAS_DM_State == E_ADAS_DM_Disabled;
+      }
+    }
+  else if (L_ADAS_ActiveFeature == E_ADAS_DriveAndShootBlind2)
+    {
+    if (V_ADAS_DM_State == E_ADAS_Disabled)
+      {
+      V_ADAS_DM_State = E_ADAS_DM_DriveStraight;
+      }
+    else if ((V_ADAS_DM_State == E_ADAS_DM_DriveStraight) &&
+             (V_ADAS_DM_StateComplete == true))
+      {
+      V_ADAS_DM_State == E_ADAS_DM_Rotate180;
+      }
+    else if ((V_ADAS_DM_State == E_ADAS_DM_Rotate180) &&
+             (V_ADAS_DM_StateComplete == true))
+      {
+      V_ADAS_DM_State == E_ADAS_DM_BlindLaunch;
+      }
+    else if ((V_ADAS_DM_State == E_ADAS_DM_BlindLaunch) &&
+             (V_ADAS_DM_StateComplete == true))
+      {
+      V_ADAS_DM_State == E_ADAS_DM_Disabled;
+      }
+    }
+  else
+    {
+    /* A catch all, we really shouldn't fall in here. */
+    V_ADAS_DM_State == E_ADAS_DM_Disabled;
+    }
+
+  switch (V_ADAS_DM_State)
+    {
+    case E_ADAS_DM_BlindLaunch:
+        V_ADAS_DM_StateComplete = ADAS_DM_BlindShot(L_Pct_FwdRev,
                                                     L_Pct_Strafe,
                                                     L_Pct_Rotate,
                                                     L_RPM_Launcher,
@@ -249,9 +369,20 @@ T_ADAS_ActiveFeature ADAS_DM_Main(double               *L_Pct_FwdRev,
                                                     L_CameraLowerLightCmndOn,
                                                     L_SD_RobotOriented,
                                                     V_ADAS_DM_AutonSelectionRaw);
-      break;
-      case E_ADAS_DM_DriveStraight:
-          V_ADAS_DM_State = ADAS_DM_DriveStraight(L_Pct_FwdRev,
+    break;
+    case E_ADAS_DM_DriveStraight:
+        V_ADAS_DM_StateComplete = ADAS_DM_DriveStraight(L_Pct_FwdRev,
+                                                        L_Pct_Strafe,
+                                                        L_Pct_Rotate,
+                                                        L_RPM_Launcher,
+                                                        L_Pct_Intake,
+                                                        L_Pct_Elevator,
+                                                        L_CameraUpperLightCmndOn,
+                                                        L_CameraLowerLightCmndOn,
+                                                        L_SD_RobotOriented);
+    break;
+    case E_ADAS_DM_Rotate180:
+        V_ADAS_DM_StateComplete = ADAS_DM_Rotate180(L_Pct_FwdRev,
                                                     L_Pct_Strafe,
                                                     L_Pct_Rotate,
                                                     L_RPM_Launcher,
@@ -259,16 +390,14 @@ T_ADAS_ActiveFeature ADAS_DM_Main(double               *L_Pct_FwdRev,
                                                     L_Pct_Elevator,
                                                     L_CameraUpperLightCmndOn,
                                                     L_CameraLowerLightCmndOn,
-                                                    L_SD_RobotOriented);
-      break;
-      }
+                                                    L_SD_RobotOriented,
+                                                    L_Deg_GyroAngleDeg);
+    break;
+    case E_ADAS_DM_Disabled:
+        ADAS_DM_Reset();
+        L_ADAS_ActiveFeature = E_ADAS_Disabled;
+    break;
     }
-
-  if (V_ADAS_DM_State == E_ADAS_DM_Disabled)
-    {
-    ADAS_DM_Reset();
-    L_ADAS_ActiveFeature = E_ADAS_Disabled;
-    }
-  
+ 
   return (L_ADAS_ActiveFeature);
   }

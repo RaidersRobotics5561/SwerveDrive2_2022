@@ -433,8 +433,11 @@ const double K_ADAS_DM_BlindShotTime = 4.0;
 /* K_ADAS_DM_BlindShotElevator: This is the amount of time to remain in blind shoot. [Seconds] */
 const double K_ADAS_DM_BlindShotElevator = 0.7;
 
+/* K_ADAS_DM_BlindShotIntake: This is the amount of intake power to request when in blind shoot. [pct] */
+const double K_ADAS_DM_BlindShotIntake = 0.7;
+
 /* K_ADAS_DM_BlindShotLauncher: This is the speed the launcher will be shot at while in shoot. [RPM] */
-const double K_ADAS_DM_BlindShotLauncherLow = 3300;
+const double K_ADAS_DM_BlindShotLauncherLow = 1600;
 
 /* K_ADAS_DM_BlindShotLauncher: This is the speed the launcher will be shot at while in shoot. [RPM] */
 const double K_ADAS_DM_BlindShotLauncherHigh = 3300;
@@ -444,6 +447,12 @@ const double K_ADAS_DM_DriveTime = 5.5;
 
 /* K_ADAS_DM_DriveFWD_Pct: This is the default drive forward Pct. [Pct] */
 const double K_ADAS_DM_DriveFWD_Pct = 1.0;
+
+/* K_ADAS_DM_RotateDebounceTime: This is the debounce time for the DM rotate state. [seconds] */
+const double K_ADAS_DM_RotateDebounceTime = 0.1;
+
+/* K_ADAS_DM_RotateDeadbandAngle: This is the deband angle for the DM rotate state. [degrees] */
+const double K_ADAS_DM_RotateDeadbandAngle = 1.5;
 
 
 /*  Rotation calibrations */

@@ -65,7 +65,7 @@ void Robot::RobotInit()
   GyroInit();
 
   IO_SensorsInit();
-
+  ADAS_Main_Init();
   ADAS_Main_Reset();
 
   ADAS_DM_ConfigsInit();
@@ -172,6 +172,8 @@ void Robot::RobotPeriodic()
   DtrmnSwerveBotLocation( V_GyroYawAngleRad,
                          &V_Rad_WheelAngleFwd[0],
                          &V_M_WheelDeltaDistance[0]);
+
+  ADAS_DetermineMode();
 
   V_ADAS_ActiveFeature = ADAS_ControlMainTeleop(&V_ADAS_Pct_SD_FwdRev,
                                                 &V_ADAS_Pct_SD_Strafe,

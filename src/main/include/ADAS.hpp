@@ -24,6 +24,9 @@ extern bool                 V_ADAS_SD_RobotOriented;
 extern bool                 V_ADAS_Vision_RequestedTargeting;
 
 void ADAS_Main_Reset(void);
+void ADAS_Main_Init(void);
+void ADAS_DetermineMode(void);
+
 
 T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double              *L_Pct_FwdRev,
                                            double               *L_Pct_Strafe,

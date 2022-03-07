@@ -33,4 +33,5 @@ T_ADAS_ActiveFeature ADAS_DM_Main(double               *L_Pct_FwdRev,
                                   double                L_LauncherRPM_Measured,
                                   bool                  L_BallDetected,
                                   bool                  L_DriverRequestElevatorUp,
-                                  bool                  L_DriverRequestElevatorDwn);
+                                  bool                  L_DriverRequestElevatorDwn,
+                                  double                L_Deg_GyroAngleDeg);
