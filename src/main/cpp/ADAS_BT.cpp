@@ -157,13 +157,15 @@ T_ADAS_BT_BallTarget ADAS_BT_CameraLightOn(double *L_Pct_FwdRev,
                                             double *L_Pct_Elevator,
                                             bool   *L_CameraUpperLightCmndOn,
                                             bool   *L_CameraLowerLightCmndOn,
-                                            bool   *L_SD_RobotOriented)
+                                            bool   *L_SD_RobotOriented,
+                                            bool   *L_VisionTargetingRequest)
   {
   T_ADAS_BT_BallTarget L_ADAS_BT_State = E_ADAS_BT_CameraLightOn;
 
-  /* First thing, let's turn on the light: */
+  /* First thing, let's turn on the light and request the vision to start targeting: */
   *L_CameraLowerLightCmndOn = true;
   *L_SD_RobotOriented = true;
+  *L_VisionTargetingRequest = true;
   /* Next, set all other values to off as we are just wanting to command the light on: */
   *L_CameraUpperLightCmndOn = false;
   *L_Pct_FwdRev = 0;
@@ -200,6 +202,7 @@ T_ADAS_BT_BallTarget ADAS_BT_AutoCenter(double *L_Pct_FwdRev,
                                         bool   *L_CameraUpperLightCmndOn,
                                         bool   *L_CameraLowerLightCmndOn,
                                         bool   *L_SD_RobotOriented,
+                                        bool   *L_VisionTargetingRequest,
                                         double  L_VisionBottomTargetAquired,
                                         double  L_VisionBottomYaw)
   {
@@ -208,6 +211,7 @@ T_ADAS_BT_BallTarget ADAS_BT_AutoCenter(double *L_Pct_FwdRev,
 
   *L_CameraLowerLightCmndOn = true;
   *L_SD_RobotOriented = true;
+  *L_VisionTargetingRequest = true;
   /* Next, let's set all the other items we aren't trying to control to off: */
   *L_CameraUpperLightCmndOn = false;
   *L_Pct_FwdRev = 0;
@@ -270,9 +274,9 @@ T_ADAS_BT_BallTarget ADAS_BT_AutoCenter(double *L_Pct_FwdRev,
 
 
 /******************************************************************************
- * Function:     ADAS_UT_LauncherSpeed
+ * Function:     ADAS_BT_IntakeAndRun
  *
- * Description:  Spins up the launcher to the correct speed.
+ * Description:  Initiates intake and drives forward to capture cargo/balls.
  ******************************************************************************/
 T_ADAS_BT_BallTarget ADAS_BT_IntakeAndRun(double *L_Pct_FwdRev,
                                           double *L_Pct_Strafe,
@@ -283,6 +287,7 @@ T_ADAS_BT_BallTarget ADAS_BT_IntakeAndRun(double *L_Pct_FwdRev,
                                           bool   *L_CameraUpperLightCmndOn,
                                           bool   *L_CameraLowerLightCmndOn,
                                           bool   *L_SD_RobotOriented,
+                                          bool   *L_VisionTargetingRequest,
                                           double  L_VisionBottomTargetAquired,
                                           double  L_VisionBottomTargetDistanceMeters)
   {
@@ -291,6 +296,7 @@ T_ADAS_BT_BallTarget ADAS_BT_IntakeAndRun(double *L_Pct_FwdRev,
 
   *L_CameraLowerLightCmndOn = true;
   *L_SD_RobotOriented = true;
+  *L_VisionTargetingRequest = true;
   /* Next, let's set all the other items we aren't trying to control to off: */
   *L_CameraUpperLightCmndOn = false;
   *L_Pct_Strafe = 0;
@@ -332,6 +338,7 @@ T_ADAS_BT_BallTarget ADAS_BT_IntakeAndRun(double *L_Pct_FwdRev,
       *L_Pct_FwdRev = 0;
       *L_Pct_Intake = 0;
       *L_CameraLowerLightCmndOn = false;
+      *L_VisionTargetingRequest = false;
       L_ADAS_BT_State = E_ADAS_BT_Disabled;
       }
     }
@@ -359,6 +366,7 @@ T_ADAS_ActiveFeature ADAS_BT_Main(double               *L_Pct_FwdRev,
                                   bool                 *L_CameraUpperLightCmndOn,
                                   bool                 *L_CameraLowerLightCmndOn,
                                   bool                 *L_SD_RobotOriented,
+                                  bool                 *L_VisionTargetingRequest,
                                   T_ADAS_ActiveFeature  L_ADAS_ActiveFeature,
                                   bool                  L_VisionBottomTargetAquired,
                                   double                L_VisionBottomYaw,
@@ -379,7 +387,8 @@ T_ADAS_ActiveFeature ADAS_BT_Main(double               *L_Pct_FwdRev,
                                                   L_Pct_Elevator,
                                                   L_CameraUpperLightCmndOn,
                                                   L_CameraLowerLightCmndOn,
-                                                  L_SD_RobotOriented);
+                                                  L_SD_RobotOriented,
+                                                  L_VisionTargetingRequest);
       break;
       case E_ADAS_BT_AutoCenter:
           V_ADAS_BT_State = ADAS_BT_AutoCenter(L_Pct_FwdRev,
@@ -391,6 +400,7 @@ T_ADAS_ActiveFeature ADAS_BT_Main(double               *L_Pct_FwdRev,
                                                L_CameraUpperLightCmndOn,
                                                L_CameraLowerLightCmndOn,
                                                L_SD_RobotOriented,
+                                               L_VisionTargetingRequest,
                                                L_VisionBottomTargetAquired,
                                                L_VisionBottomYaw);
       break;
@@ -404,6 +414,7 @@ T_ADAS_ActiveFeature ADAS_BT_Main(double               *L_Pct_FwdRev,
                                                  L_CameraUpperLightCmndOn,
                                                  L_CameraLowerLightCmndOn,
                                                  L_SD_RobotOriented,
+                                                 L_VisionTargetingRequest,
                                                  L_VisionBottomTargetAquired,
                                                  L_VisionBottomTargetDistanceMeters);
       break;

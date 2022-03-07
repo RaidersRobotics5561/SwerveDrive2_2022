@@ -119,6 +119,12 @@ typedef enum T_Lift_State
   E_Lift_State_Sz
 } T_Lift_State;
 
+typedef enum T_Lift_Iteration
+{
+  E_LiftIteration1,
+  E_LiftIteration2,
+  E_LiftIterationSz
+} T_Lift_Iteration;
 
 typedef enum T_RobotState
 {

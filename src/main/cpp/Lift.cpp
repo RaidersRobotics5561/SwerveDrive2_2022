@@ -14,12 +14,12 @@
 #include <frc/DriverStation.h>
 #include "Const.hpp"
 #include "Lookup.hpp"
-#include "Lift_sub_functions.hpp"
 #include "Driver_inputs.hpp"
 #include "Encoders.hpp"
 
 T_Lift_State V_Lift_state = E_S0_BEGONE;
-int    V_lift_counter = 0;
+T_Lift_Iteration V_LiftIteration = E_LiftIteration1;
+
 double V_LiftDebounceTimer = 0; // owo, because Chloe
 bool   V_criteria_met = false;
 bool   V_LiftInitialized = false;
@@ -41,8 +41,8 @@ bool   V_Lift_Paused = false;
 double V_Lift_PausedXD_Position = 0;
 double V_Lift_PausedYD_Position = 0;
 
-double KV_LiftMotorXDYD_MinRampRate = 0;
-double KV_LiftMotorXDYD_MaxRampRate = 0;
+
+
 
 #ifdef LiftXY_Test
 bool   V_LiftXY_Test = true;
@@ -75,9 +75,6 @@ void LiftMotorConfigsInit(rev::SparkMaxPIDController m_liftpidYD,
   m_liftpidXD.SetIZone(K_LiftPID_Gx[E_kIz]);
   m_liftpidXD.SetFF(K_LiftPID_Gx[E_kFF]);
   m_liftpidXD.SetOutputRange(K_LiftPID_Gx[E_kMinOutput], K_LiftPID_Gx[E_kMaxOutput]);
-
-  KV_LiftMotorXDYD_MaxRampRate = K_LiftPID_Gx[E_kMaxVel];
-  KV_LiftMotorXDYD_MinRampRate = K_LiftPID_Gx[E_kMinVel];
   
   #ifdef LiftXY_Test
   T_PID_SparkMaxCal L_Index = E_kP;
@@ -99,8 +96,6 @@ void LiftMotorConfigsInit(rev::SparkMaxPIDController m_liftpidYD,
   frc::SmartDashboard::PutNumber("Min Output", K_LiftPID_Gx[E_kMinOutput]);
 
   // display secondary coefficients
-  frc::SmartDashboard::PutNumber("Max Velocity", K_LiftPID_Gx[E_kMaxVel]);
-  frc::SmartDashboard::PutNumber("Min Velocity", K_LiftPID_Gx[E_kMinVel]);
   frc::SmartDashboard::PutNumber("Max Acceleration", K_LiftPID_Gx[E_kMaxAcc]);
   frc::SmartDashboard::PutNumber("Allowed Closed Loop Error", K_LiftPID_Gx[E_kAllErr]);
   frc::SmartDashboard::PutNumber("Set Position Y", 0);
@@ -141,10 +136,6 @@ void LiftMotorConfigsCal(rev::SparkMaxPIDController m_liftpidYD,
   if((L_iz != V_LiftPID_Gx[E_kIz])) { m_liftpidYD.SetIZone(L_iz); m_liftpidXD.SetIZone(L_iz); V_LiftPID_Gx[E_kIz] = L_iz; }
   if((L_ff != V_LiftPID_Gx[E_kFF])) { m_liftpidYD.SetFF(L_ff); m_liftpidXD.SetFF(L_ff); V_LiftPID_Gx[E_kFF] = L_ff; }
   if((L_max != V_LiftPID_Gx[E_kMaxOutput]) || (L_min != V_LiftPID_Gx[E_kMinOutput])) { m_liftpidYD.SetOutputRange(L_min, L_max); m_liftpidXD.SetOutputRange(L_min, L_max); V_LiftPID_Gx[E_kMinOutput] = L_min; V_LiftPID_Gx[E_kMaxOutput] = L_max; }
-  if((L_maxV != V_LiftPID_Gx[E_kMaxVel])) { KV_LiftMotorXDYD_MaxRampRate = L_maxV; V_LiftPID_Gx[E_kMaxVel] = L_maxV; }
-  if((L_minV != V_LiftPID_Gx[E_kMinVel])) { KV_LiftMotorXDYD_MinRampRate = L_minV; V_LiftPID_Gx[E_kMinVel] = L_minV; }
-  // if((L_maxA != V_LiftPID_Gx[E_kMaxAcc])) { KV_LiftMotorXDYD_MinRampRate = L_maxA; KV_LiftMotorXDYD_MaxRampRate = L_maxA; V_LiftPID_Gx[E_kMaxAcc] = L_maxA; }
-  // if((L_allE != V_LiftPID_Gx[E_kAllErr])) { m_liftpidYD.SetSmartMotionAllowedClosedLoopError(L_allE); m_liftpidXD.SetSmartMotionAllowedClosedLoopError(L_allE); V_LiftPID_Gx[E_kAllErr] = L_allE; }
   #endif
   }
 
@@ -158,7 +149,7 @@ void LiftControlInit()
   T_Lift_State L_Index;
 
   V_Lift_state = E_S0_BEGONE;
-  V_lift_counter = 0;
+  V_LiftIteration = E_LiftIteration1;
   V_LiftDebounceTimer = 0;
   V_criteria_met = false;
 
@@ -259,6 +250,400 @@ void Lift_Control_ManualOverride(double *L_lift_command_YD,
 
 
 /******************************************************************************
+ * Function:     S2_lift_down_YD
+ *
+ * Description:  State 2: moving robert up by moving y-lift down
+ ******************************************************************************/
+ bool S2_lift_down_YD(double         L_driver_auto_climb_button,
+                      double         L_lift_measured_position_YD,
+                      double         L_lift_measured_position_XD,
+                      double        *L_lift_command_YD,
+                      double        *L_lift_command_XD,
+                      double        *L_lift_command_rate_YD,
+                      double        *L_lift_command_rate_XD,
+                      T_Lift_Iteration L_LiftIteration)
+{
+  bool L_criteria_met = false;
+
+  *L_lift_command_YD = K_lift_S2_YD;
+
+  *L_lift_command_XD = K_lift_min_XD;
+
+  *L_lift_command_rate_YD = K_LiftRampRateYD[E_S2_lift_down_YD][L_LiftIteration];
+
+  *L_lift_command_rate_XD = K_LiftRampRateXD[E_S2_lift_down_YD][L_LiftIteration];
+
+  if (L_lift_measured_position_YD <= (K_lift_S2_YD + K_lift_deadband_YD) && L_lift_measured_position_YD >= (K_lift_S2_YD - K_lift_deadband_YD)) {
+    L_criteria_met = true;
+  }
+
+  return(L_criteria_met);
+}
+
+/******************************************************************************
+ * Function:       S3_move_forward_XD,
+ *
+ * Description:  State 3: moving x lift haha it has to do its job
+ ******************************************************************************/
+ bool S3_move_forward_XD(double         L_driver_auto_climb_button,
+                         double         L_lift_measured_position_YD,
+                         double         L_lift_measured_position_XD,
+                         double        *L_lift_command_YD,
+                         double        *L_lift_command_XD,
+                         double        *L_lift_command_rate_YD,
+                         double        *L_lift_command_rate_XD,
+                         T_Lift_Iteration L_LiftIteration)  
+{
+  bool L_criteria_met = false;
+  
+  *L_lift_command_XD = K_lift_S3_XD;
+
+  *L_lift_command_YD = K_lift_S3_YD;
+
+  *L_lift_command_rate_YD = K_LiftRampRateYD[E_S3_move_forward_XD][L_LiftIteration];
+
+  *L_lift_command_rate_XD = K_LiftRampRateXD[E_S3_move_forward_XD][L_LiftIteration];
+
+  if (L_lift_measured_position_XD <= (K_lift_S3_XD + K_lift_deadband_XD) && L_lift_measured_position_XD >= (K_lift_S3_XD - K_lift_deadband_XD)) {
+    V_LiftDebounceTimer += C_ExeTime;
+    if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
+          L_criteria_met = true;
+          V_LiftDebounceTimer = 0;
+    }
+  }
+  else {
+    V_LiftDebounceTimer = 0;
+  }
+
+  return(L_criteria_met);
+}
+
+/******************************************************************************
+ * Function:       S4_stretch_up_YD,
+ *
+ * Description:  State 4: x lift no move, y lift go
+ ******************************************************************************/
+ bool S4_stretch_up_YD(double         L_driver_auto_climb_button,
+                       double         L_lift_measured_position_YD,
+                       double         L_lift_measured_position_XD,
+                       double        *L_lift_command_YD,
+                       double        *L_lift_command_XD,
+                       double        *L_lift_command_rate_YD,
+                       double        *L_lift_command_rate_XD,
+                       T_Lift_Iteration L_LiftIteration)  
+{
+   bool L_criteria_met = false;
+  
+  *L_lift_command_YD = K_lift_S4_YD;
+
+  *L_lift_command_XD = K_lift_S4_XD;
+
+  *L_lift_command_rate_YD = K_LiftRampRateYD[E_S4_stretch_up_YD][L_LiftIteration];
+
+  *L_lift_command_rate_XD = K_LiftRampRateXD[E_S4_stretch_up_YD][L_LiftIteration];
+
+  if (L_lift_measured_position_YD <= (K_lift_S4_YD + K_lift_deadband_YD) && L_lift_measured_position_YD >= (K_lift_S4_YD - K_lift_deadband_YD)) {
+    V_LiftDebounceTimer += C_ExeTime;
+    if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
+          L_criteria_met = true;
+          V_LiftDebounceTimer = 0;
+    }
+  }
+  else {
+    V_LiftDebounceTimer = 0;
+  }
+  
+  return(L_criteria_met);
+}
+
+/******************************************************************************
+ * Function:       S5_more_forward_XD,
+ *
+ * Description:  State 5: y lift no move, x lift go
+ ******************************************************************************/
+ bool S5_more_forward_XD(double         L_driver_auto_climb_button,
+                         double         L_lift_measured_position_YD,
+                         double         L_lift_measured_position_XD,
+                         double        *L_lift_command_YD,
+                         double        *L_lift_command_XD,
+                         double        *L_lift_command_rate_YD,
+                         double        *L_lift_command_rate_XD,
+                         T_Lift_Iteration L_LiftIteration)  
+{
+  bool L_criteria_met = false;
+
+  *L_lift_command_XD = K_lift_S5_XD;
+
+  *L_lift_command_YD = K_lift_S5_YD;
+
+  *L_lift_command_rate_YD = K_LiftRampRateYD[E_S5_more_forward_XD][L_LiftIteration];
+
+  *L_lift_command_rate_XD = K_LiftRampRateXD[E_S5_more_forward_XD][L_LiftIteration];
+
+  if (L_lift_measured_position_XD <= (K_lift_S5_XD + K_lift_deadband_XD) && L_lift_measured_position_XD >= (K_lift_S5_XD - K_lift_deadband_XD)) {
+    V_LiftDebounceTimer += C_ExeTime;
+    if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
+          L_criteria_met = true;
+          V_LiftDebounceTimer = 0;
+    }
+  }
+  else {
+    V_LiftDebounceTimer = 0;
+  }
+  
+  return(L_criteria_met);
+}
+
+/******************************************************************************
+ * Function:       S6_lift_up_more_YD,
+ *
+ * Description:  State 6: y lift go down, x lift bad stop what's in your mouth no get back here doN'T EAT IT
+ ******************************************************************************/
+ bool S6_lift_up_more_YD(double         L_driver_auto_climb_button,
+                         double         L_lift_measured_position_YD,
+                         double         L_lift_measured_position_XD,
+                         double        *L_lift_command_YD,
+                         double        *L_lift_command_XD,
+                         double        *L_lift_command_rate_YD,
+                         double        *L_lift_command_rate_XD,
+                         T_Lift_Iteration L_LiftIteration)  
+{
+  bool L_criteria_met = false;
+
+  *L_lift_command_YD = K_lift_S6_YD;
+
+  *L_lift_command_XD = K_lift_S6_XD;
+
+  *L_lift_command_rate_YD = K_LiftRampRateYD[E_S6_lift_up_more_YD][L_LiftIteration];
+
+  *L_lift_command_rate_XD = K_LiftRampRateXD[E_S6_lift_up_more_YD][L_LiftIteration];
+
+  if (L_lift_measured_position_YD <= (K_lift_S6_YD + K_lift_deadband_YD) && L_lift_measured_position_YD >= (K_lift_S6_YD - K_lift_deadband_YD)) {
+    V_LiftDebounceTimer += C_ExeTime;
+    if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
+          L_criteria_met = true;
+          V_LiftDebounceTimer = 0;
+    }
+  }
+  else {
+    V_LiftDebounceTimer = 0;
+  }
+  
+  return(L_criteria_met);
+}
+
+/******************************************************************************
+ * Function:       S7_move_back_XD,
+ *
+ * Description:  State 7: X go back-aroni, we look at gyro to make sure we aren't tilted too much
+ ******************************************************************************/
+ bool S7_move_back_XD(double         L_driver_auto_climb_button,
+                      double         L_lift_measured_position_YD,
+                      double         L_lift_measured_position_XD,
+                      double         L_gyro_yawangledegrees,
+                      double        *L_lift_command_YD,
+                      double        *L_lift_command_XD,
+                      double        *L_lift_command_rate_YD,
+                      double        *L_lift_command_rate_XD,
+                      T_Lift_Iteration L_LiftIteration)  
+{
+  bool L_criteria_met = false;
+
+  *L_lift_command_XD = K_lift_S7_XD;
+
+  *L_lift_command_YD = K_lift_S7_YD;
+
+  *L_lift_command_rate_YD = K_LiftRampRateYD[E_S7_move_back_XD][L_LiftIteration];
+
+  *L_lift_command_rate_XD = K_LiftRampRateXD[E_S7_move_back_XD][L_LiftIteration]; // Don't go too fast, going slower will help to reduce rocking
+
+  if (L_lift_measured_position_XD <= (K_lift_S7_XD + K_lift_deadband_XD)  && L_lift_measured_position_XD >= (K_lift_S7_XD - K_lift_deadband_XD)) {
+    V_LiftDebounceTimer += C_ExeTime;
+    if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
+      V_Lift_WaitingForDriverINS = true;
+      if (L_driver_auto_climb_button == true){
+         /* Let the driver determine when we are not swinging and can proceed */
+         L_criteria_met = true;
+         V_LiftDebounceTimer = 0;
+         V_Lift_WaitingForDriverINS = false;
+      }
+    }
+  }
+  else {
+    V_LiftDebounceTimer = 0;
+  }
+  return(L_criteria_met);
+}
+
+/******************************************************************************
+ * Function:       S8_more_down_some_YD,
+ *
+ * Description:  State 8: me when the lift go down more
+ ******************************************************************************/
+ bool S8_more_down_some_YD(double         L_driver_auto_climb_button,
+                           double         L_lift_measured_position_YD,
+                           double         L_lift_measured_position_XD,
+                           double        *L_lift_command_YD,
+                           double        *L_lift_command_XD,
+                           double        *L_lift_command_rate_YD,
+                           double        *L_lift_command_rate_XD,
+                           T_Lift_Iteration L_LiftIteration)  
+{
+  bool L_criteria_met = false;
+  
+  *L_lift_command_YD = K_lift_S8_YD;
+
+  *L_lift_command_XD = K_lift_S8_XD;
+
+  *L_lift_command_rate_YD = K_LiftRampRateYD[E_S8_more_down_some_YD][L_LiftIteration];
+
+  *L_lift_command_rate_XD = K_LiftRampRateXD[E_S8_more_down_some_YD][L_LiftIteration];
+
+  if (L_lift_measured_position_YD <= (K_lift_S8_YD + K_lift_deadband_YD) && L_lift_measured_position_YD >= (K_lift_S8_YD - K_lift_deadband_YD)) {
+    V_LiftDebounceTimer += C_ExeTime;
+    if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
+      V_Lift_WaitingForDriverINS = true;
+      if (L_driver_auto_climb_button == true){
+         /* Let the driver determine when we are not swinging and can proceed */
+         L_criteria_met = true;
+         V_LiftDebounceTimer = 0;
+         V_Lift_WaitingForDriverINS = false;
+      }
+    }
+  }
+  else {
+    V_LiftDebounceTimer = 0;
+  }
+  
+  return(L_criteria_met);
+}
+
+/******************************************************************************
+ * Function:       S9_back_rest_XD
+ *
+ * Description:  State 9: reset it to initial x position (we aren't fixing my back  :(  )
+ ******************************************************************************/
+ bool S9_back_rest_XD(double         L_driver_auto_climb_button,
+                      double         L_lift_measured_position_YD,
+                      double         L_lift_measured_position_XD,
+                      double        *L_lift_command_YD,
+                      double        *L_lift_command_XD,
+                      double        *L_lift_command_rate_YD,
+                      double        *L_lift_command_rate_XD,
+                      T_Lift_Iteration L_LiftIteration)  
+{
+  bool L_criteria_met = false;
+  
+  *L_lift_command_XD = K_lift_S9_XD;
+
+  *L_lift_command_YD = K_lift_S9_YD;
+
+  *L_lift_command_rate_YD = K_LiftRampRateYD[E_S9_back_rest_XD][L_LiftIteration];
+
+  *L_lift_command_rate_XD = K_LiftRampRateXD[E_S9_back_rest_XD][L_LiftIteration];
+
+  if (L_lift_measured_position_XD <= (K_lift_S9_XD + K_lift_deadband_XD) && L_lift_measured_position_XD >= (K_lift_S9_XD - K_lift_deadband_XD)) {
+    V_LiftDebounceTimer += C_ExeTime;
+    if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
+      V_Lift_WaitingForDriverINS = true;
+      if (L_driver_auto_climb_button == true){
+         /* Let the driver determine when we are not swinging and can proceed */
+         L_criteria_met = true;
+         V_LiftDebounceTimer = 0;
+         V_Lift_WaitingForDriverINS = false;
+      }
+    }
+  }
+  else {
+    V_LiftDebounceTimer = 0;
+  }
+  
+  return(L_criteria_met);
+}
+
+/******************************************************************************
+ * Function:       S10_final_YD
+ *
+ * Description:  State 10: y move down, robert move up (what a chad)
+ ******************************************************************************/
+ bool S10_final_YD(double         L_driver_auto_climb_button,
+                   double         L_lift_measured_position_YD,
+                   double         L_lift_measured_position_XD,
+                   double        *L_lift_command_YD,
+                   double        *L_lift_command_XD,
+                   double        *L_lift_command_rate_YD,
+                   double        *L_lift_command_rate_XD,
+                   T_Lift_Iteration L_LiftIteration)  
+{
+  bool L_criteria_met = false;
+  
+  *L_lift_command_YD = K_lift_S10_YD;
+
+  *L_lift_command_XD = K_lift_S10_XD;
+
+  *L_lift_command_rate_YD = K_LiftRampRateYD[E_S10_final_YD][L_LiftIteration]; // Slow down, don't yank too hard
+
+  *L_lift_command_rate_XD = K_LiftRampRateXD[E_S10_final_YD][L_LiftIteration];
+
+  if (L_lift_measured_position_YD <= (K_lift_S10_YD + K_lift_deadband_YD) && L_lift_measured_position_YD >= (K_lift_S10_YD - K_lift_deadband_YD)) {
+    V_LiftDebounceTimer += C_ExeTime;
+    if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
+          L_criteria_met = true;
+          V_LiftDebounceTimer = 0;
+    }
+  }
+  else {
+    V_LiftDebounceTimer = 0;
+  }
+  
+  return(L_criteria_met);
+}
+
+/******************************************************************************
+ * Function:       S11_final_OWO
+ *
+ * Description:  State 11: uwu
+ ******************************************************************************/
+ bool S11_final_OWO(double         L_driver_auto_climb_button,
+                    double         L_lift_measured_position_YD,
+                    double         L_lift_measured_position_XD,
+                    double        *L_lift_command_YD,
+                    double        *L_lift_command_XD,
+                    double        *L_lift_command_rate_YD,
+                    double        *L_lift_command_rate_XD,
+                    T_Lift_Iteration L_LiftIteration)  
+{
+  bool L_criteria_met = false;
+  
+  *L_lift_command_YD = K_lift_S11_YD;
+
+  *L_lift_command_XD = K_lift_S11_XD;
+
+  *L_lift_command_rate_YD = K_LiftRampRateYD[E_S11_final_OWO][L_LiftIteration];
+
+  *L_lift_command_rate_XD = K_LiftRampRateXD[E_S11_final_OWO][L_LiftIteration];
+
+  if (L_lift_measured_position_YD <= (K_lift_S11_YD + K_lift_deadband_YD) && L_lift_measured_position_YD >= (K_lift_S11_YD - K_lift_deadband_YD)) {
+    V_LiftDebounceTimer += C_ExeTime;
+    if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
+      V_Lift_WaitingForDriverINS = true;
+      if (L_driver_auto_climb_button == true){
+         /* Let the driver determine when we are not swinging and can proceed */
+         L_criteria_met = true;
+         V_LiftDebounceTimer = 0;
+         V_Lift_WaitingForDriverINS = false;
+      }
+    }
+  }
+  else {
+    V_LiftDebounceTimer = 0;
+  }
+  
+  return(L_criteria_met);
+}
+
+
+/******************************************************************************
  * Function:     Lift_Control_Dictator
  *
  * Description:  Main calling function for lift control.
@@ -285,8 +670,8 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_auto_climb_butto
   T_Lift_State L_Commanded_State = L_current_state;
   double L_lift_command_YD_Temp = 0;
   double L_lift_command_XD_Temp = 0;
-  double L_lift_command_rate_YD = KV_LiftMotorXDYD_MaxRampRate;
-  double L_lift_command_rate_XD = KV_LiftMotorXDYD_MaxRampRate;
+  double L_lift_command_rate_YD = K_LiftRampRateYD[E_S0_BEGONE][E_LiftIteration1];
+  double L_lift_command_rate_XD = K_LiftRampRateXD[E_S0_BEGONE][E_LiftIteration1];;
   double L_LiftYD_Power = 0;
   double L_LiftXD_Power = 0;
 
@@ -358,75 +743,75 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_auto_climb_butto
         break;
 
         case E_S2_lift_down_YD:
-            V_criteria_met = S2_lift_down_YD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
+            V_criteria_met = S2_lift_down_YD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD, V_LiftIteration);
             if(V_criteria_met == true){
               L_Commanded_State =   E_S3_move_forward_XD;
             }
         break;
 
         case E_S3_move_forward_XD:
-            V_criteria_met = S3_move_forward_XD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
+            V_criteria_met = S3_move_forward_XD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD, V_LiftIteration);
             if(V_criteria_met == true){
               L_Commanded_State =   E_S4_stretch_up_YD;
             }
         break;
 
         case E_S4_stretch_up_YD:
-            V_criteria_met = S4_stretch_up_YD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
+            V_criteria_met = S4_stretch_up_YD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD, V_LiftIteration);
             if(V_criteria_met == true){
               L_Commanded_State =   E_S5_more_forward_XD;
             }
         break;
 
         case E_S5_more_forward_XD:
-            V_criteria_met = S5_more_forward_XD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
+            V_criteria_met = S5_more_forward_XD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD, V_LiftIteration);
             if(V_criteria_met == true){
               L_Commanded_State =   E_S6_lift_up_more_YD;
             }
         break;
 
         case E_S6_lift_up_more_YD:
-            V_criteria_met = S6_lift_up_more_YD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
+            V_criteria_met = S6_lift_up_more_YD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD, V_LiftIteration);
             if(V_criteria_met == true){
               L_Commanded_State =   E_S7_move_back_XD;
             }
         break;
 
         case E_S7_move_back_XD:
-            V_criteria_met = S7_move_back_XD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, L_gyro_yawangledegrees, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
+            V_criteria_met = S7_move_back_XD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, L_gyro_yawangledegrees, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD, V_LiftIteration);
             if(V_criteria_met == true){
               L_Commanded_State =   E_S8_more_down_some_YD;
             }
         break;
 
         case E_S8_more_down_some_YD:
-            V_criteria_met = S8_more_down_some_YD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
+            V_criteria_met = S8_more_down_some_YD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD, V_LiftIteration);
             if(V_criteria_met == true){
               L_Commanded_State =   E_S9_back_rest_XD;
             }
         break;
 
         case E_S9_back_rest_XD:
-            V_criteria_met = S9_back_rest_XD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
+            V_criteria_met = S9_back_rest_XD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD, V_LiftIteration);
             if(V_criteria_met == true){
               L_Commanded_State =   E_S10_final_YD;
             }
         break;
 
         case E_S10_final_YD:
-            V_criteria_met = S10_final_YD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
+            V_criteria_met = S10_final_YD(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD, V_LiftIteration);
             if(V_criteria_met == true){
               L_Commanded_State = E_S11_final_OWO;
             }
         break;
 
         case E_S11_final_OWO:
-            V_criteria_met = S11_final_OWO(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD);
-            if(V_criteria_met == true && V_lift_counter < 1){
+            V_criteria_met = S11_final_OWO(L_driver_auto_climb_button, L_lift_measured_position_YD, L_lift_measured_position_XD, &L_lift_command_YD_Temp, &L_lift_command_XD_Temp, &L_lift_command_rate_YD, &L_lift_command_rate_XD, V_LiftIteration);
+            if(V_criteria_met == true && V_LiftIteration < E_LiftIteration2){
               L_Commanded_State = E_S2_lift_down_YD;
-              V_lift_counter++;
+              V_LiftIteration = E_LiftIteration2;
             }
-            else if(V_criteria_met == true && V_lift_counter >= 1){
+            else if(V_criteria_met == true && V_LiftIteration >= E_LiftIteration2){
               L_Commanded_State = E_S11_final_OWO;
             }
         break;
@@ -458,9 +843,6 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_auto_climb_butto
     L_lift_command_XD_Temp = K_lift_max_XD;
     }
 
-  frc::SmartDashboard::PutNumber("L_DriverLiftCmndDirection",  (float)L_DriverLiftCmndDirection);
-  frc::SmartDashboard::PutNumber("L_lift_command_YD_Temp",  L_lift_command_YD_Temp);
-
   *L_lift_command_YD= RampTo(L_lift_command_YD_Temp, *L_lift_command_YD, L_lift_command_rate_YD);
 
   *L_lift_command_XD= RampTo(L_lift_command_XD_Temp, *L_lift_command_XD, L_lift_command_rate_XD);
@@ -474,388 +856,4 @@ T_Lift_State Lift_Control_Dictator(bool                L_driver_auto_climb_butto
                             L_liftMotorXD_CurrentOut);
 
   return(L_Commanded_State);
-}
-
-
-/******************************************************************************
- * Function:     S2_lift_down_YD
- *
- * Description:  State 2: moving robert up by moving y-lift down
- ******************************************************************************/
- bool S2_lift_down_YD(double         L_driver_auto_climb_button,
-                      double         L_lift_measured_position_YD,
-                      double         L_lift_measured_position_XD,
-                      double        *L_lift_command_YD,
-                      double        *L_lift_command_XD,
-                      double        *L_lift_command_rate_YD,
-                      double        *L_lift_command_rate_XD)  
-{
-  bool L_criteria_met = false;
-
-  *L_lift_command_YD = K_lift_S2_YD;
-
-  *L_lift_command_XD = K_lift_min_XD;
-
-  *L_lift_command_rate_YD = KV_LiftMotorXDYD_MaxRampRate;
-
-  *L_lift_command_rate_XD = KV_LiftMotorXDYD_MaxRampRate;
-
-  if (L_lift_measured_position_YD <= (K_lift_S2_YD + K_lift_deadband_YD) && L_lift_measured_position_YD >= (K_lift_S2_YD - K_lift_deadband_YD)) {
-    L_criteria_met = true;
-  }
-  
-  return(L_criteria_met);
-}
-
-/******************************************************************************
- * Function:       S3_move_forward_XD,
- *
- * Description:  State 3: moving x lift haha it has to do its job
- ******************************************************************************/
- bool S3_move_forward_XD(double         L_driver_auto_climb_button,
-                         double         L_lift_measured_position_YD,
-                         double         L_lift_measured_position_XD,
-                         double        *L_lift_command_YD,
-                         double        *L_lift_command_XD,
-                         double        *L_lift_command_rate_YD,
-                         double        *L_lift_command_rate_XD)  
-{
-  bool L_criteria_met = false;
-  
-  *L_lift_command_XD = K_lift_S3_XD;
-
-  *L_lift_command_YD = K_lift_S3_YD;
-
-  *L_lift_command_rate_YD = KV_LiftMotorXDYD_MaxRampRate;
-
-  *L_lift_command_rate_XD = KV_LiftMotorXDYD_MaxRampRate;
-
-  if (L_lift_measured_position_XD <= (K_lift_S3_XD + K_lift_deadband_XD) && L_lift_measured_position_XD >= (K_lift_S3_XD - K_lift_deadband_XD)) {
-    V_LiftDebounceTimer += C_ExeTime;
-    if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
-          L_criteria_met = true;
-          V_LiftDebounceTimer = 0;
-    }
-  }
-  else {
-    V_LiftDebounceTimer = 0;
-  }
-
-  return(L_criteria_met);
-}
-
-/******************************************************************************
- * Function:       S4_stretch_up_YD,
- *
- * Description:  State 4: x lift no move, y lift go
- ******************************************************************************/
- bool S4_stretch_up_YD(double         L_driver_auto_climb_button,
-                       double         L_lift_measured_position_YD,
-                       double         L_lift_measured_position_XD,
-                       double        *L_lift_command_YD,
-                       double        *L_lift_command_XD,
-                       double        *L_lift_command_rate_YD,
-                       double        *L_lift_command_rate_XD)  
-{
-   bool L_criteria_met = false;
-  
-  *L_lift_command_YD = K_lift_S4_YD;
-
-  *L_lift_command_XD = K_lift_S4_XD;
-
-  *L_lift_command_rate_YD = KV_LiftMotorXDYD_MaxRampRate;
-
-  *L_lift_command_rate_XD = KV_LiftMotorXDYD_MaxRampRate;
-
-  if (L_lift_measured_position_YD <= (K_lift_S4_YD + K_lift_deadband_YD) && L_lift_measured_position_YD >= (K_lift_S4_YD - K_lift_deadband_YD)) {
-    V_LiftDebounceTimer += C_ExeTime;
-    if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
-          L_criteria_met = true;
-          V_LiftDebounceTimer = 0;
-    }
-  }
-  else {
-    V_LiftDebounceTimer = 0;
-  }
-  
-  return(L_criteria_met);
-}
-
-/******************************************************************************
- * Function:       S5_more_forward_XD,
- *
- * Description:  State 5: y lift no move, x lift go
- ******************************************************************************/
- bool S5_more_forward_XD(double         L_driver_auto_climb_button,
-                         double         L_lift_measured_position_YD,
-                         double         L_lift_measured_position_XD,
-                         double        *L_lift_command_YD,
-                         double        *L_lift_command_XD,
-                         double        *L_lift_command_rate_YD,
-                         double        *L_lift_command_rate_XD)  
-{
-  bool L_criteria_met = false;
-
-  *L_lift_command_XD = K_lift_S5_XD;
-
-  *L_lift_command_YD = K_lift_S5_YD;
-
-  *L_lift_command_rate_YD = KV_LiftMotorXDYD_MaxRampRate;
-
-  *L_lift_command_rate_XD = KV_LiftMotorXDYD_MaxRampRate;
-
-  if (L_lift_measured_position_XD <= (K_lift_S5_XD + K_lift_deadband_XD) && L_lift_measured_position_XD >= (K_lift_S5_XD - K_lift_deadband_XD)) {
-    V_LiftDebounceTimer += C_ExeTime;
-    if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
-          L_criteria_met = true;
-          V_LiftDebounceTimer = 0;
-    }
-  }
-  else {
-    V_LiftDebounceTimer = 0;
-  }
-  
-  return(L_criteria_met);
-}
-
-/******************************************************************************
- * Function:       S6_lift_up_more_YD,
- *
- * Description:  State 6: y lift go down, x lift bad stop what's in your mouth no get back here doN'T EAT IT
- ******************************************************************************/
- bool S6_lift_up_more_YD(double         L_driver_auto_climb_button,
-                         double         L_lift_measured_position_YD,
-                         double         L_lift_measured_position_XD,
-                         double        *L_lift_command_YD,
-                         double        *L_lift_command_XD,
-                         double        *L_lift_command_rate_YD,
-                         double        *L_lift_command_rate_XD)  
-{
-  bool L_criteria_met = false;
-
-  *L_lift_command_YD = K_lift_S6_YD;
-
-  *L_lift_command_XD = K_lift_S6_XD;
-
-  *L_lift_command_rate_YD = KV_LiftMotorXDYD_MaxRampRate;
-
-  *L_lift_command_rate_XD = KV_LiftMotorXDYD_MaxRampRate;
-
-  if (L_lift_measured_position_YD <= (K_lift_S6_YD + K_lift_deadband_YD) && L_lift_measured_position_YD >= (K_lift_S6_YD - K_lift_deadband_YD)) {
-    V_LiftDebounceTimer += C_ExeTime;
-    if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
-          L_criteria_met = true;
-          V_LiftDebounceTimer = 0;
-    }
-  }
-  else {
-    V_LiftDebounceTimer = 0;
-  }
-  
-  return(L_criteria_met);
-}
-
-/******************************************************************************
- * Function:       S7_move_back_XD,
- *
- * Description:  State 7: X go back-aroni, we look at gyro to make sure we aren't tilted too much
- ******************************************************************************/
- bool S7_move_back_XD(double         L_driver_auto_climb_button,
-                      double         L_lift_measured_position_YD,
-                      double         L_lift_measured_position_XD,
-                      double         L_gyro_yawangledegrees,
-                      double        *L_lift_command_YD,
-                      double        *L_lift_command_XD,
-                      double        *L_lift_command_rate_YD,
-                      double        *L_lift_command_rate_XD)  
-{
-  bool L_criteria_met = false;
-
-  *L_lift_command_XD = K_lift_S7_XD;
-
-  *L_lift_command_YD = K_lift_S7_YD;
-
-  *L_lift_command_rate_YD = KV_LiftMotorXDYD_MaxRampRate;
-
-  *L_lift_command_rate_XD = KV_LiftMotorXDYD_MinRampRate; // Don't go too fast, going slower will help to reduce rocking
-
-  if (L_lift_measured_position_XD <= (K_lift_S7_XD + K_lift_deadband_XD)  && L_lift_measured_position_XD >= (K_lift_S7_XD - K_lift_deadband_XD)) {
-    V_LiftDebounceTimer += C_ExeTime;
-    if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
-      V_Lift_WaitingForDriverINS = true;
-      if (L_driver_auto_climb_button == true){
-         /* Let the driver determine when we are not swinging and can proceed */
-         L_criteria_met = true;
-         V_LiftDebounceTimer = 0;
-         V_Lift_WaitingForDriverINS = false;
-      }
-    }
-  }
-  else {
-    V_LiftDebounceTimer = 0;
-  }
-  return(L_criteria_met);
-}
-
-/******************************************************************************
- * Function:       S8_more_down_some_YD,
- *
- * Description:  State 8: me when the lift go down more
- ******************************************************************************/
- bool S8_more_down_some_YD(double         L_driver_auto_climb_button,
-                           double         L_lift_measured_position_YD,
-                           double         L_lift_measured_position_XD,
-                           double        *L_lift_command_YD,
-                           double        *L_lift_command_XD,
-                           double        *L_lift_command_rate_YD,
-                           double        *L_lift_command_rate_XD)  
-{
-  bool L_criteria_met = false;
-  
-  *L_lift_command_YD = K_lift_S8_YD;
-
-  *L_lift_command_XD = K_lift_S8_XD;
-
-  *L_lift_command_rate_YD = KV_LiftMotorXDYD_MaxRampRate;
-
-  *L_lift_command_rate_XD = KV_LiftMotorXDYD_MaxRampRate;
-
-  if (L_lift_measured_position_YD <= (K_lift_S8_YD + K_lift_deadband_YD) && L_lift_measured_position_YD >= (K_lift_S8_YD - K_lift_deadband_YD)) {
-    V_LiftDebounceTimer += C_ExeTime;
-    if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
-      V_Lift_WaitingForDriverINS = true;
-      if (L_driver_auto_climb_button == true){
-         /* Let the driver determine when we are not swinging and can proceed */
-         L_criteria_met = true;
-         V_LiftDebounceTimer = 0;
-         V_Lift_WaitingForDriverINS = false;
-      }
-    }
-  }
-  else {
-    V_LiftDebounceTimer = 0;
-  }
-  
-  return(L_criteria_met);
-}
-
-/******************************************************************************
- * Function:       S9_back_rest_XD
- *
- * Description:  State 9: reset it to initial x position (we aren't fixing my back  :(  )
- ******************************************************************************/
- bool S9_back_rest_XD(double         L_driver_auto_climb_button,
-                      double         L_lift_measured_position_YD,
-                      double         L_lift_measured_position_XD,
-                      double        *L_lift_command_YD,
-                      double        *L_lift_command_XD,
-                      double        *L_lift_command_rate_YD,
-                      double        *L_lift_command_rate_XD)  
-{
-  bool L_criteria_met = false;
-  
-  *L_lift_command_XD = K_lift_S9_XD;
-
-  *L_lift_command_YD = K_lift_S9_YD;
-
-  *L_lift_command_rate_YD = KV_LiftMotorXDYD_MaxRampRate;
-
-  *L_lift_command_rate_XD = KV_LiftMotorXDYD_MaxRampRate;
-
-  if (L_lift_measured_position_XD <= (K_lift_S9_XD + K_lift_deadband_XD) && L_lift_measured_position_XD >= (K_lift_S9_XD - K_lift_deadband_XD)) {
-    V_LiftDebounceTimer += C_ExeTime;
-    if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
-      V_Lift_WaitingForDriverINS = true;
-      if (L_driver_auto_climb_button == true){
-         /* Let the driver determine when we are not swinging and can proceed */
-         L_criteria_met = true;
-         V_LiftDebounceTimer = 0;
-         V_Lift_WaitingForDriverINS = false;
-      }
-    }
-  }
-  else {
-    V_LiftDebounceTimer = 0;
-  }
-  
-  return(L_criteria_met);
-}
-
-/******************************************************************************
- * Function:       S10_final_YD
- *
- * Description:  State 10: y move down, robert move up (what a chad)
- ******************************************************************************/
- bool S10_final_YD(double         L_driver_auto_climb_button,
-                   double         L_lift_measured_position_YD,
-                   double         L_lift_measured_position_XD,
-                   double        *L_lift_command_YD,
-                   double        *L_lift_command_XD,
-                   double        *L_lift_command_rate_YD,
-                   double        *L_lift_command_rate_XD)  
-{
-  bool L_criteria_met = false;
-  
-  *L_lift_command_YD = K_lift_S10_YD;
-
-  *L_lift_command_XD = K_lift_S10_XD;
-
-  *L_lift_command_rate_YD = KV_LiftMotorXDYD_MinRampRate; // Slow down, don't yank too hard
-
-  *L_lift_command_rate_XD = KV_LiftMotorXDYD_MaxRampRate;
-
-  if (L_lift_measured_position_YD <= (K_lift_S10_YD + K_lift_deadband_YD) && L_lift_measured_position_YD >= (K_lift_S10_YD - K_lift_deadband_YD)) {
-    V_LiftDebounceTimer += C_ExeTime;
-    if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
-          L_criteria_met = true;
-          V_LiftDebounceTimer = 0;
-    }
-  }
-  else {
-    V_LiftDebounceTimer = 0;
-  }
-  
-  return(L_criteria_met);
-}
-
-/******************************************************************************
- * Function:       S11_final_OWO
- *
- * Description:  State 11: uwu
- ******************************************************************************/
- bool S11_final_OWO(double         L_driver_auto_climb_button,
-                    double         L_lift_measured_position_YD,
-                    double         L_lift_measured_position_XD,
-                    double        *L_lift_command_YD,
-                    double        *L_lift_command_XD,
-                    double        *L_lift_command_rate_YD,
-                    double        *L_lift_command_rate_XD)  
-{
-  bool L_criteria_met = false;
-  
-  *L_lift_command_YD = K_lift_S11_YD;
-
-  *L_lift_command_XD = K_lift_S11_XD;
-
-  *L_lift_command_rate_YD = KV_LiftMotorXDYD_MaxRampRate;
-
-  *L_lift_command_rate_XD = KV_LiftMotorXDYD_MaxRampRate;
-
-  if (L_lift_measured_position_YD <= (K_lift_S11_YD + K_lift_deadband_YD) && L_lift_measured_position_YD >= (K_lift_S11_YD - K_lift_deadband_YD)) {
-    V_LiftDebounceTimer += C_ExeTime;
-    if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
-      V_Lift_WaitingForDriverINS = true;
-      if (L_driver_auto_climb_button == true){
-         /* Let the driver determine when we are not swinging and can proceed */
-         L_criteria_met = true;
-         V_LiftDebounceTimer = 0;
-         V_Lift_WaitingForDriverINS = false;
-      }
-    }
-  }
-  else {
-    V_LiftDebounceTimer = 0;
-  }
-  
-  return(L_criteria_met);
 }

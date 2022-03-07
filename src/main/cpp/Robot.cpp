@@ -46,10 +46,7 @@ void Robot::RobotInit()
   V_AllianceColor      = frc::DriverStation::GetInstance().GetAlliance();
   V_MatchTimeRemaining = frc::Timer::GetMatchTime().value();
 
-  // frc::CameraServer::StartAutomaticCapture("Camera 1", "/dev/video0");
-  // frc::CameraServer::StartAutomaticCapture("Camera 2", "/dev/video1");
-  // // frc::CameraServer::StartAutomaticCapture("Camera 3", "/dev/video2");
-  frc::CameraServer::StartAutomaticCapture();
+  // frc::CameraServer::StartAutomaticCapture();  // For connecting a single USB camera directly to RIO
 
   EncodersInit(m_encoderFrontRightSteer,
                m_encoderFrontLeftSteer,
@@ -107,33 +104,13 @@ void Robot::RobotInit()
   ADAS_BT_ConfigsInit();
 
   VisionRobotInit();
+
   VisionInit(V_AllianceColor);
-
-  // pc_Camera1.SetDriverMode(true);
-  // pc_Camera2.SetDriverMode(true);
-  
-
-// if (V_VisionDriverMode == false){
-
-
-//   pc_Camera1.SetPipelineIndex(V_VisionCameraIndex[E_Cam1]);
-//   pc_Camera2.SetPipelineIndex(V_VisionCameraIndex[E_Cam2]);
-
-// }
-// else{
-//   pc_Camera1.SetDriverMode(V_VisionDriverMode);
-//   pc_Camera2.SetDriverMode(V_VisionDriverMode);
-
-// }
 
 // m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
 // m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
 // frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
 // frc::SmartDashboard::PutNumber("cooler int", 1);
-
-
-
-
   }
 
 
@@ -167,7 +144,8 @@ void Robot::RobotPeriodic()
                          c_joyStick.GetRawButton(4),
                          c_joyStick2.GetPOV(),
                          c_joyStick.GetRawButton(6),
-                         c_joyStick.GetRawButton(2));
+                         c_joyStick.GetRawButton(2),
+                         c_joyStick.GetRawButton(5));
 
   Read_Encoders(a_encoderWheelAngleFrontLeft.Get().value(),
                 a_encoderWheelAngleFrontRight.Get().value(),
@@ -194,51 +172,52 @@ void Robot::RobotPeriodic()
                          &V_M_WheelDeltaDistance[0]);
 
   V_ADAS_ActiveFeature = ADAS_ControlMainTeleop(&V_ADAS_Pct_SD_FwdRev,
-                                              &V_ADAS_Pct_SD_Strafe,
-                                              &V_ADAS_Pct_SD_Rotate,
-                                              &V_ADAS_RPM_BH_Launcher,
-                                              &V_ADAS_Pct_BH_Intake,
-                                              &V_ADAS_Pct_BH_Elevator,
-                                              &V_ADAS_CameraUpperLightCmndOn,
-                                              &V_ADAS_CameraLowerLightCmndOn,
-                                              &V_ADAS_SD_RobotOriented,
-                                               V_Driver_JoystickActive,
-                                               V_Driver_StopShooterAutoClimbResetGyro,
-                                               V_Driver_SwerveGoalAutoCenter,
-                                               V_Driver_AutoIntake,
-                                               V_GyroYawAngleDegrees,
-                                               V_VisionTargetAquired[E_CamTop],
-                                               V_VisionYaw[E_CamTop],
-                                               V_VisionTargetDistanceMeters[E_CamTop],
-                                               V_VisionTargetAquired[E_CamBottom],
-                                               V_VisionYaw[E_CamBottom],
-                                               V_VisionTargetDistanceMeters[E_CamBottom],
-                                               V_RobotState,
-                                               V_ShooterSpeedCurr,
-                                               V_BallDetectedUpper,
-                                               V_Driver_elevator_up,
-                                               V_Driver_elevator_down,
-                                               V_ADAS_ActiveFeature);
+                                                &V_ADAS_Pct_SD_Strafe,
+                                                &V_ADAS_Pct_SD_Rotate,
+                                                &V_ADAS_RPM_BH_Launcher,
+                                                &V_ADAS_Pct_BH_Intake,
+                                                &V_ADAS_Pct_BH_Elevator,
+                                                &V_ADAS_CameraUpperLightCmndOn,
+                                                &V_ADAS_CameraLowerLightCmndOn,
+                                                &V_ADAS_SD_RobotOriented,
+                                                &V_ADAS_Vision_RequestedTargeting,
+                                                 V_Driver_JoystickActive,
+                                                 V_Driver_StopShooterAutoClimbResetGyro,
+                                                 V_Driver_SwerveGoalAutoCenter,
+                                                 V_Driver_AutoIntake,
+                                                 V_GyroYawAngleDegrees,
+                                                 V_VisionTargetAquired[E_CamTop],
+                                                 V_VisionYaw[E_CamTop],
+                                                 V_VisionTargetDistanceMeters[E_CamTop],
+                                                 V_VisionTargetAquired[E_CamBottom],
+                                                 V_VisionYaw[E_CamBottom],
+                                                 V_VisionTargetDistanceMeters[E_CamBottom],
+                                                 V_RobotState,
+                                                 V_ShooterSpeedCurr,
+                                                 V_BallDetectedUpper,
+                                                 V_Driver_elevator_up,
+                                                 V_Driver_elevator_down,
+                                                 V_ADAS_ActiveFeature);
 
   DriveControlMain( V_Driver_SwerveForwardBack,  // swerve control forward/back
-                  V_Driver_SwerveStrafe,  // swerve control strafe
-                  V_Driver_SwerveRotate,  // rotate the robot joystick
-                  V_Driver_SwerveSpeed,   // extra speed trigger
-                  V_Driver_SwerveRotateTo0, // auto rotate to 0 degrees
-                  V_Driver_SwerveRotateTo90, // auto rotate to 90 degrees
-                  V_ADAS_ActiveFeature,
-                  V_ADAS_Pct_SD_FwdRev,
-                  V_ADAS_Pct_SD_Strafe,
-                  V_ADAS_Pct_SD_Rotate,
-                  V_ADAS_SD_RobotOriented,
-                  V_GyroYawAngleDegrees,
-                  V_GyroYawAngleRad,
-                 &V_WheelAngleFwd[0],
-                 &V_WheelAngleRev[0],
-                 &V_WheelSpeedCmnd[0],
-                 &V_WheelAngleCmnd[0]);
+                    V_Driver_SwerveStrafe,  // swerve control strafe
+                    V_Driver_SwerveRotate,  // rotate the robot joystick
+                    V_Driver_SwerveSpeed,   // extra speed trigger
+                    V_Driver_SwerveRotateTo0, // auto rotate to 0 degrees
+                    V_Driver_SwerveRotateTo90, // auto rotate to 90 degrees
+                    V_ADAS_ActiveFeature,
+                    V_ADAS_Pct_SD_FwdRev,
+                    V_ADAS_Pct_SD_Strafe,
+                    V_ADAS_Pct_SD_Rotate,
+                    V_ADAS_SD_RobotOriented,
+                    V_GyroYawAngleDegrees,
+                    V_GyroYawAngleRad,
+                   &V_WheelAngleFwd[0],
+                   &V_WheelAngleRev[0],
+                   &V_WheelSpeedCmnd[0],
+                   &V_WheelAngleCmnd[0]);
 
-    BallHandlerControlMain( V_Driver_intake_in,
+  BallHandlerControlMain( V_Driver_intake_in,
                           V_Driver_intake_out,
                           V_BallDetectedUpper,
                           V_BallDetectedLower,
@@ -265,15 +244,22 @@ void Robot::RobotPeriodic()
                   &V_CameraLightCmndOn,
                   &V_VanityLightCmnd);
 
-  // VisionRun(pc_Camera1.GetLatestResult(),
-  //           pc_Camera2.GetLatestResult());
+  VisionRun( pc_Camera1.GetLatestResult(),
+             pc_Camera2.GetLatestResult(),
+             V_ADAS_Vision_RequestedTargeting,
+             V_Driver_VisionDriverModeOverride,
+            &V_VisionDriverModeCmndFinal);
 
-
-  VisionInit(V_AllianceColor);
-  // pc_Camera1.SetPipelineIndex(V_VisionCameraIndex[E_Cam1]);
-  // pc_Camera2.SetPipelineIndex(V_VisionCameraIndex[E_Cam2]);
-// pc_Camera1.SetDriverMode(V_VisionDriverMode);
-// pc_Camera2.SetDriverMode(V_VisionDriverMode);
+  if (V_VisionDriverModeCmndFinal == false)
+    {
+    pc_Camera1.SetPipelineIndex(V_VisionCameraIndex[E_Cam1]);
+    pc_Camera2.SetPipelineIndex(V_VisionCameraIndex[E_Cam2]);
+    }
+  else
+    {
+    pc_Camera1.SetDriverMode(V_VisionDriverModeCmndFinal);
+    pc_Camera2.SetDriverMode(V_VisionDriverModeCmndFinal);
+    }
 
   V_Lift_state = Lift_Control_Dictator(V_Driver_lift_control,
                                        V_Driver_StopShooterAutoClimbResetGyro,
@@ -307,11 +293,10 @@ void Robot::RobotPeriodic()
                       m_liftpidXD);
 
   ADAS_UT_ConfigsCal();
+
   ADAS_BT_ConfigsCal();
 
 /* Output all of the content to the dashboard here: */
-// frc::SmartDashboard::PutBoolean("Driver Mode state", pc_Camera1.GetDriverMode());
-
   frc::SmartDashboard::PutBoolean("XD Limit Detected", V_XD_LimitDetected);
   frc::SmartDashboard::PutBoolean("YD Limit Detected", V_YD_LimitDetected);
   frc::SmartDashboard::PutBoolean("Ball Detected Upper", V_BallDetectedUpper);
@@ -340,7 +325,6 @@ void Robot::RobotPeriodic()
 
   // frc::SmartDashboard::PutNumber("Camera 1 Pipeline Index", float(pc_Camera1.GetPipelineIndex()));
   // frc::SmartDashboard::PutNumber("Camera 2 Pipeline Index", float(pc_Camera2.GetPipelineIndex()));
-
 
   // frc::SmartDashboard::PutNumber("ADAS ActiveFeature",     float(V_ADAS_ActiveFeature));
   // frc::SmartDashboard::PutNumber("ADAS SD_FwdRev",               V_ADAS_Pct_SD_FwdRev);

@@ -32,6 +32,7 @@
   bool                V_Driver_CameraLight = false;
   bool                V_Driver_AutoIntake = false;
   bool                V_Driver_JoystickActive = false; // If Driver 1 presses any of the joysticks, indicate true
+  bool                V_Driver_VisionDriverModeOverride = false;
 
 /******************************************************************************
  * Function:     Joystick_robot_mapping
@@ -58,7 +59,8 @@ void Joystick_robot_mapping(bool    L_Driver2_buttonA,
                             bool    L_Driver1_ButtonY,
                             int     L_Driver2_POV,
                             bool    L_Driver1_buttonRB,
-                            bool    L_Driver1_buttonB)
+                            bool    L_Driver1_buttonB,
+                            bool    L_Driver1_ButtonLB)
   {
   double L_AxisToatl = 0;
 
@@ -80,6 +82,7 @@ void Joystick_robot_mapping(bool    L_Driver2_buttonA,
   V_Driver_SwerveRotateTo90 = L_Driver1_ButtonY;
   V_Driver_CameraLight = L_Driver1_buttonRB;                      //Controller 1, X button (3), when held, turns on the camera light
   V_Driver_AutoIntake = L_Driver1_buttonB;
+  V_Driver_VisionDriverModeOverride = L_Driver1_ButtonLB;
 
   L_AxisToatl = (fabs(V_Driver_SwerveStrafe) + fabs(V_Driver_SwerveRotate) + fabs(V_Driver_SwerveSpeed));
   

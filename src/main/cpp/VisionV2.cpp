@@ -23,7 +23,14 @@ T_CameraNumber V_VisionCamNumber[E_CamLocSz];
 bool           V_VisionTargetAquired[E_CamLocSz];
 double         V_VisionYaw[E_CamLocSz];
 double         V_VisionTargetDistanceMeters[E_CamLocSz];
-bool           V_VisionDriverMode;
+
+double         V_VisionDriverModeDelayTime; // Time to delay before allowing calculations.  This is needed to allow the driver mode to be communicated with the PI and then to allow the data to come back once in the correct mode.
+
+bool           V_VisionDriverRequestedModeCmnd; // Requested driver mode override
+bool           V_VisionDriverRequestedModeCmndLatched; // Latched state of the driver requested mode
+bool           V_VisionDriverRequestedModeCmndPrev; // Requested driver mode override previous
+
+bool           V_VisionDriverModeCmndFinal; // Final command to toggle the camera driver mode
 
 /******************************************************************************
  * Function:     VisionRobotInit
@@ -35,7 +42,6 @@ void VisionRobotInit()
   /* Place an input on the dash.  A value of 1 indicates top camera is cam 1, 
      otherwise it is camera 2 */
   frc::SmartDashboard::PutNumber("Top Camera Number", V_VisionTopCamNumberTemp);
-  frc::SmartDashboard::PutBoolean("Driver Mode", V_VisionDriverMode);
   }
 
 
@@ -48,7 +54,6 @@ void VisionInit(frc::DriverStation::Alliance L_AllianceColor)
   {
   /* Check the driver station for what the top camera number should be: */
   V_VisionTopCamNumberTemp = frc::SmartDashboard::GetNumber("Top Camera Number", V_VisionTopCamNumberTemp);
-  V_VisionDriverMode = frc::SmartDashboard::GetBoolean("Driver Mode", V_VisionDriverMode);
 
   if (fabs(V_VisionTopCamNumberTemp) < 1.5)
     {
@@ -72,9 +77,6 @@ void VisionInit(frc::DriverStation::Alliance L_AllianceColor)
     V_VisionCameraIndex[V_VisionCamNumber[E_CamBottom]] = 3; // 3 is the index for a blue ball
     V_VisionCameraIndex[V_VisionCamNumber[E_CamTop]] = 1; // 1 is the top camera targeting index
     }
-
-    
-
   }
 
 
@@ -85,38 +87,91 @@ void VisionInit(frc::DriverStation::Alliance L_AllianceColor)
  *               vision output.
  ******************************************************************************/
 void VisionRun(photonlib::PhotonPipelineResult pc_L_TopResult,
-               photonlib::PhotonPipelineResult pc_L_BottomResult)
+               photonlib::PhotonPipelineResult pc_L_BottomResult,
+               bool                            L_AutoTargetRequest,
+               bool                            L_DriverDriveModeReq,
+               bool                           *L_VisionDriverModeCmndFinal)
   {
-  // T_CameraLocation L_Index = E_CamTop;
-  // units::meter_t L_Range = 0_m;
-  // photonlib::PhotonTrackedTarget L_Target;
-  // photonlib::PhotonPipelineResult pc_L_Result[E_CamSz];
+  T_CameraLocation L_Index = E_CamTop;
+  units::meter_t L_Range = 0_m;
+  photonlib::PhotonTrackedTarget L_Target;
+  photonlib::PhotonPipelineResult pc_L_Result[E_CamSz];
+  bool L_VisionDriverModeCmndFinalTemp = false;
 
-  // pc_L_Result[E_Cam1] = pc_L_TopResult;
-  // pc_L_Result[E_Cam2] = pc_L_BottomResult;
+  pc_L_Result[E_Cam1] = pc_L_TopResult;
+  pc_L_Result[E_Cam2] = pc_L_BottomResult;
   
-  // for (L_Index = E_CamTop;
-  //      L_Index < E_CamLocSz;
-  //      L_Index = T_CameraLocation(int(L_Index) + 1))
-  //     {
-  //     V_VisionTargetAquired[L_Index] = pc_L_Result[V_VisionCamNumber[L_Index]].HasTargets(); //returns true if the camera has a target  
+  /* Check to see what the driver wants for the driver mode: */
+  if (L_DriverDriveModeReq != V_VisionDriverRequestedModeCmndPrev)
+    {
+    /* Ok, we seem to have experienced a button press.  Let's flip the latched state*/
+    if (V_VisionDriverRequestedModeCmndLatched == true)
+      {
+      V_VisionDriverRequestedModeCmndLatched = false; // When false, the driver is requesting to revert to the targeting overlay
+      }
+    else
+      {
+      V_VisionDriverRequestedModeCmndLatched = true;  // When true, the driver is wanting a clear picture.
+      }
+    }
+
+  /* Save the previous version to help determine when there is a transition in the driver button press. */
+  V_VisionDriverRequestedModeCmndPrev = L_DriverDriveModeReq;
+
+  if (V_VisionDriverRequestedModeCmndLatched == true || L_AutoTargetRequest == true)
+    {
+    L_VisionDriverModeCmndFinalTemp = true;  // We want photon vision to be active and send targeting data.
+    V_VisionDriverModeDelayTime += C_ExeTime;
+    }
+  else
+    {
+    L_VisionDriverModeCmndFinalTemp = false;  // No need for data now, let's get a better picture.
+    V_VisionDriverModeDelayTime = 0;
+    }
+
+  /* Let's do the calculations here: */
+  if ((L_VisionDriverModeCmndFinalTemp == true) &&
+      (V_VisionDriverModeDelayTime >= K_VisionCalculationDelayTime))
+    {
+    /* Ok, we want vision to be active and sending data: */
+    for (L_Index = E_CamTop;
+         L_Index < E_CamLocSz;
+         L_Index = T_CameraLocation(int(L_Index) + 1))
+      {
+      V_VisionTargetAquired[L_Index] = pc_L_Result[V_VisionCamNumber[L_Index]].HasTargets(); //returns true if the camera has a target  
     
-  //     if (V_VisionTargetAquired[L_Index] == true)
-  //       {
-  //       L_Target = pc_L_Result[V_VisionCamNumber[L_Index]].GetBestTarget(); //gets the best target  
+      if (V_VisionTargetAquired[L_Index] == true)
+        {
+        L_Target = pc_L_Result[V_VisionCamNumber[L_Index]].GetBestTarget(); //gets the best target  
     
-  //       V_VisionYaw[L_Index] = L_Target.GetYaw(); // Yaw of the best target
+        V_VisionYaw[L_Index] = L_Target.GetYaw(); // Yaw of the best target
       
-  //       L_Range = photonlib::PhotonUtils::CalculateDistanceToTarget(
-  //                    K_VisionHeight[L_Index], K_VisionTargetHeight[L_Index], K_VisionCameraPitch[L_Index],
-  //                    units::degree_t{pc_L_Result[V_VisionCamNumber[L_Index]].GetBestTarget().GetPitch()}); // first 3 variables are constants from Const.hpp  
+        L_Range = photonlib::PhotonUtils::CalculateDistanceToTarget(
+                     K_VisionHeight[L_Index], K_VisionTargetHeight[L_Index], K_VisionCameraPitch[L_Index],
+                     units::degree_t{pc_L_Result[V_VisionCamNumber[L_Index]].GetBestTarget().GetPitch()}); // first 3 variables are constants from Const.hpp  
         
-  //       if (L_Range < 0_m)
-  //         {
-  //         L_Range = 0_m;
-  //         }
-  //       V_VisionTargetDistanceMeters[L_Index] = L_Range.value();
-  //       }
-  //     }
+        if (L_Range < 0_m)
+          {
+          L_Range = 0_m;
+          }
+        V_VisionTargetDistanceMeters[L_Index] = L_Range.value();
+        }
+      }
+    }
+  else
+    {
+    for (L_Index = E_CamTop;
+         L_Index < E_CamLocSz;
+         L_Index = T_CameraLocation(int(L_Index) + 1))
+      {
+      /* We don't want to be active, default everything to indicate no data: */
+      V_VisionTargetAquired[L_Index] = false;
+      V_VisionYaw[L_Index] = 0;
+      V_VisionTargetDistanceMeters[L_Index] = 0;
+      }
+    }
+
+  /* Send the command out to photon vision: */
+  *L_VisionDriverModeCmndFinal = L_VisionDriverModeCmndFinalTemp;
   }
 #endif

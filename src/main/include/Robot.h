@@ -19,9 +19,8 @@
 // #include <networktables/NetworkTable.h>
 #include <photonlib/PhotonCamera.h>
 // #include <photonlib/PhotonUtils.h>
-// #include <cscore_oo.h>
-#include <cstdio>
-#include <cameraserver/CameraServer.h>
+// #include <cstdio>
+// #include <cameraserver/CameraServer.h>
 
 #include "Const.hpp"
 
@@ -107,10 +106,8 @@ class Robot : public frc::TimedRobot {
   frc::Joystick c_joyStick2{1};
 
   // Network tables
-  // photonlib::PhotonCamera pc_Camera1{"Top"};
-  // photonlib::PhotonCamera pc_Camera2{"Bottom"};
-  // cs::UsbCamera(std::string_view "USB 0", 0);
-  // cs::UsbCamera("USB 1", 1);
+  photonlib::PhotonCamera pc_Camera1{"Top"};
+  photonlib::PhotonCamera pc_Camera2{"Bottom"};
   
  private:
   frc::SendableChooser<std::string> m_chooser;

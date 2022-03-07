@@ -48,15 +48,6 @@ const double K_SteerMotorCurrentLimit = 25;
 
 // Vision Cals:
 // cals for top target cam
-// const units::meter_t K_VisionHeight1 = 0.725_m; // 725 mm to camera lense
-// const units::meter_t K_VisionTargetHeight1 = 2.58_m; // bottom of tape to carpet 
-// const units::radian_t K_VisionCameraPitch1 = 45_deg; // camera on a 45 degree tilt
-
-// // cals for bottom ball cam
-// const units::meter_t K_VisionHeight2 = 0.367_m;
-// const units::meter_t K_VisionTargetHeight2 = .12_m; // radius of the ball in cm
-// const units::radian_t K_VisionCameraPitch2 = 50_deg;
-
 const units::meter_t K_VisionHeight[E_CamLocSz] = {0.725_m,  // 725 mm to camera lense  -> top
                                                    0.367_m}; //                         -> bottom
 
@@ -66,6 +57,8 @@ const units::meter_t K_VisionTargetHeight[E_CamLocSz] = {2.58_m,  // bottom of t
 const units::radian_t K_VisionCameraPitch[E_CamLocSz] = {45_deg,  // camera on a 45 degree tilt  -> top
                                                          50_deg}; //                             -> bottom
 
+/* K_VisionCalculationDelayTime: Delay time before allowing calculations to occur */
+const double K_VisionCalculationDelayTime = 0.1;
 
 
 // Cals / constants for Light Control
@@ -84,8 +77,39 @@ const double K_ReductionRatio = 8.31;
 const double K_WheelCircufrence = 12.566; // Circumferance of wheel, in inches
 
 
+// Lift related cals
+/* K_LiftRampRateYD: Per loop revolutions of the motor allowed for the YD position. */
+const double K_LiftRampRateYD[E_Lift_State_Sz][E_LiftIterationSz] = 
+  {
+    {1.05, 1.05},  // E_S0_BEGONE
+    {1.05, 1.05},  // E_S2_lift_down_YD
+    {1.05, 1.05},  // E_S3_move_forward_XD
+    {1.05, 1.05},  // E_S4_stretch_up_YD
+    {1.05, 1.05},  // E_S5_more_forward_XD
+    {1.05, 1.05},  // E_S6_lift_up_more_YD
+    {1.05, 1.05},  // E_S7_move_back_XD
+    {1.05, 1.05},  // E_S8_more_down_some_YD
+    {1.05, 1.05},  // E_S9_back_rest_XD
+    {0.50, 0.50},  // E_S10_final_YD
+    {1.05, 1.05}   // E_S11_final_OWO
+  };
 
-/* Lift specific calibrations: */
+/* K_LiftRampRateXD: Per loop revolutions of the motor allowed for the XD position. */
+const double K_LiftRampRateXD[E_Lift_State_Sz][E_LiftIterationSz] = 
+  {
+    {1.05, 1.05},  // E_S0_BEGONE
+    {1.05, 1.05},  // E_S2_lift_down_YD
+    {1.05, 1.05},  // E_S3_move_forward_XD
+    {1.05, 1.05},  // E_S4_stretch_up_YD
+    {1.05, 1.05},  // E_S5_more_forward_XD
+    {1.05, 1.05},  // E_S6_lift_up_more_YD
+    {1.05, 0.50},  // E_S7_move_back_XD
+    {1.05, 1.05},  // E_S8_more_down_some_YD
+    {1.05, 1.05},  // E_S9_back_rest_XD
+    {1.05, 1.05},  // E_S10_final_YD
+    {1.05, 1.05}   // E_S11_final_OWO
+  };
+
 const double K_lift_S2_YD = 8; //initial lift of the robot
 const double K_lift_S3_YD = 8; //stays the same
 const double K_lift_S4_YD = 26; //Move YD off of hooks

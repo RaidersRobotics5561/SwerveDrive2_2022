@@ -117,12 +117,14 @@ T_ADAS_UT_UpperTarget ADAS_UT_CameraLightOn(double *L_Pct_FwdRev,
                                             double *L_Pct_Elevator,
                                             bool   *L_CameraUpperLightCmndOn,
                                             bool   *L_CameraLowerLightCmndOn,
-                                            bool   *L_SD_RobotOriented)
+                                            bool   *L_SD_RobotOriented,
+                                            bool   *L_VisionTargetingRequest)
   {
   T_ADAS_UT_UpperTarget L_ADAS_UT_State = E_ADAS_UT_CameraLightOn;
 
-  /* First thing, let's turn on the light: */
+  /* First thing, let's turn on the light and request vision targeting: */
   *L_CameraUpperLightCmndOn = true;
+  *L_VisionTargetingRequest = true;
 
   *L_SD_RobotOriented = true;
   /* Next, set all other values to off as we are just wanting to command the light on: */
@@ -161,14 +163,16 @@ T_ADAS_UT_UpperTarget ADAS_UT_AutoCenter(double *L_Pct_FwdRev,
                                          bool   *L_CameraUpperLightCmndOn,
                                          bool   *L_CameraLowerLightCmndOn,
                                          bool   *L_SD_RobotOriented,
+                                         bool   *L_VisionTargetingRequest,
                                          double  L_VisionTopTargetAquired,
                                          double  L_TopTargetYawDegrees)
   {
   T_ADAS_UT_UpperTarget L_ADAS_UT_State = E_ADAS_UT_AutoCenter;
   double L_RotateErrorCalc = 0;
 
-  /* First thing, let's keep the light on: */
+  /* First thing, let's keep the light on and keep request vision targeting: */
   *L_CameraUpperLightCmndOn = true;
+  *L_VisionTargetingRequest = true;
 
   *L_SD_RobotOriented = true;
   /* Next, let's set all the other items we aren't trying to control to off: */
@@ -248,14 +252,16 @@ T_ADAS_UT_UpperTarget ADAS_UT_LauncherSpeed(double *L_Pct_FwdRev,
                                             bool   *L_CameraUpperLightCmndOn,
                                             bool   *L_CameraLowerLightCmndOn,
                                             bool   *L_SD_RobotOriented,
+                                            bool   *L_VisionTargetingRequest,
                                             double  L_VisionTopTargetAquired,
                                             double  L_VisionTopTargetDistanceMeters)
   {
   T_ADAS_UT_UpperTarget L_ADAS_UT_State = E_ADAS_UT_LauncherSpeed;
   double                L_LauncherSpeedCmnd = 0;
 
-  /* First thing, let's keep the light on: */
+  /* First thing, let's keep the light on and keep request vision targeting: */
   *L_CameraUpperLightCmndOn = true;
+  *L_VisionTargetingRequest = true;
 
   *L_SD_RobotOriented = true;
   /* Next, let's set all the other items we aren't trying to control to off: */
@@ -317,6 +323,7 @@ T_ADAS_UT_UpperTarget ADAS_UT_ElevatorControl(double       *L_Pct_FwdRev,
                                               bool         *L_CameraUpperLightCmndOn,
                                               bool         *L_CameraLowerLightCmndOn,
                                               bool         *L_SD_RobotOriented,
+                                              bool         *L_VisionTargetingRequest,
                                               T_RobotState  L_RobotState,
                                               double        L_LauncherRPM_Measured,
                                               bool          L_BallDetected,
@@ -331,6 +338,7 @@ T_ADAS_UT_UpperTarget ADAS_UT_ElevatorControl(double       *L_Pct_FwdRev,
   /* Next, let's set all the other items we aren't trying to control to off: */
   *L_CameraUpperLightCmndOn = false;
   *L_CameraLowerLightCmndOn = false;
+  *L_VisionTargetingRequest = false;
   *L_Pct_FwdRev = 0;
   *L_Pct_Strafe = 0;
   *L_Pct_Rotate = 0;
@@ -410,6 +418,7 @@ T_ADAS_ActiveFeature ADAS_UT_Main(double               *L_Pct_FwdRev,
                                   bool                 *L_CameraUpperLightCmndOn,
                                   bool                 *L_CameraLowerLightCmndOn,
                                   bool                 *L_SD_RobotOriented,
+                                  bool                 *L_VisionTargetingRequest,
                                   T_ADAS_ActiveFeature  L_ADAS_ActiveFeature,
                                    bool                 L_VisionTopTargetAquired,
                                   double                L_TopTargetYawDegrees,
@@ -434,7 +443,8 @@ T_ADAS_ActiveFeature ADAS_UT_Main(double               *L_Pct_FwdRev,
                                                   L_Pct_Elevator,
                                                   L_CameraUpperLightCmndOn,
                                                   L_CameraLowerLightCmndOn,
-                                                  L_SD_RobotOriented);
+                                                  L_SD_RobotOriented,
+                                                  L_VisionTargetingRequest);
       break;
       case E_ADAS_UT_AutoCenter:
           V_ADAS_UT_State = ADAS_UT_AutoCenter(L_Pct_FwdRev,
@@ -446,6 +456,7 @@ T_ADAS_ActiveFeature ADAS_UT_Main(double               *L_Pct_FwdRev,
                                                L_CameraUpperLightCmndOn,
                                                L_CameraLowerLightCmndOn,
                                                L_SD_RobotOriented,
+                                               L_VisionTargetingRequest,
                                                L_VisionTopTargetAquired,
                                                L_TopTargetYawDegrees);
       break;
@@ -459,6 +470,7 @@ T_ADAS_ActiveFeature ADAS_UT_Main(double               *L_Pct_FwdRev,
                                                   L_CameraUpperLightCmndOn,
                                                   L_CameraLowerLightCmndOn,
                                                   L_SD_RobotOriented,
+                                                  L_VisionTargetingRequest,
                                                   L_VisionTopTargetAquired,
                                                   L_VisionTopTargetDistanceMeters);
       break;
@@ -472,6 +484,7 @@ T_ADAS_ActiveFeature ADAS_UT_Main(double               *L_Pct_FwdRev,
                                                     L_CameraUpperLightCmndOn,
                                                     L_CameraLowerLightCmndOn,
                                                     L_SD_RobotOriented,
+                                                    L_VisionTargetingRequest,
                                                     L_RobotState,
                                                     L_LauncherRPM_Measured,
                                                     L_BallDetected,

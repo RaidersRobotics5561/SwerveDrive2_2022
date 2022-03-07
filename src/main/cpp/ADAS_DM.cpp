@@ -215,6 +215,7 @@ T_ADAS_ActiveFeature ADAS_DM_Main(double               *L_Pct_FwdRev,
                                   bool                 *L_CameraUpperLightCmndOn,
                                   bool                 *L_CameraLowerLightCmndOn,
                                   bool                 *L_SD_RobotOriented,
+                                  bool                 *L_VisionTargetingRequest,
                                   T_ADAS_ActiveFeature  L_ADAS_ActiveFeature,
                                    bool                 L_VisionTopTargetAquired,
                                   double                L_TopTargetYawDegrees,
@@ -227,7 +228,7 @@ T_ADAS_ActiveFeature ADAS_DM_Main(double               *L_Pct_FwdRev,
   {
 
 
-  V_ADAS_DM_AutonSelection = frc::SmartDashboard::GetNumber("Auton Selection (the cooler one", V_ADAS_DM_AutonSelection);
+  V_ADAS_DM_AutonSelection = frc::SmartDashboard::GetNumber("Blind Shot Auton Selection", V_ADAS_DM_AutonSelection);
 
   if (L_ADAS_ActiveFeature == E_ADAS_DriveAndShootBlind)
     {

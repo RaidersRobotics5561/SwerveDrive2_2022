@@ -21,6 +21,7 @@ extern double               V_ADAS_Pct_BH_Elevator;
 extern bool                 V_ADAS_CameraUpperLightCmndOn;
 extern bool                 V_ADAS_CameraLowerLightCmndOn;
 extern bool                 V_ADAS_SD_RobotOriented;
+extern bool                 V_ADAS_Vision_RequestedTargeting;
 
 void ADAS_Main_Reset(void);
 
@@ -33,6 +34,7 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double              *L_Pct_FwdRev,
                                            bool                 *L_CameraUpperLightCmndOn,
                                            bool                 *L_CameraLowerLightCmndOn,
                                            bool                 *L_SD_RobotOriented,
+                                           bool                 *L_ADAS_Vision_RequestedTargeting,
                                            bool                  L_Driver1_JoystickActive,
                                            bool                  L_Driver_stops_shooter,
                                            bool                  L_Driver_SwerveGoalAutoCenter,

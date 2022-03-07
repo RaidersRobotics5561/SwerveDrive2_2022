@@ -38,6 +38,7 @@ bool                 V_ADAS_CameraUpperLightCmndOn = false;
 bool                 V_ADAS_CameraLowerLightCmndOn = false;
 bool                 V_ADAS_SD_RobotOriented = false;
 bool                 V_ADAS_AutonActive = false;
+bool                 V_ADAS_Vision_RequestedTargeting = false; 
 
 /******************************************************************************
  * Function:     ADAS_Main_Reset
@@ -57,6 +58,7 @@ void ADAS_Main_Reset(void)
   V_ADAS_CameraLowerLightCmndOn = false;
   V_ADAS_SD_RobotOriented = false;
   V_ADAS_AutonActive = false;
+  V_ADAS_Vision_RequestedTargeting = false;
   }
 
 /******************************************************************************
@@ -75,6 +77,7 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
                                             bool                 *L_CameraUpperLightCmndOn,
                                             bool                 *L_CameraLowerLightCmndOn,
                                             bool                 *L_SD_RobotOriented,
+                                            bool                 *L_VisionTargetingRequest,
                                             bool                  L_Driver1_JoystickActive,
                                             bool                  L_Driver_stops_shooter,
                                             bool                  L_Driver_SwerveGoalAutoCenter,
@@ -149,6 +152,7 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
                                               L_CameraUpperLightCmndOn,
                                               L_CameraLowerLightCmndOn,
                                               L_SD_RobotOriented,
+                                              L_VisionTargetingRequest,
                                               L_ADAS_ActiveFeature,
                                               L_VisionTopTargetAquired,
                                               L_TopTargetYawDegrees,
@@ -169,6 +173,7 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
                                               L_CameraUpperLightCmndOn,
                                               L_CameraLowerLightCmndOn,
                                               L_SD_RobotOriented,
+                                              L_VisionTargetingRequest,
                                               L_ADAS_ActiveFeature,
                                               L_VisionBottomTargetAquired,
                                               L_VisionBottomYaw,
@@ -186,6 +191,7 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
                                               L_CameraUpperLightCmndOn,
                                               L_CameraLowerLightCmndOn,
                                               L_SD_RobotOriented,
+                                              L_VisionTargetingRequest,
                                               L_ADAS_ActiveFeature,
                                               L_VisionTopTargetAquired,
                                               L_TopTargetYawDegrees,
@@ -205,6 +211,7 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
           *L_Pct_Elevator = 0;
           *L_CameraUpperLightCmndOn = false;
           *L_CameraLowerLightCmndOn = false;
+          *L_VisionTargetingRequest = false;
       break;
     }
   return (L_ADAS_ActiveFeature);
