@@ -216,8 +216,8 @@ bool ADAS_DM_DriveStraight(double     *L_Pct_FwdRev,
   *L_Pct_Strafe = 0;
   *L_Pct_Rotate = 0;
   *L_RPM_Launcher = 0;
-  *L_Pct_Intake = K_ADAS_DM_BlindShotIntake;
-  *L_Pct_Elevator = 0; // Elevator should automatically enable when necessary when intake is commanded on
+  *L_Pct_Intake = 0;
+  *L_Pct_Elevator = 0;
 
   V_ADAS_DM_DebounceTime += C_ExeTime;
 
@@ -229,6 +229,51 @@ bool ADAS_DM_DriveStraight(double     *L_Pct_FwdRev,
     {
     *L_Pct_FwdRev = 0;
     *L_SD_RobotOriented = false;
+    V_ADAS_DM_DebounceTime = 0;
+    L_ADAS_DM_StateComplete = true;
+    }
+  return (L_ADAS_DM_StateComplete);
+  }
+
+
+/******************************************************************************
+ * Function:     ADAS_DM_ReverseAndIntake
+ *
+ * Description:  Drive in reverse and turn on intake.
+ ******************************************************************************/
+bool ADAS_DM_ReverseAndIntake(double     *L_Pct_FwdRev,
+                              double     *L_Pct_Strafe,
+                              double     *L_Pct_Rotate,
+                              double     *L_RPM_Launcher,
+                              double     *L_Pct_Intake,
+                              double     *L_Pct_Elevator,
+                              bool       *L_CameraUpperLightCmndOn,
+                              bool       *L_CameraLowerLightCmndOn,
+                              bool       *L_SD_RobotOriented)
+  {
+  bool L_ADAS_DM_StateComplete = false;
+
+  *L_SD_RobotOriented = true;
+  /* Next, let's set all the other items we aren't trying to control to off: */
+  *L_CameraUpperLightCmndOn = false;
+  *L_CameraLowerLightCmndOn = false;
+  *L_Pct_Strafe = 0;
+  *L_Pct_Rotate = 0;
+  *L_RPM_Launcher = 0;
+  *L_Pct_Intake = K_ADAS_DM_BlindShotIntake;
+  *L_Pct_Elevator = 0; // Elevator should automatically enable when necessary when intake is commanded on
+
+  V_ADAS_DM_DebounceTime += C_ExeTime;
+
+  if (V_ADAS_DM_DebounceTime <= K_ADAS_DM_DriveTime)
+    {
+    *L_Pct_FwdRev = K_ADAS_DM_DriveREV_Pct;
+    }
+  else
+    {
+    *L_Pct_FwdRev = 0;
+    *L_SD_RobotOriented = false;
+    *L_Pct_Intake = 0;
     V_ADAS_DM_DebounceTime = 0;
     L_ADAS_DM_StateComplete = true;
     }
@@ -332,9 +377,9 @@ T_ADAS_ActiveFeature ADAS_DM_Main(double               *L_Pct_FwdRev,
     {
     if (V_ADAS_DM_State == E_ADAS_Disabled)
       {
-      V_ADAS_DM_State = E_ADAS_DM_DriveStraight;
+      V_ADAS_DM_State = E_ADAS_DM_ReverseAndIntake;
       }
-    else if ((V_ADAS_DM_State == E_ADAS_DM_DriveStraight) &&
+    else if ((V_ADAS_DM_State == E_ADAS_DM_ReverseAndIntake) &&
              (V_ADAS_DM_StateComplete == true))
       {
       V_ADAS_DM_State == E_ADAS_DM_Rotate180;
@@ -380,6 +425,17 @@ T_ADAS_ActiveFeature ADAS_DM_Main(double               *L_Pct_FwdRev,
                                                         L_CameraUpperLightCmndOn,
                                                         L_CameraLowerLightCmndOn,
                                                         L_SD_RobotOriented);
+    break;
+    case E_ADAS_DM_ReverseAndIntake:
+        V_ADAS_DM_StateComplete = ADAS_DM_ReverseAndIntake(L_Pct_FwdRev,
+                                                           L_Pct_Strafe,
+                                                           L_Pct_Rotate,
+                                                           L_RPM_Launcher,
+                                                           L_Pct_Intake,
+                                                           L_Pct_Elevator,
+                                                           L_CameraUpperLightCmndOn,
+                                                           L_CameraLowerLightCmndOn,
+                                                           L_SD_RobotOriented);
     break;
     case E_ADAS_DM_Rotate180:
         V_ADAS_DM_StateComplete = ADAS_DM_Rotate180(L_Pct_FwdRev,

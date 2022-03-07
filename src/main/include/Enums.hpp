@@ -169,6 +169,7 @@ typedef enum T_ADAS_DM_DriveManuvering
   E_ADAS_DM_Disabled,
   E_ADAS_DM_BlindLaunch,
   E_ADAS_DM_DriveStraight,
+  E_ADAS_DM_ReverseAndIntake,
   E_ADAS_DM_Rotate180
 } T_ADAS_DM_DriveManuvering;
 

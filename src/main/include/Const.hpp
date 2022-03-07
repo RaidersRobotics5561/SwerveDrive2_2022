@@ -448,6 +448,9 @@ const double K_ADAS_DM_DriveTime = 5.5;
 /* K_ADAS_DM_DriveFWD_Pct: This is the default drive forward Pct. [Pct] */
 const double K_ADAS_DM_DriveFWD_Pct = 1.0;
 
+/* K_ADAS_DM_DriveREV_Pct: This is the default drive in reverse Pct. [Pct] */
+const double K_ADAS_DM_DriveREV_Pct = -1.0;
+
 /* K_ADAS_DM_RotateDebounceTime: This is the debounce time for the DM rotate state. [seconds] */
 const double K_ADAS_DM_RotateDebounceTime = 0.1;
 
