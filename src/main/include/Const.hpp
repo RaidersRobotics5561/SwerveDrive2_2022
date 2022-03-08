@@ -9,7 +9,7 @@
 #define VISION2
 
 // Define the bot type: CompBot, PracticeBot
-#define CompBot
+#define PracticeBot
 
 // RoboRio controller execution time
 const double C_ExeTime = 0.02; // Set to match the the default controller loop time of 20 ms
@@ -272,21 +272,21 @@ const double K_SD_WheelOffsetAnglePractieBot[E_RobotCornerSz] = { -74.8834367,  
 
 /* K_SD_WheelGx: Gain multiplied by each calculated desired speed.  Intended to account for variation in wheel size. */
 const double K_SD_WheelGx[E_RobotCornerSz] = {1.0,   // E_FrontLeft
-                                              1.0,   // E_FrontRight 
+                                              0.97,   // E_FrontRight 
                                               1.0,   // E_RearLeft
-                                              1.0};  // E_RearRight 
+                                              0.97};  // E_RearRight 
 
 /* K_SD_MinGain: Min gain applied to the wheel speed for swerve drive. */
-const double K_SD_MinGain = 0.1;
+const double K_SD_MinGain = 0.5;
 
 /* K_SD_MaxGain: Max gain allowed for swerve drive control. */
-const double K_SD_MaxGain = 0.75;
+const double K_SD_MaxGain = 1.0;
 
 /* K_SD_AutoRotateGx: Gain applied to the rotate command for auto functionality. */
 const double K_SD_AutoRotateGx = 0.1;
 
 /* K_SD_WheelMaxSpeed: Max in/sec speed of the swerve drive wheel.*/
-const double K_SD_WheelMaxSpeed = 6000;
+const double K_SD_WheelMaxSpeed = 5800;
 
 /* K_SD_WheelMinCmndSpeed: Min in/sec speed of the swerve drive wheel to keep it under PID control.  
   If the absolute value of the command, wheels will transition to 0 power (but still in brake 

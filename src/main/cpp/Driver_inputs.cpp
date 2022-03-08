@@ -68,8 +68,8 @@ void Joystick_robot_mapping(bool    L_Driver2_buttonA,
 
   V_Driver_elevator_up = L_Driver2_buttonA;                       //Controller 2, A button (1), (robot.cpp) Elevator goes up
   V_Driver_elevator_down = L_Driver2_buttonB;                     //Controller 2, B button (2), (robot.cpp) Elevator goes down
-  // V_Driver_zero_gyro = (L_Driver1_buttonback || L_Driver1_buttonstart);     //Controller 1, Back button (7), (robot.cpp, gyro.cpp) zeroes out the gyro  
-  V_Driver_zero_gyro = (L_Driver2_buttonback);     //Controller 2, Back button (7), (robot.cpp, gyro.cpp) zeroes out the gyro, temporary only, for practice 
+  V_Driver_zero_gyro = (L_Driver1_buttonback || L_Driver1_buttonstart);     //Controller 1, Back button (7), (robot.cpp, gyro.cpp) zeroes out the gyro  
+  // V_Driver_zero_gyro = (L_Driver2_buttonback);     //Controller 2, Back button (7), (robot.cpp, gyro.cpp) zeroes out the gyro, temporary only, for practice 
   V_Driver_RobotFieldOrientedReq = L_Driver1_buttonstart; // Controller 1, toggles the robot from robot oriented to field oriented (and back)
   V_Driver_StopShooterAutoClimbResetGyro = L_Driver2_buttonLB;     //Controller 2 back button (7), (robot.cpp) Stops the shooter- pretty self-explain, pauses auto climb and resets encoders in test mode
   V_Driver_auto_setspeed_shooter = L_Driver2_buttonstart;         //controller 2 start button (8), (robot.cpp) Starts robot shooter speed based on distance

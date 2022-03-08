@@ -343,8 +343,8 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
     {
     /* ADAS is active, pass throught the commands: */
       L_FWD = -L_ADAS_Pct_SD_FwdRev;
-      L_STR = -L_ADAS_Pct_SD_Strafe;
-      L_RCW = -L_ADAS_Pct_SD_Rotate;
+      L_STR = L_ADAS_Pct_SD_Strafe;
+      L_RCW = L_ADAS_Pct_SD_Rotate;
 
       if (L_ADAS_SD_RobotOriented == true)
         {
@@ -357,8 +357,8 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
     {
     /* ADAS is disabled, use the driver joysticks */
       L_FWD = -L_JoyStick1Axis1Y;
-      L_STR = -L_JoyStick1Axis1X;
-      L_RCW = -L_JoyStick1Axis2X;
+      L_STR = L_JoyStick1Axis1X;
+      L_RCW = L_JoyStick1Axis2X;
 
       /* Check to see what the driver wants for the driver mode: */
       if (L_Driver_RobotFieldOrientedReq != V_SD_DriverRobotOrientedRequestedPrev)
@@ -477,25 +477,25 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
     L_C = L_FWD - L_RCW * (C_SD_W/C_SD_R);
     L_D = L_FWD + L_RCW * (C_SD_W/C_SD_R);
 
-    // L_WS[E_FrontRight] = pow((L_B * L_B + L_C * L_C), 0.5);
-    // L_WS[E_FrontLeft]  = pow((L_B * L_B + L_D * L_D), 0.5);
-    // L_WS[E_RearLeft]   = pow((L_A * L_A + L_D * L_D), 0.5);
-    // L_WS[E_RearRight]  = pow((L_A * L_A + L_C * L_C), 0.5);
+    L_WS[E_FrontRight] = pow((L_B * L_B + L_C * L_C), 0.5);
+    L_WS[E_FrontLeft]  = pow((L_B * L_B + L_D * L_D), 0.5);
+    L_WS[E_RearLeft]   = pow((L_A * L_A + L_D * L_D), 0.5);
+    L_WS[E_RearRight]  = pow((L_A * L_A + L_C * L_C), 0.5);
 
-    // L_WA[E_FrontRight] = atan2(L_B, L_C) *180/C_PI;
-    // L_WA[E_FrontLeft]  = atan2(L_B, L_D) *180/C_PI;
-    // L_WA[E_RearLeft]   = atan2(L_A, L_D) *180/C_PI;
-    // L_WA[E_RearRight]  = atan2(L_A, L_C) *180/C_PI;
+    L_WA[E_FrontRight] = -atan2(L_B, L_C) *180/C_PI;
+    L_WA[E_FrontLeft]  = -atan2(L_B, L_D) *180/C_PI;
+    L_WA[E_RearLeft]   = -atan2(L_A, L_D) *180/C_PI;
+    L_WA[E_RearRight]  = -atan2(L_A, L_C) *180/C_PI;
 
-    L_WS[E_FrontRight] = pow((L_B * L_B + L_D * L_D), 0.5);
-    L_WS[E_FrontLeft]  = pow((L_B * L_B + L_C * L_C), 0.5);
-    L_WS[E_RearLeft]   = pow((L_A * L_A + L_C * L_C), 0.5);
-    L_WS[E_RearRight]  = pow((L_A * L_A + L_D * L_D), 0.5);
+    // L_WS[E_FrontRight] = pow((L_B * L_B + L_D * L_D), 0.5);
+    // L_WS[E_FrontLeft]  = pow((L_B * L_B + L_C * L_C), 0.5);
+    // L_WS[E_RearLeft]   = pow((L_A * L_A + L_C * L_C), 0.5);
+    // L_WS[E_RearRight]  = pow((L_A * L_A + L_D * L_D), 0.5);
 
-    L_WA[E_FrontRight] = atan2(L_B, L_D) *180/C_PI;
-    L_WA[E_FrontLeft]  = atan2(L_B, L_C) *180/C_PI;
-    L_WA[E_RearLeft]   = atan2(L_A, L_C) *180/C_PI;
-    L_WA[E_RearRight]  = atan2(L_A, L_D) *180/C_PI;
+    // L_WA[E_FrontRight] = atan2(L_B, L_D) *180/C_PI;
+    // L_WA[E_FrontLeft]  = atan2(L_B, L_C) *180/C_PI;
+    // L_WA[E_RearLeft]   = atan2(L_A, L_C) *180/C_PI;
+    // L_WA[E_RearRight]  = atan2(L_A, L_D) *180/C_PI;
 
     L_Max = L_WS[E_FrontRight];
 
