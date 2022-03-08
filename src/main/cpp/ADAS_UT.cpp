@@ -409,59 +409,71 @@ T_ADAS_UT_UpperTarget ADAS_UT_ElevatorControl(double       *L_Pct_FwdRev,
  * Description:  Manages and controls the upper targeting (UT) and spinning up of 
  *               the launcher.
  ******************************************************************************/
-T_ADAS_ActiveFeature ADAS_UT_Main(double               *L_Pct_FwdRev,
-                                  double               *L_Pct_Strafe,
-                                  double               *L_Pct_Rotate,
-                                  double               *L_RPM_Launcher,
-                                  double               *L_Pct_Intake,
-                                  double               *L_Pct_Elevator,
-                                  bool                 *L_CameraUpperLightCmndOn,
-                                  bool                 *L_CameraLowerLightCmndOn,
-                                  bool                 *L_SD_RobotOriented,
-                                  bool                 *L_VisionTargetingRequest,
-                                  T_ADAS_ActiveFeature  L_ADAS_ActiveFeature,
-                                   bool                 L_VisionTopTargetAquired,
-                                  double                L_TopTargetYawDegrees,
-                                  double                L_VisionTopTargetDistanceMeters,
-                                  T_RobotState          L_RobotState,
-                                  double                L_LauncherRPM_Measured,
-                                  bool                  L_BallDetected,
-                                  bool                  L_DriverRequestElevatorUp,
-                                  bool                  L_DriverRequestElevatorDwn)
+bool ADAS_UT_Main(double               *L_Pct_FwdRev,
+                  double               *L_Pct_Strafe,
+                  double               *L_Pct_Rotate,
+                  double               *L_RPM_Launcher,
+                  double               *L_Pct_Intake,
+                  double               *L_Pct_Elevator,
+                  bool                 *L_CameraUpperLightCmndOn,
+                  bool                 *L_CameraLowerLightCmndOn,
+                  bool                 *L_SD_RobotOriented,
+                  bool                 *L_VisionTargetingRequest,
+                  bool                  L_VisionTopTargetAquired,
+                  double                L_TopTargetYawDegrees,
+                  double                L_VisionTopTargetDistanceMeters,
+                  T_RobotState          L_RobotState,
+                  double                L_LauncherRPM_Measured,
+                  bool                  L_BallDetected,
+                  bool                  L_DriverRequestElevatorUp,
+                  bool                  L_DriverRequestElevatorDwn)
   {
+  bool L_ADAS_UT_Complete = false;
 
-  if (L_ADAS_ActiveFeature == E_ADAS_AutoUpperTarget)
+  switch (V_ADAS_UT_State)
     {
-    switch (V_ADAS_UT_State)
-      {
-      case E_ADAS_UT_Disabled:
-          V_ADAS_UT_State = ADAS_UT_CameraLightOn(L_Pct_FwdRev,
-                                                  L_Pct_Strafe,
-                                                  L_Pct_Rotate,
-                                                  L_RPM_Launcher,
-                                                  L_Pct_Intake,
-                                                  L_Pct_Elevator,
-                                                  L_CameraUpperLightCmndOn,
-                                                  L_CameraLowerLightCmndOn,
-                                                  L_SD_RobotOriented,
-                                                  L_VisionTargetingRequest);
-      break;
-      case E_ADAS_UT_AutoCenter:
-          V_ADAS_UT_State = ADAS_UT_AutoCenter(L_Pct_FwdRev,
-                                               L_Pct_Strafe,
-                                               L_Pct_Rotate,
-                                               L_RPM_Launcher,
-                                               L_Pct_Intake,
-                                               L_Pct_Elevator,
-                                               L_CameraUpperLightCmndOn,
-                                               L_CameraLowerLightCmndOn,
-                                               L_SD_RobotOriented,
-                                               L_VisionTargetingRequest,
-                                               L_VisionTopTargetAquired,
-                                               L_TopTargetYawDegrees);
-      break;
-      case E_ADAS_UT_LauncherSpeed:
-          V_ADAS_UT_State = ADAS_UT_LauncherSpeed(L_Pct_FwdRev,
+    case E_ADAS_UT_Disabled:
+        V_ADAS_UT_State = ADAS_UT_CameraLightOn(L_Pct_FwdRev,
+                                                L_Pct_Strafe,
+                                                L_Pct_Rotate,
+                                                L_RPM_Launcher,
+                                                L_Pct_Intake,
+                                                L_Pct_Elevator,
+                                                L_CameraUpperLightCmndOn,
+                                                L_CameraLowerLightCmndOn,
+                                                L_SD_RobotOriented,
+                                                L_VisionTargetingRequest);
+    break;
+    case E_ADAS_UT_AutoCenter:
+        V_ADAS_UT_State = ADAS_UT_AutoCenter(L_Pct_FwdRev,
+                                             L_Pct_Strafe,
+                                             L_Pct_Rotate,
+                                             L_RPM_Launcher,
+                                             L_Pct_Intake,
+                                             L_Pct_Elevator,
+                                             L_CameraUpperLightCmndOn,
+                                             L_CameraLowerLightCmndOn,
+                                             L_SD_RobotOriented,
+                                             L_VisionTargetingRequest,
+                                             L_VisionTopTargetAquired,
+                                             L_TopTargetYawDegrees);
+    break;
+    case E_ADAS_UT_LauncherSpeed:
+        V_ADAS_UT_State = ADAS_UT_LauncherSpeed(L_Pct_FwdRev,
+                                                L_Pct_Strafe,
+                                                L_Pct_Rotate,
+                                                L_RPM_Launcher,
+                                                L_Pct_Intake,
+                                                L_Pct_Elevator,
+                                                L_CameraUpperLightCmndOn,
+                                                L_CameraLowerLightCmndOn,
+                                                L_SD_RobotOriented,
+                                                L_VisionTargetingRequest,
+                                                L_VisionTopTargetAquired,
+                                                L_VisionTopTargetDistanceMeters);
+    break;
+    case E_ADAS_UT_ElevatorControl:
+        V_ADAS_UT_State = ADAS_UT_ElevatorControl(L_Pct_FwdRev,
                                                   L_Pct_Strafe,
                                                   L_Pct_Rotate,
                                                   L_RPM_Launcher,
@@ -471,34 +483,19 @@ T_ADAS_ActiveFeature ADAS_UT_Main(double               *L_Pct_FwdRev,
                                                   L_CameraLowerLightCmndOn,
                                                   L_SD_RobotOriented,
                                                   L_VisionTargetingRequest,
-                                                  L_VisionTopTargetAquired,
-                                                  L_VisionTopTargetDistanceMeters);
-      break;
-      case E_ADAS_UT_ElevatorControl:
-          V_ADAS_UT_State = ADAS_UT_ElevatorControl(L_Pct_FwdRev,
-                                                    L_Pct_Strafe,
-                                                    L_Pct_Rotate,
-                                                    L_RPM_Launcher,
-                                                    L_Pct_Intake,
-                                                    L_Pct_Elevator,
-                                                    L_CameraUpperLightCmndOn,
-                                                    L_CameraLowerLightCmndOn,
-                                                    L_SD_RobotOriented,
-                                                    L_VisionTargetingRequest,
-                                                    L_RobotState,
-                                                    L_LauncherRPM_Measured,
-                                                    L_BallDetected,
-                                                    L_DriverRequestElevatorUp,
-                                                    L_DriverRequestElevatorDwn);
-      break;
-      }
+                                                  L_RobotState,
+                                                  L_LauncherRPM_Measured,
+                                                  L_BallDetected,
+                                                  L_DriverRequestElevatorUp,
+                                                  L_DriverRequestElevatorDwn);
+    break;
     }
 
   if (V_ADAS_UT_State == E_ADAS_UT_Disabled)
     {
     ADAS_UT_Reset();
-    L_ADAS_ActiveFeature = E_ADAS_Disabled;
+    L_ADAS_UT_Complete = true;
     }
   
-  return (L_ADAS_ActiveFeature);
+  return (L_ADAS_UT_Complete);
   }

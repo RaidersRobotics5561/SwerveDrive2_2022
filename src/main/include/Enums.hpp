@@ -164,22 +164,24 @@ typedef enum T_ADAS_UT_UpperTarget
   E_ADAS_UT_ElevatorControl
 } T_ADAS_UT_UpperTarget;
 
-typedef enum T_ADAS_DM_DriveManuvering
-{
-  E_ADAS_DM_Disabled,
-  E_ADAS_DM_BlindLaunch,
-  E_ADAS_DM_DriveStraight,
-  E_ADAS_DM_ReverseAndIntake,
-  E_ADAS_DM_Rotate180
-} T_ADAS_DM_DriveManuvering;
+// typedef enum T_ADAS_DM_DriveManuvering
+// {
+//   E_ADAS_DM_Disabled,
+//   E_ADAS_DM_BlindLaunch,
+//   E_ADAS_DM_DriveStraight,
+//   E_ADAS_DM_ReverseAndIntake,
+//   E_ADAS_DM_Rotate180
+// } T_ADAS_DM_DriveManuvering;
 
 typedef enum T_ADAS_ActiveFeature
 {
   E_ADAS_Disabled,
-  E_ADAS_AutoUpperTarget,
-  E_ADAS_AutoBallTarget,
-  E_ADAS_DriveAndShootBlind1,    // Shoot preloaded ball, drive straight, robot oriented
-  E_ADAS_DriveAndShootBlind2     // Drive into preplaced ball, intake, rotate 180*, shoot 2 balls
+  E_ADAS_UT_AutoUpperTarget,
+  E_ADAS_BT_AutoBallTarget,
+  E_ADAS_DM_BlindLaunch,
+  E_ADAS_DM_DriveStraight,
+  E_ADAS_DM_ReverseAndIntake,
+  E_ADAS_DM_Rotate180
 } T_ADAS_ActiveFeature;
 
 typedef enum T_ADAS_ActiveAutonFeature

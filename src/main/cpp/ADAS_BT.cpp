@@ -357,41 +357,54 @@ T_ADAS_BT_BallTarget ADAS_BT_IntakeAndRun(double *L_Pct_FwdRev,
  *
  * Description:  Manages and controls the ball targeting (BT).
  ******************************************************************************/
-T_ADAS_ActiveFeature ADAS_BT_Main(double               *L_Pct_FwdRev,
-                                  double               *L_Pct_Strafe,
-                                  double               *L_Pct_Rotate,
-                                  double               *L_RPM_Launcher,
-                                  double               *L_Pct_Intake,
-                                  double               *L_Pct_Elevator,
-                                  bool                 *L_CameraUpperLightCmndOn,
-                                  bool                 *L_CameraLowerLightCmndOn,
-                                  bool                 *L_SD_RobotOriented,
-                                  bool                 *L_VisionTargetingRequest,
-                                  T_ADAS_ActiveFeature  L_ADAS_ActiveFeature,
-                                  bool                  L_VisionBottomTargetAquired,
-                                  double                L_VisionBottomYaw,
-                                  double                L_VisionBottomTargetDistanceMeters,
-                                  T_RobotState          L_RobotState,
-                                  bool                  L_BallDetected)
+bool ADAS_BT_Main(double               *L_Pct_FwdRev,
+                  double               *L_Pct_Strafe,
+                  double               *L_Pct_Rotate,
+                  double               *L_RPM_Launcher,
+                  double               *L_Pct_Intake,
+                  double               *L_Pct_Elevator,
+                  bool                 *L_CameraUpperLightCmndOn,
+                  bool                 *L_CameraLowerLightCmndOn,
+                  bool                 *L_SD_RobotOriented,
+                  bool                 *L_VisionTargetingRequest,
+                  bool                  L_VisionBottomTargetAquired,
+                  double                L_VisionBottomYaw,
+                  double                L_VisionBottomTargetDistanceMeters,
+                  T_RobotState          L_RobotState,
+                  bool                  L_BallDetected)
   {
-  if (L_ADAS_ActiveFeature == E_ADAS_AutoBallTarget)
+  bool L_ADAS_BT_Complete = false;
+
+  switch (V_ADAS_BT_State)
     {
-    switch (V_ADAS_BT_State)
-      {
-      case E_ADAS_BT_Disabled:
-          V_ADAS_BT_State = ADAS_BT_CameraLightOn(L_Pct_FwdRev,
-                                                  L_Pct_Strafe,
-                                                  L_Pct_Rotate,
-                                                  L_RPM_Launcher,
-                                                  L_Pct_Intake,
-                                                  L_Pct_Elevator,
-                                                  L_CameraUpperLightCmndOn,
-                                                  L_CameraLowerLightCmndOn,
-                                                  L_SD_RobotOriented,
-                                                  L_VisionTargetingRequest);
-      break;
-      case E_ADAS_BT_AutoCenter:
-          V_ADAS_BT_State = ADAS_BT_AutoCenter(L_Pct_FwdRev,
+    case E_ADAS_BT_Disabled:
+        V_ADAS_BT_State = ADAS_BT_CameraLightOn(L_Pct_FwdRev,
+                                                L_Pct_Strafe,
+                                                L_Pct_Rotate,
+                                                L_RPM_Launcher,
+                                                L_Pct_Intake,
+                                                L_Pct_Elevator,
+                                                L_CameraUpperLightCmndOn,
+                                                L_CameraLowerLightCmndOn,
+                                                L_SD_RobotOriented,
+                                                L_VisionTargetingRequest);
+    break;
+    case E_ADAS_BT_AutoCenter:
+        V_ADAS_BT_State = ADAS_BT_AutoCenter(L_Pct_FwdRev,
+                                             L_Pct_Strafe,
+                                             L_Pct_Rotate,
+                                             L_RPM_Launcher,
+                                             L_Pct_Intake,
+                                             L_Pct_Elevator,
+                                             L_CameraUpperLightCmndOn,
+                                             L_CameraLowerLightCmndOn,
+                                             L_SD_RobotOriented,
+                                             L_VisionTargetingRequest,
+                                             L_VisionBottomTargetAquired,
+                                             L_VisionBottomYaw);
+    break;
+    case E_ADAS_BT_IntakeAndRun:
+        V_ADAS_BT_State = ADAS_BT_IntakeAndRun(L_Pct_FwdRev,
                                                L_Pct_Strafe,
                                                L_Pct_Rotate,
                                                L_RPM_Launcher,
@@ -402,30 +415,15 @@ T_ADAS_ActiveFeature ADAS_BT_Main(double               *L_Pct_FwdRev,
                                                L_SD_RobotOriented,
                                                L_VisionTargetingRequest,
                                                L_VisionBottomTargetAquired,
-                                               L_VisionBottomYaw);
-      break;
-      case E_ADAS_BT_IntakeAndRun:
-          V_ADAS_BT_State = ADAS_BT_IntakeAndRun(L_Pct_FwdRev,
-                                                 L_Pct_Strafe,
-                                                 L_Pct_Rotate,
-                                                 L_RPM_Launcher,
-                                                 L_Pct_Intake,
-                                                 L_Pct_Elevator,
-                                                 L_CameraUpperLightCmndOn,
-                                                 L_CameraLowerLightCmndOn,
-                                                 L_SD_RobotOriented,
-                                                 L_VisionTargetingRequest,
-                                                 L_VisionBottomTargetAquired,
-                                                 L_VisionBottomTargetDistanceMeters);
-      break;
-      }
+                                               L_VisionBottomTargetDistanceMeters);
+    break;
     }
 
   if (V_ADAS_BT_State == E_ADAS_BT_Disabled)
     {
     ADAS_BT_Reset();
-    L_ADAS_ActiveFeature = E_ADAS_Disabled;
+    L_ADAS_BT_Complete = true;
     }
   
-  return (L_ADAS_ActiveFeature);
+  return (L_ADAS_BT_Complete);
   }

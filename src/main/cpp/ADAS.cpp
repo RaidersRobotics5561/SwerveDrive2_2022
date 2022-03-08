@@ -20,6 +20,8 @@
   Changes:
   2022-02-25 -> Beta
  */
+
+#include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/smartdashboard/SendableChooser.h>
 
 #include "Enums.hpp"
@@ -27,12 +29,13 @@
 #include "ADAS_BT.hpp"
 #include "ADAS_DM.hpp"
 
-T_ADAS_ActiveFeature V_ADAS_ActiveFeature;
+/* ADAS control state variables */
+T_ADAS_ActiveFeature                            V_ADAS_ActiveFeature = E_ADAS_Disabled;
+T_ADAS_ActiveAutonFeature                       V_ADAS_DriverRequestedAutonFeature = E_ADAS_AutonDisabled;
+frc::SendableChooser<T_ADAS_ActiveAutonFeature> V_ADAS_AutonChooser;
+bool                                            V_ADAS_StateComplete = false;
 
-T_ADAS_ActiveFeature V_ADAS_DriverRequestedAutonFeature;
-
-frc::SendableChooser<T_ADAS_ActiveFeature> V_ADAS_AutonChooser;
-
+/* ADAS output control variables */
 double               V_ADAS_Pct_SD_FwdRev = 0;
 double               V_ADAS_Pct_SD_Strafe = 0;
 double               V_ADAS_Pct_SD_Rotate = 0;
@@ -42,8 +45,8 @@ double               V_ADAS_Pct_BH_Elevator = 0;
 bool                 V_ADAS_CameraUpperLightCmndOn = false;
 bool                 V_ADAS_CameraLowerLightCmndOn = false;
 bool                 V_ADAS_SD_RobotOriented = false;
-bool                 V_ADAS_AutonActive = false;
 bool                 V_ADAS_Vision_RequestedTargeting = false; 
+
 
 
 /******************************************************************************
@@ -53,16 +56,20 @@ bool                 V_ADAS_Vision_RequestedTargeting = false;
  ******************************************************************************/
 void ADAS_Main_Init(void)
   {
-  V_ADAS_AutonChooser.AddOption("Blind Shot 1", T_ADAS_ActiveFeature::E_ADAS_DriveAndShootBlind1);
-  V_ADAS_AutonChooser.AddOption("Blind Shot 2", T_ADAS_ActiveFeature::E_ADAS_DriveAndShootBlind2);
-  V_ADAS_AutonChooser.SetDefaultOption("Disabled", T_ADAS_ActiveFeature::E_ADAS_Disabled);
+  std::string_view L_AutonSelectorName = "Auton";
+  V_ADAS_AutonChooser.AddOption("Disabled", T_ADAS_ActiveAutonFeature::E_ADAS_AutonDisabled);
+  V_ADAS_AutonChooser.AddOption("Blind Shot 1", T_ADAS_ActiveAutonFeature::E_ADAS_AutonDriveAndShootBlind1);
+  V_ADAS_AutonChooser.AddOption("Blind Shot 2", T_ADAS_ActiveAutonFeature::E_ADAS_AutonDriveAndShootBlind2);
+  V_ADAS_AutonChooser.SetDefaultOption("Disabled", T_ADAS_ActiveAutonFeature::E_ADAS_AutonDisabled);
+  frc::SmartDashboard::PutData(L_AutonSelectorName, &V_ADAS_AutonChooser);
   }
 
 
 /******************************************************************************
- * Function:     ADAS_Main_Reset
+ * Function:     ADAS_DetermineMode
  *
- * Description:  Reset all applicable ADAS variables.
+ * Description:  Ping the driver station to see what the desired auton routine 
+ *               should be.
  ******************************************************************************/
 void ADAS_DetermineMode(void)
   {
@@ -87,9 +94,9 @@ void ADAS_Main_Reset(void)
   V_ADAS_CameraUpperLightCmndOn = false;
   V_ADAS_CameraLowerLightCmndOn = false;
   V_ADAS_SD_RobotOriented = false;
-  V_ADAS_AutonActive = false;
   V_ADAS_Vision_RequestedTargeting = false;
-  V_ADAS_DriverRequestedAutonFeature = E_ADAS_Disabled;
+  V_ADAS_DriverRequestedAutonFeature = E_ADAS_AutonDisabled;
+  V_ADAS_StateComplete = false;
   
   /* Trigger the resets for all of the sub tasks/functions as well: */
   ADAS_UT_Reset();
@@ -141,15 +148,15 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
     /* Enable criteria goes here: */
     if (L_Driver_SwerveGoalAutoCenter == true)
       {
-      L_ADAS_ActiveFeature = E_ADAS_AutoUpperTarget;
+      L_ADAS_ActiveFeature = E_ADAS_UT_AutoUpperTarget;
       }
     else if (L_Driver_AutoIntake == true)
       {
-      L_ADAS_ActiveFeature = E_ADAS_AutoBallTarget;
+      L_ADAS_ActiveFeature = E_ADAS_BT_AutoBallTarget;
       }
   
     /* Abort criteria goes here: */
-    if ((L_Driver1_JoystickActive == true) || (L_Driver_stops_shooter == true))
+    if ((L_Driver1_JoystickActive == true) || (L_Driver_stops_shooter == true) || (V_ADAS_StateComplete == true))
       {
       /* Abort criteria goes here. */
       L_ADAS_ActiveFeature = E_ADAS_Disabled;
@@ -157,10 +164,53 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
     }
   else if (L_RobotState == E_Auton)
     {
-    if (V_ADAS_AutonActive == false)
+    if (V_ADAS_DriverRequestedAutonFeature == E_ADAS_AutonDriveAndShootBlind1)
       {
-      L_ADAS_ActiveFeature = V_ADAS_DriverRequestedAutonFeature;
-      V_ADAS_AutonActive = true;
+      if ((L_ADAS_ActiveFeature == E_ADAS_Disabled) &&
+          (V_ADAS_StateComplete == false))
+        {
+        L_ADAS_ActiveFeature = E_ADAS_DM_BlindLaunch;
+        }
+      else if ((L_ADAS_ActiveFeature == E_ADAS_DM_BlindLaunch) &&
+               (V_ADAS_StateComplete == true))
+        {
+        L_ADAS_ActiveFeature == E_ADAS_DM_DriveStraight;
+        }
+      else if ((L_ADAS_ActiveFeature == E_ADAS_DM_DriveStraight) &&
+               (V_ADAS_StateComplete == true))
+        {
+        L_ADAS_ActiveFeature == E_ADAS_Disabled;
+        V_ADAS_StateComplete = true;
+        }
+      }
+    else if (V_ADAS_DriverRequestedAutonFeature == E_ADAS_AutonDriveAndShootBlind2)
+      {
+      if ((L_ADAS_ActiveFeature == E_ADAS_Disabled) &&
+          (V_ADAS_StateComplete == false))
+        {
+        L_ADAS_ActiveFeature = E_ADAS_DM_ReverseAndIntake;
+        }
+      else if ((L_ADAS_ActiveFeature == E_ADAS_DM_ReverseAndIntake) &&
+               (V_ADAS_StateComplete == true))
+        {
+        L_ADAS_ActiveFeature == E_ADAS_DM_Rotate180;
+        }
+      else if ((L_ADAS_ActiveFeature == E_ADAS_DM_Rotate180) &&
+               (V_ADAS_StateComplete == true))
+        {
+        L_ADAS_ActiveFeature == E_ADAS_DM_BlindLaunch;
+        }
+      else if ((L_ADAS_ActiveFeature == E_ADAS_DM_BlindLaunch) &&
+               (V_ADAS_StateComplete == true))
+        {
+        L_ADAS_ActiveFeature == E_ADAS_Disabled;
+        V_ADAS_StateComplete = true;
+        }
+      }
+    else
+      {
+      /* No auton requested. */
+      L_ADAS_ActiveFeature == E_ADAS_Disabled;
       }
     }
   else
@@ -179,8 +229,8 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
 
   switch (L_ADAS_ActiveFeature)
     {
-      case E_ADAS_AutoUpperTarget:
-          L_ADAS_ActiveFeature = ADAS_UT_Main(L_Pct_FwdRev,
+      case E_ADAS_UT_AutoUpperTarget:
+          V_ADAS_StateComplete = ADAS_UT_Main(L_Pct_FwdRev,
                                               L_Pct_Strafe,
                                               L_Pct_Rotate,
                                               L_RPM_Launcher,
@@ -190,7 +240,6 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
                                               L_CameraLowerLightCmndOn,
                                               L_SD_RobotOriented,
                                               L_VisionTargetingRequest,
-                                              L_ADAS_ActiveFeature,
                                               L_VisionTopTargetAquired,
                                               L_TopTargetYawDegrees,
                                               L_VisionTopTargetDistanceMeters,
@@ -200,8 +249,8 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
                                               L_DriverRequestElevatorUp,
                                               L_DriverRequestElevatorDwn);
       break;
-      case E_ADAS_AutoBallTarget:
-          L_ADAS_ActiveFeature = ADAS_BT_Main(L_Pct_FwdRev,
+      case E_ADAS_BT_AutoBallTarget:
+          V_ADAS_StateComplete = ADAS_BT_Main(L_Pct_FwdRev,
                                               L_Pct_Strafe,
                                               L_Pct_Rotate,
                                               L_RPM_Launcher,
@@ -211,35 +260,56 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
                                               L_CameraLowerLightCmndOn,
                                               L_SD_RobotOriented,
                                               L_VisionTargetingRequest,
-                                              L_ADAS_ActiveFeature,
                                               L_VisionBottomTargetAquired,
                                               L_VisionBottomYaw,
                                               L_VisionBottomTargetDistanceMeters,
                                               L_RobotState,
                                               L_BallDetected);
       break;
-      case E_ADAS_DriveAndShootBlind1:
-      case E_ADAS_DriveAndShootBlind2:
-          L_ADAS_ActiveFeature = ADAS_DM_Main(L_Pct_FwdRev,
-                                              L_Pct_Strafe,
-                                              L_Pct_Rotate,
-                                              L_RPM_Launcher,
-                                              L_Pct_Intake,
-                                              L_Pct_Elevator,
-                                              L_CameraUpperLightCmndOn,
-                                              L_CameraLowerLightCmndOn,
-                                              L_SD_RobotOriented,
-                                              L_VisionTargetingRequest,
-                                              L_ADAS_ActiveFeature,
-                                              L_VisionTopTargetAquired,
-                                              L_TopTargetYawDegrees,
-                                              L_VisionTopTargetDistanceMeters,
-                                              L_RobotState,
-                                              L_LauncherRPM_Measured,
-                                              L_BallDetected,
-                                              L_DriverRequestElevatorUp,
-                                              L_DriverRequestElevatorDwn,
-                                              L_Deg_GyroAngleDeg);
+      case E_ADAS_DM_BlindLaunch:
+          V_ADAS_StateComplete = ADAS_DM_BlindShot(L_Pct_FwdRev,
+                                                      L_Pct_Strafe,
+                                                      L_Pct_Rotate,
+                                                      L_RPM_Launcher,
+                                                      L_Pct_Intake,
+                                                      L_Pct_Elevator,
+                                                      L_CameraUpperLightCmndOn,
+                                                      L_CameraLowerLightCmndOn,
+                                                      L_SD_RobotOriented);
+      break;
+      case E_ADAS_DM_DriveStraight:
+          V_ADAS_StateComplete = ADAS_DM_DriveStraight(L_Pct_FwdRev,
+                                                          L_Pct_Strafe,
+                                                          L_Pct_Rotate,
+                                                          L_RPM_Launcher,
+                                                          L_Pct_Intake,
+                                                          L_Pct_Elevator,
+                                                          L_CameraUpperLightCmndOn,
+                                                          L_CameraLowerLightCmndOn,
+                                                          L_SD_RobotOriented);
+      break;
+      case E_ADAS_DM_ReverseAndIntake:
+          V_ADAS_StateComplete = ADAS_DM_ReverseAndIntake(L_Pct_FwdRev,
+                                                             L_Pct_Strafe,
+                                                             L_Pct_Rotate,
+                                                             L_RPM_Launcher,
+                                                             L_Pct_Intake,
+                                                             L_Pct_Elevator,
+                                                             L_CameraUpperLightCmndOn,
+                                                             L_CameraLowerLightCmndOn,
+                                                             L_SD_RobotOriented);
+      break;
+      case E_ADAS_DM_Rotate180:
+          V_ADAS_StateComplete = ADAS_DM_Rotate180(L_Pct_FwdRev,
+                                                      L_Pct_Strafe,
+                                                      L_Pct_Rotate,
+                                                      L_RPM_Launcher,
+                                                      L_Pct_Intake,
+                                                      L_Pct_Elevator,
+                                                      L_CameraUpperLightCmndOn,
+                                                      L_CameraLowerLightCmndOn,
+                                                      L_SD_RobotOriented,
+                                                      L_Deg_GyroAngleDeg);
       break;
       case E_ADAS_Disabled:
           *L_Pct_FwdRev = 0;

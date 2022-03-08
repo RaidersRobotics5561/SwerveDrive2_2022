@@ -41,7 +41,7 @@ void VisionRobotInit()
   {
   /* Place an input on the dash.  A value of 1 indicates top camera is cam 1, 
      otherwise it is camera 2 */
-  frc::SmartDashboard::PutNumber("Top Camera Number", V_VisionTopCamNumberTemp);
+  // frc::SmartDashboard::PutNumber("Top Camera Number", V_VisionTopCamNumberTemp);
   }
 
 
