@@ -52,29 +52,32 @@ void VisionRobotInit()
  ******************************************************************************/
 void VisionInit(frc::DriverStation::Alliance L_AllianceColor)
   {
-  /* Check the driver station for what the top camera number should be: */
-  V_VisionTopCamNumberTemp = frc::SmartDashboard::GetNumber("Top Camera Number", V_VisionTopCamNumberTemp);
+  // /* Check the driver station for what the top camera number should be: */
+  // V_VisionTopCamNumberTemp = frc::SmartDashboard::GetNumber("Top Camera Number", V_VisionTopCamNumberTemp);
 
-  if (fabs(V_VisionTopCamNumberTemp) < 1.5)
-    {
-    V_VisionCamNumber[E_CamTop] = E_Cam1;
-    V_VisionCamNumber[E_CamBottom] = E_Cam2;
-    }
-  else
-    {
-    V_VisionCamNumber[E_CamTop] = E_Cam2;
-    V_VisionCamNumber[E_CamBottom] = E_Cam1;
-    }
+  // if (fabs(V_VisionTopCamNumberTemp) < 1.5)
+  //   {
+  //   V_VisionCamNumber[E_CamTop] = E_Cam1;
+  //   V_VisionCamNumber[E_CamBottom] = E_Cam2;
+  //   }
+  // else
+  //   {
+  //   V_VisionCamNumber[E_CamTop] = E_Cam2;
+  //   V_VisionCamNumber[E_CamBottom] = E_Cam1;
+  //   }
+
+  V_VisionCamNumber[E_CamTop] = E_Cam1;
+  V_VisionCamNumber[E_CamBottom] = E_Cam2;
 
   // gets flag from the driver station to choose between alliance colors
   if (L_AllianceColor == frc::DriverStation::Alliance::kRed)
     {
-    V_VisionCameraIndex[V_VisionCamNumber[E_CamBottom]] = 2; // 2 is the index for a red ball
+    V_VisionCameraIndex[V_VisionCamNumber[E_CamBottom]] = 1; // 2 is the index for a red ball
     V_VisionCameraIndex[V_VisionCamNumber[E_CamTop]] = 1; // 1 is the top camera targeting index
     }
   else // if (L_AllianceColor == frc::DriverStation::Alliance::kBlue) -> must be either red or blue
     {
-    V_VisionCameraIndex[V_VisionCamNumber[E_CamBottom]] = 3; // 3 is the index for a blue ball
+    V_VisionCameraIndex[V_VisionCamNumber[E_CamBottom]] = 2; // 3 is the index for a blue ball
     V_VisionCameraIndex[V_VisionCamNumber[E_CamTop]] = 1; // 1 is the top camera targeting index
     }
   }
@@ -102,7 +105,7 @@ void VisionRun(photonlib::PhotonPipelineResult pc_L_TopResult,
   pc_L_Result[E_Cam2] = pc_L_BottomResult;
   
   /* Check to see what the driver wants for the driver mode: */
-  if (L_DriverDriveModeReq != V_VisionDriverRequestedModeCmndPrev)
+  if ((L_DriverDriveModeReq != V_VisionDriverRequestedModeCmndPrev) && (L_DriverDriveModeReq == true))
     {
     /* Ok, we seem to have experienced a button press.  Let's flip the latched state*/
     if (V_VisionDriverRequestedModeCmndLatched == true)
@@ -118,20 +121,8 @@ void VisionRun(photonlib::PhotonPipelineResult pc_L_TopResult,
   /* Save the previous version to help determine when there is a transition in the driver button press. */
   V_VisionDriverRequestedModeCmndPrev = L_DriverDriveModeReq;
 
-  if (V_VisionDriverRequestedModeCmndLatched == true || L_AutoTargetRequest == true)
-    {
-    L_VisionDriverModeCmndFinalTemp = true;  // We want photon vision to be active and send targeting data.
-    V_VisionDriverModeDelayTime += C_ExeTime;
-    }
-  else
-    {
-    L_VisionDriverModeCmndFinalTemp = false;  // No need for data now, let's get a better picture.
-    V_VisionDriverModeDelayTime = 0;
-    }
-
   /* Let's do the calculations here: */
-  if ((L_VisionDriverModeCmndFinalTemp == true) &&
-      (V_VisionDriverModeDelayTime >= K_VisionCalculationDelayTime))
+  if ((V_VisionDriverRequestedModeCmndLatched == false))
     {
     /* Ok, we want vision to be active and sending data: */
     for (L_Index = E_CamTop;
@@ -172,6 +163,6 @@ void VisionRun(photonlib::PhotonPipelineResult pc_L_TopResult,
     }
 
   /* Send the command out to photon vision: */
-  *L_VisionDriverModeCmndFinal = L_VisionDriverModeCmndFinalTemp;
+  *L_VisionDriverModeCmndFinal = V_VisionDriverRequestedModeCmndLatched;
   }
 #endif

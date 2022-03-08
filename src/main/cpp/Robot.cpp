@@ -255,15 +255,13 @@ void Robot::RobotPeriodic()
              V_Driver_VisionDriverModeOverride,
             &V_VisionDriverModeCmndFinal);
 
+  pc_Camera1.SetDriverMode(V_VisionDriverModeCmndFinal);
+  pc_Camera2.SetDriverMode(V_VisionDriverModeCmndFinal);
+
   if (V_VisionDriverModeCmndFinal == false)
     {
     pc_Camera1.SetPipelineIndex(V_VisionCameraIndex[E_Cam1]);
     pc_Camera2.SetPipelineIndex(V_VisionCameraIndex[E_Cam2]);
-    }
-  else
-    {
-    pc_Camera1.SetDriverMode(V_VisionDriverModeCmndFinal);
-    pc_Camera2.SetDriverMode(V_VisionDriverModeCmndFinal);
     }
 
   V_Lift_state = Lift_Control_Dictator(V_Driver_lift_control,
@@ -324,7 +322,7 @@ void Robot::RobotPeriodic()
     frc::SmartDashboard::PutNumber("Cam1 Index",    float(V_VisionCameraIndex[E_Cam1]));
   // frc::SmartDashboard::PutNumber("Bottom Range",    V_VisionTargetDistanceMeters[E_CamBottom]);
   frc::SmartDashboard::PutBoolean("Bottom Target?", V_VisionTargetAquired[E_CamBottom]);
-  // frc::SmartDashboard::PutNumber("Bottom Yaw",      V_VisionYaw[E_CamBottom]);
+  frc::SmartDashboard::PutNumber("Bottom Yaw",      V_VisionYaw[E_CamBottom]);
   frc::SmartDashboard::PutNumber("Cam2 Index",    float(V_VisionCameraIndex[E_Cam2])); 
 // frc::SmartDashboard::PutNumber("V_VisionTopCamNumberTemp", V_VisionTopCamNumberTemp);
 
