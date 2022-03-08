@@ -19,18 +19,22 @@
  extern double V_LiftPostitionYD; // Position of the YD lift, in revolutions of the motor
  extern double V_LiftPostitionXD; // Position of the XD lift, in revolutions of the motor
  
- void Read_Encoders(double          L_encoderWheelAngleFrontLeftRaw,
-                  double          L_encoderWheelAngleFrontRightRaw,
-                  double          L_encoderWheelAngleRearLeftRaw,
-                  double          L_encoderWheelAngleRearRightRaw,
-                   rev::SparkMaxRelativeEncoder m_encoderFrontLeftDrive,
-                   rev::SparkMaxRelativeEncoder m_encoderFrontRightDrive,
-                   rev::SparkMaxRelativeEncoder m_encoderRearLeftDrive,
-                   rev::SparkMaxRelativeEncoder m_encoderRearRightDrive,
-                   rev::SparkMaxRelativeEncoder m_encoderrightShooter,
-                   rev::SparkMaxRelativeEncoder m_encoderleftShooter,
-                   rev::SparkMaxRelativeEncoder m_encoderLiftYD,
-                   rev::SparkMaxRelativeEncoder m_encoderLiftXD);
+ void Read_Encoders(double                       L_encoderWheelAngleFrontLeftRaw,
+                    double                       L_encoderWheelAngleFrontRightRaw,
+                    double                       L_encoderWheelAngleRearLeftRaw,
+                    double                       L_encoderWheelAngleRearRightRaw,
+                    double                       L_encoderWheelAngleFrontLeftRawPracticeBot,
+                    double                       L_encoderWheelAngleFrontRightRawPracticeBot,
+                    double                       L_encoderWheelAngleRearLeftRawPracticeBot,
+                    double                       L_encoderWheelAngleRearRightRawPracticeBot,
+                    rev::SparkMaxRelativeEncoder m_encoderFrontLeftDrive,
+                    rev::SparkMaxRelativeEncoder m_encoderFrontRightDrive,
+                    rev::SparkMaxRelativeEncoder m_encoderRearLeftDrive,
+                    rev::SparkMaxRelativeEncoder m_encoderRearRightDrive,
+                    rev::SparkMaxRelativeEncoder m_encoderrightShooter,
+                    rev::SparkMaxRelativeEncoder m_encoderleftShooter,
+                    rev::SparkMaxRelativeEncoder m_encoderLiftYD,
+                    rev::SparkMaxRelativeEncoder m_encoderLiftXD);
 
 void EncodersLiftInit(rev::SparkMaxRelativeEncoder m_encoderLiftYD,
                       rev::SparkMaxRelativeEncoder m_encoderLiftXD);

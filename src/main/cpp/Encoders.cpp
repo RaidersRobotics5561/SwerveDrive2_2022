@@ -100,6 +100,10 @@ void Read_Encoders(double                       L_encoderWheelAngleFrontLeftRaw,
                    double                       L_encoderWheelAngleFrontRightRaw,
                    double                       L_encoderWheelAngleRearLeftRaw,
                    double                       L_encoderWheelAngleRearRightRaw,
+                   double                       L_encoderWheelAngleFrontLeftRawPracticeBot,
+                   double                       L_encoderWheelAngleFrontRightRawPracticeBot,
+                   double                       L_encoderWheelAngleRearLeftRawPracticeBot,
+                   double                       L_encoderWheelAngleRearRightRawPracticeBot,
                    rev::SparkMaxRelativeEncoder m_encoderFrontLeftDrive,
                    rev::SparkMaxRelativeEncoder m_encoderFrontRightDrive,
                    rev::SparkMaxRelativeEncoder m_encoderRearLeftDrive,
@@ -114,11 +118,18 @@ void Read_Encoders(double                       L_encoderWheelAngleFrontLeftRaw,
   V_LiftPostitionYD = m_encoderLiftYD.GetPosition();
   V_LiftPostitionXD = m_encoderLiftXD.GetPosition();
 
+#ifdef CompBot
   V_WheelAngleConverted[E_FrontLeft]  = std::fmod((L_encoderWheelAngleFrontLeftRaw  * C_EncoderToAngle), 360) - K_SD_WheelOffsetAngle[E_FrontLeft];
   V_WheelAngleConverted[E_FrontRight] = std::fmod((L_encoderWheelAngleFrontRightRaw * C_EncoderToAngle), 360) - K_SD_WheelOffsetAngle[E_FrontRight];
   V_WheelAngleConverted[E_RearLeft]   = std::fmod((L_encoderWheelAngleRearLeftRaw   * C_EncoderToAngle), 360) - K_SD_WheelOffsetAngle[E_RearLeft];
   V_WheelAngleConverted[E_RearRight]  = std::fmod((L_encoderWheelAngleRearRightRaw  * C_EncoderToAngle), 360) - K_SD_WheelOffsetAngle[E_RearRight];
-
+#endif
+#ifdef PracticeBot
+  V_WheelAngleConverted[E_FrontLeft]  = std::fmod((-L_encoderWheelAngleFrontLeftRawPracticeBot  * C_VoltageToAngle), 360) - K_SD_WheelOffsetAnglePractieBot[E_FrontLeft];
+  V_WheelAngleConverted[E_FrontRight] = std::fmod((-L_encoderWheelAngleFrontRightRawPracticeBot * C_VoltageToAngle), 360) - K_SD_WheelOffsetAnglePractieBot[E_FrontRight];
+  V_WheelAngleConverted[E_RearLeft]   = std::fmod((-L_encoderWheelAngleRearLeftRawPracticeBot   * C_VoltageToAngle), 360) - K_SD_WheelOffsetAnglePractieBot[E_RearLeft];
+  V_WheelAngleConverted[E_RearRight]  = std::fmod((-L_encoderWheelAngleRearRightRawPracticeBot  * C_VoltageToAngle), 360) - K_SD_WheelOffsetAnglePractieBot[E_RearRight];
+#endif
   V_Cnt_WheelDeltaDistanceCurr[E_FrontLeft]  = m_encoderFrontLeftDrive.GetPosition();
   V_Cnt_WheelDeltaDistanceCurr[E_FrontRight] = m_encoderFrontRightDrive.GetPosition();
   V_Cnt_WheelDeltaDistanceCurr[E_RearRight]  = m_encoderRearRightDrive.GetPosition();

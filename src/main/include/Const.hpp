@@ -8,6 +8,9 @@
 // Define the version of vision to use: VISION1 VISION2
 #define VISION2
 
+// Define the bot type: CompBot, PracticeBot
+#define CompBot
+
 // RoboRio controller execution time
 const double C_ExeTime = 0.02; // Set to match the the default controller loop time of 20 ms
 const units::second_t C_ExeTime_t = 0.02_s; // Set to match the the default controller loop time of 20 ms
@@ -22,6 +25,8 @@ const double C_PI = 3.14159265358979;
 const double C_Tau = 6.28318530717958647;
 
 static const double C_EncoderToAngle = 360; // Raw output of PWM encoder to degrees
+static const double C_VoltageToAngle = 72.0; // Gain that converts the measured voltage of the absolute encoder to an equivalent angle in degrees. (practice bot only)
+
 
 // CAN Device IDs:
 static const int C_PDP_ID = 0;
@@ -253,10 +258,17 @@ const double C_SD_R = 0.8441;
 
 /* K_SD_WheelOffsetAngle: Offset angle for each respective corder of the swerve drive wheel.  This is the angle 
    reading from the absolute encoder that is indicated in order for the wheel to point straight. */
-const double K_SD_WheelOffsetAngle[E_RobotCornerSz] = {174.527239,   // E_FrontLeft  169.527239
+const double K_SD_WheelOffsetAngle[E_RobotCornerSz] = {174.527239,   // E_FrontLeft
                                                        128.487963,   // E_FrontRight 
                                                         33.112801,   // E_RearLeft
-                                                       250.813891};  // E_RearRight 246.813891
+                                                       250.813891};  // E_RearRight
+
+/* K_SD_WheelOffsetAnglePractieBot: Offset angle for each respective corder of the swerve drive wheel.  This is the angle 
+   reading from the absolute encoder that is indicated in order for the wheel to point straight.  For practice bot only. */
+const double K_SD_WheelOffsetAnglePractieBot[E_RobotCornerSz] = { -74.8834367,  // E_FrontLeft
+                                                                  -91.0615225,  // E_FrontRight
+                                                                  -11.771014,   // E_RearLeft
+                                                                 -145.722063};  // E_RearRight
 
 /* K_SD_WheelGx: Gain multiplied by each calculated desired speed.  Intended to account for variation in wheel size. */
 const double K_SD_WheelGx[E_RobotCornerSz] = {1.0,   // E_FrontLeft
@@ -306,6 +318,19 @@ const double K_SD_WheelAnglePID_Gx[E_PID_CalSz] = { 0.0035,     // P Gx
                                                    -1.0,       // D LL -0.5
                                                     1.0,       // Max upper 0.9
                                                    -1.0};      // Max lower -0.9
+
+/* K_SD_WheelAnglePID_GxPracticeBot: PID gains for the angle of the swerve drive wheels on practice bot.  PID control is within the RoboRio.  */
+const double K_SD_WheelAnglePID_GxPracticeBot[E_PID_CalSz] = { 0.002,     // P Gx
+                                                               0.000001,  // I Gx
+                                                               0.0000005, // D Gx
+                                                               0.4,       // P UL
+                                                              -0.4,       // P LL
+                                                               0.12,      // I UL
+                                                              -0.12,      // I LL
+                                                               0.5,       // D UL
+                                                              -0.5,       // D LL
+                                                               0.9,       // Max upper
+                                                              -0.9};      // Max lower
 
 /* K_SD_DesiredDriveSpeedAxis: Joystick scale axis for K_SD_DesiredDriveSpeed.  */
 const double K_SD_DesiredDriveSpeedAxis[20] = {-0.95,

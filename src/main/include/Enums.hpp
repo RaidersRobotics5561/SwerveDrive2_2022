@@ -164,15 +164,6 @@ typedef enum T_ADAS_UT_UpperTarget
   E_ADAS_UT_ElevatorControl
 } T_ADAS_UT_UpperTarget;
 
-// typedef enum T_ADAS_DM_DriveManuvering
-// {
-//   E_ADAS_DM_Disabled,
-//   E_ADAS_DM_BlindLaunch,
-//   E_ADAS_DM_DriveStraight,
-//   E_ADAS_DM_ReverseAndIntake,
-//   E_ADAS_DM_Rotate180
-// } T_ADAS_DM_DriveManuvering;
-
 typedef enum T_ADAS_ActiveFeature
 {
   E_ADAS_Disabled,

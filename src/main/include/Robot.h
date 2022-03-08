@@ -34,6 +34,14 @@ class Robot : public frc::TimedRobot {
   void TeleopPeriodic() override;
   void TestPeriodic() override;
 
+  // Analog Inputs
+  // Practice Bot Wheel Angle Encoders
+  frc::AnalogInput a_encoderFrontLeftSteer{2};
+  frc::AnalogInput a_encoderFrontRightSteer{1};
+  frc::AnalogInput a_encoderRearLeftSteer{3};
+  frc::AnalogInput a_encoderRearRightSteer{0};
+ 
+  
   //DIO - Inputs / Outputs
   frc::DutyCycleEncoder a_encoderWheelAngleFrontLeft  {C_MagEncoderFL_ID};
   frc::DutyCycleEncoder a_encoderWheelAngleFrontRight {C_MagEncoderFR_ID};

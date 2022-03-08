@@ -95,7 +95,12 @@ void SwerveDriveMotorConfigsInit(rev::SparkMaxPIDController m_frontLeftDrivePID,
        L_Index2 < E_PID_CalSz;
        L_Index2 = T_PID_Cal(int(L_Index2) + 1))
       {
+	  #ifdef CompBot
       KV_SD_WheelAnglePID_Gx[L_Index2] = K_SD_WheelAnglePID_Gx[L_Index2];
+	  #endif
+	  #ifdef PracticeBot
+	  KV_SD_WheelAnglePID_Gx[L_Index2] = K_SD_WheelAnglePID_GxPracticeBot[L_Index2];
+	  #endif
       }
 
 T_RobotCorner L_Index3;
