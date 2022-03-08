@@ -174,12 +174,12 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
       else if ((L_ADAS_ActiveFeature == E_ADAS_DM_BlindLaunch) &&
                (V_ADAS_StateComplete == true))
         {
-        L_ADAS_ActiveFeature == E_ADAS_DM_DriveStraight;
+        L_ADAS_ActiveFeature = E_ADAS_DM_DriveStraight;
         }
       else if ((L_ADAS_ActiveFeature == E_ADAS_DM_DriveStraight) &&
                (V_ADAS_StateComplete == true))
         {
-        L_ADAS_ActiveFeature == E_ADAS_Disabled;
+        L_ADAS_ActiveFeature = E_ADAS_Disabled;
         V_ADAS_StateComplete = true;
         }
       }
@@ -193,24 +193,24 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
       else if ((L_ADAS_ActiveFeature == E_ADAS_DM_ReverseAndIntake) &&
                (V_ADAS_StateComplete == true))
         {
-        L_ADAS_ActiveFeature == E_ADAS_DM_Rotate180;
+        L_ADAS_ActiveFeature = E_ADAS_DM_Rotate180;
         }
       else if ((L_ADAS_ActiveFeature == E_ADAS_DM_Rotate180) &&
                (V_ADAS_StateComplete == true))
         {
-        L_ADAS_ActiveFeature == E_ADAS_DM_BlindLaunch;
+        L_ADAS_ActiveFeature = E_ADAS_DM_BlindLaunch;
         }
       else if ((L_ADAS_ActiveFeature == E_ADAS_DM_BlindLaunch) &&
                (V_ADAS_StateComplete == true))
         {
-        L_ADAS_ActiveFeature == E_ADAS_Disabled;
+        L_ADAS_ActiveFeature = E_ADAS_Disabled;
         V_ADAS_StateComplete = true;
         }
       }
     else
       {
       /* No auton requested. */
-      L_ADAS_ActiveFeature == E_ADAS_Disabled;
+      L_ADAS_ActiveFeature = E_ADAS_Disabled;
       }
     }
   else
