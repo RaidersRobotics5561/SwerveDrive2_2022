@@ -107,39 +107,39 @@ void ADAS_Main_Reset(void)
 
 
 /******************************************************************************
- * Function:     ADAS_ControlMainTeleop
+ * Function:     ADAS_ControlMain
  *
  * Description:  Main calling function for the ADAS (advanced driver assistance 
- *               system)control when in teleop. This will call and manage the 
- *               various ADAS features when in teleop mode. 
+ *               system)control when robot is active. This will call and manage 
+ *               the various ADAS features. 
  ******************************************************************************/
-T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
-                                            double               *L_Pct_Strafe,
-                                            double               *L_Pct_Rotate,
-                                            double               *L_RPM_Launcher,
-                                            double               *L_Pct_Intake,
-                                            double               *L_Pct_Elevator,
-                                            bool                 *L_CameraUpperLightCmndOn,
-                                            bool                 *L_CameraLowerLightCmndOn,
-                                            bool                 *L_SD_RobotOriented,
-                                            bool                 *L_VisionTargetingRequest,
-                                            bool                  L_Driver1_JoystickActive,
-                                            bool                  L_Driver_stops_shooter,
-                                            bool                  L_Driver_SwerveGoalAutoCenter,
-                                            bool                  L_Driver_AutoIntake,
-                                            double                L_Deg_GyroAngleDeg,
-                                            bool                  L_VisionTopTargetAquired,
-                                            double                L_TopTargetYawDegrees,
-                                            double                L_VisionTopTargetDistanceMeters,
-                                            bool                  L_VisionBottomTargetAquired,
-                                            double                L_VisionBottomYaw,
-                                            double                L_VisionBottomTargetDistanceMeters,
-                                            T_RobotState          L_RobotState,
-                                            double                L_LauncherRPM_Measured,
-                                            bool                  L_BallDetected,
-                                            bool                  L_DriverRequestElevatorUp,
-                                            bool                  L_DriverRequestElevatorDwn,
-                                            T_ADAS_ActiveFeature  L_ADAS_ActiveFeature)
+T_ADAS_ActiveFeature ADAS_ControlMain(double               *L_Pct_FwdRev,
+                                      double               *L_Pct_Strafe,
+                                      double               *L_Pct_Rotate,
+                                      double               *L_RPM_Launcher,
+                                      double               *L_Pct_Intake,
+                                      double               *L_Pct_Elevator,
+                                      bool                 *L_CameraUpperLightCmndOn,
+                                      bool                 *L_CameraLowerLightCmndOn,
+                                      bool                 *L_SD_RobotOriented,
+                                      bool                 *L_VisionTargetingRequest,
+                                      bool                  L_Driver1_JoystickActive,
+                                      bool                  L_Driver_stops_shooter,
+                                      bool                  L_Driver_SwerveGoalAutoCenter,
+                                      bool                  L_Driver_AutoIntake,
+                                      double                L_Deg_GyroAngleDeg,
+                                      bool                  L_VisionTopTargetAquired,
+                                      double                L_TopTargetYawDegrees,
+                                      double                L_VisionTopTargetDistanceMeters,
+                                      bool                  L_VisionBottomTargetAquired,
+                                      double                L_VisionBottomYaw,
+                                      double                L_VisionBottomTargetDistanceMeters,
+                                      T_RobotState          L_RobotState,
+                                      double                L_LauncherRPM_Measured,
+                                      bool                  L_BallDetected,
+                                      bool                  L_DriverRequestElevatorUp,
+                                      bool                  L_DriverRequestElevatorDwn,
+                                      T_ADAS_ActiveFeature  L_ADAS_ActiveFeature)
   {
   T_ADAS_ActiveFeature L_ADAS_ActiveFeaturePrev = L_ADAS_ActiveFeature;
 
