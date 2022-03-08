@@ -60,6 +60,7 @@ void ADAS_Main_Init(void)
   V_ADAS_AutonChooser.AddOption("Disabled", T_ADAS_ActiveAutonFeature::E_ADAS_AutonDisabled);
   V_ADAS_AutonChooser.AddOption("Blind Shot 1", T_ADAS_ActiveAutonFeature::E_ADAS_AutonDriveAndShootBlind1);
   V_ADAS_AutonChooser.AddOption("Blind Shot 2", T_ADAS_ActiveAutonFeature::E_ADAS_AutonDriveAndShootBlind2);
+  V_ADAS_AutonChooser.AddOption("Auto Shot 2", T_ADAS_ActiveAutonFeature::E_ADAS_AutonDriveAndShootAuto2);
   V_ADAS_AutonChooser.SetDefaultOption("Disabled", T_ADAS_ActiveAutonFeature::E_ADAS_AutonDisabled);
   frc::SmartDashboard::PutData(L_AutonSelectorName, &V_ADAS_AutonChooser);
   }
@@ -201,6 +202,35 @@ T_ADAS_ActiveFeature ADAS_ControlMainTeleop(double               *L_Pct_FwdRev,
         L_ADAS_ActiveFeature = E_ADAS_DM_BlindLaunch;
         }
       else if ((L_ADAS_ActiveFeature == E_ADAS_DM_BlindLaunch) &&
+               (V_ADAS_StateComplete == true))
+        {
+        L_ADAS_ActiveFeature = E_ADAS_Disabled;
+        V_ADAS_StateComplete = true;
+        }
+      }
+    else if (V_ADAS_DriverRequestedAutonFeature == E_ADAS_AutonDriveAndShootAuto2)
+      {
+      if ((L_ADAS_ActiveFeature == E_ADAS_Disabled) &&
+          (V_ADAS_StateComplete == false))
+        {
+        L_ADAS_ActiveFeature = E_ADAS_DM_DriveStraight;
+        }
+      else if ((L_ADAS_ActiveFeature == E_ADAS_DM_DriveStraight) &&
+               (V_ADAS_StateComplete == true))
+        {
+        L_ADAS_ActiveFeature = E_ADAS_BT_AutoBallTarget;
+        }
+      else if ((L_ADAS_ActiveFeature == E_ADAS_BT_AutoBallTarget) &&
+               (V_ADAS_StateComplete == true))
+        {
+        L_ADAS_ActiveFeature = E_ADAS_DM_Rotate180;
+        }
+      else if ((L_ADAS_ActiveFeature == E_ADAS_DM_Rotate180) &&
+               (V_ADAS_StateComplete == true))
+        {
+        L_ADAS_ActiveFeature = E_ADAS_UT_AutoUpperTarget;
+        }
+      else if ((L_ADAS_ActiveFeature == E_ADAS_UT_AutoUpperTarget) &&
                (V_ADAS_StateComplete == true))
         {
         L_ADAS_ActiveFeature = E_ADAS_Disabled;
