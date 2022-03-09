@@ -223,7 +223,7 @@ T_ADAS_BT_BallTarget ADAS_BT_AutoCenter(double *L_Pct_FwdRev,
   /* Ok, now let's focus on the auto centering: */
   if (L_VisionBottomTargetAquired == true)
     {
-    L_RotateErrorCalc = KV_ADAS_BT_TargetVisionAngle - L_VisionBottomYaw;
+    L_RotateErrorCalc = L_VisionBottomYaw - KV_ADAS_BT_TargetVisionAngle;
     V_ADAS_BT_RotateErrorPrev = L_RotateErrorCalc;
     V_ADAS_BT_TargetAquiredPrev = true;
     }
@@ -340,6 +340,8 @@ T_ADAS_BT_BallTarget ADAS_BT_IntakeAndRun(double *L_Pct_FwdRev,
       *L_CameraLowerLightCmndOn = false;
       *L_VisionTargetingRequest = false;
       L_ADAS_BT_State = E_ADAS_BT_Disabled;
+      V_ADAS_BT_DriveForwardInitiated = false;
+      V_ADAS_BT_DebounceTime = 0;
       }
     }
   else
@@ -378,6 +380,7 @@ bool ADAS_BT_Main(double               *L_Pct_FwdRev,
   switch (V_ADAS_BT_State)
     {
     case E_ADAS_BT_Disabled:
+    case E_ADAS_BT_CameraLightOn:
         V_ADAS_BT_State = ADAS_BT_CameraLightOn(L_Pct_FwdRev,
                                                 L_Pct_Strafe,
                                                 L_Pct_Rotate,

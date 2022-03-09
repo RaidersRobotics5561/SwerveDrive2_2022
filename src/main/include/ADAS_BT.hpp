@@ -10,6 +10,7 @@
   2022-02-25 -> Beta
  */
 
+extern T_ADAS_BT_BallTarget V_ADAS_BT_State;
 void ADAS_BT_Reset(void);
 void ADAS_BT_ConfigsCal(void);
 void ADAS_BT_ConfigsInit(void);

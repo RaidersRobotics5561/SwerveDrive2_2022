@@ -161,6 +161,7 @@ T_ADAS_ActiveFeature ADAS_ControlMain(double               *L_Pct_FwdRev,
       {
       /* Abort criteria goes here. */
       L_ADAS_ActiveFeature = E_ADAS_Disabled;
+      V_ADAS_StateComplete = false;
       }
     }
   else if (L_RobotState == E_Auton)
@@ -248,13 +249,15 @@ T_ADAS_ActiveFeature ADAS_ControlMain(double               *L_Pct_FwdRev,
     L_ADAS_ActiveFeature = E_ADAS_Disabled;
     }
 
+  frc::SmartDashboard::PutNumber("L_ADAS_ActiveFeature",  L_ADAS_ActiveFeature);
 
-  if (L_ADAS_ActiveFeature != L_ADAS_ActiveFeaturePrev)
+  if (L_ADAS_ActiveFeature == E_ADAS_Disabled)
     {
     /* Hmm, there was a transition, let's go ahead and reset all of the variables before we start: */
     ADAS_UT_Reset();
     ADAS_BT_Reset();
     ADAS_DM_Reset();
+    V_ADAS_StateComplete = false;
     }
 
   switch (L_ADAS_ActiveFeature)

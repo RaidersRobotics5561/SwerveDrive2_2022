@@ -128,13 +128,15 @@ bool ADAS_DM_Rotate180(double     *L_Pct_FwdRev,
   if (V_ADAS_DM_StateInit == false)
     {
     /* Need to find the target angle.  The gyro in use will only report values of -180 to 180. Need to account for this:*/
-    V_ADAS_DM_Rotate180TargetAngle = L_Deg_GyroAngleDeg + 180;
+    V_ADAS_DM_Rotate180TargetAngle = L_Deg_GyroAngleDeg - 180;
 
-    if (V_ADAS_DM_Rotate180TargetAngle > 180)
+    // V_ADAS_DM_Rotate180TargetAngle = std::fmod((V_ADAS_DM_Rotate180TargetAngle), 180);
+
+    if (V_ADAS_DM_Rotate180TargetAngle >= 180)
       {
       V_ADAS_DM_Rotate180TargetAngle -= 360;
       }
-    else if (V_ADAS_DM_Rotate180TargetAngle < 180)
+    else if (V_ADAS_DM_Rotate180TargetAngle <= -180)
       {
       V_ADAS_DM_Rotate180TargetAngle += 360;
       }
@@ -173,7 +175,7 @@ bool ADAS_DM_Rotate180(double     *L_Pct_FwdRev,
     L_ADAS_DM_StateComplete = true;
     V_ADAS_DM_StateInit = false;
     }
-  
+
   return (L_ADAS_DM_StateComplete);
   }
 
@@ -300,6 +302,7 @@ bool ADAS_DM_BlindShot(double       *L_Pct_FwdRev,
 
   if (V_ADAS_DM_DebounceTime <= K_ADAS_DM_BlindShotTime)
     {
+    *L_Pct_Intake = K_ADAS_DM_BlindShotElevator;
     *L_Pct_Elevator = K_ADAS_DM_BlindShotElevator;
     *L_RPM_Launcher = K_ADAS_DM_BlindShotLauncherHigh;
     }
@@ -307,6 +310,7 @@ bool ADAS_DM_BlindShot(double       *L_Pct_FwdRev,
     {
     V_ADAS_DM_DebounceTime = 0;
     L_ADAS_DM_StateComplete = true;
+    *L_Pct_Intake = 0;
     *L_Pct_Elevator = 0;
     *L_RPM_Launcher = 0;
     }

@@ -10,7 +10,7 @@
   2022-02-25 -> Beta
  */
 
-
+extern T_ADAS_UT_UpperTarget V_ADAS_UT_State;
 void ADAS_UT_Reset(void);
 void ADAS_UT_ConfigsCal(void);
 void ADAS_UT_ConfigsInit(void);

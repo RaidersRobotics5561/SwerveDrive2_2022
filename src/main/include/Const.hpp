@@ -9,7 +9,7 @@
 #define VISION2
 
 // Define the bot type: CompBot, PracticeBot
-#define PracticeBot
+#define CompBot
 
 // RoboRio controller execution time
 const double C_ExeTime = 0.02; // Set to match the the default controller loop time of 20 ms
@@ -53,13 +53,13 @@ const double K_SteerMotorCurrentLimit = 25;
 
 // Vision Cals:
 // cals for top target cam
-const units::meter_t K_VisionHeight[E_CamLocSz] = {0.725_m,  // 725 mm to camera lense  -> top
+const units::meter_t K_VisionHeight[E_CamLocSz] = {0.795_m,  // 795 mm to camera lense  -> top
                                                    0.367_m}; //                         -> bottom
 
 const units::meter_t K_VisionTargetHeight[E_CamLocSz] = {2.58_m,  // bottom of tape to carpet  -> top
                                                          0.12_m};  // radius of the ball in cm -> bottom
 
-const units::radian_t K_VisionCameraPitch[E_CamLocSz] = {45_deg,  // camera on a 45 degree tilt  -> top
+const units::radian_t K_VisionCameraPitch[E_CamLocSz] = {15_deg,  // camera on a 75 degree tilt  -> top
                                                          50_deg}; //                             -> bottom
 
 /* K_VisionCalculationDelayTime: Delay time before allowing calculations to occur */
@@ -194,28 +194,17 @@ const double K_BH_LauncherPID_Gx[E_PID_SparkMaxCalSz] = { 0.00055,  // kP
                                                           0.0};     // kAllErr
 
 /* K_BH_LauncherSpeedAxis: Launcher speed axis for K_BH_LauncherSpeed.  Distance is in the unit from the camera.  Comments reflect actual measured distance. */
-const double K_BH_LauncherSpeedAxis[10] = {415,   // 3 ft
-                                           644,   // 5 ft
-                                           840,   // 7 ft
-                                           975,   // 9 ft
-                                           1077,  // 11 ft
-                                           1090,  // 13 ft
-                                           1100,  // 15 ft
-                                           1120,  // 17 ft
-                                           1130,  // 19 ft
-                                           1150}; // 21 ft
+const double K_BH_LauncherSpeedAxis[4] = {2.52,   // 6 ft 6in
+                                          3.60,    // 8 ft 6in
+                                          4.51,
+                                          13.5};   // 10 ft 6in
+
 
 /* K_BH_LauncherSpeed: Launcher speed necessary for ball to reach target based on the estimated distance from the camera. */
-const double K_BH_LauncherSpeed[10] = {3300,  // 3 ft 
-                                       3300,  // 5 ft
-                                       3550,  // 7 ft
-                                       3750,  // 9 ft
-                                       4000,  // 11 ft
-                                       4300,  // 13 ft
-                                       4550,  // 15 ft
-                                       4700,  // 17 ft
-                                       5000,  // 19 ft
-                                       5300}; // 21 ft
+const double K_BH_LauncherSpeed[4] = {3300,   // 3 ft 
+                                      3650,   // 5 ft
+                                      3900,
+                                      5000};  // 7 ft
 
 /* K_BH_LauncherManualDb: Deadband around the manual ball launcher axis. */
 const double K_BH_LauncherManualDb = 0.1;
@@ -404,24 +393,24 @@ const double K_ADAS_UT_AllowedLauncherTime = 2;
 const double K_ADAS_UT_RotateDeadbandAngle = 0.5;
 
 /* K_ADAS_UT_TargetVisionAngle: This is the desired target angle for the auto vision targeting.  This is due to the offset of the camera. For 2020 - 3.3 */
-const double K_ADAS_UT_TargetVisionAngle = 0.0;
+const double K_ADAS_UT_TargetVisionAngle = -5.0;
 
 /* K_ADAS_BT_LightDelayTIme - Amount of time wait for the camera to have sufficent light before proceeding. [Seconds] */
 const double K_ADAS_BT_LightDelayTIme = 0.060;
 
 /* K_ADAS_BT_LostTargetGx - When the camera has lost the target, the previous error value will be used,
    but multiplied against this gain so that we don't go too far before getting another good value. */
-const double K_ADAS_BT_LostTargetGx = 0.25;
+const double K_ADAS_BT_LostTargetGx = 0.080;
 
 /* K_ADAS_BT_NoTargetError - When we haven't seen anything from the camera, take a guess.  This will 
    be the percieved error value until we see something good. */
-const double K_ADAS_BT_NoTargetError = 20;
+const double K_ADAS_BT_NoTargetError = 1;
 
 /* K_ADAS_BT_DebounceTime - Debounce time to hold a given state before preceding to next step. [Seconds] */
-const double K_ADAS_BT_DebounceTime = 0.080;
+const double K_ADAS_BT_DebounceTime = 0.020;
 
 /* K_ADAS_BT_RotateDeadbandAngle: Deadband angle for ball targeting */
-const double K_ADAS_BT_RotateDeadbandAngle = 0.5;
+const double K_ADAS_BT_RotateDeadbandAngle = 2.0;
 
 /* K_ADAS_BT_TargetVisionAngle: This is the desired target angle for the auto ball vision targeting.  This is due to the offset of the camera. */
 const double K_ADAS_BT_TargetVisionAngle = 2.0;
@@ -435,12 +424,12 @@ const double K_ADAS_BT_DriveTimeAxis[6] = {0,
                                           5};
 
 /* K_ADAS_BT_DriveTime: This is the amount of time to drive forward to capture the ball based on the estimated distance. [seconds] */
-const double K_ADAS_BT_DriveTime[6] = {0.8,
+const double K_ADAS_BT_DriveTime[6] = {1.5,
                                        1.5,
-                                       2.0,
-                                       2.5,
-                                       3.0,
-                                       3.4};
+                                       1.5,
+                                       1.5,
+                                       1.5,
+                                       1.5};
 
 /* K_ADAS_BT_MaxTimeToWaitForCamera: This is the max amount of time we will wait for a valid distance from the camera. [Seconds] */
 const double K_ADAS_BT_MaxTimeToWaitForCamera = 0.5;
@@ -449,7 +438,7 @@ const double K_ADAS_BT_MaxTimeToWaitForCamera = 0.5;
 const double K_ADAS_BT_TimedOutDriveForward = 1.0;
 
 /* K_ADAS_BT_DriveForwardPct: This is the percent of swerve drive control to go forward to pickup the ball. */
-const double K_ADAS_BT_DriveForwardPct = 0.8;
+const double K_ADAS_BT_DriveForwardPct = -0.1;
 
 
 /* K_ADAS_DM_BlindShotTime: This is the amount of time to remain in blind shoot. [Seconds] */
@@ -471,10 +460,10 @@ const double K_ADAS_DM_BlindShotLauncherHigh = 3300;
 const double K_ADAS_DM_DriveTime = 5.5;
 
 /* K_ADAS_DM_DriveFWD_Pct: This is the default drive forward Pct. [Pct] */
-const double K_ADAS_DM_DriveFWD_Pct = 1.0;
+const double K_ADAS_DM_DriveFWD_Pct = 0.2;
 
 /* K_ADAS_DM_DriveREV_Pct: This is the default drive in reverse Pct. [Pct] */
-const double K_ADAS_DM_DriveREV_Pct = -1.0;
+const double K_ADAS_DM_DriveREV_Pct = -0.2;
 
 /* K_ADAS_DM_RotateDebounceTime: This is the debounce time for the DM rotate state. [seconds] */
 const double K_ADAS_DM_RotateDebounceTime = 0.1;
@@ -497,16 +486,16 @@ const double K_DesiredRotateSpeedAxis[10] = {-20.0,
                                               20.0};
 
 /* K_DesiredRotateSpeed - This is the effective command, equivalent to the rotate joystick */
-const double K_DesiredRotateSpeed[10] = {-0.5,  // -20.0
-                                         -0.2,  //  -4.0
-                                         -0.06,  //  -2.0
-                                         -0.05,  //  -1.0
+const double K_DesiredRotateSpeed[10] = {-0.20,  // -20.0
+                                         -0.08,  //  -4.0
+                                         -0.015,  //  -2.0
+                                         -0.008,  //  -1.0
                                           0.0,  //  -0.2
                                           0.0,  //   0.2
-                                          0.05,  //   1.0
-                                          0.06,  //   2.0
-                                          0.2,  //   4.0
-                                          0.5}; //  20.0
+                                          0.008,  //   1.0
+                                          0.015,  //   2.0
+                                          0.08,  //   4.0
+                                          0.20}; //  20.0
 
 /* K_DesiredAutoRotateSpeedAxis - This is the effective command axis, function of error calculation, in degrees */
 const double K_DesiredAutoRotateSpeedAxis[10] = {-4.0,

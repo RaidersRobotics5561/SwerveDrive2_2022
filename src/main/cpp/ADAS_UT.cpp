@@ -188,7 +188,7 @@ T_ADAS_UT_UpperTarget ADAS_UT_AutoCenter(double *L_Pct_FwdRev,
   /* Ok, now let's focus on the auto centering: */
   if (L_VisionTopTargetAquired == true)
     {
-    L_RotateErrorCalc = KV_ADAS_UT_TargetVisionAngle - L_TopTargetYawDegrees;
+    L_RotateErrorCalc =  L_TopTargetYawDegrees - KV_ADAS_UT_TargetVisionAngle;
     V_ADAS_UT_RotateErrorPrev = L_RotateErrorCalc;
     V_ADAS_UT_TargetAquiredPrev = true;
     }
@@ -231,9 +231,10 @@ T_ADAS_UT_UpperTarget ADAS_UT_AutoCenter(double *L_Pct_FwdRev,
     {
     /* We have been at the correct location for the set amount of time.
        We have previously set the state to the next one, now set the rotate command to off. */
+    L_ADAS_UT_State = E_ADAS_UT_LauncherSpeed;
     *L_Pct_Rotate = 0;
     }
-  
+
   return (L_ADAS_UT_State);
   }
 
@@ -430,9 +431,12 @@ bool ADAS_UT_Main(double               *L_Pct_FwdRev,
   {
   bool L_ADAS_UT_Complete = false;
 
+
+
   switch (V_ADAS_UT_State)
     {
     case E_ADAS_UT_Disabled:
+    case E_ADAS_UT_CameraLightOn:
         V_ADAS_UT_State = ADAS_UT_CameraLightOn(L_Pct_FwdRev,
                                                 L_Pct_Strafe,
                                                 L_Pct_Rotate,

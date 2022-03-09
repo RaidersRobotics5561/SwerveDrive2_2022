@@ -107,11 +107,6 @@ void Robot::RobotInit()
   VisionRobotInit();
 
   VisionInit(V_AllianceColor);
-
-// m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
-// m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
-// frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
-// frc::SmartDashboard::PutNumber("cooler int", 1);
   }
 
 
@@ -264,8 +259,8 @@ void Robot::RobotPeriodic()
 
   if (V_VisionDriverModeCmndFinal == false)
     {
-    pc_Camera1.SetPipelineIndex(V_VisionCameraIndex[E_Cam1]);
-    pc_Camera2.SetPipelineIndex(V_VisionCameraIndex[E_Cam2]);
+    // pc_Camera1.SetPipelineIndex(V_VisionCameraIndex[E_Cam1]);  // Shouldn't need this one so long as Cam1 remains as top
+    pc_Camera2.SetPipelineIndex(V_VisionCameraIndex[E_Cam2]);  // Need to comment this out if Photon Vision is being calibrated/tweaked
     }
 
   V_Lift_state = Lift_Control_Dictator(V_Driver_lift_control,
@@ -304,14 +299,16 @@ void Robot::RobotPeriodic()
   ADAS_BT_ConfigsCal();
 
 /* Output all of the content to the dashboard here: */
-  frc::SmartDashboard::PutBoolean("XD Limit Detected", V_XD_LimitDetected);
-  frc::SmartDashboard::PutBoolean("YD Limit Detected", V_YD_LimitDetected);
+  // frc::SmartDashboard::PutBoolean("XD Limit Detected", V_XD_LimitDetected);
+  // frc::SmartDashboard::PutBoolean("YD Limit Detected", V_YD_LimitDetected);
   frc::SmartDashboard::PutBoolean("Ball Detected Upper", V_BallDetectedUpper);
   frc::SmartDashboard::PutBoolean("Ball Detected Lower", V_BallDetectedLower);
   frc::SmartDashboard::PutBoolean("Lift Ready to Advance", V_Lift_WaitingForDriverINS);
+  frc::SmartDashboard::PutNumber("V_WheelAngleConverted[E_FrontRight]", V_WheelAngleConverted[E_FrontRight]);
+  frc::SmartDashboard::PutNumber("V_ADAS_BT_State", V_ADAS_BT_State);
   
-  frc::SmartDashboard::PutNumber("Lift postition YD", V_LiftPostitionYD);
-  frc::SmartDashboard::PutNumber("Lift postition XD", V_LiftPostitionXD);
+  // frc::SmartDashboard::PutNumber("Lift postition YD", V_LiftPostitionYD);
+  // frc::SmartDashboard::PutNumber("Lift postition XD", V_LiftPostitionXD);
 
   // frc::SmartDashboard::PutNumber("V_b_DriveStraight", V_b_DriveStraight);
   // frc::SmartDashboard::PutNumber("V_RotateErrorCalc", V_RotateErrorCalc);
@@ -323,11 +320,11 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutBoolean("Top Target?",    V_VisionTargetAquired[E_CamTop]);
   frc::SmartDashboard::PutNumber("Top Yaw",         V_VisionYaw[E_CamTop]);
   frc::SmartDashboard::PutNumber("Top Distance",    V_VisionTargetDistanceMeters[E_CamTop]);
-    frc::SmartDashboard::PutNumber("Cam1 Index",    float(V_VisionCameraIndex[E_Cam1]));
+    // frc::SmartDashboard::PutNumber("Cam1 Index",    float(V_VisionCameraIndex[E_Cam1]));
   // frc::SmartDashboard::PutNumber("Bottom Range",    V_VisionTargetDistanceMeters[E_CamBottom]);
   frc::SmartDashboard::PutBoolean("Bottom Target?", V_VisionTargetAquired[E_CamBottom]);
   frc::SmartDashboard::PutNumber("Bottom Yaw",      V_VisionYaw[E_CamBottom]);
-  frc::SmartDashboard::PutNumber("Cam2 Index",    float(V_VisionCameraIndex[E_Cam2])); 
+  // frc::SmartDashboard::PutNumber("Cam2 Index",    float(V_VisionCameraIndex[E_Cam2])); 
 // frc::SmartDashboard::PutNumber("V_VisionTopCamNumberTemp", V_VisionTopCamNumberTemp);
 
   // frc::SmartDashboard::PutNumber("Camera 1 Pipeline Index", float(pc_Camera1.GetPipelineIndex()));
@@ -369,7 +366,7 @@ void Robot::RobotPeriodic()
   // frc::SmartDashboard::PutNumber("Lift XD S8",  V_LiftMotorXD_MaxCurrent[E_S8_more_down_some_YD]);
   // frc::SmartDashboard::PutNumber("Lift XD S9",  V_LiftMotorXD_MaxCurrent[E_S9_back_rest_XD]);
   // frc::SmartDashboard::PutNumber("Lift XD S10", V_LiftMotorXD_MaxCurrent[E_S10_final_YD]);
-
+frc::SmartDashboard::PutNumber("V_ADAS_UT_State",  float(V_ADAS_UT_State));
   /* Set light control outputs here */
   do_CameraLightControl.Set(V_CameraLightCmndOn);
   m_vanityLightControler.Set(V_VanityLightCmnd);
@@ -386,7 +383,7 @@ void Robot::AutonomousInit()
   { 
     V_RobotState = E_Auton;
     V_AllianceColor = frc::DriverStation::GetInstance().GetAlliance();
-    
+    GyroInit();
     DriveControlInit();
     BallHandlerInit();
     LiftControlInit();
