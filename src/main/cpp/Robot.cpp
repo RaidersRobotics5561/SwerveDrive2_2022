@@ -366,7 +366,9 @@ void Robot::RobotPeriodic()
   // frc::SmartDashboard::PutNumber("Lift XD S8",  V_LiftMotorXD_MaxCurrent[E_S8_more_down_some_YD]);
   // frc::SmartDashboard::PutNumber("Lift XD S9",  V_LiftMotorXD_MaxCurrent[E_S9_back_rest_XD]);
   // frc::SmartDashboard::PutNumber("Lift XD S10", V_LiftMotorXD_MaxCurrent[E_S10_final_YD]);
-frc::SmartDashboard::PutNumber("V_ADAS_UT_State",  float(V_ADAS_UT_State));
+  frc::SmartDashboard::PutNumber("V_ADAS_UT_State",  float(V_ADAS_UT_State));
+  frc::SmartDashboard::PutBoolean("Robot Oriented Control?",    V_SD_DriverRobotOrientedRequestedLatched);
+
   /* Set light control outputs here */
   do_CameraLightControl.Set(V_CameraLightCmndOn);
   m_vanityLightControler.Set(V_VanityLightCmnd);
