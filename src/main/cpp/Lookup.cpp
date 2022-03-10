@@ -261,189 +261,189 @@ void DesiredAutonLocation2(double  L_t_AutonTime,
                            double *L_L_Y_Location,
                            int     L_int_AutonSelection)
   {
-  double L_L_X_Loc = 0.0;
-  double L_L_Y_Loc = 0.0;
-  int L_i_X_AxisSize     = 0;
-  int L_i_X_CalArraySize = 0;
-  int L_i_Y_AxisSize     = 0;
-  int L_i_Y_CalArraySize = 0;
+  // double L_L_X_Loc = 0.0;
+  // double L_L_Y_Loc = 0.0;
+  // int L_i_X_AxisSize     = 0;
+  // int L_i_X_CalArraySize = 0;
+  // int L_i_Y_AxisSize     = 0;
+  // int L_i_Y_CalArraySize = 0;
 
-    switch (L_int_AutonSelection)
-      {
-        case 1:
-        L_i_X_AxisSize             = (int)(sizeof(K_t_Slalom_V55A25_T) / sizeof(K_l_Slalom_V55A25_X[0]));
-        L_i_X_CalArraySize         = (int)(sizeof(K_l_Slalom_V55A25_X) / sizeof(K_l_Slalom_V55A25_X[0]));
-        L_i_Y_AxisSize             = (int)(sizeof(K_t_Slalom_V55A25_T) / sizeof(K_l_Slalom_V55A25_Y[0]));
-        L_i_Y_CalArraySize         = (int)(sizeof(K_l_Slalom_V55A25_Y) / sizeof(K_l_Slalom_V55A25_Y[0]));
+  //   switch (L_int_AutonSelection)
+  //     {
+  //       case 1:
+  //       L_i_X_AxisSize             = (int)(sizeof(K_t_Slalom_V55A25_T) / sizeof(K_l_Slalom_V55A25_X[0]));
+  //       L_i_X_CalArraySize         = (int)(sizeof(K_l_Slalom_V55A25_X) / sizeof(K_l_Slalom_V55A25_X[0]));
+  //       L_i_Y_AxisSize             = (int)(sizeof(K_t_Slalom_V55A25_T) / sizeof(K_l_Slalom_V55A25_Y[0]));
+  //       L_i_Y_CalArraySize         = (int)(sizeof(K_l_Slalom_V55A25_Y) / sizeof(K_l_Slalom_V55A25_Y[0]));
 
-        L_L_X_Loc = LookUp1D_Table(&K_t_Slalom_V55A25_T[0],
-                                   &K_l_Slalom_V55A25_X[0],
-                                    L_i_X_AxisSize,
-                                    L_i_X_CalArraySize,
-                                    L_t_AutonTime);
+  //       L_L_X_Loc = LookUp1D_Table(&K_t_Slalom_V55A25_T[0],
+  //                                  &K_l_Slalom_V55A25_X[0],
+  //                                   L_i_X_AxisSize,
+  //                                   L_i_X_CalArraySize,
+  //                                   L_t_AutonTime);
 
-        L_L_Y_Loc = LookUp1D_Table(&K_t_Slalom_V55A25_T[0],
-                                   &K_l_Slalom_V55A25_Y[0],
-                                    L_i_Y_AxisSize,
-                                    L_i_Y_CalArraySize,
-                                    L_t_AutonTime);
-        break;
+  //       L_L_Y_Loc = LookUp1D_Table(&K_t_Slalom_V55A25_T[0],
+  //                                  &K_l_Slalom_V55A25_Y[0],
+  //                                   L_i_Y_AxisSize,
+  //                                   L_i_Y_CalArraySize,
+  //                                   L_t_AutonTime);
+  //       break;
 
-        case 2:
-        L_i_X_AxisSize             = (int)(sizeof(K_t_Slalom_V75A30_T) / sizeof(K_l_Slalom_V75A30_X[0]));
-        L_i_X_CalArraySize         = (int)(sizeof(K_l_Slalom_V75A30_X) / sizeof(K_l_Slalom_V75A30_X[0]));
-        L_i_Y_AxisSize             = (int)(sizeof(K_t_Slalom_V75A30_T) / sizeof(K_l_Slalom_V75A30_Y[0]));
-        L_i_Y_CalArraySize         = (int)(sizeof(K_l_Slalom_V75A30_Y) / sizeof(K_l_Slalom_V75A30_Y[0]));
+  //       case 2:
+  //       L_i_X_AxisSize             = (int)(sizeof(K_t_Slalom_V75A30_T) / sizeof(K_l_Slalom_V75A30_X[0]));
+  //       L_i_X_CalArraySize         = (int)(sizeof(K_l_Slalom_V75A30_X) / sizeof(K_l_Slalom_V75A30_X[0]));
+  //       L_i_Y_AxisSize             = (int)(sizeof(K_t_Slalom_V75A30_T) / sizeof(K_l_Slalom_V75A30_Y[0]));
+  //       L_i_Y_CalArraySize         = (int)(sizeof(K_l_Slalom_V75A30_Y) / sizeof(K_l_Slalom_V75A30_Y[0]));
 
-        L_L_X_Loc = LookUp1D_Table(&K_t_Slalom_V75A30_T[0],
-                                   &K_l_Slalom_V75A30_X[0],
-                                    L_i_X_AxisSize,
-                                    L_i_X_CalArraySize,
-                                    L_t_AutonTime);
+  //       L_L_X_Loc = LookUp1D_Table(&K_t_Slalom_V75A30_T[0],
+  //                                  &K_l_Slalom_V75A30_X[0],
+  //                                   L_i_X_AxisSize,
+  //                                   L_i_X_CalArraySize,
+  //                                   L_t_AutonTime);
 
-        L_L_Y_Loc = LookUp1D_Table(&K_t_Slalom_V75A30_T[0],
-                                   &K_l_Slalom_V75A30_Y[0],
-                                    L_i_Y_AxisSize,
-                                    L_i_Y_CalArraySize,
-                                    L_t_AutonTime);
-        break;
+  //       L_L_Y_Loc = LookUp1D_Table(&K_t_Slalom_V75A30_T[0],
+  //                                  &K_l_Slalom_V75A30_Y[0],
+  //                                   L_i_Y_AxisSize,
+  //                                   L_i_Y_CalArraySize,
+  //                                   L_t_AutonTime);
+  //       break;
 
-        case 3:
-        L_i_X_AxisSize             = (int)(sizeof(K_t_Slalom_V125A50_T) / sizeof(K_l_Slalom_V125A50_X[0]));
-        L_i_X_CalArraySize         = (int)(sizeof(K_l_Slalom_V125A50_X) / sizeof(K_l_Slalom_V125A50_X[0]));
-        L_i_Y_AxisSize             = (int)(sizeof(K_t_Slalom_V125A50_T) / sizeof(K_l_Slalom_V125A50_Y[0]));
-        L_i_Y_CalArraySize         = (int)(sizeof(K_l_Slalom_V125A50_Y) / sizeof(K_l_Slalom_V125A50_Y[0]));
+  //       case 3:
+  //       L_i_X_AxisSize             = (int)(sizeof(K_t_Slalom_V125A50_T) / sizeof(K_l_Slalom_V125A50_X[0]));
+  //       L_i_X_CalArraySize         = (int)(sizeof(K_l_Slalom_V125A50_X) / sizeof(K_l_Slalom_V125A50_X[0]));
+  //       L_i_Y_AxisSize             = (int)(sizeof(K_t_Slalom_V125A50_T) / sizeof(K_l_Slalom_V125A50_Y[0]));
+  //       L_i_Y_CalArraySize         = (int)(sizeof(K_l_Slalom_V125A50_Y) / sizeof(K_l_Slalom_V125A50_Y[0]));
 
-        L_L_X_Loc = LookUp1D_Table(&K_t_Slalom_V125A50_T[0],
-                                   &K_l_Slalom_V125A50_X[0],
-                                    L_i_X_AxisSize,
-                                    L_i_X_CalArraySize,
-                                    L_t_AutonTime);
+  //       L_L_X_Loc = LookUp1D_Table(&K_t_Slalom_V125A50_T[0],
+  //                                  &K_l_Slalom_V125A50_X[0],
+  //                                   L_i_X_AxisSize,
+  //                                   L_i_X_CalArraySize,
+  //                                   L_t_AutonTime);
 
-        L_L_Y_Loc = LookUp1D_Table(&K_t_Slalom_V125A50_T[0],
-                                   &K_l_Slalom_V125A50_Y[0],
-                                    L_i_Y_AxisSize,
-                                    L_i_Y_CalArraySize,
-                                    L_t_AutonTime);
-        break;
+  //       L_L_Y_Loc = LookUp1D_Table(&K_t_Slalom_V125A50_T[0],
+  //                                  &K_l_Slalom_V125A50_Y[0],
+  //                                   L_i_Y_AxisSize,
+  //                                   L_i_Y_CalArraySize,
+  //                                   L_t_AutonTime);
+  //       break;
 
-        case 4:
-        L_i_X_AxisSize             = (int)(sizeof(K_t_BarrelRacing_V55A25_T) / sizeof(K_l_BarrelRacing_V55A25_X[0]));
-        L_i_X_CalArraySize         = (int)(sizeof(K_l_BarrelRacing_V55A25_X) / sizeof(K_l_BarrelRacing_V55A25_X[0]));
-        L_i_Y_AxisSize             = (int)(sizeof(K_t_BarrelRacing_V55A25_T) / sizeof(K_l_BarrelRacing_V55A25_Y[0]));
-        L_i_Y_CalArraySize         = (int)(sizeof(K_l_BarrelRacing_V55A25_Y) / sizeof(K_l_BarrelRacing_V55A25_Y[0]));
+  //       case 4:
+  //       L_i_X_AxisSize             = (int)(sizeof(K_t_BarrelRacing_V55A25_T) / sizeof(K_l_BarrelRacing_V55A25_X[0]));
+  //       L_i_X_CalArraySize         = (int)(sizeof(K_l_BarrelRacing_V55A25_X) / sizeof(K_l_BarrelRacing_V55A25_X[0]));
+  //       L_i_Y_AxisSize             = (int)(sizeof(K_t_BarrelRacing_V55A25_T) / sizeof(K_l_BarrelRacing_V55A25_Y[0]));
+  //       L_i_Y_CalArraySize         = (int)(sizeof(K_l_BarrelRacing_V55A25_Y) / sizeof(K_l_BarrelRacing_V55A25_Y[0]));
 
-        L_L_X_Loc = LookUp1D_Table(&K_t_BarrelRacing_V55A25_T[0],
-                                   &K_l_BarrelRacing_V55A25_X[0],
-                                    L_i_X_AxisSize,
-                                    L_i_X_CalArraySize,
-                                    L_t_AutonTime);
+  //       L_L_X_Loc = LookUp1D_Table(&K_t_BarrelRacing_V55A25_T[0],
+  //                                  &K_l_BarrelRacing_V55A25_X[0],
+  //                                   L_i_X_AxisSize,
+  //                                   L_i_X_CalArraySize,
+  //                                   L_t_AutonTime);
 
-        L_L_Y_Loc = LookUp1D_Table(&K_t_BarrelRacing_V55A25_T[0],
-                                   &K_l_BarrelRacing_V55A25_Y[0],
-                                    L_i_Y_AxisSize,
-                                    L_i_Y_CalArraySize,
-                                    L_t_AutonTime);
-        break;
+  //       L_L_Y_Loc = LookUp1D_Table(&K_t_BarrelRacing_V55A25_T[0],
+  //                                  &K_l_BarrelRacing_V55A25_Y[0],
+  //                                   L_i_Y_AxisSize,
+  //                                   L_i_Y_CalArraySize,
+  //                                   L_t_AutonTime);
+  //       break;
 
-        case 5:
-        L_i_X_AxisSize             = (int)(sizeof(K_t_BarrelRacing_V75A30_T) / sizeof(K_l_BarrelRacing_V75A30_X[0]));
-        L_i_X_CalArraySize         = (int)(sizeof(K_l_BarrelRacing_V75A30_X) / sizeof(K_l_BarrelRacing_V75A30_X[0]));
-        L_i_Y_AxisSize             = (int)(sizeof(K_t_BarrelRacing_V75A30_T) / sizeof(K_l_BarrelRacing_V75A30_Y[0]));
-        L_i_Y_CalArraySize         = (int)(sizeof(K_l_BarrelRacing_V75A30_Y) / sizeof(K_l_BarrelRacing_V75A30_Y[0]));
+  //       case 5:
+  //       L_i_X_AxisSize             = (int)(sizeof(K_t_BarrelRacing_V75A30_T) / sizeof(K_l_BarrelRacing_V75A30_X[0]));
+  //       L_i_X_CalArraySize         = (int)(sizeof(K_l_BarrelRacing_V75A30_X) / sizeof(K_l_BarrelRacing_V75A30_X[0]));
+  //       L_i_Y_AxisSize             = (int)(sizeof(K_t_BarrelRacing_V75A30_T) / sizeof(K_l_BarrelRacing_V75A30_Y[0]));
+  //       L_i_Y_CalArraySize         = (int)(sizeof(K_l_BarrelRacing_V75A30_Y) / sizeof(K_l_BarrelRacing_V75A30_Y[0]));
 
-        L_L_X_Loc = LookUp1D_Table(&K_t_BarrelRacing_V75A30_T[0],
-                                   &K_l_BarrelRacing_V75A30_X[0],
-                                    L_i_X_AxisSize,
-                                    L_i_X_CalArraySize,
-                                    L_t_AutonTime);
+  //       L_L_X_Loc = LookUp1D_Table(&K_t_BarrelRacing_V75A30_T[0],
+  //                                  &K_l_BarrelRacing_V75A30_X[0],
+  //                                   L_i_X_AxisSize,
+  //                                   L_i_X_CalArraySize,
+  //                                   L_t_AutonTime);
 
-        L_L_Y_Loc = LookUp1D_Table(&K_t_BarrelRacing_V75A30_T[0],
-                                   &K_l_BarrelRacing_V75A30_Y[0],
-                                    L_i_Y_AxisSize,
-                                    L_i_Y_CalArraySize,
-                                    L_t_AutonTime);
-        break;
+  //       L_L_Y_Loc = LookUp1D_Table(&K_t_BarrelRacing_V75A30_T[0],
+  //                                  &K_l_BarrelRacing_V75A30_Y[0],
+  //                                   L_i_Y_AxisSize,
+  //                                   L_i_Y_CalArraySize,
+  //                                   L_t_AutonTime);
+  //       break;
 
-        case 6:
-        L_i_X_AxisSize             = (int)(sizeof(K_t_BarrelRacing_V95A35_T) / sizeof(K_l_BarrelRacing_V95A35_X[0]));
-        L_i_X_CalArraySize         = (int)(sizeof(K_l_BarrelRacing_V95A35_X) / sizeof(K_l_BarrelRacing_V95A35_X[0]));
-        L_i_Y_AxisSize             = (int)(sizeof(K_t_BarrelRacing_V95A35_T) / sizeof(K_l_BarrelRacing_V95A35_Y[0]));
-        L_i_Y_CalArraySize         = (int)(sizeof(K_l_BarrelRacing_V95A35_Y) / sizeof(K_l_BarrelRacing_V95A35_Y[0]));
+  //       case 6:
+  //       L_i_X_AxisSize             = (int)(sizeof(K_t_BarrelRacing_V95A35_T) / sizeof(K_l_BarrelRacing_V95A35_X[0]));
+  //       L_i_X_CalArraySize         = (int)(sizeof(K_l_BarrelRacing_V95A35_X) / sizeof(K_l_BarrelRacing_V95A35_X[0]));
+  //       L_i_Y_AxisSize             = (int)(sizeof(K_t_BarrelRacing_V95A35_T) / sizeof(K_l_BarrelRacing_V95A35_Y[0]));
+  //       L_i_Y_CalArraySize         = (int)(sizeof(K_l_BarrelRacing_V95A35_Y) / sizeof(K_l_BarrelRacing_V95A35_Y[0]));
 
-        L_L_X_Loc = LookUp1D_Table(&K_t_BarrelRacing_V95A35_T[0],
-                                   &K_l_BarrelRacing_V95A35_X[0],
-                                    L_i_X_AxisSize,
-                                    L_i_X_CalArraySize,
-                                    L_t_AutonTime);
+  //       L_L_X_Loc = LookUp1D_Table(&K_t_BarrelRacing_V95A35_T[0],
+  //                                  &K_l_BarrelRacing_V95A35_X[0],
+  //                                   L_i_X_AxisSize,
+  //                                   L_i_X_CalArraySize,
+  //                                   L_t_AutonTime);
 
-        L_L_Y_Loc = LookUp1D_Table(&K_t_BarrelRacing_V95A35_T[0],
-                                   &K_l_BarrelRacing_V95A35_Y[0],
-                                    L_i_Y_AxisSize,
-                                    L_i_Y_CalArraySize,
-                                    L_t_AutonTime);
-        break;
+  //       L_L_Y_Loc = LookUp1D_Table(&K_t_BarrelRacing_V95A35_T[0],
+  //                                  &K_l_BarrelRacing_V95A35_Y[0],
+  //                                   L_i_Y_AxisSize,
+  //                                   L_i_Y_CalArraySize,
+  //                                   L_t_AutonTime);
+  //       break;
 
-        case 7:
-        L_i_X_AxisSize             = (int)(sizeof(K_t_Bounce_V55A25_T) / sizeof(K_l_Bounce_V55A25_X[0]));
-        L_i_X_CalArraySize         = (int)(sizeof(K_l_Bounce_V55A25_X) / sizeof(K_l_Bounce_V55A25_X[0]));
-        L_i_Y_AxisSize             = (int)(sizeof(K_t_Bounce_V55A25_T) / sizeof(K_l_Bounce_V55A25_Y[0]));
-        L_i_Y_CalArraySize         = (int)(sizeof(K_l_Bounce_V55A25_Y) / sizeof(K_l_Bounce_V55A25_Y[0]));
+  //       case 7:
+  //       L_i_X_AxisSize             = (int)(sizeof(K_t_Bounce_V55A25_T) / sizeof(K_l_Bounce_V55A25_X[0]));
+  //       L_i_X_CalArraySize         = (int)(sizeof(K_l_Bounce_V55A25_X) / sizeof(K_l_Bounce_V55A25_X[0]));
+  //       L_i_Y_AxisSize             = (int)(sizeof(K_t_Bounce_V55A25_T) / sizeof(K_l_Bounce_V55A25_Y[0]));
+  //       L_i_Y_CalArraySize         = (int)(sizeof(K_l_Bounce_V55A25_Y) / sizeof(K_l_Bounce_V55A25_Y[0]));
 
-        L_L_X_Loc = LookUp1D_Table(&K_t_Bounce_V55A25_T[0],
-                                   &K_l_Bounce_V55A25_X[0],
-                                    L_i_X_AxisSize,
-                                    L_i_X_CalArraySize,
-                                    L_t_AutonTime);
+  //       L_L_X_Loc = LookUp1D_Table(&K_t_Bounce_V55A25_T[0],
+  //                                  &K_l_Bounce_V55A25_X[0],
+  //                                   L_i_X_AxisSize,
+  //                                   L_i_X_CalArraySize,
+  //                                   L_t_AutonTime);
 
-        L_L_Y_Loc = LookUp1D_Table(&K_t_Bounce_V55A25_T[0],
-                                   &K_l_Bounce_V55A25_Y[0],
-                                    L_i_Y_AxisSize,
-                                    L_i_Y_CalArraySize,
-                                    L_t_AutonTime);
-        break;
+  //       L_L_Y_Loc = LookUp1D_Table(&K_t_Bounce_V55A25_T[0],
+  //                                  &K_l_Bounce_V55A25_Y[0],
+  //                                   L_i_Y_AxisSize,
+  //                                   L_i_Y_CalArraySize,
+  //                                   L_t_AutonTime);
+  //       break;
 
-        case 8:
-        L_i_X_AxisSize             = (int)(sizeof(K_t_Bounce_V75A30_T) / sizeof(K_l_Bounce_V75A30_X[0]));
-        L_i_X_CalArraySize         = (int)(sizeof(K_l_Bounce_V75A30_X) / sizeof(K_l_Bounce_V75A30_X[0]));
-        L_i_Y_AxisSize             = (int)(sizeof(K_t_Bounce_V75A30_T) / sizeof(K_l_Bounce_V75A30_Y[0]));
-        L_i_Y_CalArraySize         = (int)(sizeof(K_l_Bounce_V75A30_Y) / sizeof(K_l_Bounce_V75A30_Y[0]));
+  //       case 8:
+  //       L_i_X_AxisSize             = (int)(sizeof(K_t_Bounce_V75A30_T) / sizeof(K_l_Bounce_V75A30_X[0]));
+  //       L_i_X_CalArraySize         = (int)(sizeof(K_l_Bounce_V75A30_X) / sizeof(K_l_Bounce_V75A30_X[0]));
+  //       L_i_Y_AxisSize             = (int)(sizeof(K_t_Bounce_V75A30_T) / sizeof(K_l_Bounce_V75A30_Y[0]));
+  //       L_i_Y_CalArraySize         = (int)(sizeof(K_l_Bounce_V75A30_Y) / sizeof(K_l_Bounce_V75A30_Y[0]));
 
-        L_L_X_Loc = LookUp1D_Table(&K_t_Bounce_V75A30_T[0],
-                                   &K_l_Bounce_V75A30_X[0],
-                                    L_i_X_AxisSize,
-                                    L_i_X_CalArraySize,
-                                    L_t_AutonTime);
+  //       L_L_X_Loc = LookUp1D_Table(&K_t_Bounce_V75A30_T[0],
+  //                                  &K_l_Bounce_V75A30_X[0],
+  //                                   L_i_X_AxisSize,
+  //                                   L_i_X_CalArraySize,
+  //                                   L_t_AutonTime);
 
-        L_L_Y_Loc = LookUp1D_Table(&K_t_Bounce_V75A30_T[0],
-                                   &K_l_Bounce_V75A30_Y[0],
-                                    L_i_Y_AxisSize,
-                                    L_i_Y_CalArraySize,
-                                    L_t_AutonTime);
-        break;
+  //       L_L_Y_Loc = LookUp1D_Table(&K_t_Bounce_V75A30_T[0],
+  //                                  &K_l_Bounce_V75A30_Y[0],
+  //                                   L_i_Y_AxisSize,
+  //                                   L_i_Y_CalArraySize,
+  //                                   L_t_AutonTime);
+  //       break;
 
-        case 9:
-        L_i_X_AxisSize             = (int)(sizeof(K_t_Bounce_V95A35_T) / sizeof(K_l_Bounce_V95A35_X[0]));
-        L_i_X_CalArraySize         = (int)(sizeof(K_l_Bounce_V95A35_X) / sizeof(K_l_Bounce_V95A35_X[0]));
-        L_i_Y_AxisSize             = (int)(sizeof(K_t_Bounce_V95A35_T) / sizeof(K_l_Bounce_V95A35_Y[0]));
-        L_i_Y_CalArraySize         = (int)(sizeof(K_l_Bounce_V95A35_Y) / sizeof(K_l_Bounce_V95A35_Y[0]));
+  //       case 9:
+  //       L_i_X_AxisSize             = (int)(sizeof(K_t_Bounce_V95A35_T) / sizeof(K_l_Bounce_V95A35_X[0]));
+  //       L_i_X_CalArraySize         = (int)(sizeof(K_l_Bounce_V95A35_X) / sizeof(K_l_Bounce_V95A35_X[0]));
+  //       L_i_Y_AxisSize             = (int)(sizeof(K_t_Bounce_V95A35_T) / sizeof(K_l_Bounce_V95A35_Y[0]));
+  //       L_i_Y_CalArraySize         = (int)(sizeof(K_l_Bounce_V95A35_Y) / sizeof(K_l_Bounce_V95A35_Y[0]));
 
-        L_L_X_Loc = LookUp1D_Table(&K_t_Bounce_V95A35_T[0],
-                                   &K_l_Bounce_V95A35_X[0],
-                                    L_i_X_AxisSize,
-                                    L_i_X_CalArraySize,
-                                    L_t_AutonTime);
+  //       L_L_X_Loc = LookUp1D_Table(&K_t_Bounce_V95A35_T[0],
+  //                                  &K_l_Bounce_V95A35_X[0],
+  //                                   L_i_X_AxisSize,
+  //                                   L_i_X_CalArraySize,
+  //                                   L_t_AutonTime);
 
-        L_L_Y_Loc = LookUp1D_Table(&K_t_Bounce_V95A35_T[0],
-                                   &K_l_Bounce_V95A35_Y[0],
-                                    L_i_Y_AxisSize,
-                                    L_i_Y_CalArraySize,
-                                    L_t_AutonTime);
-        break;
-      }
+  //       L_L_Y_Loc = LookUp1D_Table(&K_t_Bounce_V95A35_T[0],
+  //                                  &K_l_Bounce_V95A35_Y[0],
+  //                                   L_i_Y_AxisSize,
+  //                                   L_i_Y_CalArraySize,
+  //                                   L_t_AutonTime);
+  //       break;
+  //     }
 
-  *L_L_X_Location = L_L_X_Loc;
-  *L_L_Y_Location = L_L_Y_Loc;
+  // *L_L_X_Location = L_L_X_Loc;
+  // *L_L_Y_Location = L_L_Y_Loc;
   }
 
 /******************************************************************************
@@ -621,48 +621,48 @@ void DesiredRollerSpeed(double  L_Distance,
                         double *L_UpperCmnd,
                         double *L_LowerCmnd)
   {
-  double  L_DesiredRobotAngle       = 0.0;
-  double  L_DesiredRollerSpeedUpper = 0.0;
-  double  L_DesiredRollerSpeedLower = 0.0;
-  double *L_RollerSpeedCalibration[K_BallLauncherDistanceSz];
-  double  L_Temp[K_BallLauncherDistanceSz][K_BallLauncherAngleSz];
-  int     i;
-  int     j;
+  // double  L_DesiredRobotAngle       = 0.0;
+  // double  L_DesiredRollerSpeedUpper = 0.0;
+  // double  L_DesiredRollerSpeedLower = 0.0;
+  // double *L_RollerSpeedCalibration[K_BallLauncherDistanceSz];
+  // double  L_Temp[K_BallLauncherDistanceSz][K_BallLauncherAngleSz];
+  // int     i;
+  // int     j;
 
-  for (i = 0; i < K_BallLauncherDistanceSz; i++)
-    {
-    for (j = 0; j < K_BallLauncherAngleSz; j++)
-      {
-      L_Temp[i][j] = K_BallLauncherUpperSpeed[i][j];
-      }
-    L_RollerSpeedCalibration[i] = L_Temp[i];
-    }
+  // for (i = 0; i < K_BallLauncherDistanceSz; i++)
+  //   {
+  //   for (j = 0; j < K_BallLauncherAngleSz; j++)
+  //     {
+  //     L_Temp[i][j] = K_BallLauncherUpperSpeed[i][j];
+  //     }
+  //   L_RollerSpeedCalibration[i] = L_Temp[i];
+  //   }
 
-  L_DesiredRollerSpeedUpper = LookUp2D_Table(&K_BallLauncherDistanceAxis[0],
-                                              K_BallLauncherDistanceSz,
-                                              L_Distance,
-                                             &K_BallLauncherAngleAxis[0],
-                                              K_BallLauncherAngleSz,
-                                              L_Angle,
-                                              L_RollerSpeedCalibration);
+  // L_DesiredRollerSpeedUpper = LookUp2D_Table(&K_BallLauncherDistanceAxis[0],
+  //                                             K_BallLauncherDistanceSz,
+  //                                             L_Distance,
+  //                                            &K_BallLauncherAngleAxis[0],
+  //                                             K_BallLauncherAngleSz,
+  //                                             L_Angle,
+  //                                             L_RollerSpeedCalibration);
 
-  for (i = 0; i < K_BallLauncherDistanceSz; i++)
-    {
-    for (j = 0; j < K_BallLauncherAngleSz; j++)
-      {
-      L_Temp[i][j] = K_BallLauncherLowerSpeed[i][j];
-      }
-    L_RollerSpeedCalibration[i] = L_Temp[i];
-    }
+  // for (i = 0; i < K_BallLauncherDistanceSz; i++)
+  //   {
+  //   for (j = 0; j < K_BallLauncherAngleSz; j++)
+  //     {
+  //     L_Temp[i][j] = K_BallLauncherLowerSpeed[i][j];
+  //     }
+  //   L_RollerSpeedCalibration[i] = L_Temp[i];
+  //   }
 
-  L_DesiredRollerSpeedLower = LookUp2D_Table(&K_BallLauncherDistanceAxis[0],
-                                              K_BallLauncherDistanceSz,
-                                              L_Distance,
-                                             &K_BallLauncherAngleAxis[0],
-                                              K_BallLauncherAngleSz,
-                                              L_Angle,
-                                              L_RollerSpeedCalibration);
+  // L_DesiredRollerSpeedLower = LookUp2D_Table(&K_BallLauncherDistanceAxis[0],
+  //                                             K_BallLauncherDistanceSz,
+  //                                             L_Distance,
+  //                                            &K_BallLauncherAngleAxis[0],
+  //                                             K_BallLauncherAngleSz,
+  //                                             L_Angle,
+  //                                             L_RollerSpeedCalibration);
 
-  *L_UpperCmnd  = L_DesiredRollerSpeedUpper;
-  *L_LowerCmnd  = L_DesiredRollerSpeedLower;
+  // *L_UpperCmnd  = L_DesiredRollerSpeedUpper;
+  // *L_LowerCmnd  = L_DesiredRollerSpeedLower;
   }

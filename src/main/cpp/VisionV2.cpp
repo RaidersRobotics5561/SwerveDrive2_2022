@@ -14,7 +14,6 @@
 #include <photonlib/PhotonUtils.h>
 #include "Const.hpp"
 #include "Filter.hpp"
-#ifdef VISION2
 
 // all our favorite variables
 double         V_VisionTopCamNumberTemp = 1;
@@ -170,4 +169,3 @@ void VisionRun(photonlib::PhotonPipelineResult pc_L_TopResult,
   /* Send the command out to photon vision: */
   *L_VisionDriverModeCmndFinal = V_VisionDriverRequestedModeCmndLatched;
   }
-#endif

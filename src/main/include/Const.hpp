@@ -5,9 +5,6 @@
 
 // Define the desired test state here: COMP (no test), BallHandlerTest, LiftXY_Test, DriveMotorTest, WheelAngleTest, ADAS_UT_Test, ADAS_BT_Test
 #define COMP
-// Define the version of vision to use: VISION1 VISION2
-#define VISION2
-
 // Define the bot type: CompBot, PracticeBot
 #define CompBot
 
@@ -148,7 +145,7 @@ const double K_lift_S9_YD = 210; //stays the same
 const double K_lift_S10_YD = 170; //
 const double K_lift_S11_YD = 140; //
 
-const double K_lift_max_YD = 210; //distance from floor to mid rung (60.25 inches)
+const double K_lift_max_YD = 210; //max allowed travel distance of YD
 const double K_lift_min_YD = 0; //it crunch
 const double K_lift_enable_auto_YD = 150; //distance the lift must be above to allow the driver to enable the auto climb
 const double K_lift_deadband_YD = 1.1; //it's a deadband for the y lift yeah
@@ -168,7 +165,7 @@ const double K_lift_S9_XD = 122; //
 const double K_lift_S10_XD = 122; //stays the same
 const double K_lift_S11_XD = 0; //
 
-const double K_lift_max_XD = 133; //distance between bars (24 inches)
+const double K_lift_max_XD = 133; //max allowed travel distance of XD
 const double K_lift_min_XD = 0; //we don't want XD to past this or it crunch
 const double K_lift_deadband_XD = 0.7; //it's a deadband for the x lift yeah
 const double K_lift_driver_manual_forward_XD = 0.15; // Manual override power
@@ -273,9 +270,9 @@ const double K_SD_WheelOffsetAnglePractieBot[E_RobotCornerSz] = { -74.8834367,  
                                                                  -145.722063};  // E_RearRight
 
 /* K_SD_WheelGx: Gain multiplied by each calculated desired speed.  Intended to account for variation in wheel size. */
-const double K_SD_WheelGx[E_RobotCornerSz] = {1.0,   // E_FrontLeft
+const double K_SD_WheelGx[E_RobotCornerSz] = {1.0,    // E_FrontLeft
                                               0.99,   // E_FrontRight 
-                                              1.0,   // E_RearLeft
+                                              1.0,    // E_RearLeft
                                               0.99};  // E_RearRight 
 
 /* K_SD_MinGain: Min gain applied to the wheel speed for swerve drive. */
@@ -296,30 +293,30 @@ const double K_SD_WheelMaxSpeed = 5800;
 const double K_SD_WheelMinCmndSpeed = 0.2;
 
 /* K_SD_WheelSpeedPID_V2_Gx: PID gains for the driven wheels that is within the motor controllers. */
-const double K_SD_WheelSpeedPID_V2_Gx[E_PID_SparkMaxCalSz] = { 0.000350,  // kP
+const double K_SD_WheelSpeedPID_V2_Gx[E_PID_SparkMaxCalSz] = { 0.000350, // kP
                                                                0.000001, // kI
-                                                               0.000001,   // kD
+                                                               0.000001, // kD
                                                                0.0,      // kIz
                                                                0.0,      // kFF
                                                                1.0,      // kMaxOutput
                                                               -1.0,      // kMinOutput
                                                                0.0,      // kMaxVel
                                                                0.0,      // kMinVel
-                                                              150.0,      // kMaxAcc
+                                                              150.0,     // kMaxAcc
                                                                0.0};     // kAllErr
 
 /* K_SD_WheelAnglePID_Gx: PID gains for the angle of the swerve drive wheels.  PID control is within the RoboRio.  */
-const double K_SD_WheelAnglePID_Gx[E_PID_CalSz] = { 0.0035,     // P Gx
-                                                    0.000001,    // I Gx
+const double K_SD_WheelAnglePID_Gx[E_PID_CalSz] = { 0.0035,   // P Gx
+                                                    0.000001, // I Gx
                                                     0.000005, // D Gx
-                                                    1.0,       // P UL - 0.4
-                                                   -1.0,       // P LL - -0.4
-                                                    0.1500,      // I UL - 0.1
-                                                   -0.1500,      // I LL - -0.1
-                                                    1.0,       // D UL 0.5
-                                                   -1.0,       // D LL -0.5
-                                                    1.0,       // Max upper 0.9
-                                                   -1.0};      // Max lower -0.9
+                                                    1.0,      // P UL
+                                                   -1.0,      // P LL
+                                                    0.1500,   // I UL
+                                                   -0.1500,   // I LL
+                                                    1.0,      // D UL
+                                                   -1.0,      // D LL
+                                                    1.0,      // Max upper
+                                                   -1.0};     // Max lower
 
 /* K_SD_WheelAnglePID_GxPracticeBot: PID gains for the angle of the swerve drive wheels on practice bot.  PID control is within the RoboRio.  */
 const double K_SD_WheelAnglePID_GxPracticeBot[E_PID_CalSz] = { 0.002,     // P Gx
@@ -336,47 +333,47 @@ const double K_SD_WheelAnglePID_GxPracticeBot[E_PID_CalSz] = { 0.002,     // P G
 
 /* K_SD_DesiredDriveSpeedAxis: Joystick scale axis for K_SD_DesiredDriveSpeed.  */
 const double K_SD_DesiredDriveSpeedAxis[20] = {-0.95,
-                                            -0.85,
-                                            -0.75,
-                                            -0.65,
-                                            -0.55,
-                                            -0.45,
-                                            -0.35,
-                                            -0.25,
-                                            -0.15,
-                                            -0.10,
-                                             0.10,
-                                             0.15,
-                                             0.25,
-                                             0.35,
-                                             0.45,
-                                             0.55,
-                                             0.65,
-                                             0.75,
-                                             0.85,
-                                             0.95};
+                                               -0.85,
+                                               -0.75,
+                                               -0.65,
+                                               -0.55,
+                                               -0.45,
+                                               -0.35,
+                                               -0.25,
+                                               -0.15,
+                                               -0.10,
+                                                0.10,
+                                                0.15,
+                                                0.25,
+                                                0.35,
+                                                0.45,
+                                                0.55,
+                                                0.65,
+                                                0.75,
+                                                0.85,
+                                                0.95};
 
 /* K_SD_DesiredDriveSpeed: Joystick scaled output for swerve drive control.  Used as debouncing and to help limit speeds at lower joystick inputs values.  */
 const double K_SD_DesiredDriveSpeed[20] = {-1.00,  //-0.95
-                                        -0.88,  //-0.85
-                                        -0.77,  //-0.75
-                                        -0.66,  //-0.65
-                                        -0.55,  //-0.55
-                                        -0.44,  //-0.45
-                                        -0.33,  //-0.35
-                                        -0.22,  //-0.25
-                                        -0.11,  //-0.15
-                                         0.00,  //-0.10
-                                         0.00,  // 0.10
-                                         0.11,  // 0.15
-                                         0.22,  // 0.25
-                                         0.33,  // 0.35
-                                         0.44,  // 0.45
-                                         0.55,  // 0.55
-                                         0.66,  // 0.65
-                                         0.77,  // 0.75
-                                         0.88,  // 0.85
-                                         1.00}; // 0.95
+                                           -0.88,  //-0.85
+                                           -0.77,  //-0.75
+                                           -0.66,  //-0.65
+                                           -0.55,  //-0.55
+                                           -0.44,  //-0.45
+                                           -0.33,  //-0.35
+                                           -0.22,  //-0.25
+                                           -0.11,  //-0.15
+                                            0.00,  //-0.10
+                                            0.00,  // 0.10
+                                            0.11,  // 0.15
+                                            0.22,  // 0.25
+                                            0.33,  // 0.35
+                                            0.44,  // 0.45
+                                            0.55,  // 0.55
+                                            0.66,  // 0.65
+                                            0.77,  // 0.75
+                                            0.88,  // 0.85
+                                            1.00}; // 0.95
 
 
 
@@ -504,66 +501,52 @@ const double K_DesiredRotateSpeedAxis[10] = {-20.0,
 /* K_DesiredRotateSpeed - This is the effective command, equivalent to the rotate joystick */
 const double K_DesiredRotateSpeed[10] = {-0.60,  // -20.0
                                          -0.12,  //  -4.0
-                                         -0.035,  //  -2.0
-                                         -0.018,  //  -1.0
+                                         -0.035, //  -2.0
+                                         -0.018, //  -1.0
                                           0.02,  //  -0.2
                                           0.02,  //   0.2
-                                          0.018,  //   1.0
-                                          0.035,  //   2.0
-                                          0.012,  //   4.0
+                                          0.018, //   1.0
+                                          0.035, //   2.0
+                                          0.012, //   4.0
                                           0.60}; //  20.0
 
 /* K_DesiredAutoRotateSpeedAxis - This is the effective command axis, function of error calculation, in degrees */
 const double K_DesiredAutoRotateSpeedAxis[10] = {-4.0,
-                                              -3.0,
-                                              -2.0,
-                                              -1.0,
-                                              -0.2,
-                                               0.2,
-                                               1.0,
-                                               2.0,
-                                               3.0,
-                                              4.0};
+                                                 -3.0,
+                                                 -2.0,
+                                                 -1.0,
+                                                 -0.2,
+                                                  0.2,
+                                                  1.0,
+                                                  2.0,
+                                                  3.0,
+                                                  4.0};
 
 /* K_DesiredRotateSpeed - This is the effective command, equivalent to the rotate joystick */
-const double K_DesiredAutoRotateSpeed[10] = {-0.150,  // -4.0
-                                         -0.12,  //  -3.0
-                                         -0.035,  //  -2.0
-                                         -0.018,  //  -1.0
-                                          0.02,  //  -0.2
-                                          0.02,  //   0.2
-                                          -0.018,  //   1.0
-                                          0.035,  //   2.0
-                                          0.12,  //   4.0
-                                          0.15}; //  20.0
-
-                                        //   const double K_DesiredAutoRotateSpeed[10] = {-0.09,  // -4.0
-                                        //  -0.08,  //  -3.0
-                                        //  -0.07,  //  -2.0
-                                        //  -0.06,  //  -1.0
-                                        //  -0.05,  //  -0.2
-                                        //   0.05,  //   0.2
-                                        //   0.06,  //   1.0
-                                        //   0.07,  //   2.0
-                                        //   0.08,  //   4.0
-                                        //   0.09}; //  20.0
+const double K_DesiredAutoRotateSpeed[10] = {-0.15,  //  -4.0
+                                             -0.12,  //  -3.0
+                                             -0.035, //  -2.0
+                                             -0.018, //  -1.0
+                                              0.02,  //  -0.2
+                                              0.02,  //   0.2
+                                             -0.018, //   1.0
+                                              0.035, //   2.0
+                                              0.12,  //   3.0
+                                              0.15}; //   4.0
 
 
-
-
-// This is the amount of time that we will wait to make sure we are at the correct location
-const double K_RotateDebounceTime = 0.06;  
-
-// This is the amount of error allowed when in auto rotate / auto target
-const double K_RotateDeadbandAngle = 0.5;  
+/************************************************************************************************************************
+ * 
+ * 
+ * 
+ * Depricated cals below, needs to be cleaned up
+ * 
+ * 
+ * 
+*************************************************************************************************************************/
 
 // This is the desired target angle for the auto vision targeting.  This is due to the offset of the camera. For 2020 - 3.3
 const double K_TargetVisionAngleUpper = 0.0;
-
-// This is the desired target angle for the auto ball vision targeting.  This is due to the offset of the camera.
-const double K_TargetVisionAngleLower = 2.0;
-
-
 
 const double K_TargetVisionAngleMin = 10;
 
@@ -644,35 +627,35 @@ const double K_k_AutonY_PID_Gx[E_PID_CalSz] = { 0.095,       // P Gx
                                                 1.0,       // Max upper
                                                -1.0};      // Max lower
 
-#include "MotionProfiles/K_BarrelRacing_V55A25_T.hpp"
-#include "MotionProfiles/K_BarrelRacing_V55A25_X.hpp"
-#include "MotionProfiles/K_BarrelRacing_V55A25_Y.hpp"
-#include "MotionProfiles/K_BarrelRacing_V75A30_T.hpp"
-#include "MotionProfiles/K_BarrelRacing_V75A30_X.hpp"
-#include "MotionProfiles/K_BarrelRacing_V75A30_Y.hpp"
-#include "MotionProfiles/K_BarrelRacing_V95A35_T.hpp"
-#include "MotionProfiles/K_BarrelRacing_V95A35_X.hpp"
-#include "MotionProfiles/K_BarrelRacing_V95A35_Y.hpp"
+// #include "MotionProfiles/K_BarrelRacing_V55A25_T.hpp"
+// #include "MotionProfiles/K_BarrelRacing_V55A25_X.hpp"
+// #include "MotionProfiles/K_BarrelRacing_V55A25_Y.hpp"
+// #include "MotionProfiles/K_BarrelRacing_V75A30_T.hpp"
+// #include "MotionProfiles/K_BarrelRacing_V75A30_X.hpp"
+// #include "MotionProfiles/K_BarrelRacing_V75A30_Y.hpp"
+// #include "MotionProfiles/K_BarrelRacing_V95A35_T.hpp"
+// #include "MotionProfiles/K_BarrelRacing_V95A35_X.hpp"
+// #include "MotionProfiles/K_BarrelRacing_V95A35_Y.hpp"
 
-#include "MotionProfiles/K_Bounce_V55A25_T.hpp"
-#include "MotionProfiles/K_Bounce_V55A25_X.hpp"
-#include "MotionProfiles/K_Bounce_V55A25_Y.hpp"
-#include "MotionProfiles/K_Bounce_V75A30_T.hpp"
-#include "MotionProfiles/K_Bounce_V75A30_X.hpp"
-#include "MotionProfiles/K_Bounce_V75A30_Y.hpp"
-#include "MotionProfiles/K_Bounce_V95A35_T.hpp"
-#include "MotionProfiles/K_Bounce_V95A35_X.hpp"
-#include "MotionProfiles/K_Bounce_V95A35_Y.hpp"
+// #include "MotionProfiles/K_Bounce_V55A25_T.hpp"
+// #include "MotionProfiles/K_Bounce_V55A25_X.hpp"
+// #include "MotionProfiles/K_Bounce_V55A25_Y.hpp"
+// #include "MotionProfiles/K_Bounce_V75A30_T.hpp"
+// #include "MotionProfiles/K_Bounce_V75A30_X.hpp"
+// #include "MotionProfiles/K_Bounce_V75A30_Y.hpp"
+// #include "MotionProfiles/K_Bounce_V95A35_T.hpp"
+// #include "MotionProfiles/K_Bounce_V95A35_X.hpp"
+// #include "MotionProfiles/K_Bounce_V95A35_Y.hpp"
 
-#include "MotionProfiles/K_Slalom_V55A25_T.hpp"
-#include "MotionProfiles/K_Slalom_V55A25_X.hpp"
-#include "MotionProfiles/K_Slalom_V55A25_Y.hpp"
-#include "MotionProfiles/K_Slalom_V75A30_T.hpp"
-#include "MotionProfiles/K_Slalom_V75A30_X.hpp"
-#include "MotionProfiles/K_Slalom_V75A30_Y.hpp"
-#include "MotionProfiles/K_Slalom_V95A35_T.hpp"
-#include "MotionProfiles/K_Slalom_V95A35_X.hpp"
-#include "MotionProfiles/K_Slalom_V95A35_Y.hpp"
-#include "MotionProfiles/K_Slalom_V125A50_T.hpp"
-#include "MotionProfiles/K_Slalom_V125A50_X.hpp"
-#include "MotionProfiles/K_Slalom_V125A50_Y.hpp"
+// #include "MotionProfiles/K_Slalom_V55A25_T.hpp"
+// #include "MotionProfiles/K_Slalom_V55A25_X.hpp"
+// #include "MotionProfiles/K_Slalom_V55A25_Y.hpp"
+// #include "MotionProfiles/K_Slalom_V75A30_T.hpp"
+// #include "MotionProfiles/K_Slalom_V75A30_X.hpp"
+// #include "MotionProfiles/K_Slalom_V75A30_Y.hpp"
+// #include "MotionProfiles/K_Slalom_V95A35_T.hpp"
+// #include "MotionProfiles/K_Slalom_V95A35_X.hpp"
+// #include "MotionProfiles/K_Slalom_V95A35_Y.hpp"
+// #include "MotionProfiles/K_Slalom_V125A50_T.hpp"
+// #include "MotionProfiles/K_Slalom_V125A50_X.hpp"
+// #include "MotionProfiles/K_Slalom_V125A50_Y.hpp"
