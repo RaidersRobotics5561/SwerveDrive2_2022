@@ -65,6 +65,11 @@ const units::radian_t K_VisionCameraPitch[E_CamLocSz] = {15_deg,  // camera on a
 /* K_VisionCalculationDelayTime: Delay time before allowing calculations to occur */
 const double K_VisionCalculationDelayTime = 0.1;
 
+const double K_VisionYawLagFilter[E_CamLocSz] = {0.4,  // -> top
+                                                 0.4}; // -> bottom
+
+const double K_VisionTargetDistLagFilter[E_CamLocSz] = {0.4,  // -> top
+                                                        0.4}; // -> bottom
 
 // Cals / constants for Light Control
 const double K_CameraLightDelay = 0.01; // Delay time between enabling the camera light and allowing the data feed to be used. [seconds]

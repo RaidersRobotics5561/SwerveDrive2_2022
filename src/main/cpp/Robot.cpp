@@ -65,10 +65,6 @@ void Robot::RobotInit()
   GyroInit();
 
   IO_SensorsInit();
-  ADAS_Main_Init();
-  ADAS_Main_Reset();
-
-  ADAS_DM_ConfigsInit();
 
   m_frontLeftSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
   m_frontRightSteerMotor.SetSmartCurrentLimit(K_SteerMotorCurrentLimit);
@@ -101,6 +97,10 @@ void Robot::RobotInit()
   LiftMotorConfigsInit(m_liftpidYD,
                        m_liftpidXD);
 
+  ADAS_Main_Init();
+  ADAS_Main_Reset();
+
+  ADAS_DM_ConfigsInit();
   ADAS_UT_ConfigsInit();
   ADAS_BT_ConfigsInit();
 

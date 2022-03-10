@@ -13,6 +13,7 @@
 #include <photonlib/PhotonCamera.h>
 #include <photonlib/PhotonUtils.h>
 #include "Const.hpp"
+#include "Filter.hpp"
 #ifdef VISION2
 
 // all our favorite variables
@@ -135,7 +136,9 @@ void VisionRun(photonlib::PhotonPipelineResult pc_L_TopResult,
         {
         L_Target = pc_L_Result[V_VisionCamNumber[L_Index]].GetBestTarget(); //gets the best target  
     
-        V_VisionYaw[L_Index] = L_Target.GetYaw(); // Yaw of the best target
+        // V_VisionYaw[L_Index] = L_Target.GetYaw(); // Yaw of the best target
+
+        V_VisionYaw[L_Index] = Filter_FirstOrderLag(L_Target.GetYaw(), V_VisionYaw[L_Index], K_VisionYawLagFilter[L_Index]);
       
         L_Range = photonlib::PhotonUtils::CalculateDistanceToTarget(
                      K_VisionHeight[L_Index], K_VisionTargetHeight[L_Index], K_VisionCameraPitch[L_Index],
@@ -145,7 +148,9 @@ void VisionRun(photonlib::PhotonPipelineResult pc_L_TopResult,
           {
           L_Range = 0_m;
           }
-        V_VisionTargetDistanceMeters[L_Index] = L_Range.value();
+        // V_VisionTargetDistanceMeters[L_Index] = L_Range.value();
+
+        V_VisionTargetDistanceMeters[L_Index] = Filter_FirstOrderLag(L_Range.value(), V_VisionTargetDistanceMeters[L_Index], K_VisionTargetDistLagFilter[L_Index]);
         }
       }
     }
