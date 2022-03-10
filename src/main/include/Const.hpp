@@ -47,37 +47,60 @@ static const int C_LowerBallSensorID = 5;
 static const int C_VanityLight_ID = 0;
 
 
+
 // Motor specific cals
-const double K_SteerMotorCurrentLimit = 25;
+/* K_SD_SteerMotorCurrentLimit: Max allowed current going to each swerve drive steer motor. */
+const double K_SD_SteerMotorCurrentLimit = 25;
+
 
 
 // Vision Cals:
 // cals for top target cam
+/* K_VisionHeight: Height of the camera relative to ground. */
 const units::meter_t K_VisionHeight[E_CamLocSz] = {0.795_m,  // 795 mm to camera lense  -> top
                                                    0.367_m}; //                         -> bottom
 
+/* K_VisionTargetHeight: Height of the target relative to ground. */
 const units::meter_t K_VisionTargetHeight[E_CamLocSz] = {2.58_m,  // bottom of tape to carpet  -> top
                                                          0.12_m};  // radius of the ball in cm -> bottom
 
+/* K_VisionCameraPitch: Pitch of the camera relative to the ground. */
 const units::radian_t K_VisionCameraPitch[E_CamLocSz] = {15_deg,  // camera on a 75 degree tilt  -> top
                                                          50_deg}; //                             -> bottom
 
 /* K_VisionCalculationDelayTime: Delay time before allowing calculations to occur */
 const double K_VisionCalculationDelayTime = 0.1;
 
-const double K_VisionYawLagFilter[E_CamLocSz] = {0.4,  // -> top
-                                                 0.4}; // -> bottom
+/* K_VisionYawLagFilter: First order lag filter coefficents for yaw calculation. */
+const double K_VisionYawLagFilter[E_CamLocSz] = {0.5,  // -> top
+                                                 0.5}; // -> bottom
 
-const double K_VisionTargetDistLagFilter[E_CamLocSz] = {0.4,  // -> top
-                                                        0.4}; // -> bottom
+/* K_VisionTargetDistLagFilter: First order lag filter coefficents for distance calculation. */
+const double K_VisionTargetDistLagFilter[E_CamLocSz] = {0.5,  // -> top
+                                                        0.5}; // -> bottom
+
+
 
 // Cals / constants for Light Control
-const double K_CameraLightDelay = 0.01; // Delay time between enabling the camera light and allowing the data feed to be used. [seconds]
-const double K_CameraLightMaxOnTime = 10.0; // Max amount of time to have the camera light enabled. [seconds]
+/* K_CameraLightDelay: Delay time between enabling the camera light and allowing the data feed to be used. [seconds] */
+const double K_CameraLightDelay = 0.01;
+
+/* K_CameraLightMaxOnTime: Max amount of time to have the camera light enabled. [seconds] */
+const double K_CameraLightMaxOnTime = 30.0;
+
+/* C_BlinkinLED_SolidWhite: Constant for the Blinkin to command solid white. */
 const double C_BlinkinLED_SolidWhite = 0.93;
+
+/* C_BlinkinLED_BreathRed: Constant for the Blinkin to command breath red.  */
 const double C_BlinkinLED_BreathRed = -0.17;
+
+/* C_BlinkinLED_BreathBlue: Constant for the Blinkin to command breath blue.  */
 const double C_BlinkinLED_BreathBlue = -0.15;
+
+/* C_BlinkinLED_LightChaseGray: Constant for the Blinkin to command a light chase gray.  */
 const double C_BlinkinLED_LightChaseGray = -0.27;
+
+/* C_BlinkinLED_RainbowWithGlitter: Constant for the Blinkin to command rainbow with glitter.  */
 const double C_BlinkinLED_RainbowWithGlitter = -0.89;
 
 
@@ -85,6 +108,7 @@ const double C_BlinkinLED_RainbowWithGlitter = -0.89;
 // Encoder / speed calculation related cals
 const double K_ReductionRatio = 8.31;
 const double K_WheelCircufrence = 12.566; // Circumferance of wheel, in inches
+
 
 
 // Lift related cals
@@ -439,8 +463,11 @@ const double K_ADAS_BT_DriveTime[6] = {1.5,
 /* K_ADAS_BT_MaxTimeToWaitForCamera: This is the max amount of time we will wait for a valid distance from the camera. [Seconds] */
 const double K_ADAS_BT_MaxTimeToWaitForCamera = 0.5;
 
+/* K_ADAS_BT_SettleTimeBeforeDriveForward: This is the amount of time to allow for settling prior to driving forward to pickup the ball.  This MUST be below K_ADAS_BT_TimedOutDriveForward [Seconds] */
+const double K_ADAS_BT_SettleTimeBeforeDriveForward = 0.03;
+
 /* K_ADAS_BT_TimedOutDriveForward: This is the default drive forward time when we have waited too long for the camera. [Seconds] */
-const double K_ADAS_BT_TimedOutDriveForward = 2.5;
+const double K_ADAS_BT_TimedOutDriveForward = 3.0;
 
 /* K_ADAS_BT_DriveForwardPct: This is the percent of swerve drive control to go forward to pickup the ball. */
 const double K_ADAS_BT_DriveForwardPct = -0.1;
