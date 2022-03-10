@@ -29,4 +29,5 @@ bool ADAS_BT_Main(double               *L_Pct_FwdRev,
                   double                L_VisionBottomYaw,
                   double                L_VisionBottomTargetDistanceMeters,
                   T_RobotState          L_RobotState,
-                  bool                  L_BallDetected);
+                  bool                  L_BallDetectedUpper,
+                  bool                  L_BallDetectedLower);

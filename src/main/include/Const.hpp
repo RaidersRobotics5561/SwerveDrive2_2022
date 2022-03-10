@@ -440,7 +440,7 @@ const double K_ADAS_BT_DriveTime[6] = {1.5,
 const double K_ADAS_BT_MaxTimeToWaitForCamera = 0.5;
 
 /* K_ADAS_BT_TimedOutDriveForward: This is the default drive forward time when we have waited too long for the camera. [Seconds] */
-const double K_ADAS_BT_TimedOutDriveForward = 1.0;
+const double K_ADAS_BT_TimedOutDriveForward = 2.5;
 
 /* K_ADAS_BT_DriveForwardPct: This is the percent of swerve drive control to go forward to pickup the ball. */
 const double K_ADAS_BT_DriveForwardPct = -0.1;

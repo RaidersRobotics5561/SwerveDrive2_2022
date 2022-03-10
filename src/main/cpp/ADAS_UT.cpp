@@ -225,7 +225,7 @@ T_ADAS_UT_UpperTarget ADAS_UT_AutoCenter(double *L_Pct_FwdRev,
 
   if (L_ADAS_UT_State == E_ADAS_UT_AutoCenter)
     {
-    *L_Pct_Rotate = DesiredRotateSpeed(L_RotateErrorCalc);
+    *L_Pct_Rotate = DesiredAutoRotateSpeed(L_RotateErrorCalc);
     }
   else
     {
@@ -327,7 +327,7 @@ T_ADAS_UT_UpperTarget ADAS_UT_ElevatorControl(double       *L_Pct_FwdRev,
                                               bool         *L_VisionTargetingRequest,
                                               T_RobotState  L_RobotState,
                                               double        L_LauncherRPM_Measured,
-                                              bool          L_BallDetected,
+                                              bool          L_BallDetectedUpper,
                                               bool          L_DriverRequestElevatorUp,
                                               bool          L_DriverRequestElevatorDwn)
   {
@@ -379,7 +379,7 @@ T_ADAS_UT_UpperTarget ADAS_UT_ElevatorControl(double       *L_Pct_FwdRev,
        the elevator to move up.*/
     V_ADAS_UT_DebounceTime += C_ExeTime;
 
-    if (L_BallDetected == true)
+    if (L_BallDetectedUpper == true)
       {
       /* Reset the timer each time we detect a ball: */
       V_ADAS_UT_DebounceTime = 0;
@@ -425,7 +425,7 @@ bool ADAS_UT_Main(double               *L_Pct_FwdRev,
                   double                L_VisionTopTargetDistanceMeters,
                   T_RobotState          L_RobotState,
                   double                L_LauncherRPM_Measured,
-                  bool                  L_BallDetected,
+                  bool                  L_BallDetectedUpper,
                   bool                  L_DriverRequestElevatorUp,
                   bool                  L_DriverRequestElevatorDwn)
   {
@@ -489,7 +489,7 @@ bool ADAS_UT_Main(double               *L_Pct_FwdRev,
                                                   L_VisionTargetingRequest,
                                                   L_RobotState,
                                                   L_LauncherRPM_Measured,
-                                                  L_BallDetected,
+                                                  L_BallDetectedUpper,
                                                   L_DriverRequestElevatorUp,
                                                   L_DriverRequestElevatorDwn);
     break;

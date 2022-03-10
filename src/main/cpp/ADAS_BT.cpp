@@ -24,6 +24,7 @@ double               V_ADAS_BT_DebounceTime      = 0;
 double               V_ADAS_BT_RotateErrorPrev   = 0;
 bool                 V_ADAS_BT_TargetAquiredPrev = false;
 bool                 V_ADAS_BT_DriveForwardInitiated = false;
+bool                 V_ADAS_BT_BallInLowerElevatorAtInit = false;
 double               V_ADAS_BT_DriveForwardTime     = 0;
 
 double KV_ADAS_BT_LightDelayTIme;
@@ -141,6 +142,7 @@ void ADAS_BT_Reset(void)
   V_ADAS_BT_TargetAquiredPrev = false;
   V_ADAS_BT_DriveForwardInitiated = false;
   V_ADAS_BT_DriveForwardTime = 0;
+  V_ADAS_BT_BallInLowerElevatorAtInit = false;
   }
 
 
@@ -289,66 +291,115 @@ T_ADAS_BT_BallTarget ADAS_BT_IntakeAndRun(double *L_Pct_FwdRev,
                                           bool   *L_SD_RobotOriented,
                                           bool   *L_VisionTargetingRequest,
                                           double  L_VisionBottomTargetAquired,
-                                          double  L_VisionBottomTargetDistanceMeters)
+                                          double  L_VisionBottomTargetDistanceMeters,
+                                          bool    L_BallDetectedUpper,
+                                          bool    L_BallDetectedLower)
   {
   T_ADAS_BT_BallTarget L_ADAS_BT_State = E_ADAS_BT_IntakeAndRun;
   bool                 L_DistanceFound = false;
 
   *L_CameraLowerLightCmndOn = true;
   *L_SD_RobotOriented = true;
-  *L_VisionTargetingRequest = true;
+  *L_VisionTargetingRequest = false;
   /* Next, let's set all the other items we aren't trying to control to off: */
   *L_CameraUpperLightCmndOn = false;
   *L_Pct_Strafe = 0;
   *L_Pct_Rotate = 0;
   *L_Pct_Elevator = 0;
 
-  /* Ok, now let's focus on the getting the correct estimated distance: */
+  // /* Ok, now let's focus on the getting the correct estimated distance: */
+  // if (V_ADAS_BT_DriveForwardInitiated == false)
+  //   {
+  //   if (L_VisionBottomTargetAquired == true)
+  //     {
+  //     V_ADAS_BT_DriveForwardTime = DtrmnTimeToDriveToCaptureBall(L_VisionBottomTargetDistanceMeters);
+  //     V_ADAS_BT_DriveForwardInitiated = true;
+  //     }
+  //   else
+  //     {
+  //     /* Hmm, we see to have lost the target.  Let's wait a bit... */
+  //     V_ADAS_BT_DebounceTime += C_ExeTime;
+  //     if (V_ADAS_BT_DebounceTime >= KV_ADAS_BT_TimedOutDriveForward)
+  //       {
+  //       /* Well, we have waited long enough.  Let's pick a value and go!! */
+  //       V_ADAS_BT_DriveForwardTime = KV_ADAS_BT_TimedOutDriveForward;
+  //       V_ADAS_BT_DriveForwardInitiated = true;
+  //       V_ADAS_BT_DebounceTime = 0;
+  //       }
+  //     }
+  //   }
+
+  // if (V_ADAS_BT_DriveForwardInitiated == true)
+  //   {
+  //   V_ADAS_BT_DebounceTime += C_ExeTime;
+  //   if (V_ADAS_BT_DebounceTime < V_ADAS_BT_DriveForwardTime)
+  //     {
+  //     *L_Pct_FwdRev = KV_ADAS_BT_DriveForwardPct;
+  //     *L_Pct_Intake = K_IntakePower;
+  //     }
+  //   else
+  //     {
+  //     *L_Pct_FwdRev = 0;
+  //     *L_Pct_Intake = 0;
+  //     *L_CameraLowerLightCmndOn = false;
+  //     *L_VisionTargetingRequest = false;
+  //     L_ADAS_BT_State = E_ADAS_BT_Disabled;
+  //     V_ADAS_BT_DriveForwardInitiated = false;
+  //     V_ADAS_BT_DebounceTime = 0;
+  //     }
+  //   }
+  // else
+  //   {
+  //   *L_Pct_FwdRev = 0;
+  //   *L_Pct_Intake = 0;
+  //   }
+
   if (V_ADAS_BT_DriveForwardInitiated == false)
     {
-    if (L_VisionBottomTargetAquired == true)
+    /* Ok, let's see if we have a ball located at the bottom of the elevator.  If so, we don't want to pay attention to the lower sensor initially. */
+    if ((L_BallDetectedLower == true) &&
+        (L_BallDetectedUpper == false))
       {
-      V_ADAS_BT_DriveForwardTime = DtrmnTimeToDriveToCaptureBall(L_VisionBottomTargetDistanceMeters);
-      V_ADAS_BT_DriveForwardInitiated = true;
+      /* We have a ball at the lower sensor, but not in the upper, meaning we are not full of balls*/
+      V_ADAS_BT_BallInLowerElevatorAtInit = true;
       }
     else
       {
-      /* Hmm, we see to have lost the target.  Let's wait a bit... */
-      V_ADAS_BT_DebounceTime += C_ExeTime;
-      if (V_ADAS_BT_DebounceTime >= KV_ADAS_BT_TimedOutDriveForward)
-        {
-        /* Well, we have waited long enough.  Let's pick a value and go!! */
-        V_ADAS_BT_DriveForwardTime = KV_ADAS_BT_TimedOutDriveForward;
-        V_ADAS_BT_DriveForwardInitiated = true;
-        V_ADAS_BT_DebounceTime = 0;
-        }
+      V_ADAS_BT_BallInLowerElevatorAtInit = false;
       }
+    V_ADAS_BT_DriveForwardInitiated = true;
+    }
+  else if ((V_ADAS_BT_BallInLowerElevatorAtInit == true) &&
+           (L_BallDetectedLower == false))
+    {
+    /* Ok, we had a ball at this state init at the intake, but no longer.*/
+    V_ADAS_BT_BallInLowerElevatorAtInit = false;
     }
 
-  if (V_ADAS_BT_DriveForwardInitiated == true)
+  V_ADAS_BT_DebounceTime += C_ExeTime;
+  
+  if ((V_ADAS_BT_DebounceTime < KV_ADAS_BT_TimedOutDriveForward) &&                         // This is a generic time out.  Don't want to drive forever...
+
+      (((L_BallDetectedUpper == false) && (L_BallDetectedLower == false)) ||                // We don't believe we have any balls in the ball handler
+        (L_BallDetectedLower == true) && (V_ADAS_BT_BallInLowerElevatorAtInit == true)) ||  // We have a ball in the lower eleveator from the begining, don't stop because of this
+        (L_BallDetectedLower == false))                                                     // We still don't have a ball present at the intake
     {
-    V_ADAS_BT_DebounceTime += C_ExeTime;
-    if (V_ADAS_BT_DebounceTime < V_ADAS_BT_DriveForwardTime)
-      {
-      *L_Pct_FwdRev = KV_ADAS_BT_DriveForwardPct;
-      *L_Pct_Intake = K_IntakePower;
-      }
-    else
-      {
-      *L_Pct_FwdRev = 0;
-      *L_Pct_Intake = 0;
-      *L_CameraLowerLightCmndOn = false;
-      *L_VisionTargetingRequest = false;
-      L_ADAS_BT_State = E_ADAS_BT_Disabled;
-      V_ADAS_BT_DriveForwardInitiated = false;
-      V_ADAS_BT_DebounceTime = 0;
-      }
+    *L_Pct_FwdRev = KV_ADAS_BT_DriveForwardPct;
+    *L_Pct_Intake = K_IntakePower;
     }
   else
     {
     *L_Pct_FwdRev = 0;
     *L_Pct_Intake = 0;
+    *L_CameraLowerLightCmndOn = false;
+    L_ADAS_BT_State = E_ADAS_BT_Disabled;
+    V_ADAS_BT_DriveForwardInitiated = false;
+    V_ADAS_BT_BallInLowerElevatorAtInit = false;
+    V_ADAS_BT_DebounceTime = 0;
     }
+
+
+
 
   return (L_ADAS_BT_State);
   }
@@ -373,7 +424,8 @@ bool ADAS_BT_Main(double               *L_Pct_FwdRev,
                   double                L_VisionBottomYaw,
                   double                L_VisionBottomTargetDistanceMeters,
                   T_RobotState          L_RobotState,
-                  bool                  L_BallDetected)
+                  bool                  L_BallDetectedUpper,
+                  bool                  L_BallDetectedLower)
   {
   bool L_ADAS_BT_Complete = false;
 
@@ -418,7 +470,9 @@ bool ADAS_BT_Main(double               *L_Pct_FwdRev,
                                                L_SD_RobotOriented,
                                                L_VisionTargetingRequest,
                                                L_VisionBottomTargetAquired,
-                                               L_VisionBottomTargetDistanceMeters);
+                                               L_VisionBottomTargetDistanceMeters,
+                                               L_BallDetectedUpper,
+                                               L_BallDetectedLower);
     break;
     }
 

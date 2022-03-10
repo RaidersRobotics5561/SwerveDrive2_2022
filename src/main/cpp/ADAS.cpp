@@ -136,7 +136,8 @@ T_ADAS_ActiveFeature ADAS_ControlMain(double               *L_Pct_FwdRev,
                                       double                L_VisionBottomTargetDistanceMeters,
                                       T_RobotState          L_RobotState,
                                       double                L_LauncherRPM_Measured,
-                                      bool                  L_BallDetected,
+                                      bool                  L_BallDetectedUpper,
+                                      bool                  L_BallDetectedLower,
                                       bool                  L_DriverRequestElevatorUp,
                                       bool                  L_DriverRequestElevatorDwn,
                                       T_ADAS_ActiveFeature  L_ADAS_ActiveFeature)
@@ -278,7 +279,7 @@ T_ADAS_ActiveFeature ADAS_ControlMain(double               *L_Pct_FwdRev,
                                               L_VisionTopTargetDistanceMeters,
                                               L_RobotState,
                                               L_LauncherRPM_Measured,
-                                              L_BallDetected,
+                                              L_BallDetectedUpper,
                                               L_DriverRequestElevatorUp,
                                               L_DriverRequestElevatorDwn);
       break;
@@ -297,7 +298,8 @@ T_ADAS_ActiveFeature ADAS_ControlMain(double               *L_Pct_FwdRev,
                                               L_VisionBottomYaw,
                                               L_VisionBottomTargetDistanceMeters,
                                               L_RobotState,
-                                              L_BallDetected);
+                                              L_BallDetectedUpper,
+                                              L_BallDetectedLower);
       break;
       case E_ADAS_DM_BlindLaunch:
           V_ADAS_StateComplete = ADAS_DM_BlindShot(L_Pct_FwdRev,

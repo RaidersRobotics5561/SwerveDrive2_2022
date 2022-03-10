@@ -198,6 +198,7 @@ void Robot::RobotPeriodic()
                                            V_RobotState,
                                            V_ShooterSpeedCurr,
                                            V_BallDetectedUpper,
+                                           V_BallDetectedLower,
                                            V_Driver_elevator_up,
                                            V_Driver_elevator_down,
                                            V_ADAS_ActiveFeature);
