@@ -92,7 +92,7 @@ const double K_WheelCircufrence = 12.566; // Circumferance of wheel, in inches
 const double K_LiftRampRateYD[E_Lift_State_Sz][E_LiftIterationSz] = 
   {
     {1.05, 1.05},  // E_S0_BEGONE
-    {1.05, 1.05},  // E_S2_lift_down_YD
+    {1.25, 1.05},  // E_S2_lift_down_YD
     {1.05, 1.05},  // E_S3_move_forward_XD
     {1.05, 1.05},  // E_S4_stretch_up_YD
     {1.05, 1.05},  // E_S5_more_forward_XD
@@ -135,7 +135,7 @@ const double K_lift_max_YD = 210; //distance from floor to mid rung (60.25 inche
 const double K_lift_min_YD = 0; //it crunch
 const double K_lift_enable_auto_YD = 150; //distance the lift must be above to allow the driver to enable the auto climb
 const double K_lift_deadband_YD = 1.1; //it's a deadband for the y lift yeah
-const double K_lift_driver_up_rate_YD = 1.2; // This is the amount of traversal added per loop (0.02 sec)
+const double K_lift_driver_up_rate_YD = 1.8; // This is the amount of traversal added per loop (0.02 sec)
 const double K_lift_driver_down_rate_YD = 0.3; // This is the amount of traversal added per loop (0.02 sec)
 const double K_lift_driver_manual_up_YD = 0.25; // Manual override power
 const double K_lift_driver_manual_down_YD = -0.25; // Manual override power
