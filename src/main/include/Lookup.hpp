@@ -27,8 +27,6 @@ extern double DesiredUpperBeamSpeed(double L_TargetDistance);
 
 extern double DtrmnAutoLauncherSpeed(double L_TargetDistance);
 
-extern double DtrmnManualLauncherSpeed(double L_DriverAxis);
-
 extern double DtrmnTimeToDriveToCaptureBall(double L_EstTargetDistance);
 
 extern void DesiredAutonLocation(double  L_t_AutonTime,

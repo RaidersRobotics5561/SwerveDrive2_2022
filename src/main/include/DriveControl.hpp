@@ -9,10 +9,8 @@
    2022-02-15: Cleaned up file
  */
 
-extern double V_WheelAngleCmnd[E_RobotCornerSz];
-extern double V_WheelSpeedCmnd[E_RobotCornerSz];
-extern bool   V_b_DriveStraight;
-extern double V_RotateErrorCalc;
+extern double V_SD_WheelAngleCmnd[E_RobotCornerSz];
+extern double V_SD_WheelSpeedCmnd[E_RobotCornerSz];
 extern bool   V_SD_DriveWheelsInPID;
 extern bool   V_SD_DriverRobotOrientedRequestedLatched;
 

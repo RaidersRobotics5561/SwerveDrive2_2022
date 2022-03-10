@@ -47,13 +47,6 @@ static const int C_LowerBallSensorID = 5;
 static const int C_VanityLight_ID = 0;
 
 
-
-// Motor specific cals
-/* K_SD_SteerMotorCurrentLimit: Max allowed current going to each swerve drive steer motor. */
-const double K_SD_SteerMotorCurrentLimit = 25;
-
-
-
 // Vision Cals:
 // cals for top target cam
 /* K_VisionHeight: Height of the camera relative to ground. */
@@ -198,11 +191,14 @@ const double K_LiftPID_Gx[E_PID_SparkMaxCalSz] = { 0.1,      // kP
 
 
 /* Ball handler (BH) cals: */
-const double K_IntakePower = 0.7; // Amount of power to apply to intake wheels.  Must be 0 to 1.
+/* K_BH_IntakePower: Amount of power to apply to intake wheels.  Must be 0 to 1. */
+const double K_BH_IntakePower = 0.7;
 
-const double K_ElevatorPowerUp = 0.9; // Amount of power to apply to elevator band when commanded up.  Must be 0 to 1.
+/* K_BH_ElevatorPowerUp: Amount of power to apply to elevator band when commanded up.  Must be 0 to 1. */
+const double K_BH_ElevatorPowerUp = 0.9;
 
-const double K_ElevatorPowerDwn = -0.9; // Amount of power to apply to elevator band when commanded down.  Must be -1 to 0.
+/* K_BH_ElevatorPowerDwn: Amount of power to apply to elevator band when commanded down.  Must be -1 to 0. */
+const double K_BH_ElevatorPowerDwn = -0.9;
 
 /* K_BH_LauncherMinCmndSpd: Min speed for launcher control.  Below this speed, launcher will transition to 0 power.  Also 
    acts as the indicator for allowing the elevator to run.  If the commanded launcher speed is above this threshold, then 
@@ -243,20 +239,6 @@ const double K_BH_LauncherManualHi = 3300;
 /* K_BH_LauncherManualLo: Manual speed single point. */
 const double K_BH_LauncherManualLo = 1600;
 
-/* K_BH_LauncherManualSpeed: Manual launcher speed control values. */
-const double K_BH_LauncherManualSpeed[5] = {0,
-                                            3300,
-                                            4000,
-                                            4500,
-                                            5300};
-
-/* K_BH_LauncherManualSpeedAxis: Axis for K_BH_LauncherManualSpeed. */
-const double K_BH_LauncherManualSpeedAxis[5] = {0.00,
-                                                0.25,
-                                                0.50,
-                                                0.75,
-                                                1.00};
-
 /* K_BH_LauncherSpeedDb: Deadband around the commanded launcher speed (in RPM).  
                          Used to indicate when a ball can be launched. */
 const double K_BH_LauncherSpeedDb = 50;
@@ -272,6 +254,9 @@ const double C_SD_W = 0.5969;
 
 /* C_SD_R: Constant composed of the C_SD_W and C_SD_L constants: R = sqrt(L^2 + W^2) [meters]*/
 const double C_SD_R = 0.8441;
+
+/* K_SD_SteerMotorCurrentLimit: Max allowed current going to each swerve drive steer motor. */
+const double K_SD_SteerMotorCurrentLimit = 25;
 
 /* K_SD_WheelOffsetAngle: Offset angle for each respective corder of the swerve drive wheel.  This is the angle 
    reading from the absolute encoder that is indicated in order for the wheel to point straight. */
@@ -302,7 +287,7 @@ const double K_SD_MaxGain = 1.0;
 /* K_SD_AutoRotateGx: Gain applied to the rotate command for auto functionality. */
 const double K_SD_AutoRotateGx = 0.1;
 
-/* K_SD_WheelMaxSpeed: Max in/sec speed of the swerve drive wheel.*/
+/* K_SD_WheelMaxSpeed: Max RPM speed of the swerve drive wheel motor.*/
 const double K_SD_WheelMaxSpeed = 5800;
 
 /* K_SD_WheelMinCmndSpeed: Min in/sec speed of the swerve drive wheel to keep it under PID control.  

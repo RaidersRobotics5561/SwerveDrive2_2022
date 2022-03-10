@@ -254,11 +254,11 @@ double BallIntake(bool                 L_DriverIntakeInCmnd,
             (L_LowerBallDetected == false && L_UpperBallDetected == true) ||
             (L_UpperBallDetected == false)))
     {
-    L_IntakeMotorCmnd = K_IntakePower;
+    L_IntakeMotorCmnd = K_BH_IntakePower;
     }
   else if (L_DriverIntakeOutCmnd == true)
     {
-    L_IntakeMotorCmnd = -K_IntakePower;
+    L_IntakeMotorCmnd = -K_BH_IntakePower;
     }
   // Otherwise, leave at 0
 
@@ -296,7 +296,7 @@ double BallElevator(bool L_BallDetected,
           {
           if (L_ADAS_ActiveFeature == E_ADAS_Disabled)
             {
-            L_ElevatorPowerCmnd = K_ElevatorPowerUp;
+            L_ElevatorPowerCmnd = K_BH_ElevatorPowerUp;
             }
           else
             {
@@ -307,7 +307,7 @@ double BallElevator(bool L_BallDetected,
       }
     else if(L_ElevatorCmndDwn == true)
       {
-      L_ElevatorPowerCmnd = K_ElevatorPowerDwn;
+      L_ElevatorPowerCmnd = K_BH_ElevatorPowerDwn;
       }
 
     // otherwise leave at 0

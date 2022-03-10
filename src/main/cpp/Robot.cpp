@@ -219,8 +219,8 @@ void Robot::RobotPeriodic()
                     V_GyroYawAngleRad,
                    &V_WheelAngleFwd[0],
                    &V_WheelAngleRev[0],
-                   &V_WheelSpeedCmnd[0],
-                   &V_WheelAngleCmnd[0]);
+                   &V_SD_WheelSpeedCmnd[0],
+                   &V_SD_WheelAngleCmnd[0]);
 
   BallHandlerControlMain( V_Driver_intake_in,
                           V_Driver_intake_out,
@@ -311,8 +311,6 @@ void Robot::RobotPeriodic()
   // frc::SmartDashboard::PutNumber("Lift postition YD", V_LiftPostitionYD);
   // frc::SmartDashboard::PutNumber("Lift postition XD", V_LiftPostitionXD);
 
-  // frc::SmartDashboard::PutNumber("V_b_DriveStraight", V_b_DriveStraight);
-  // frc::SmartDashboard::PutNumber("V_RotateErrorCalc", V_RotateErrorCalc);
   // frc::SmartDashboard::PutNumber("Launcher Speed Cmnd",      V_ShooterRPM_Cmnd);
   // frc::SmartDashboard::PutNumber("Launcher Speed Actual",    V_ShooterSpeedCurr);
   // frc::SmartDashboard::PutNumber("Front Left Speed Cmnd", m_encoderFrontLeftDrive.GetVelocity());
@@ -407,10 +405,10 @@ void Robot::AutonomousPeriodic()
   // Motor output commands:
   if (V_SD_DriveWheelsInPID == true)
     {
-    m_frontLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kVelocity);
-    m_frontRightDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kVelocity);
-    m_rearLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_RearLeft],     rev::ControlType::kVelocity);
-    m_rearRightDrivePID.SetReference(V_WheelSpeedCmnd[E_RearRight],   rev::ControlType::kVelocity);
+    m_frontLeftDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kVelocity);
+    m_frontRightDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kVelocity);
+    m_rearLeftDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_RearLeft],     rev::ControlType::kVelocity);
+    m_rearRightDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_RearRight],   rev::ControlType::kVelocity);
     }
   else
     {
@@ -420,10 +418,10 @@ void Robot::AutonomousPeriodic()
     m_rearRightDriveMotor.Set(0);
     }
 
-    m_frontLeftSteerMotor.Set(V_WheelAngleCmnd[E_FrontLeft]);
-    m_frontRightSteerMotor.Set(V_WheelAngleCmnd[E_FrontRight]);
-    m_rearLeftSteerMotor.Set(V_WheelAngleCmnd[E_RearLeft]);
-    m_rearRightSteerMotor.Set(V_WheelAngleCmnd[E_RearRight]);
+    m_frontLeftSteerMotor.Set(V_SD_WheelAngleCmnd[E_FrontLeft]);
+    m_frontRightSteerMotor.Set(V_SD_WheelAngleCmnd[E_FrontRight]);
+    m_rearLeftSteerMotor.Set(V_SD_WheelAngleCmnd[E_RearLeft]);
+    m_rearRightSteerMotor.Set(V_SD_WheelAngleCmnd[E_RearRight]);
 
     if (V_BH_LauncherActive == true)
       {
@@ -484,10 +482,10 @@ void Robot::TeleopPeriodic()
   // Motor output commands:
   if (V_SD_DriveWheelsInPID == true)
     {
-    m_frontLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kVelocity);
-    m_frontRightDrivePID.SetReference(V_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kVelocity);
-    m_rearLeftDrivePID.SetReference(V_WheelSpeedCmnd[E_RearLeft],     rev::ControlType::kVelocity);
-    m_rearRightDrivePID.SetReference(V_WheelSpeedCmnd[E_RearRight],   rev::ControlType::kVelocity);
+    m_frontLeftDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kVelocity);
+    m_frontRightDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kVelocity);
+    m_rearLeftDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_RearLeft],     rev::ControlType::kVelocity);
+    m_rearRightDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_RearRight],   rev::ControlType::kVelocity);
     }
   else
     {
@@ -497,10 +495,10 @@ void Robot::TeleopPeriodic()
     m_rearRightDriveMotor.Set(0);
     }
 
-  m_frontLeftSteerMotor.Set(V_WheelAngleCmnd[E_FrontLeft]);
-  m_frontRightSteerMotor.Set(V_WheelAngleCmnd[E_FrontRight]);
-  m_rearLeftSteerMotor.Set(V_WheelAngleCmnd[E_RearLeft]);
-  m_rearRightSteerMotor.Set(V_WheelAngleCmnd[E_RearRight]);
+  m_frontLeftSteerMotor.Set(V_SD_WheelAngleCmnd[E_FrontLeft]);
+  m_frontRightSteerMotor.Set(V_SD_WheelAngleCmnd[E_FrontRight]);
+  m_rearLeftSteerMotor.Set(V_SD_WheelAngleCmnd[E_RearLeft]);
+  m_rearRightSteerMotor.Set(V_SD_WheelAngleCmnd[E_RearRight]);
 
   if (V_BH_LauncherActive == true)
     {

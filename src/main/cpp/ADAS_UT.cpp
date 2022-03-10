@@ -358,12 +358,12 @@ T_ADAS_UT_UpperTarget ADAS_UT_ElevatorControl(double       *L_Pct_FwdRev,
     if (L_DriverRequestElevatorDwn == true)
       {
       *L_Pct_Intake = 0;
-      *L_Pct_Elevator = K_ElevatorPowerDwn;
+      *L_Pct_Elevator = K_BH_ElevatorPowerDwn;
       }
     else if (L_DriverRequestElevatorUp == true)
       {
-      *L_Pct_Intake = K_IntakePower;
-      *L_Pct_Elevator = K_ElevatorPowerUp;
+      *L_Pct_Intake = K_BH_IntakePower;
+      *L_Pct_Elevator = K_BH_ElevatorPowerUp;
       }
     else
       {
@@ -387,8 +387,8 @@ T_ADAS_UT_UpperTarget ADAS_UT_ElevatorControl(double       *L_Pct_FwdRev,
 
     if (V_ADAS_UT_DebounceTime < KV_ADAS_UT_AllowedLauncherTime)
       {
-      *L_Pct_Intake = K_IntakePower;
-      *L_Pct_Elevator = K_ElevatorPowerUp;
+      *L_Pct_Intake = K_BH_IntakePower;
+      *L_Pct_Elevator = K_BH_ElevatorPowerUp;
       }
     else // V_ADAS_UT_DebounceTime >= KV_ADAS_UT_AllowedLauncherTime
       {

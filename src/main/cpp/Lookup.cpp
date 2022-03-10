@@ -520,26 +520,6 @@ double DtrmnAutoLauncherSpeed(double L_TargetDistance)
   return L_DesiredLaunchSpeed;
   }
 
-/******************************************************************************
- * Function:     DtrmnManualLauncherSpeed
- *
- * Description:  Function to rescale the driver axis to a desired launcher 
- *               speed.
- ******************************************************************************/
-double DtrmnManualLauncherSpeed(double L_DriverAxis)
-  {
-  double L_DesiredLaunchSpeed = 0.0;
-  int L_AxisSize             = (int)(sizeof(K_BH_LauncherManualSpeedAxis) / sizeof(K_BH_LauncherManualSpeed[0]));
-  int L_CalArraySize         = (int)(sizeof(K_BH_LauncherManualSpeed) / sizeof(K_BH_LauncherManualSpeed[0]));
-
-  L_DesiredLaunchSpeed = LookUp1D_Table(&K_BH_LauncherManualSpeedAxis[0],
-                                        &K_BH_LauncherManualSpeed[0],
-                                         L_AxisSize,
-                                         L_CalArraySize,
-                                         L_DriverAxis);
-
-  return L_DesiredLaunchSpeed;
-  }
 
 /******************************************************************************
  * Function:     DtrmnTimeToDriveToCaptureBall

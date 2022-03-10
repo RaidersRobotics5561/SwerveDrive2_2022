@@ -335,7 +335,7 @@ T_ADAS_BT_BallTarget ADAS_BT_IntakeAndRun(double *L_Pct_FwdRev,
   //   if (V_ADAS_BT_DebounceTime < V_ADAS_BT_DriveForwardTime)
   //     {
   //     *L_Pct_FwdRev = KV_ADAS_BT_DriveForwardPct;
-  //     *L_Pct_Intake = K_IntakePower;
+  //     *L_Pct_Intake = K_BH_IntakePower;
   //     }
   //   else
   //     {
@@ -381,7 +381,7 @@ T_ADAS_BT_BallTarget ADAS_BT_IntakeAndRun(double *L_Pct_FwdRev,
   if (V_ADAS_BT_DebounceTime < K_ADAS_BT_SettleTimeBeforeDriveForward)
     {
     *L_Pct_FwdRev = 0;
-    *L_Pct_Intake = K_IntakePower;
+    *L_Pct_Intake = K_BH_IntakePower;
     }
   else if ((V_ADAS_BT_DebounceTime < KV_ADAS_BT_TimedOutDriveForward) &&                         // This is a generic time out.  Don't want to drive forever...
 
@@ -390,7 +390,7 @@ T_ADAS_BT_BallTarget ADAS_BT_IntakeAndRun(double *L_Pct_FwdRev,
              (L_BallDetectedLower == false))                                                     // We still don't have a ball present at the intake
     {
     *L_Pct_FwdRev = KV_ADAS_BT_DriveForwardPct;
-    *L_Pct_Intake = K_IntakePower;
+    *L_Pct_Intake = K_BH_IntakePower;
     }
   else
     {
