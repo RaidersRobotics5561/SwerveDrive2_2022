@@ -75,6 +75,7 @@ void ADAS_Main_Init(void)
 void ADAS_DetermineMode(void)
   {
   V_ADAS_DriverRequestedAutonFeature = V_ADAS_AutonChooser.GetSelected();
+  frc::SmartDashboard::PutNumber("Requested Auton",  float(V_ADAS_DriverRequestedAutonFeature));
   }
 
 
