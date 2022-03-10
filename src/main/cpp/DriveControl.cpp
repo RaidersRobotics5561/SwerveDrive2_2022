@@ -361,7 +361,7 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       L_RCW = L_JoyStick1Axis2X;
 
       /* Check to see what the driver wants for the driver mode: */
-      if (L_Driver_RobotFieldOrientedReq != V_SD_DriverRobotOrientedRequestedPrev)
+      if (L_Driver_RobotFieldOrientedReq != V_SD_DriverRobotOrientedRequestedPrev && L_Driver_RobotFieldOrientedReq == true)
         {
         /* Ok, we seem to have experienced a button press.  Let's flip the latched state*/
         if (V_SD_DriverRobotOrientedRequestedLatched == true)

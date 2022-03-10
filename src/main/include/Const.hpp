@@ -261,9 +261,9 @@ const double K_SD_WheelOffsetAnglePractieBot[E_RobotCornerSz] = { -74.8834367,  
 
 /* K_SD_WheelGx: Gain multiplied by each calculated desired speed.  Intended to account for variation in wheel size. */
 const double K_SD_WheelGx[E_RobotCornerSz] = {1.0,   // E_FrontLeft
-                                              0.97,   // E_FrontRight 
+                                              0.99,   // E_FrontRight 
                                               1.0,   // E_RearLeft
-                                              0.97};  // E_RearRight 
+                                              0.99};  // E_RearRight 
 
 /* K_SD_MinGain: Min gain applied to the wheel speed for swerve drive. */
 const double K_SD_MinGain = 0.5;
@@ -454,7 +454,7 @@ const double K_ADAS_DM_BlindShotIntake = 0.7;
 const double K_ADAS_DM_BlindShotLauncherLow = 1600;
 
 /* K_ADAS_DM_BlindShotLauncher: This is the speed the launcher will be shot at while in shoot. [RPM] */
-const double K_ADAS_DM_BlindShotLauncherHigh = 3300;
+const double K_ADAS_DM_BlindShotLauncherHigh = 4000; //4000 is temporary make sure to tune later
 
 /* K_ADAS_DM_DriveTime: This is the default drive forward time. [Seconds] */
 const double K_ADAS_DM_DriveTime = 5.5;
@@ -486,16 +486,16 @@ const double K_DesiredRotateSpeedAxis[10] = {-20.0,
                                               20.0};
 
 /* K_DesiredRotateSpeed - This is the effective command, equivalent to the rotate joystick */
-const double K_DesiredRotateSpeed[10] = {-0.20,  // -20.0
-                                         -0.08,  //  -4.0
-                                         -0.015,  //  -2.0
-                                         -0.008,  //  -1.0
-                                          0.0,  //  -0.2
-                                          0.0,  //   0.2
-                                          0.008,  //   1.0
-                                          0.015,  //   2.0
-                                          0.08,  //   4.0
-                                          0.20}; //  20.0
+const double K_DesiredRotateSpeed[10] = {-0.60,  // -20.0
+                                         -0.12,  //  -4.0
+                                         -0.035,  //  -2.0
+                                         -0.018,  //  -1.0
+                                          0.02,  //  -0.2
+                                          0.02,  //   0.2
+                                          0.018,  //   1.0
+                                          0.035,  //   2.0
+                                          0.012,  //   4.0
+                                          0.60}; //  20.0
 
 /* K_DesiredAutoRotateSpeedAxis - This is the effective command axis, function of error calculation, in degrees */
 const double K_DesiredAutoRotateSpeedAxis[10] = {-4.0,
@@ -510,16 +510,16 @@ const double K_DesiredAutoRotateSpeedAxis[10] = {-4.0,
                                               4.0};
 
 /* K_DesiredRotateSpeed - This is the effective command, equivalent to the rotate joystick */
-const double K_DesiredAutoRotateSpeed[10] = {0,  // -4.0
-                                         0,  //  -3.0
-                                         0,  //  -2.0
-                                         0,  //  -1.0
-                                         0,  //  -0.2
-                                          0.0,  //   0.2
-                                          0.0,  //   1.0
-                                          0.0,  //   2.0
-                                          0,  //   4.0
-                                          0.0}; //  20.0
+const double K_DesiredAutoRotateSpeed[10] = {-0.150,  // -4.0
+                                         -0.12,  //  -3.0
+                                         -0.035,  //  -2.0
+                                         -0.018,  //  -1.0
+                                          0.02,  //  -0.2
+                                          0.02,  //   0.2
+                                          -0.018,  //   1.0
+                                          0.035,  //   2.0
+                                          0.12,  //   4.0
+                                          0.15}; //  20.0
 
                                         //   const double K_DesiredAutoRotateSpeed[10] = {-0.09,  // -4.0
                                         //  -0.08,  //  -3.0

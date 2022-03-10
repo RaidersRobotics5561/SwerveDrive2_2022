@@ -260,7 +260,7 @@ T_ADAS_BT_BallTarget ADAS_BT_AutoCenter(double *L_Pct_FwdRev,
 
   if (L_ADAS_BT_State == E_ADAS_BT_AutoCenter)
     {
-    *L_Pct_Rotate = DesiredRotateSpeed(L_RotateErrorCalc);
+    *L_Pct_Rotate = DesiredAutoRotateSpeed(L_RotateErrorCalc);
     }
   else
     {
