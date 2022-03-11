@@ -106,7 +106,7 @@ const double K_WheelCircufrence = 12.566; // Circumferance of wheel, in inches
 const double K_LiftRampRateYD[E_Lift_State_Sz][E_LiftIterationSz] = 
   {
     {1.05, 1.05},  // E_S0_BEGONE
-    {1.25, 1.05},  // E_S2_lift_down_YD
+    {1.15, 1.05},  // E_S2_lift_down_YD
     {1.05, 1.05},  // E_S3_move_forward_XD
     {1.05, 1.05},  // E_S4_stretch_up_YD
     {1.05, 1.05},  // E_S5_more_forward_XD
@@ -127,7 +127,7 @@ const double K_LiftRampRateXD[E_Lift_State_Sz][E_LiftIterationSz] =
     {1.05, 1.05},  // E_S4_stretch_up_YD
     {1.05, 1.05},  // E_S5_more_forward_XD
     {1.05, 1.05},  // E_S6_lift_up_more_YD
-    {1.05, 0.50},  // E_S7_move_back_XD
+    {1.15, 0.50},  // E_S7_move_back_XD
     {1.05, 1.05},  // E_S8_more_down_some_YD
     {1.05, 1.05},  // E_S9_back_rest_XD
     {1.05, 1.05},  // E_S10_final_YD
@@ -417,13 +417,13 @@ const double K_ADAS_BT_LostTargetGx = 0.080;
 const double K_ADAS_BT_NoTargetError = 1.2;
 
 /* K_ADAS_BT_DebounceTime - Debounce time to hold a given state before preceding to next step. [Seconds] */
-const double K_ADAS_BT_DebounceTime = 0.030;
+const double K_ADAS_BT_DebounceTime = 0.020;
 
 /* K_ADAS_BT_TimeOut - If the ball can't be located in this amount of time, abort out of BT. [Seconds] */
 const double K_ADAS_BT_TimeOut = 1.5;
 
 /* K_ADAS_BT_RotateDeadbandAngle: Deadband angle for ball targeting */
-const double K_ADAS_BT_RotateDeadbandAngle = 1.0;
+const double K_ADAS_BT_RotateDeadbandAngle = 1.8;
 
 /* K_ADAS_BT_TargetVisionAngle: This is the desired target angle for the auto ball vision targeting.  This is due to the offset of the camera. */
 const double K_ADAS_BT_TargetVisionAngle = 2.0;
@@ -454,7 +454,7 @@ const double K_ADAS_BT_SettleTimeBeforeDriveForward = 0.03;
 const double K_ADAS_BT_TimedOutDriveForward = 4.0;
 
 /* K_ADAS_BT_DriveForwardPct: This is the percent of swerve drive control to go forward to pickup the ball. */
-const double K_ADAS_BT_DriveForwardPct = -0.35;
+const double K_ADAS_BT_DriveForwardPct = -0.40;
 
 
 /* K_ADAS_DM_BlindShotTime: This is the amount of time to remain in blind shoot. [Seconds] */
@@ -473,7 +473,7 @@ const double K_ADAS_DM_BlindShotLauncherLow = 1600;
 const double K_ADAS_DM_BlindShotLauncherHigh = 4000; //4000 is temporary make sure to tune later
 
 /* K_ADAS_DM_DriveTimeShort: This is the short drive forward time. [Seconds] */
-const double K_ADAS_DM_DriveTimeShort = 3.0; 
+const double K_ADAS_DM_DriveTimeShort = 4.5; 
 
 /* K_ADAS_DM_DriveTimeLong: This is the default drive forward time. [Seconds] */
 const double K_ADAS_DM_DriveTimeLong = 5.5;
