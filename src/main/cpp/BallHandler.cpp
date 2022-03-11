@@ -202,7 +202,7 @@ double BallLauncher(bool                 L_DisableShooter,
 
   V_ShooterRPM_CmndPrev = L_ShooterSpeedCmnd;
   
-  if ((fabs(L_ShooterSpeedCmndTarget - L_LauncherCurrentSpeed) <= K_BH_LauncherSpeedDb) == true)
+  if (fabs(L_ShooterSpeedCmndTarget - L_LauncherCurrentSpeed) <= K_BH_LauncherSpeedDb)
     {
     V_ShooterTargetSpeedReached = true;
     }

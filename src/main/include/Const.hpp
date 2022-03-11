@@ -238,7 +238,7 @@ const double K_BH_LauncherManualLo = 1600;
 
 /* K_BH_LauncherSpeedDb: Deadband around the commanded launcher speed (in RPM).  
                          Used to indicate when a ball can be launched. */
-const double K_BH_LauncherSpeedDb = 50;
+const double K_BH_LauncherSpeedDb = 40;
 
 
 
@@ -485,10 +485,10 @@ const double K_ADAS_DM_DriveFWD_Pct = 0.2;
 const double K_ADAS_DM_DriveREV_Pct = -0.2;
 
 /* K_ADAS_DM_RotateDebounceTime: This is the debounce time for the DM rotate state. [seconds] */
-const double K_ADAS_DM_RotateDebounceTime = 0.1;
+const double K_ADAS_DM_RotateDebounceTime = 0.02;
 
 /* K_ADAS_DM_RotateDeadbandAngle: This is the deband angle for the DM rotate state. [degrees] */
-const double K_ADAS_DM_RotateDeadbandAngle = 1.5;
+const double K_ADAS_DM_RotateDeadbandAngle = 1.8;
 
 
 /*  Rotation calibrations */
