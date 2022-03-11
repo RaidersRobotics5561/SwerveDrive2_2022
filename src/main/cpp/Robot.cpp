@@ -323,7 +323,7 @@ void Robot::RobotPeriodic()
   // frc::SmartDashboard::PutNumber("Bottom Range",    V_VisionTargetDistanceMeters[E_CamBottom]);
   frc::SmartDashboard::PutBoolean("Bottom Target?", V_VisionTargetAquired[E_CamBottom]);
   frc::SmartDashboard::PutNumber("Bottom Yaw",      V_VisionYaw[E_CamBottom]);
-  // frc::SmartDashboard::PutNumber("Cam2 Index",    float(V_VisionCameraIndex[E_Cam2])); 
+  frc::SmartDashboard::PutNumber("Cam2 Index",    float(V_VisionCameraIndex[E_Cam2])); 
 // frc::SmartDashboard::PutNumber("V_VisionTopCamNumberTemp", V_VisionTopCamNumberTemp);
 
   // frc::SmartDashboard::PutNumber("Camera 1 Pipeline Index", float(pc_Camera1.GetPipelineIndex()));

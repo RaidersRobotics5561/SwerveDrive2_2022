@@ -33,7 +33,8 @@ bool ADAS_DM_ReverseAndIntake(double     *L_Pct_FwdRev,
                               double     *L_Pct_Elevator,
                               bool       *L_CameraUpperLightCmndOn,
                               bool       *L_CameraLowerLightCmndOn,
-                              bool       *L_SD_RobotOriented);
+                              bool       *L_SD_RobotOriented,
+                              double      L_DriveTime);
 
 bool ADAS_DM_DriveStraight(double     *L_Pct_FwdRev,
                            double     *L_Pct_Strafe,

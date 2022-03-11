@@ -209,7 +209,7 @@ bool ADAS_DM_DriveStraight(double     *L_Pct_FwdRev,
 
   V_ADAS_DM_DebounceTime += C_ExeTime;
 
-  if (V_ADAS_DM_DebounceTime <= K_ADAS_DM_DriveTime)
+  if (V_ADAS_DM_DebounceTime <= K_ADAS_DM_DriveTimeLong)
     {
     *L_Pct_FwdRev = K_ADAS_DM_DriveFWD_Pct;
     }
@@ -237,7 +237,8 @@ bool ADAS_DM_ReverseAndIntake(double     *L_Pct_FwdRev,
                               double     *L_Pct_Elevator,
                               bool       *L_CameraUpperLightCmndOn,
                               bool       *L_CameraLowerLightCmndOn,
-                              bool       *L_SD_RobotOriented)
+                              bool       *L_SD_RobotOriented,
+                              double      L_DriveTime)
   {
   bool L_ADAS_DM_StateComplete = false;
 
@@ -253,7 +254,7 @@ bool ADAS_DM_ReverseAndIntake(double     *L_Pct_FwdRev,
 
   V_ADAS_DM_DebounceTime += C_ExeTime;
 
-  if (V_ADAS_DM_DebounceTime <= K_ADAS_DM_DriveTime)
+  if (V_ADAS_DM_DebounceTime <= L_DriveTime)
     {
     *L_Pct_FwdRev = K_ADAS_DM_DriveREV_Pct;
     }

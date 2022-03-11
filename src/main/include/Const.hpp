@@ -62,8 +62,8 @@ const units::radian_t K_VisionCameraPitch[E_CamLocSz] = {15_deg,  // camera on a
 const double K_VisionCalculationDelayTime = 0.1;
 
 /* K_VisionYawLagFilter: First order lag filter coefficents for yaw calculation. */
-const double K_VisionYawLagFilter[E_CamLocSz] = {0.5,  // -> top
-                                                 0.5}; // -> bottom
+const double K_VisionYawLagFilter[E_CamLocSz] = {0.05,  // -> top
+                                                 0.08}; // -> bottom
 
 /* K_VisionTargetDistLagFilter: First order lag filter coefficents for distance calculation. */
 const double K_VisionTargetDistLagFilter[E_CamLocSz] = {0.5,  // -> top
@@ -222,10 +222,10 @@ const double K_BH_LauncherSpeedAxis[4] = {2.52,  // 6 ft 6in
                                           13.5}; // 17 ft
 
 /* K_BH_LauncherSpeed: Launcher speed necessary for ball to reach target based on the estimated distance from the camera. */
-const double K_BH_LauncherSpeed[4] = {3300,  // 6 ft 6in
-                                      3650,  // 8 ft 6in
-                                      3900,  // 10 ft 6in
-                                      5000}; // 17 ft
+const double K_BH_LauncherSpeed[4] = {3350,  // 6 ft 6in
+                                      3700,  // 8 ft 6in
+                                      3950,  // 10 ft 6in
+                                      5050}; // 17 ft
 
 /* K_BH_LauncherManualDb: Deadband around the manual ball launcher axis. */
 const double K_BH_LauncherManualDb = 0.1;
@@ -388,10 +388,10 @@ const double K_ADAS_UT_LostTargetGx = 0.25;
 
 /* K_ADAS_UT_NoTargetError - When we haven't seen anything from the camera, take a guess.  This will 
    be the percieved error value until we see something good. */
-const double K_ADAS_UT_NoTargetError = 20;
+const double K_ADAS_UT_NoTargetError = 2;
 
 /* K_ADAS_UT_DebounceTime - Debounce time to hold a given state before preceding to next step. [Seconds] */
-const double K_ADAS_UT_DebounceTime = 0.080;
+const double K_ADAS_UT_DebounceTime = 0.030;
 
 /* K_ADAS_UT_AllowedLauncherError - Amount of error allowed in launcher speed before attempting to launch balls. [RPM] */
 const double K_ADAS_UT_AllowedLauncherError = 100;
@@ -400,7 +400,7 @@ const double K_ADAS_UT_AllowedLauncherError = 100;
 const double K_ADAS_UT_AllowedLauncherTime = 2;
 
 /* K_ADAS_UT_RotateDeadbandAngle: Deadband angle for upper targeting */
-const double K_ADAS_UT_RotateDeadbandAngle = 0.5;
+const double K_ADAS_UT_RotateDeadbandAngle = 1.2; //0.9
 
 /* K_ADAS_UT_TargetVisionAngle: This is the desired target angle for the auto vision targeting.  This is due to the offset of the camera. For 2020 - 3.3 */
 const double K_ADAS_UT_TargetVisionAngle = -5.0;
@@ -414,13 +414,13 @@ const double K_ADAS_BT_LostTargetGx = 0.080;
 
 /* K_ADAS_BT_NoTargetError - When we haven't seen anything from the camera, take a guess.  This will 
    be the percieved error value until we see something good. */
-const double K_ADAS_BT_NoTargetError = 1;
+const double K_ADAS_BT_NoTargetError = 1.2;
 
 /* K_ADAS_BT_DebounceTime - Debounce time to hold a given state before preceding to next step. [Seconds] */
-const double K_ADAS_BT_DebounceTime = 0.020;
+const double K_ADAS_BT_DebounceTime = 0.030;
 
 /* K_ADAS_BT_RotateDeadbandAngle: Deadband angle for ball targeting */
-const double K_ADAS_BT_RotateDeadbandAngle = 2.0;
+const double K_ADAS_BT_RotateDeadbandAngle = 1.0;
 
 /* K_ADAS_BT_TargetVisionAngle: This is the desired target angle for the auto ball vision targeting.  This is due to the offset of the camera. */
 const double K_ADAS_BT_TargetVisionAngle = 2.0;
@@ -442,16 +442,16 @@ const double K_ADAS_BT_DriveTime[6] = {1.5,
                                        1.5};
 
 /* K_ADAS_BT_MaxTimeToWaitForCamera: This is the max amount of time we will wait for a valid distance from the camera. [Seconds] */
-const double K_ADAS_BT_MaxTimeToWaitForCamera = 0.5;
+const double K_ADAS_BT_MaxTimeToWaitForCamera = 0.8;
 
 /* K_ADAS_BT_SettleTimeBeforeDriveForward: This is the amount of time to allow for settling prior to driving forward to pickup the ball.  This MUST be below K_ADAS_BT_TimedOutDriveForward [Seconds] */
 const double K_ADAS_BT_SettleTimeBeforeDriveForward = 0.03;
 
 /* K_ADAS_BT_TimedOutDriveForward: This is the default drive forward time when we have waited too long for the camera. [Seconds] */
-const double K_ADAS_BT_TimedOutDriveForward = 3.0;
+const double K_ADAS_BT_TimedOutDriveForward = 4.0;
 
 /* K_ADAS_BT_DriveForwardPct: This is the percent of swerve drive control to go forward to pickup the ball. */
-const double K_ADAS_BT_DriveForwardPct = -0.1;
+const double K_ADAS_BT_DriveForwardPct = -0.35;
 
 
 /* K_ADAS_DM_BlindShotTime: This is the amount of time to remain in blind shoot. [Seconds] */
@@ -469,8 +469,11 @@ const double K_ADAS_DM_BlindShotLauncherLow = 1600;
 /* K_ADAS_DM_BlindShotLauncher: This is the speed the launcher will be shot at while in shoot. [RPM] */
 const double K_ADAS_DM_BlindShotLauncherHigh = 4000; //4000 is temporary make sure to tune later
 
-/* K_ADAS_DM_DriveTime: This is the default drive forward time. [Seconds] */
-const double K_ADAS_DM_DriveTime = 5.5;
+/* K_ADAS_DM_DriveTimeShort: This is the short drive forward time. [Seconds] */
+const double K_ADAS_DM_DriveTimeShort = 3.0; 
+
+/* K_ADAS_DM_DriveTimeLong: This is the default drive forward time. [Seconds] */
+const double K_ADAS_DM_DriveTimeLong = 5.5;
 
 /* K_ADAS_DM_DriveFWD_Pct: This is the default drive forward Pct. [Pct] */
 const double K_ADAS_DM_DriveFWD_Pct = 0.2;
@@ -524,14 +527,14 @@ const double K_DesiredAutoRotateSpeedAxis[10] = {-4.0,
 
 /* K_DesiredRotateSpeed - This is the effective command, equivalent to the rotate joystick */
 const double K_DesiredAutoRotateSpeed[10] = {-0.15,  //  -4.0
-                                             -0.12,  //  -3.0
-                                             -0.035, //  -2.0
-                                             -0.018, //  -1.0
-                                              0.02,  //  -0.2
-                                              0.02,  //   0.2
-                                             -0.018, //   1.0
-                                              0.035, //   2.0
-                                              0.12,  //   3.0
+                                             -0.02,  //  -3.0
+                                             -0.008, //  -2.0
+                                             -0.005, //  -1.0
+                                              0.00,  //  -0.2
+                                              0.00,  //   0.2
+                                             -0.005, //   1.0
+                                              0.008, //   2.0
+                                              0.02,  //   3.0
                                               0.15}; //   4.0
 
 
