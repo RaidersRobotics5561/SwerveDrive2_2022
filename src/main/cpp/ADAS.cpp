@@ -145,6 +145,7 @@ T_ADAS_ActiveFeature ADAS_ControlMain(double               *L_Pct_FwdRev,
                                       bool                  L_BallDetectedLower,
                                       bool                  L_DriverRequestElevatorUp,
                                       bool                  L_DriverRequestElevatorDwn,
+                                      bool                  L_DriverRequestIntake,
                                       T_ADAS_ActiveFeature  L_ADAS_ActiveFeature)
   {
   T_ADAS_ActiveFeature L_ADAS_ActiveFeaturePrev = L_ADAS_ActiveFeature;
@@ -294,7 +295,8 @@ T_ADAS_ActiveFeature ADAS_ControlMain(double               *L_Pct_FwdRev,
                                               L_LauncherRPM_Measured,
                                               L_BallDetectedUpper,
                                               L_DriverRequestElevatorUp,
-                                              L_DriverRequestElevatorDwn);
+                                              L_DriverRequestElevatorDwn,
+                                              L_DriverRequestIntake);
       break;
       case E_ADAS_BT_AutoBallTarget:
           V_ADAS_StateComplete = ADAS_BT_Main(L_Pct_FwdRev,

@@ -55,4 +55,5 @@ T_ADAS_ActiveFeature ADAS_ControlMain(double              *L_Pct_FwdRev,
                                       bool                  L_BallDetectedLower,
                                       bool                  L_DriverRequestElevatorUp,
                                       bool                  L_DriverRequestElevatorDwn,
+                                      bool                  L_DriverRequestIntake,
                                       T_ADAS_ActiveFeature  L_ADAS_ActiveFeature);

@@ -419,6 +419,9 @@ const double K_ADAS_BT_NoTargetError = 1.2;
 /* K_ADAS_BT_DebounceTime - Debounce time to hold a given state before preceding to next step. [Seconds] */
 const double K_ADAS_BT_DebounceTime = 0.030;
 
+/* K_ADAS_BT_TimeOut - If the ball can't be located in this amount of time, abort out of BT. [Seconds] */
+const double K_ADAS_BT_TimeOut = 1.5;
+
 /* K_ADAS_BT_RotateDeadbandAngle: Deadband angle for ball targeting */
 const double K_ADAS_BT_RotateDeadbandAngle = 1.0;
 

@@ -26,6 +26,7 @@ bool                 V_ADAS_BT_TargetAquiredPrev = false;
 bool                 V_ADAS_BT_DriveForwardInitiated = false;
 bool                 V_ADAS_BT_BallInLowerElevatorAtInit = false;
 double               V_ADAS_BT_DriveForwardTime     = 0;
+double               V_ADAS_BT_StateTime            = 0;
 
 double KV_ADAS_BT_LightDelayTIme;
 double KV_ADAS_BT_LostTargetGx;
@@ -143,6 +144,7 @@ void ADAS_BT_Reset(void)
   V_ADAS_BT_DriveForwardInitiated = false;
   V_ADAS_BT_DriveForwardTime = 0;
   V_ADAS_BT_BallInLowerElevatorAtInit = false;
+  V_ADAS_BT_StateTime = 0;
   }
 
 
@@ -241,8 +243,10 @@ T_ADAS_BT_BallTarget ADAS_BT_AutoCenter(double *L_Pct_FwdRev,
     L_RotateErrorCalc = KV_ADAS_BT_NoTargetError;
     }
   
+  V_ADAS_BT_StateTime += C_ExeTime;
 
-  if (fabs(L_RotateErrorCalc) <= KV_ADAS_BT_RotateDeadbandAngle && V_ADAS_BT_DebounceTime < KV_ADAS_BT_DebounceTime)
+  if (fabs(L_RotateErrorCalc) <= KV_ADAS_BT_RotateDeadbandAngle &&
+      V_ADAS_BT_DebounceTime < KV_ADAS_BT_DebounceTime)
     {
     V_ADAS_BT_DebounceTime += C_ExeTime;
     }
@@ -258,6 +262,16 @@ T_ADAS_BT_BallTarget ADAS_BT_AutoCenter(double *L_Pct_FwdRev,
     V_ADAS_BT_DebounceTime = 0;
     V_ADAS_BT_RotateErrorPrev = 0;
     V_ADAS_BT_TargetAquiredPrev = false;
+    V_ADAS_BT_StateTime = 0;
+    }
+  else if (V_ADAS_BT_StateTime >= K_ADAS_BT_TimeOut)
+    {
+    /* We have taken too long to try and find a ball, abort out. */
+    L_ADAS_BT_State = E_ADAS_BT_Disabled;
+    V_ADAS_BT_DebounceTime = 0;
+    V_ADAS_BT_RotateErrorPrev = 0;
+    V_ADAS_BT_TargetAquiredPrev = false;
+    V_ADAS_BT_StateTime = 0;
     }
 
   if (L_ADAS_BT_State == E_ADAS_BT_AutoCenter)
@@ -306,53 +320,6 @@ T_ADAS_BT_BallTarget ADAS_BT_IntakeAndRun(double *L_Pct_FwdRev,
   *L_Pct_Strafe = 0;
   *L_Pct_Rotate = 0;
   *L_Pct_Elevator = 0;
-
-  // /* Ok, now let's focus on the getting the correct estimated distance: */
-  // if (V_ADAS_BT_DriveForwardInitiated == false)
-  //   {
-  //   if (L_VisionBottomTargetAquired == true)
-  //     {
-  //     V_ADAS_BT_DriveForwardTime = DtrmnTimeToDriveToCaptureBall(L_VisionBottomTargetDistanceMeters);
-  //     V_ADAS_BT_DriveForwardInitiated = true;
-  //     }
-  //   else
-  //     {
-  //     /* Hmm, we see to have lost the target.  Let's wait a bit... */
-  //     V_ADAS_BT_DebounceTime += C_ExeTime;
-  //     if (V_ADAS_BT_DebounceTime >= KV_ADAS_BT_TimedOutDriveForward)
-  //       {
-  //       /* Well, we have waited long enough.  Let's pick a value and go!! */
-  //       V_ADAS_BT_DriveForwardTime = KV_ADAS_BT_TimedOutDriveForward;
-  //       V_ADAS_BT_DriveForwardInitiated = true;
-  //       V_ADAS_BT_DebounceTime = 0;
-  //       }
-  //     }
-  //   }
-
-  // if (V_ADAS_BT_DriveForwardInitiated == true)
-  //   {
-  //   V_ADAS_BT_DebounceTime += C_ExeTime;
-  //   if (V_ADAS_BT_DebounceTime < V_ADAS_BT_DriveForwardTime)
-  //     {
-  //     *L_Pct_FwdRev = KV_ADAS_BT_DriveForwardPct;
-  //     *L_Pct_Intake = K_BH_IntakePower;
-  //     }
-  //   else
-  //     {
-  //     *L_Pct_FwdRev = 0;
-  //     *L_Pct_Intake = 0;
-  //     *L_CameraLowerLightCmndOn = false;
-  //     *L_VisionTargetingRequest = false;
-  //     L_ADAS_BT_State = E_ADAS_BT_Disabled;
-  //     V_ADAS_BT_DriveForwardInitiated = false;
-  //     V_ADAS_BT_DebounceTime = 0;
-  //     }
-  //   }
-  // else
-  //   {
-  //   *L_Pct_FwdRev = 0;
-  //   *L_Pct_Intake = 0;
-  //   }
 
   if (V_ADAS_BT_DriveForwardInitiated == false)
     {

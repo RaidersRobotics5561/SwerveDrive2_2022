@@ -329,10 +329,10 @@ T_ADAS_UT_UpperTarget ADAS_UT_ElevatorControl(double       *L_Pct_FwdRev,
                                               double        L_LauncherRPM_Measured,
                                               bool          L_BallDetectedUpper,
                                               bool          L_DriverRequestElevatorUp,
-                                              bool          L_DriverRequestElevatorDwn)
+                                              bool          L_DriverRequestElevatorDwn,
+                                              bool          L_DriverRequestIntake)
   {
   T_ADAS_UT_UpperTarget L_ADAS_UT_State = E_ADAS_UT_ElevatorControl;
-  double                L_LauncherError = 0;
   double                L_LauncherSpeedCmnd = 0;
 
   *L_SD_RobotOriented = true;
@@ -345,10 +345,6 @@ T_ADAS_UT_UpperTarget ADAS_UT_ElevatorControl(double       *L_Pct_FwdRev,
   *L_Pct_Rotate = 0;
   *L_RPM_Launcher = V_ADAS_UT_LauncherSpeedPrev; // Hold the desired speed
 
-  L_LauncherError = fabs(L_LauncherRPM_Measured - V_ADAS_UT_LauncherSpeedPrev);
-
-
-
   if (L_RobotState == E_Teleop)
     {
     /* Ok, we are in teleop.  Driver 2 will handle the triggering of the eleveator, 
@@ -360,7 +356,8 @@ T_ADAS_UT_UpperTarget ADAS_UT_ElevatorControl(double       *L_Pct_FwdRev,
       *L_Pct_Intake = 0;
       *L_Pct_Elevator = K_BH_ElevatorPowerDwn;
       }
-    else if (L_DriverRequestElevatorUp == true)
+    else if ((L_DriverRequestElevatorUp == true) ||
+             (L_DriverRequestIntake == true))
       {
       *L_Pct_Intake = K_BH_IntakePower;
       *L_Pct_Elevator = K_BH_ElevatorPowerUp;
@@ -397,6 +394,7 @@ T_ADAS_UT_UpperTarget ADAS_UT_ElevatorControl(double       *L_Pct_FwdRev,
       V_ADAS_UT_DebounceTime = 0;
       *L_Pct_Intake = 0;
       *L_Pct_Elevator = 0;
+      *L_RPM_Launcher = 0;
       }
     }
 
@@ -427,7 +425,8 @@ bool ADAS_UT_Main(double               *L_Pct_FwdRev,
                   double                L_LauncherRPM_Measured,
                   bool                  L_BallDetectedUpper,
                   bool                  L_DriverRequestElevatorUp,
-                  bool                  L_DriverRequestElevatorDwn)
+                  bool                  L_DriverRequestElevatorDwn,
+                  bool                  L_DriverRequestIntake)
   {
   bool L_ADAS_UT_Complete = false;
 
@@ -491,7 +490,8 @@ bool ADAS_UT_Main(double               *L_Pct_FwdRev,
                                                   L_LauncherRPM_Measured,
                                                   L_BallDetectedUpper,
                                                   L_DriverRequestElevatorUp,
-                                                  L_DriverRequestElevatorDwn);
+                                                  L_DriverRequestElevatorDwn,
+                                                  L_DriverRequestIntake);
     break;
     }
 

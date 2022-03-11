@@ -201,6 +201,7 @@ void Robot::RobotPeriodic()
                                            V_BallDetectedLower,
                                            V_Driver_elevator_up,
                                            V_Driver_elevator_down,
+                                           V_Driver_intake_in,
                                            V_ADAS_ActiveFeature);
 
   DriveControlMain( V_Driver_SwerveForwardBack,  // swerve control forward/back
