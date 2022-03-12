@@ -172,7 +172,8 @@ typedef enum T_ADAS_ActiveFeature
   E_ADAS_DM_BlindLaunch,
   E_ADAS_DM_DriveStraight,
   E_ADAS_DM_ReverseAndIntake,
-  E_ADAS_DM_Rotate180
+  E_ADAS_DM_Rotate180,
+  E_ADAS_DM_RotateTo0
 } T_ADAS_ActiveFeature;
 
 typedef enum T_ADAS_ActiveAutonFeature

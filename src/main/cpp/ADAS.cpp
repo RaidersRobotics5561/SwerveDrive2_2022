@@ -229,6 +229,7 @@ T_ADAS_ActiveFeature ADAS_ControlMain(double               *L_Pct_FwdRev,
         {
         L_ADAS_ActiveFeature = E_ADAS_DM_ReverseAndIntake;
         V_ADAS_DriveTime = K_ADAS_DM_DriveTimeShort;
+        V_ADAS_DM_InitGyroAngle = L_Deg_GyroAngleDeg;
         }
       else if ((L_ADAS_ActiveFeature == E_ADAS_DM_ReverseAndIntake) &&
                (V_ADAS_StateComplete == true))
@@ -362,6 +363,19 @@ T_ADAS_ActiveFeature ADAS_ControlMain(double               *L_Pct_FwdRev,
                                                       L_SD_RobotOriented,
                                                       L_Deg_GyroAngleDeg);
       break;
+      case E_ADAS_DM_RotateTo0:
+          V_ADAS_StateComplete =    ADAS_DM_RotateTo0(L_Pct_FwdRev,
+                                                      L_Pct_Strafe,
+                                                      L_Pct_Rotate,
+                                                      L_RPM_Launcher,
+                                                      L_Pct_Intake,
+                                                      L_Pct_Elevator,
+                                                      L_CameraUpperLightCmndOn,
+                                                      L_CameraLowerLightCmndOn,
+                                                      L_SD_RobotOriented,
+                                                      L_Deg_GyroAngleDeg,
+                                                      V_ADAS_DM_InitGyroAngle);
+      break;
       case E_ADAS_Disabled:
           *L_Pct_FwdRev = 0;
           *L_Pct_Strafe = 0;
@@ -374,5 +388,8 @@ T_ADAS_ActiveFeature ADAS_ControlMain(double               *L_Pct_FwdRev,
           *L_VisionTargetingRequest = false;
       break;
     }
+
+  frc::SmartDashboard::PutNumber("GyroInit",  V_ADAS_DM_InitGyroAngle);
+  frc::SmartDashboard::PutNumber("Rotate180TargetAngle",  V_ADAS_DM_Rotate180TargetAngle);
   return (L_ADAS_ActiveFeature);
   }

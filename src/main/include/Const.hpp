@@ -222,10 +222,10 @@ const double K_BH_LauncherSpeedAxis[4] = {2.52,  // 6 ft 6in
                                           13.5}; // 17 ft
 
 /* K_BH_LauncherSpeed: Launcher speed necessary for ball to reach target based on the estimated distance from the camera. */
-const double K_BH_LauncherSpeed[4] = {3350,  // 6 ft 6in
-                                      3700,  // 8 ft 6in
-                                      3950,  // 10 ft 6in
-                                      5050}; // 17 ft
+const double K_BH_LauncherSpeed[4] = {3300,  // 6 ft 6in
+                                      3650,  // 8 ft 6in
+                                      3900,  // 10 ft 6in
+                                      5000}; // 17 ft
 
 /* K_BH_LauncherManualDb: Deadband around the manual ball launcher axis. */
 const double K_BH_LauncherManualDb = 0.1;

@@ -23,6 +23,7 @@
 double                    V_ADAS_DM_DebounceTime      = 0;
 bool                      V_ADAS_DM_StateInit = false;
 double                    V_ADAS_DM_Rotate180TargetAngle = 0;
+double                    V_ADAS_DM_InitGyroAngle = 0;
 
 /* Configuration cals: */
 // double KV_ADAS_DM_DebounceTime;
@@ -93,6 +94,7 @@ void ADAS_DM_Reset(void)
   V_ADAS_DM_DebounceTime      = 0;
   V_ADAS_DM_StateInit = false;
   V_ADAS_DM_Rotate180TargetAngle = 0;
+  V_ADAS_DM_InitGyroAngle = 0;
   }
 
 
@@ -178,6 +180,95 @@ bool ADAS_DM_Rotate180(double     *L_Pct_FwdRev,
 
   return (L_ADAS_DM_StateComplete);
   }
+/******************************************************************************
+ * Function:     ADAS_DM_RotateTo0
+ *
+ * Description:  Rotate to the zeroed position
+ ******************************************************************************/
+bool ADAS_DM_RotateTo0(double     *L_Pct_FwdRev,
+                       double     *L_Pct_Strafe,
+                       double     *L_Pct_Rotate,
+                       double     *L_RPM_Launcher,
+                       double     *L_Pct_Intake,
+                       double     *L_Pct_Elevator,
+                       bool       *L_CameraUpperLightCmndOn,
+                       bool       *L_CameraLowerLightCmndOn,
+                       bool       *L_SD_RobotOriented,
+                       double      L_Deg_GyroAngleDeg,
+                       double      L_InitGyroAngle)
+  {
+  bool L_ADAS_DM_StateComplete = false;
+  double L_RotateError = 0;
+
+  *L_SD_RobotOriented = false;
+  /* Next, let's set all the other items we aren't trying to control to off: */
+  *L_CameraUpperLightCmndOn = false;
+  *L_CameraLowerLightCmndOn = false;
+  *L_Pct_FwdRev = 0;
+  *L_Pct_Strafe = 0;
+  *L_RPM_Launcher = 0;
+  *L_Pct_Intake = 0;
+  *L_Pct_Elevator = 0;
+
+  if (V_ADAS_DM_StateInit == false)
+    {
+    /* Need to find the target angle.  The gyro in use will only report values of -180 to 180. Need to account for this:*/
+    V_ADAS_DM_Rotate180TargetAngle = L_InitGyroAngle - 180;
+
+    // V_ADAS_DM_Rotate180TargetAngle = std::fmod((V_ADAS_DM_Rotate180TargetAngle), 180);
+
+    if (V_ADAS_DM_Rotate180TargetAngle > 180)
+      {
+      V_ADAS_DM_Rotate180TargetAngle -= 360;
+      }
+    else if (V_ADAS_DM_Rotate180TargetAngle < -180)
+      {
+      V_ADAS_DM_Rotate180TargetAngle += 360;
+      }
+
+    if (V_ADAS_DM_Rotate180TargetAngle >= -179 || V_ADAS_DM_Rotate180TargetAngle >= 179)
+     {
+       V_ADAS_DM_Rotate180TargetAngle = 178;
+     } 
+
+    V_ADAS_DM_StateInit = true;
+    }
+
+  L_RotateError = V_ADAS_DM_Rotate180TargetAngle - L_Deg_GyroAngleDeg;
+
+    if (fabs(L_RotateError) <= K_ADAS_DM_RotateDeadbandAngle && V_ADAS_DM_DebounceTime < K_ADAS_DM_RotateDebounceTime)
+    {
+    V_ADAS_DM_DebounceTime += C_ExeTime;
+    }
+  else if (fabs(L_RotateError) > K_ADAS_DM_RotateDeadbandAngle)
+    {
+    /* Reset the timer, we have gone out of bounds */
+    V_ADAS_DM_DebounceTime = 0;
+    }
+  else if (V_ADAS_DM_DebounceTime >= K_ADAS_DM_RotateDebounceTime)
+    {
+    /* Reset the time, proceed to next state. */
+    L_ADAS_DM_StateComplete = true;
+    V_ADAS_DM_DebounceTime = 0;
+    }
+
+  if (L_ADAS_DM_StateComplete == false)
+    {
+    *L_Pct_Rotate = DesiredRotateSpeed(L_RotateError);
+    }
+  else
+    {
+    /* We have been at the correct location for the set amount of time.
+       We have previously set the state to the next one, now set the rotate command to off. */
+    *L_Pct_Rotate = 0;
+    V_ADAS_DM_DebounceTime = 0;
+    L_ADAS_DM_StateComplete = true;
+    V_ADAS_DM_StateInit = false;
+    }
+
+  return (L_ADAS_DM_StateComplete);
+  }
+
 
 
 /******************************************************************************
