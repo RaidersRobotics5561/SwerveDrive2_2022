@@ -19,6 +19,7 @@
 
   Changes:
   2022-02-25 -> Beta
+  2022-03-12 -> Auto targets, shoots
  */
 
 #include <frc/smartdashboard/SmartDashboard.h>
