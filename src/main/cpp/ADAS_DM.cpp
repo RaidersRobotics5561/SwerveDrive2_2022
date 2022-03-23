@@ -24,6 +24,15 @@ double                    V_ADAS_DM_DebounceTime      = 0;
 bool                      V_ADAS_DM_StateInit = false;
 double                    V_ADAS_DM_Rotate180TargetAngle = 0;
 double                    V_ADAS_DM_InitGyroAngle = 0;
+double                    V_ADAS_DM_StateTimer = 0;
+double                    V_ADAS_DM_X_ErrorPrev = 0;
+double                    V_ADAS_DM_Y_ErrorPrev = 0;
+double                    V_ADAS_DM_X_Integral = 0;
+double                    V_ADAS_DM_Y_Integral = 0;
+double                    V_ADAS_DM_X_StartPosition = 0;
+double                    V_ADAS_DM_Y_StartPosition = 0;
+double                    V_ADAS_DM_X_TargetStartPosition = 0;
+double                    V_ADAS_DM_Y_TargetStartPosition = 0;
 
 /* Configuration cals: */
 // double KV_ADAS_DM_DebounceTime;
@@ -95,6 +104,15 @@ void ADAS_DM_Reset(void)
   V_ADAS_DM_StateInit = false;
   V_ADAS_DM_Rotate180TargetAngle = 0;
   V_ADAS_DM_InitGyroAngle = 0;
+  V_ADAS_DM_StateTimer = 0;
+  V_ADAS_DM_X_ErrorPrev = 0;
+  V_ADAS_DM_Y_ErrorPrev = 0;
+  V_ADAS_DM_X_Integral = 0;
+  V_ADAS_DM_Y_Integral = 0;
+  V_ADAS_DM_X_StartPosition = 0;
+  V_ADAS_DM_Y_StartPosition = 0;
+  V_ADAS_DM_X_TargetStartPosition = 0;
+  V_ADAS_DM_Y_TargetStartPosition = 0;
   }
 
 
@@ -148,7 +166,7 @@ bool ADAS_DM_Rotate180(double     *L_Pct_FwdRev,
 
   L_RotateError = V_ADAS_DM_Rotate180TargetAngle - L_Deg_GyroAngleDeg;
 
-    if (fabs(L_RotateError) <= K_ADAS_DM_RotateDeadbandAngle && V_ADAS_DM_DebounceTime < K_ADAS_DM_RotateDebounceTime)
+  if (fabs(L_RotateError) <= K_ADAS_DM_RotateDeadbandAngle && V_ADAS_DM_DebounceTime < K_ADAS_DM_RotateDebounceTime)
     {
     V_ADAS_DM_DebounceTime += C_ExeTime;
     }
@@ -217,7 +235,7 @@ bool ADAS_DM_RotateTo0(double     *L_Pct_FwdRev,
 
     // V_ADAS_DM_Rotate180TargetAngle = std::fmod((V_ADAS_DM_Rotate180TargetAngle), 180);
 
-    if (V_ADAS_DM_Rotate180TargetAngle > 180) //o w o
+    if (V_ADAS_DM_Rotate180TargetAngle > 180)
       {
       V_ADAS_DM_Rotate180TargetAngle -= 360;
       }
@@ -226,7 +244,7 @@ bool ADAS_DM_RotateTo0(double     *L_Pct_FwdRev,
       V_ADAS_DM_Rotate180TargetAngle += 360;
       }
 
-    if (V_ADAS_DM_Rotate180TargetAngle >= -179 || V_ADAS_DM_Rotate180TargetAngle <= 179)
+    if (V_ADAS_DM_Rotate180TargetAngle >= -179 || V_ADAS_DM_Rotate180TargetAngle >= 179)
      {
        V_ADAS_DM_Rotate180TargetAngle = 178;
      } 
@@ -236,7 +254,7 @@ bool ADAS_DM_RotateTo0(double     *L_Pct_FwdRev,
 
   L_RotateError = V_ADAS_DM_Rotate180TargetAngle - L_Deg_GyroAngleDeg;
 
-    if (fabs(L_RotateError) <= K_ADAS_DM_RotateDeadbandAngle && V_ADAS_DM_DebounceTime < K_ADAS_DM_RotateDebounceTime)
+  if (fabs(L_RotateError) <= K_ADAS_DM_RotateDeadbandAngle && V_ADAS_DM_DebounceTime < K_ADAS_DM_RotateDebounceTime)
     {
     V_ADAS_DM_DebounceTime += C_ExeTime;
     }
@@ -406,5 +424,156 @@ bool ADAS_DM_BlindShot(double       *L_Pct_FwdRev,
     *L_Pct_Elevator = 0;
     *L_RPM_Launcher = 0;
     }
+  return (L_ADAS_DM_StateComplete);
+  }
+
+
+/******************************************************************************
+ * Function:     ADAS_DM_PathFollower
+ *
+ * Description:  Follow the preplaned path.  We take in the current field 
+ *               position, then lookup the desired position based on the 
+ *               current time.  Based on this "error" between the current 
+ *               position and the desired position, we command either the 
+ *               robot to move foward/backward or to strafe to try and 
+ *               reach the desired position
+ ******************************************************************************/
+bool ADAS_DM_PathFollower(double *L_Pct_FwdRev,
+                          double *L_Pct_Strafe,
+                          double *L_Pct_Rotate,
+                          double *L_RPM_Launcher,
+                          double *L_Pct_Intake,
+                          double *L_Pct_Elevator,
+                          bool   *L_CameraUpperLightCmndOn,
+                          bool   *L_CameraLowerLightCmndOn,
+                          bool   *L_SD_RobotOriented,
+                          double  L_L_X_FieldPos,
+                          double  L_L_Y_FieldPos,
+                          double  L_Deg_GyroAngleDeg,
+                          int     L_i_PathNum)
+  {
+  bool   L_ADAS_DM_StateComplete = false;
+  double L_L_TargetPositionX = 0.0;
+  double L_L_TargetPositionY = 0.0;
+  double L_Rad_TargetAngle = 0.0;
+  double L_L_RelativePosX = 0.0;
+  double L_L_RelativePosY = 0.0;
+  double L_L_X_Error = 0.0;
+  double L_L_Y_Error = 0.0;
+  double L_Deg_RotateError = 0.0;
+
+  /* Set the things we are not using to off: */
+  *L_SD_RobotOriented = false;
+  *L_CameraUpperLightCmndOn = false;
+  *L_CameraLowerLightCmndOn = false;
+  *L_RPM_Launcher = 0;
+  *L_Pct_Intake = 0;
+  *L_Pct_Elevator = 0;
+  
+  /* Capture some of the things we need to save for this state control: */
+  if (V_ADAS_DM_StateInit == false)
+    {
+    V_ADAS_DM_X_StartPosition = L_L_X_FieldPos;
+    V_ADAS_DM_Y_StartPosition = L_L_Y_FieldPos;
+    V_ADAS_DM_X_TargetStartPosition = L_L_TargetPositionX;
+    V_ADAS_DM_Y_TargetStartPosition = L_L_TargetPositionY;
+    V_ADAS_DM_StateInit = true;
+    }
+
+  /* Look up the desired target location point: */
+  DesiredAutonLocation2(V_ADAS_DM_StateTimer,
+                        L_i_PathNum,
+                        &L_L_TargetPositionX,
+                        &L_L_TargetPositionY,
+                        &L_Rad_TargetAngle);
+
+  /* We need to offset the position by the start position since the odometry will 
+     start at zero, but the lookup table will not */
+  L_L_TargetPositionX -= V_ADAS_DM_X_TargetStartPosition;
+  L_L_TargetPositionY -= V_ADAS_DM_Y_TargetStartPosition;
+
+  L_L_RelativePosX = L_L_X_FieldPos - V_ADAS_DM_X_StartPosition;
+  L_L_RelativePosY = L_L_Y_FieldPos - V_ADAS_DM_Y_StartPosition;
+
+  L_L_X_Error = fabs(L_L_TargetPositionX - L_L_RelativePosX);
+  L_L_Y_Error = fabs(L_L_TargetPositionY - L_L_RelativePosY);
+
+  L_Deg_RotateError = L_Rad_TargetAngle * C_RadtoDeg - L_Deg_GyroAngleDeg;
+  
+  V_ADAS_DM_StateTimer += C_ExeTime;
+
+  /* Exit criteria: */
+  if (fabs(L_Deg_RotateError) <= K_ADAS_DM_RotateDeadbandAngle && 
+      L_L_X_Error <= K_ADAS_DM_XY_Deadband &&
+      L_L_Y_Error <= K_ADAS_DM_XY_Deadband &&
+      V_ADAS_DM_DebounceTime < K_ADAS_DM_RotateDebounceTime)
+    {
+    V_ADAS_DM_DebounceTime += C_ExeTime;
+    }
+  else if (fabs(L_Deg_RotateError) > K_ADAS_DM_RotateDeadbandAngle ||
+           L_L_X_Error > K_ADAS_DM_XY_Deadband ||
+           L_L_Y_Error > K_ADAS_DM_XY_Deadband)
+    {
+    /* Reset the timer, we have gone out of bounds */
+    V_ADAS_DM_DebounceTime = 0;
+    }
+  else if (V_ADAS_DM_DebounceTime >= K_ADAS_DM_RotateDebounceTime)
+    {
+    /* Reset the time, proceed to next state. */
+    L_ADAS_DM_StateComplete = true;
+    V_ADAS_DM_DebounceTime = 0;
+    }
+
+  if (L_ADAS_DM_StateComplete == false)
+    {
+    *L_Pct_FwdRev =  Control_PID( L_L_TargetPositionX,
+                                 -L_L_X_FieldPos,
+                                 &V_ADAS_DM_X_ErrorPrev,
+                                 &V_ADAS_DM_X_Integral,
+                                  K_k_AutonX_PID_Gx[E_P_Gx],
+                                  K_k_AutonX_PID_Gx[E_I_Gx],
+                                  K_k_AutonX_PID_Gx[E_D_Gx],
+                                  K_k_AutonX_PID_Gx[E_P_Ul],
+                                  K_k_AutonX_PID_Gx[E_P_Ll],
+                                  K_k_AutonX_PID_Gx[E_I_Ul],
+                                  K_k_AutonX_PID_Gx[E_I_Ll],
+                                  K_k_AutonX_PID_Gx[E_D_Ul],
+                                  K_k_AutonX_PID_Gx[E_D_Ll],
+                                  K_k_AutonX_PID_Gx[E_Max_Ul],
+                                  K_k_AutonX_PID_Gx[E_Max_Ll]);
+
+     *L_Pct_Strafe =  Control_PID( L_L_TargetPositionY,
+                                  -L_L_Y_FieldPos,
+                                  &V_ADAS_DM_Y_ErrorPrev,
+                                  &V_ADAS_DM_Y_Integral,
+                                   K_k_AutonY_PID_Gx[E_P_Gx],
+                                   K_k_AutonY_PID_Gx[E_I_Gx],
+                                   K_k_AutonY_PID_Gx[E_D_Gx],
+                                   K_k_AutonY_PID_Gx[E_P_Ul],
+                                   K_k_AutonY_PID_Gx[E_P_Ll],
+                                   K_k_AutonY_PID_Gx[E_I_Ul],
+                                   K_k_AutonY_PID_Gx[E_I_Ll],
+                                   K_k_AutonY_PID_Gx[E_D_Ul],
+                                   K_k_AutonY_PID_Gx[E_D_Ll],
+                                   K_k_AutonY_PID_Gx[E_Max_Ul],
+                                   K_k_AutonY_PID_Gx[E_Max_Ll]);
+   
+     *L_Pct_Rotate = DesiredRotateSpeed(L_Deg_RotateError);
+    }
+  else
+    {
+    /* We have been at the correct location for the set amount of time. */
+    *L_Pct_FwdRev = 0;
+    *L_Pct_Strafe = 0;
+    *L_Pct_Rotate = 0;
+    V_ADAS_DM_DebounceTime = 0;
+    L_ADAS_DM_StateComplete = true;
+    V_ADAS_DM_StateInit = false;
+    V_ADAS_DM_X_StartPosition = 0;
+    V_ADAS_DM_Y_StartPosition = 0;
+    V_ADAS_DM_X_TargetStartPosition = 0;
+    V_ADAS_DM_Y_TargetStartPosition = 0;
+    }
+
   return (L_ADAS_DM_StateComplete);
   }

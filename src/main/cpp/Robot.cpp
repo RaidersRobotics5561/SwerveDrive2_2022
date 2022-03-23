@@ -16,7 +16,6 @@
 #include "Encoders.hpp"
 #include "Gyro.hpp"
 #include "IO_Sensors.hpp"
-// #include "vision.hpp"
 #include "Driver_inputs.hpp"
 #include "Odometry.hpp"
 #include "DriveControl.hpp"
@@ -189,6 +188,8 @@ void Robot::RobotPeriodic()
                                            V_Driver_SwerveGoalAutoCenter,
                                            V_Driver_AutoIntake,
                                            V_GyroYawAngleDegrees,
+                                           V_l_RobotDisplacementX,
+                                           V_l_RobotDisplacementY,
                                            V_VisionTargetAquired[E_CamTop],
                                            V_VisionYaw[E_CamTop],
                                            V_VisionTargetDistanceMeters[E_CamTop],

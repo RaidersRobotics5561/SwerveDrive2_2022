@@ -16,7 +16,7 @@ const units::second_t C_ExeTime_t = 0.02_s; // Set to match the the default cont
 const double C_End_game_time = 30;
 
 // Numerical constants
-const double C_RadtoDeg = 57.2958;
+const double C_RadtoDeg = 57.2957795;
 const double C_Deg2Rad = 0.017453292519943295;
 const double C_PI = 3.14159265358979;
 const double C_Tau = 6.28318530717958647;
@@ -490,6 +490,26 @@ const double K_ADAS_DM_RotateDebounceTime = 0.02;
 /* K_ADAS_DM_RotateDeadbandAngle: This is the deband angle for the DM rotate state. [degrees] */
 const double K_ADAS_DM_RotateDeadbandAngle = 1.8;
 
+/* K_ADAS_DM_XY_Deadband: This is the deband position for the DM XY drive state. [meters] */
+const double K_ADAS_DM_XY_Deadband = 0.1;
+
+/* Motion profiles for DM: */
+#include "MotionProfiles/Red1Ang.hpp"
+#include "MotionProfiles/Red1T.hpp"
+#include "MotionProfiles/Red1X.hpp"
+#include "MotionProfiles/Red1Y.hpp"
+
+#include "MotionProfiles/Red2Ang.hpp"
+#include "MotionProfiles/Red2T.hpp"
+#include "MotionProfiles/Red2X.hpp"
+#include "MotionProfiles/Red2Y.hpp"
+
+#include "MotionProfiles/Red3Ang.hpp"
+#include "MotionProfiles/Red3T.hpp"
+#include "MotionProfiles/Red3X.hpp"
+#include "MotionProfiles/Red3Y.hpp"
+
+
 
 /*  Rotation calibrations */
 /* K_DesiredRotateSpeedAxis - This is the effective command axis, function of error calculation, in degrees */
@@ -665,3 +685,7 @@ const double K_k_AutonY_PID_Gx[E_PID_CalSz] = { 0.095,       // P Gx
 // #include "MotionProfiles/K_Slalom_V125A50_T.hpp"
 // #include "MotionProfiles/K_Slalom_V125A50_X.hpp"
 // #include "MotionProfiles/K_Slalom_V125A50_Y.hpp"
+
+
+
+

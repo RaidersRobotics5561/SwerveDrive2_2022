@@ -173,15 +173,29 @@ typedef enum T_ADAS_ActiveFeature
   E_ADAS_DM_DriveStraight,
   E_ADAS_DM_ReverseAndIntake,
   E_ADAS_DM_Rotate180,
-  E_ADAS_DM_RotateTo0
+  E_ADAS_DM_RotateTo0,
+  E_ADAS_DM_PathFollower
 } T_ADAS_ActiveFeature;
+
+typedef enum T_ADAS_Auton1
+{
+  E_ADAS_Auton_DM_PF_1,
+  E_ADAS_Auton_BT_2,
+  E_ADAS_Auton_DM_PF_3,
+  E_ADAS_Auton_UT_4,
+  E_ADAS_Auton_DM_PF_5,
+  E_ADAS_Auton_BT_6,
+  E_ADAS_Auton_DM_Rotate_7,
+  E_ADAS_Auton_UT_8
+} T_ADAS_Auton1;
 
 typedef enum T_ADAS_ActiveAutonFeature
 {
   E_ADAS_AutonDisabled,
   E_ADAS_AutonDriveAndShootBlind1,     // Shoot preloaded ball, drive straight, robot oriented
   E_ADAS_AutonDriveAndShootBlind2,     // Drive into preplaced ball, intake, rotate 180*, shoot 2 balls
-  E_ADAS_AutonDriveAndShootAuto2       // Drive into preplaced ball, intake, rotate 180*, shoot 2 balls
+  E_ADAS_AutonDriveAndShootAuto2,      // Drive into preplaced ball, intake, rotate 180*, shoot 2 balls
+  E_ADAS_AutonDriveAndShootAuto3       // Drive into preplaced ball, intake, rotate 180*, shoot 2 balls, pickup 3rd and shoot
 } T_ADAS_ActiveAutonFeature;
 
 #endif

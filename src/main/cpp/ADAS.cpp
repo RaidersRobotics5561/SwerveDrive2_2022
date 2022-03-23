@@ -36,6 +36,8 @@ T_ADAS_ActiveAutonFeature                       V_ADAS_DriverRequestedAutonFeatu
 frc::SendableChooser<T_ADAS_ActiveAutonFeature> V_ADAS_AutonChooser;
 bool                                            V_ADAS_StateComplete = false;
 bool                                            V_ADAS_AutonOncePerTrigger = false;
+T_ADAS_Auton1                                   V_ADAS_Auton1State;
+int                                             V_ADAS_PathNum;
 
 /* ADAS output control variables */
 double               V_ADAS_Pct_SD_FwdRev = 0;
@@ -64,6 +66,7 @@ void ADAS_Main_Init(void)
   V_ADAS_AutonChooser.AddOption("Blind Shot 1", T_ADAS_ActiveAutonFeature::E_ADAS_AutonDriveAndShootBlind1);
   V_ADAS_AutonChooser.AddOption("Blind Shot 2", T_ADAS_ActiveAutonFeature::E_ADAS_AutonDriveAndShootBlind2);
   V_ADAS_AutonChooser.AddOption("Auto Shot 2", T_ADAS_ActiveAutonFeature::E_ADAS_AutonDriveAndShootAuto2);
+  V_ADAS_AutonChooser.AddOption("Auto Shot 3", T_ADAS_ActiveAutonFeature::E_ADAS_AutonDriveAndShootAuto3);
   V_ADAS_AutonChooser.SetDefaultOption("Disabled", T_ADAS_ActiveAutonFeature::E_ADAS_AutonDisabled);
   frc::SmartDashboard::PutData(L_AutonSelectorName, &V_ADAS_AutonChooser);
   }
@@ -134,6 +137,8 @@ T_ADAS_ActiveFeature ADAS_ControlMain(double               *L_Pct_FwdRev,
                                       bool                  L_Driver_SwerveGoalAutoCenter,
                                       bool                  L_Driver_AutoIntake,
                                       double                L_Deg_GyroAngleDeg,
+                                      double                L_L_X_FieldPos,
+                                      double                L_L_Y_FieldPos,
                                       bool                  L_VisionTopTargetAquired,
                                       double                L_TopTargetYawDegrees,
                                       double                L_VisionTopTargetDistanceMeters,
@@ -248,6 +253,68 @@ T_ADAS_ActiveFeature ADAS_ControlMain(double               *L_Pct_FwdRev,
         L_ADAS_ActiveFeature = E_ADAS_UT_AutoUpperTarget;
         }
       else if ((L_ADAS_ActiveFeature == E_ADAS_UT_AutoUpperTarget) &&
+               (V_ADAS_StateComplete == true))
+        {
+        L_ADAS_ActiveFeature = E_ADAS_Disabled;
+        V_ADAS_StateComplete = true;
+        V_ADAS_AutonOncePerTrigger = true;
+        }
+      }
+    else if (V_ADAS_DriverRequestedAutonFeature == E_ADAS_AutonDriveAndShootAuto3)
+      {
+      if ((L_ADAS_ActiveFeature == E_ADAS_Disabled) &&
+          (V_ADAS_StateComplete == false) &&
+          (V_ADAS_AutonOncePerTrigger == false))
+        {
+        L_ADAS_ActiveFeature = E_ADAS_DM_PathFollower;
+        V_ADAS_PathNum = 1;
+        V_ADAS_Auton1State = E_ADAS_Auton_DM_PF_1;
+        }
+      else if ((V_ADAS_Auton1State == E_ADAS_Auton_DM_PF_1) &&
+               (V_ADAS_StateComplete == true))
+        {
+        L_ADAS_ActiveFeature = E_ADAS_BT_AutoBallTarget;
+        V_ADAS_Auton1State = E_ADAS_Auton_BT_2;
+        }
+      else if ((V_ADAS_Auton1State == E_ADAS_Auton_BT_2) &&
+               (V_ADAS_StateComplete == true))
+        {
+        L_ADAS_ActiveFeature = E_ADAS_DM_PathFollower;
+        V_ADAS_PathNum = 2;
+        V_ADAS_Auton1State = E_ADAS_Auton_DM_PF_3;
+        }
+      else if ((V_ADAS_Auton1State == E_ADAS_Auton_DM_PF_3) &&
+               (V_ADAS_StateComplete == true))
+        {
+        L_ADAS_ActiveFeature = E_ADAS_UT_AutoUpperTarget;
+        V_ADAS_Auton1State = E_ADAS_Auton_UT_4;
+        }
+      else if ((V_ADAS_Auton1State == E_ADAS_Auton_UT_4) &&
+               (V_ADAS_StateComplete == true))
+        {
+        L_ADAS_ActiveFeature = E_ADAS_DM_PathFollower;
+        V_ADAS_PathNum = 3;
+        V_ADAS_Auton1State = E_ADAS_Auton_DM_PF_5;
+        }
+      else if ((V_ADAS_Auton1State == E_ADAS_Auton_DM_PF_5) &&
+               (V_ADAS_StateComplete == true))
+        {
+        L_ADAS_ActiveFeature = E_ADAS_BT_AutoBallTarget;
+        V_ADAS_Auton1State = E_ADAS_Auton_BT_6;
+        }
+      else if ((V_ADAS_Auton1State == E_ADAS_Auton_BT_6) &&
+               (V_ADAS_StateComplete == true))
+        {
+        L_ADAS_ActiveFeature = E_ADAS_DM_Rotate180;
+        V_ADAS_Auton1State = E_ADAS_Auton_DM_Rotate_7;
+        }
+      else if ((V_ADAS_Auton1State == E_ADAS_Auton_DM_Rotate_7) &&
+               (V_ADAS_StateComplete == true))
+        {
+        L_ADAS_ActiveFeature = E_ADAS_UT_AutoUpperTarget;
+        V_ADAS_Auton1State = E_ADAS_Auton_UT_8;
+        }
+      else if ((V_ADAS_Auton1State == E_ADAS_Auton_UT_8) &&
                (V_ADAS_StateComplete == true))
         {
         L_ADAS_ActiveFeature = E_ADAS_Disabled;
@@ -377,7 +444,23 @@ T_ADAS_ActiveFeature ADAS_ControlMain(double               *L_Pct_FwdRev,
                                                       L_Deg_GyroAngleDeg,
                                                       V_ADAS_DM_InitGyroAngle);
       break;
+      case E_ADAS_DM_PathFollower:
+          V_ADAS_StateComplete = ADAS_DM_PathFollower(L_Pct_FwdRev,
+                                                      L_Pct_Strafe,
+                                                      L_Pct_Rotate,
+                                                      L_RPM_Launcher,
+                                                      L_Pct_Intake,
+                                                      L_Pct_Elevator,
+                                                      L_CameraUpperLightCmndOn,
+                                                      L_CameraLowerLightCmndOn,
+                                                      L_SD_RobotOriented,
+                                                      L_L_X_FieldPos,
+                                                      L_L_Y_FieldPos,
+                                                      L_Deg_GyroAngleDeg,
+                                                      V_ADAS_PathNum);
+      break;
       case E_ADAS_Disabled:
+      default:
           *L_Pct_FwdRev = 0;
           *L_Pct_Strafe = 0;
           *L_Pct_Rotate = 0;

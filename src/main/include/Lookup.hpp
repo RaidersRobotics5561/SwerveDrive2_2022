@@ -33,8 +33,9 @@ extern void DesiredAutonLocation(double  L_t_AutonTime,
                                  double *L_L_X_Location,
                                  double *L_L_Y_Location);
 
-extern void DesiredAutonLocation2(double  L_t_AutonTime,
+void DesiredAutonLocation2(double  L_t_AutonTime,
+                           int     L_int_AutonSelection,
                            double *L_L_X_Location,
                            double *L_L_Y_Location,
-                           int     L_int_AutonSelection);
+                           double *L_Deg_Angle);
 #endif /* SRC_ROBORIO2018_LOOKUP_HPP_ */

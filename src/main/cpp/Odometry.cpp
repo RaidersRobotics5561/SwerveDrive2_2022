@@ -12,8 +12,8 @@
 
 #include "Enums.hpp"
 
-double V_M_RobotDisplacementX = 0;
-double V_M_RobotDisplacementY = 0;
+double V_l_RobotDisplacementX = 0;
+double V_l_RobotDisplacementY = 0;
 
 
 /******************************************************************************
@@ -24,8 +24,8 @@ double V_M_RobotDisplacementY = 0;
  ******************************************************************************/
 void OdometryInit()
   {
-  V_M_RobotDisplacementX = 0;
-  V_M_RobotDisplacementY = 0;
+  V_l_RobotDisplacementX = 0;
+  V_l_RobotDisplacementY = 0;
   }
 
 
@@ -61,8 +61,8 @@ void DtrmnSwerveBotLocation(double  L_Deg_Gyro,
   L_M_TotalDeltaX = L_M_TotalDeltaX / 4;
   L_M_TotalDeltaY = L_M_TotalDeltaY / 4;
 
-  V_M_RobotDisplacementX += L_M_TotalDeltaX;
-  V_M_RobotDisplacementY += L_M_TotalDeltaY;
+  V_l_RobotDisplacementX += L_M_TotalDeltaX;
+  V_l_RobotDisplacementY += L_M_TotalDeltaY;
   }
 
 
