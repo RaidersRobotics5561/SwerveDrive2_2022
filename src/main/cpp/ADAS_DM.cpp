@@ -217,7 +217,7 @@ bool ADAS_DM_RotateTo0(double     *L_Pct_FwdRev,
 
     // V_ADAS_DM_Rotate180TargetAngle = std::fmod((V_ADAS_DM_Rotate180TargetAngle), 180);
 
-    if (V_ADAS_DM_Rotate180TargetAngle > 180)
+    if (V_ADAS_DM_Rotate180TargetAngle > 180) //o w o
       {
       V_ADAS_DM_Rotate180TargetAngle -= 360;
       }
@@ -226,7 +226,7 @@ bool ADAS_DM_RotateTo0(double     *L_Pct_FwdRev,
       V_ADAS_DM_Rotate180TargetAngle += 360;
       }
 
-    if (V_ADAS_DM_Rotate180TargetAngle >= -179 || V_ADAS_DM_Rotate180TargetAngle >= 179)
+    if (V_ADAS_DM_Rotate180TargetAngle >= -179 || V_ADAS_DM_Rotate180TargetAngle <= 179)
      {
        V_ADAS_DM_Rotate180TargetAngle = 178;
      } 
