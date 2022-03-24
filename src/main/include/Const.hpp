@@ -105,17 +105,17 @@ const double K_WheelCircufrence = 12.566; // Circumferance of wheel, in inches
 /* K_LiftRampRateYD: Per loop revolutions of the motor allowed for the YD position. */
 const double K_LiftRampRateYD[E_Lift_State_Sz][E_LiftIterationSz] = 
   {
-    {1.05, 1.05},  // E_S0_BEGONE
-    {1.15, 1.05},  // E_S2_lift_down_YD
-    {1.05, 1.05},  // E_S3_move_forward_XD
-    {1.05, 1.05},  // E_S4_stretch_up_YD
-    {1.05, 1.05},  // E_S5_more_forward_XD
-    {1.05, 1.05},  // E_S6_lift_up_more_YD
-    {1.05, 1.05},  // E_S7_move_back_XD
-    {1.05, 1.05},  // E_S8_more_down_some_YD
-    {1.05, 1.05},  // E_S9_back_rest_XD
-    {0.50, 0.50},  // E_S10_final_YD
-    {1.05, 1.05}   // E_S11_final_OWO
+    {1.25, 1.25},  // E_S0_BEGONE
+    {1.35, 1.25},  // E_S2_lift_down_YD
+    {1.25, 1.25},  // E_S3_move_forward_XD
+    {1.15, 1.15},  // E_S4_stretch_up_YD
+    {1.25, 1.25},  // E_S5_more_forward_XD
+    {1.25, 1.25},  // E_S6_lift_up_more_YD
+    {1.25, 1.25},  // E_S7_move_back_XD
+    {1.25, 1.25},  // E_S8_more_down_some_YD
+    {1.25, 1.25},  // E_S9_back_rest_XD
+    {1.00, 1.00},  // E_S10_final_YD
+    {1.25, 1.25}   // E_S11_final_OWO
   };
 
 /* K_LiftRampRateXD: Per loop revolutions of the motor allowed for the XD position. */
