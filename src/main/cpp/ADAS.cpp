@@ -431,19 +431,19 @@ T_ADAS_ActiveFeature ADAS_ControlMain(double               *L_Pct_FwdRev,
                                                       L_SD_RobotOriented,
                                                       L_Deg_GyroAngleDeg);
       break;
-      case E_ADAS_DM_RotateTo0:
-          V_ADAS_StateComplete =    ADAS_DM_RotateTo0(L_Pct_FwdRev,
-                                                      L_Pct_Strafe,
-                                                      L_Pct_Rotate,
-                                                      L_RPM_Launcher,
-                                                      L_Pct_Intake,
-                                                      L_Pct_Elevator,
-                                                      L_CameraUpperLightCmndOn,
-                                                      L_CameraLowerLightCmndOn,
-                                                      L_SD_RobotOriented,
-                                                      L_Deg_GyroAngleDeg,
-                                                      V_ADAS_DM_InitGyroAngle);
-      break;
+      // case E_ADAS_DM_RotateTo0:
+      //     V_ADAS_StateComplete =    ADAS_DM_RotateTo0(L_Pct_FwdRev,
+      //                                                 L_Pct_Strafe,
+      //                                                 L_Pct_Rotate,
+      //                                                 L_RPM_Launcher,
+      //                                                 L_Pct_Intake,
+      //                                                 L_Pct_Elevator,
+      //                                                 L_CameraUpperLightCmndOn,
+      //                                                 L_CameraLowerLightCmndOn,
+      //                                                 L_SD_RobotOriented,
+      //                                                 L_Deg_GyroAngleDeg,
+      //                                                 V_ADAS_DM_InitGyroAngle);
+      // break;
       case E_ADAS_DM_PathFollower:
           V_ADAS_StateComplete = ADAS_DM_PathFollower(L_Pct_FwdRev,
                                                       L_Pct_Strafe,
