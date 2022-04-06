@@ -173,7 +173,7 @@ typedef enum T_ADAS_ActiveFeature
   E_ADAS_DM_DriveStraight,
   E_ADAS_DM_ReverseAndIntake,
   E_ADAS_DM_Rotate180,
-  E_ADAS_DM_RotateTo0,
+  E_ADAS_DM_RotateFieldOriented,
   E_ADAS_DM_PathFollower
 } T_ADAS_ActiveFeature;
 

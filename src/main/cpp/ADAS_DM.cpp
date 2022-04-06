@@ -32,12 +32,19 @@ double                    V_ADAS_DM_Y_Integral = 0;
 double                    V_ADAS_DM_X_StartPosition = 0;
 double                    V_ADAS_DM_Y_StartPosition = 0;
 double                    V_ADAS_DM_X_TargetStartPosition = 0;
-double                    V_ADAS_DM_Y_TargetStartPosition = 0;    
+double                    V_ADAS_DM_Y_TargetStartPosition = 0;
+double                    V_ADAS_DM_TargetAngle;
+double                    V_ADAS_DM_GyroPrevious;
+bool                      V_ADAS_DM_GyroFlipNeg;
+bool                      V_ADAS_DM_GyroFlipPos;
+
 double V_TargetAngle;
 double V_GyroPrevious;
-double V_OffsettedGyro;
 bool V_GyroFlipNeg;
 bool V_GyroFlipPos;
+double V_OffsettedGyro;
+
+
 
 /* Configuration cals: */
 // double KV_ADAS_DM_DebounceTime;
@@ -225,7 +232,7 @@ bool ADAS_DM_RotateTo(double     *L_Pct_FwdRev,
   double L_ClockwiseError = 0;
   double L_CounterClockwiseError = 0;
   double L_Deg_TargetErrorActual = 0;
-  bool L_ErrorChosen;
+
   *L_SD_RobotOriented = false;
   /* Next, let's set all the other items we aren't trying to control to off: */
   *L_CameraUpperLightCmndOn = false;
@@ -247,21 +254,25 @@ bool ADAS_DM_RotateTo(double     *L_Pct_FwdRev,
 
     L_CounterClockwiseError = fabs((L_Deg_GyroAngleTarget - 360) - L_Deg_GyroAngleDeg);
 
-    if (L_CounterClockwiseError < L_ClockwiseError && L_ErrorChosen) {
-        V_TargetAngle = L_CounterClockwiseError - 360;
-        V_GyroPrevious = L_Deg_GyroAngleDeg;
-        L_ErrorChosen = false;
-    }
+    if (L_CounterClockwiseError < L_ClockwiseError)
+      {
+      V_TargetAngle = L_CounterClockwiseError - 360;
+      V_GyroPrevious = L_Deg_GyroAngleDeg;
+      }
 
-    if(V_GyroPrevious <= -170 && L_Deg_GyroAngleDeg >= 170 || V_GyroFlipNeg && L_Deg_GyroAngleDeg < 0){
-        V_OffsettedGyro = L_Deg_GyroAngleDeg - 360;
-        V_GyroFlipNeg = true;
-    }
-     else if(V_GyroPrevious >= 170 && L_Deg_GyroAngleDeg <=170){
+    if (V_GyroPrevious <= -170 && L_Deg_GyroAngleDeg >= 170 ||
+        V_GyroFlipNeg && L_Deg_GyroAngleDeg < 0)
+      {
+      V_OffsettedGyro = L_Deg_GyroAngleDeg - 360;
+      V_GyroFlipNeg = true;
+      }
+    else if (V_GyroPrevious >= 170 && L_Deg_GyroAngleDeg <=170)
+      {
       V_OffsettedGyro = L_Deg_GyroAngleDeg + 360;
       V_GyroFlipPos = true;
-    }
-    else{
+      }
+    else
+      {
       V_OffsettedGyro = L_Deg_GyroAngleDeg;
     }
 
@@ -321,6 +332,127 @@ bool ADAS_DM_RotateTo(double     *L_Pct_FwdRev,
   return (L_ADAS_DM_StateComplete);
   }
 
+
+/******************************************************************************
+ * Function:     ADAS_DM_RotateTo
+ *
+ * Description:  Rotate to the zeroed position
+ ******************************************************************************/
+bool ADAS_DM_FieldOrientRotate(double     *L_Pct_FwdRev,
+                               double     *L_Pct_Strafe,
+                               double     *L_Pct_Rotate,
+                               double     *L_RPM_Launcher,
+                               double     *L_Pct_Intake,
+                               double     *L_Pct_Elevator,
+                               bool       *L_CameraUpperLightCmndOn,
+                               bool       *L_CameraLowerLightCmndOn,
+                               bool       *L_SD_RobotOriented,
+                               double      L_Deg_GyroAngleDeg,
+                               double      L_Deg_GyroAngleTarget)
+  {
+  bool L_ADAS_DM_StateComplete = false;
+  double L_RotateError = 0;
+  double L_ClockwiseError = 0;
+  double L_CounterClockwiseError = 0;
+  double L_Deg_TargetErrorActual = 0;
+  double L_Deg_GyroRolloverProtected = 0;
+
+  *L_SD_RobotOriented = true;
+  /* Next, let's set all the other items we aren't trying to control to off: */
+  *L_CameraUpperLightCmndOn = false;
+  *L_CameraLowerLightCmndOn = false;
+  *L_Pct_FwdRev = 0;
+  *L_Pct_Strafe = 0;
+  *L_RPM_Launcher = 0;
+  *L_Pct_Intake = 0;
+  *L_Pct_Elevator = 0;
+
+  if (V_ADAS_DM_StateInit == false)
+    {
+    /* Need to find the target angle.  The gyro in use will only report values of -180 to 180. Need to account for this:*/
+    //V_ADAS_DM_Rotate180TargetAngle = L_InitGyroAngle - 180;
+
+    // V_ADAS_DM_Rotate180TargetAngle = std::fmod((V_ADAS_DM_Rotate180TargetAngle), 180);
+
+    L_RotateError = L_Deg_GyroAngleTarget - L_Deg_GyroAngleDeg;
+
+    /* A positive error number indicates clockwise rotation */
+    if (L_RotateError > 180)
+      {
+      /* It would be quicker to rotate in a counter clockwise direction to meet the command*/
+      L_RotateError -= 360;
+      }
+    else if (L_RotateError < -180)
+      {
+      L_RotateError += 360;
+      }
+    
+    V_ADAS_DM_TargetAngle = L_RotateError;
+    V_ADAS_DM_StateInit = true;
+    }
+
+  L_RotateError = V_TargetAngle - L_Deg_GyroAngleDeg;
+
+  /* Detect Gyro roll over. */
+  if ((V_ADAS_DM_GyroPrevious <= -170 && L_Deg_GyroAngleDeg >= 170) ||
+      (V_ADAS_DM_GyroFlipNeg == true  && L_Deg_GyroAngleDeg > 0))
+    {
+    L_Deg_GyroRolloverProtected = L_Deg_GyroAngleDeg - 360;
+    V_ADAS_DM_GyroFlipNeg = true;
+    V_ADAS_DM_GyroFlipPos = false;
+    }
+  else if ((V_GyroPrevious >= 170 && L_Deg_GyroAngleDeg <=170) || 
+           (V_GyroFlipPos && L_Deg_GyroAngleDeg < 0))
+    {
+    L_Deg_GyroRolloverProtected = L_Deg_GyroAngleDeg + 360;
+    V_ADAS_DM_GyroFlipPos = true;
+    V_ADAS_DM_GyroFlipNeg = false;
+    }
+  else
+    {
+    L_Deg_GyroRolloverProtected = L_Deg_GyroAngleDeg;
+    V_ADAS_DM_GyroFlipPos = false;
+    V_ADAS_DM_GyroFlipNeg = false;
+    }
+
+  L_Deg_TargetErrorActual = V_TargetAngle - L_Deg_GyroRolloverProtected;
+  V_ADAS_DM_GyroPrevious = L_Deg_GyroAngleDeg;
+
+  if (fabs(L_Deg_TargetErrorActual) <= K_ADAS_DM_RotateDeadbandAngle && V_ADAS_DM_DebounceTime < K_ADAS_DM_RotateDebounceTime)
+    {
+    V_ADAS_DM_DebounceTime += C_ExeTime;
+    }
+  else if (fabs(L_Deg_TargetErrorActual) > K_ADAS_DM_RotateDeadbandAngle)
+    {
+    /* Reset the timer, we have gone out of bounds */
+    V_ADAS_DM_DebounceTime = 0;
+    }
+  else if (V_ADAS_DM_DebounceTime >= K_ADAS_DM_RotateDebounceTime)
+    {
+    /* Reset the time, proceed to next state. */
+    L_ADAS_DM_StateComplete = true;
+    V_ADAS_DM_DebounceTime = 0;
+    }
+
+  if (L_ADAS_DM_StateComplete == false)
+    {
+    *L_Pct_Rotate = DesiredRotateSpeed(L_Deg_TargetErrorActual);
+    }
+  else
+    {
+    /* We have been at the correct location for the set amount of time.
+       We have previously set the state to the next one, now set the rotate command to off. */
+    *L_Pct_Rotate = 0;
+    V_ADAS_DM_DebounceTime = 0;
+    L_ADAS_DM_StateComplete = true;
+    V_ADAS_DM_StateInit = false;
+    V_ADAS_DM_GyroPrevious = 0;
+    V_ADAS_DM_GyroFlipPos = false;
+    V_ADAS_DM_GyroFlipNeg = false;
+    }
+
+  return (L_ADAS_DM_StateComplete);
+  }
 
 
 /******************************************************************************
