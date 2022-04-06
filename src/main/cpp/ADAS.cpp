@@ -51,6 +51,7 @@ bool                 V_ADAS_CameraLowerLightCmndOn = false;
 bool                 V_ADAS_SD_RobotOriented = false;
 bool                 V_ADAS_Vision_RequestedTargeting = false; 
 double               V_ADAS_DriveTime = 0;
+double               V_ADAS_Deg_TargetAngle = 0;
 
 
 
@@ -107,6 +108,7 @@ void ADAS_Main_Reset(void)
   V_ADAS_StateComplete = false;
   V_ADAS_AutonOncePerTrigger = false;
   V_ADAS_DriveTime = 0;
+  V_ADAS_Deg_TargetAngle = 0;
   
   /* Trigger the resets for all of the sub tasks/functions as well: */
   ADAS_UT_Reset();
@@ -245,7 +247,8 @@ T_ADAS_ActiveFeature ADAS_ControlMain(double               *L_Pct_FwdRev,
       else if ((L_ADAS_ActiveFeature == E_ADAS_BT_AutoBallTarget) &&
                (V_ADAS_StateComplete == true))
         {
-        L_ADAS_ActiveFeature = E_ADAS_DM_Rotate180;
+        L_ADAS_ActiveFeature = E_ADAS_DM_RotateFieldOriented;
+        V_ADAS_Deg_TargetAngle = L_Deg_GyroAngleDeg + 180;
         }
       else if ((L_ADAS_ActiveFeature == E_ADAS_DM_Rotate180) &&
                (V_ADAS_StateComplete == true))
@@ -431,8 +434,8 @@ T_ADAS_ActiveFeature ADAS_ControlMain(double               *L_Pct_FwdRev,
                                                       L_SD_RobotOriented,
                                                       L_Deg_GyroAngleDeg);
       break;
-      case E_ADAS_DM_RotateTo0:
-          V_ADAS_StateComplete =    ADAS_DM_RotateTo0(L_Pct_FwdRev,
+      case E_ADAS_DM_RotateFieldOriented:
+          V_ADAS_StateComplete = ADAS_DM_FieldOrientRotate(L_Pct_FwdRev,
                                                       L_Pct_Strafe,
                                                       L_Pct_Rotate,
                                                       L_RPM_Launcher,
@@ -442,7 +445,7 @@ T_ADAS_ActiveFeature ADAS_ControlMain(double               *L_Pct_FwdRev,
                                                       L_CameraLowerLightCmndOn,
                                                       L_SD_RobotOriented,
                                                       L_Deg_GyroAngleDeg,
-                                                      V_ADAS_DM_InitGyroAngle);
+                                                      V_ADAS_Deg_TargetAngle);
       break;
       case E_ADAS_DM_PathFollower:
           V_ADAS_StateComplete = ADAS_DM_PathFollower(L_Pct_FwdRev,

@@ -84,3 +84,15 @@ bool ADAS_DM_PathFollower(double *L_Pct_FwdRev,
                           double  L_L_Y_FieldPos,
                           double  L_Deg_GyroAngleDeg,
                           int     L_i_PathNum);
+
+bool ADAS_DM_FieldOrientRotate(double     *L_Pct_FwdRev,
+                               double     *L_Pct_Strafe,
+                               double     *L_Pct_Rotate,
+                               double     *L_RPM_Launcher,
+                               double     *L_Pct_Intake,
+                               double     *L_Pct_Elevator,
+                               bool       *L_CameraUpperLightCmndOn,
+                               bool       *L_CameraLowerLightCmndOn,
+                               bool       *L_SD_RobotOriented,
+                               double      L_Deg_GyroAngleDeg,
+                               double      L_Deg_GyroAngleTarget);
