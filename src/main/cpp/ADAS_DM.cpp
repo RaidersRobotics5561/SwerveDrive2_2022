@@ -37,6 +37,8 @@ double                    V_ADAS_DM_TargetAngle;
 double                    V_ADAS_DM_GyroPrevious;
 bool                      V_ADAS_DM_GyroFlipNeg;
 bool                      V_ADAS_DM_GyroFlipPos;
+double                    V_ADAS_DM_InitAngle;
+double                    V_ADAS_DM_StartAngle;
 
 double V_TargetAngle;
 double V_GyroPrevious;
@@ -125,6 +127,7 @@ void ADAS_DM_Reset(void)
   V_ADAS_DM_Y_StartPosition = 0;
   V_ADAS_DM_X_TargetStartPosition = 0;
   V_ADAS_DM_Y_TargetStartPosition = 0;
+  V_ADAS_DM_InitAngle = 0;
   }
 
 
@@ -627,6 +630,7 @@ bool ADAS_DM_PathFollower(double *L_Pct_FwdRev,
   double L_L_X_Error = 0.0;
   double L_L_Y_Error = 0.0;
   double L_Deg_RotateError = 0.0;
+  bool L_timeEND = false;
 
   /* Set the things we are not using to off: */
   *L_SD_RobotOriented = false;
@@ -635,23 +639,24 @@ bool ADAS_DM_PathFollower(double *L_Pct_FwdRev,
   *L_RPM_Launcher = 0;
   *L_Pct_Intake = 0;
   *L_Pct_Elevator = 0;
-  
+
+  /* Look up the desired target location point: */
+  L_timeEND = DesiredAutonLocation2(V_ADAS_DM_StateTimer,
+                                    L_i_PathNum,
+                                   &L_L_TargetPositionX,
+                                   &L_L_TargetPositionY,
+                                   &L_Rad_TargetAngle);
+
   /* Capture some of the things we need to save for this state control: */
-  if (V_ADAS_DM_StateInit == false)
-    {
+  if (V_ADAS_DM_StateInit == false) {
     V_ADAS_DM_X_StartPosition = L_L_X_FieldPos;
     V_ADAS_DM_Y_StartPosition = L_L_Y_FieldPos;
     V_ADAS_DM_X_TargetStartPosition = L_L_TargetPositionX;
     V_ADAS_DM_Y_TargetStartPosition = L_L_TargetPositionY;
+    V_ADAS_DM_InitAngle = L_Deg_GyroAngleDeg;
+    V_ADAS_DM_StartAngle = L_Rad_TargetAngle;
     V_ADAS_DM_StateInit = true;
     }
-
-  /* Look up the desired target location point: */
-  DesiredAutonLocation2(V_ADAS_DM_StateTimer,
-                        L_i_PathNum,
-                        &L_L_TargetPositionX,
-                        &L_L_TargetPositionY,
-                        &L_Rad_TargetAngle);
 
   /* We need to offset the position by the start position since the odometry will 
      start at zero, but the lookup table will not */
@@ -661,10 +666,15 @@ bool ADAS_DM_PathFollower(double *L_Pct_FwdRev,
   L_L_RelativePosX = L_L_X_FieldPos - V_ADAS_DM_X_StartPosition;
   L_L_RelativePosY = L_L_Y_FieldPos - V_ADAS_DM_Y_StartPosition;
 
+  frc::SmartDashboard::PutNumber("Y relative pos",  L_L_RelativePosY);
+  frc::SmartDashboard::PutNumber("X relative pos",  L_L_RelativePosX);
+  frc::SmartDashboard::PutNumber("Y target pos",  L_L_TargetPositionY);
+  frc::SmartDashboard::PutNumber("X target pos",  L_L_TargetPositionX);
+
   L_L_X_Error = fabs(L_L_TargetPositionX - L_L_RelativePosX);
   L_L_Y_Error = fabs(L_L_TargetPositionY - L_L_RelativePosY);
 
-  L_Deg_RotateError = L_Rad_TargetAngle * C_RadtoDeg - L_Deg_GyroAngleDeg;
+  L_Deg_RotateError = (L_Rad_TargetAngle - V_ADAS_DM_StartAngle - V_ADAS_DM_InitAngle) * C_RadtoDeg - L_Deg_GyroAngleDeg;
   
   V_ADAS_DM_StateTimer += C_ExeTime;
 
@@ -672,7 +682,8 @@ bool ADAS_DM_PathFollower(double *L_Pct_FwdRev,
   if (fabs(L_Deg_RotateError) <= K_ADAS_DM_RotateDeadbandAngle && 
       L_L_X_Error <= K_ADAS_DM_XY_Deadband &&
       L_L_Y_Error <= K_ADAS_DM_XY_Deadband &&
-      V_ADAS_DM_DebounceTime < K_ADAS_DM_RotateDebounceTime)
+      V_ADAS_DM_DebounceTime < K_ADAS_DM_RotateDebounceTime &&
+      L_timeEND == true)
     {
     V_ADAS_DM_DebounceTime += C_ExeTime;
     }
@@ -692,8 +703,8 @@ bool ADAS_DM_PathFollower(double *L_Pct_FwdRev,
 
   if (L_ADAS_DM_StateComplete == false)
     {
-    *L_Pct_FwdRev =  Control_PID( L_L_TargetPositionX,
-                                 -L_L_X_FieldPos,
+    *L_Pct_Strafe =  Control_PID( L_L_TargetPositionX,
+                                  L_L_RelativePosX,
                                  &V_ADAS_DM_X_ErrorPrev,
                                  &V_ADAS_DM_X_Integral,
                                   K_k_AutonX_PID_Gx[E_P_Gx],
@@ -708,8 +719,8 @@ bool ADAS_DM_PathFollower(double *L_Pct_FwdRev,
                                   K_k_AutonX_PID_Gx[E_Max_Ul],
                                   K_k_AutonX_PID_Gx[E_Max_Ll]);
 
-     *L_Pct_Strafe =  Control_PID( L_L_TargetPositionY,
-                                  -L_L_Y_FieldPos,
+     *L_Pct_FwdRev =  Control_PID( L_L_TargetPositionY,
+                                  L_L_RelativePosY,
                                   &V_ADAS_DM_Y_ErrorPrev,
                                   &V_ADAS_DM_Y_Integral,
                                    K_k_AutonY_PID_Gx[E_P_Gx],

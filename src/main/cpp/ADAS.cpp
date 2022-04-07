@@ -250,7 +250,7 @@ T_ADAS_ActiveFeature ADAS_ControlMain(double               *L_Pct_FwdRev,
         L_ADAS_ActiveFeature = E_ADAS_DM_RotateFieldOriented;
         V_ADAS_Deg_TargetAngle = L_Deg_GyroAngleDeg + 180;
         }
-      else if ((L_ADAS_ActiveFeature == E_ADAS_DM_Rotate180) &&
+      else if ((L_ADAS_ActiveFeature == E_ADAS_DM_RotateFieldOriented) &&
                (V_ADAS_StateComplete == true))
         {
         L_ADAS_ActiveFeature = E_ADAS_UT_AutoUpperTarget;
@@ -308,7 +308,8 @@ T_ADAS_ActiveFeature ADAS_ControlMain(double               *L_Pct_FwdRev,
       else if ((V_ADAS_Auton1State == E_ADAS_Auton_BT_6) &&
                (V_ADAS_StateComplete == true))
         {
-        L_ADAS_ActiveFeature = E_ADAS_DM_Rotate180;
+        L_ADAS_ActiveFeature = E_ADAS_DM_RotateFieldOriented;
+        V_ADAS_Deg_TargetAngle = L_Deg_GyroAngleDeg + 180;
         V_ADAS_Auton1State = E_ADAS_Auton_DM_Rotate_7;
         }
       else if ((V_ADAS_Auton1State == E_ADAS_Auton_DM_Rotate_7) &&

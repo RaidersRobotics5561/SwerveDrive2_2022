@@ -256,7 +256,7 @@ double LookUp2D_Table(double const *L_X_Axis,
  *
  * Description:  Determine the desired X/Y location based on the current time.
  ******************************************************************************/
-void DesiredAutonLocation2(double  L_t_AutonTime,
+bool DesiredAutonLocation2(double  L_t_AutonTime,
                            int     L_int_AutonSelection,
                            double *L_L_X_Location,
                            double *L_L_Y_Location,
@@ -271,6 +271,7 @@ void DesiredAutonLocation2(double  L_t_AutonTime,
   int L_i_Y_CalArraySize = 0;
   int L_i_Ang_AxisSize     = 0;
   int L_i_Ang_CalArraySize = 0;
+  bool L_timeTableDONE = false;
 
     switch (L_int_AutonSelection)
       {
@@ -299,6 +300,11 @@ void DesiredAutonLocation2(double  L_t_AutonTime,
                                    L_i_Ang_AxisSize,
                                    L_i_Ang_CalArraySize,
                                    L_t_AutonTime);
+                                                                      
+       if (L_t_AutonTime >= K_t_ADAS_DM_Red_1T[L_i_X_AxisSize - 1]) {
+           L_timeTableDONE = true;
+        }
+                                   
         break;
 
         case 2:
@@ -326,6 +332,11 @@ void DesiredAutonLocation2(double  L_t_AutonTime,
                                    L_i_Ang_AxisSize,
                                    L_i_Ang_CalArraySize,
                                    L_t_AutonTime);
+                                   
+       if (L_t_AutonTime >= K_t_ADAS_DM_Red_2T[L_i_X_AxisSize - 1]) {
+           L_timeTableDONE = true;
+        }
+        
         break;
 
         case 3:
@@ -354,12 +365,19 @@ void DesiredAutonLocation2(double  L_t_AutonTime,
                                    L_i_Ang_AxisSize,
                                    L_i_Ang_CalArraySize,
                                    L_t_AutonTime);
+
+       if (L_t_AutonTime >= K_t_ADAS_DM_Red_3T[L_i_X_AxisSize - 1]) {
+           L_timeTableDONE = true;
+        }
+
         break;
       }
 
   *L_L_X_Location = L_L_X_Loc;
   *L_L_Y_Location = L_L_Y_Loc;
   *L_Deg_Angle    = L_Deg_Ang;
+
+  return (L_timeTableDONE);
   }
 
 /******************************************************************************

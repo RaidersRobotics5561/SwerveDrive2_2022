@@ -54,8 +54,8 @@ void DtrmnSwerveBotLocation(double  L_Deg_Gyro,
       L_M_DeltaCornerDisplacementX[L_e_Index] = sin(L_Deg_RelativeAngle[L_e_Index]) * L_M_DeltaWheelDistance[L_e_Index];
       L_M_DeltaCornerDisplacementY[L_e_Index] = cos(L_Deg_RelativeAngle[L_e_Index]) * L_M_DeltaWheelDistance[L_e_Index];
 
-      L_M_TotalDeltaX += L_M_DeltaCornerDisplacementX[L_e_Index];
-      L_M_TotalDeltaY += L_M_DeltaCornerDisplacementY[L_e_Index];
+      L_M_TotalDeltaX -= L_M_DeltaCornerDisplacementX[L_e_Index];
+      L_M_TotalDeltaY -= L_M_DeltaCornerDisplacementY[L_e_Index];
     }
     
   L_M_TotalDeltaX = L_M_TotalDeltaX / 4;

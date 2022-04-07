@@ -413,8 +413,8 @@ void Lift_Control_ManualOverride(double *L_lift_command_YD,
   if (L_lift_measured_position_XD <= (K_lift_S3_XD + K_lift_deadband_XD) && L_lift_measured_position_XD >= (K_lift_S3_XD - K_lift_deadband_XD)) {
     V_LiftDebounceTimer += C_ExeTime;
     if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
-          L_criteria_met = true;
-          V_LiftDebounceTimer = 0;
+         L_criteria_met = true;
+         V_LiftDebounceTimer = 0;
     }
   }
   else {
@@ -451,8 +451,13 @@ void Lift_Control_ManualOverride(double *L_lift_command_YD,
   if (L_lift_measured_position_YD <= (K_lift_S4_YD + K_lift_deadband_YD) && L_lift_measured_position_YD >= (K_lift_S4_YD - K_lift_deadband_YD)) {
     V_LiftDebounceTimer += C_ExeTime;
     if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
-          L_criteria_met = true;
-          V_LiftDebounceTimer = 0;
+      V_Lift_WaitingForDriverINS = true;
+      if (L_driver_auto_climb_button == true){
+         /* Let the driver determine when we are not swinging and can proceed */
+         L_criteria_met = true;
+         V_LiftDebounceTimer = 0;
+         V_Lift_WaitingForDriverINS = false;
+      }
     }
   }
   else {
@@ -489,8 +494,8 @@ void Lift_Control_ManualOverride(double *L_lift_command_YD,
   if (L_lift_measured_position_XD <= (K_lift_S5_XD + K_lift_deadband_XD) && L_lift_measured_position_XD >= (K_lift_S5_XD - K_lift_deadband_XD)) {
     V_LiftDebounceTimer += C_ExeTime;
     if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
-          L_criteria_met = true;
-          V_LiftDebounceTimer = 0;
+         L_criteria_met = true;
+         V_LiftDebounceTimer = 0;
     }
   }
   else {
@@ -527,8 +532,8 @@ void Lift_Control_ManualOverride(double *L_lift_command_YD,
   if (L_lift_measured_position_YD <= (K_lift_S6_YD + K_lift_deadband_YD) && L_lift_measured_position_YD >= (K_lift_S6_YD - K_lift_deadband_YD)) {
     V_LiftDebounceTimer += C_ExeTime;
     if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
-          L_criteria_met = true;
-          V_LiftDebounceTimer = 0;
+         L_criteria_met = true;
+         V_LiftDebounceTimer = 0;
     }
   }
   else {
@@ -694,8 +699,8 @@ void Lift_Control_ManualOverride(double *L_lift_command_YD,
   if (L_lift_measured_position_YD <= (K_lift_S10_YD + K_lift_deadband_YD) && L_lift_measured_position_YD >= (K_lift_S10_YD - K_lift_deadband_YD)) {
     V_LiftDebounceTimer += C_ExeTime;
     if (V_LiftDebounceTimer >= K_Lift_deadband_timer){
-          L_criteria_met = true;
-          V_LiftDebounceTimer = 0;
+         L_criteria_met = true;
+         V_LiftDebounceTimer = 0;
     }
   }
   else {

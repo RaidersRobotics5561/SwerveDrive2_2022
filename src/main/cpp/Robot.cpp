@@ -370,6 +370,9 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutNumber("V_ADAS_UT_State",  float(V_ADAS_UT_State));
   frc::SmartDashboard::PutBoolean("Robot Oriented Control?",    V_SD_DriverRobotOrientedRequestedLatched);
 
+  frc::SmartDashboard::PutNumber("X Displacement",  V_l_RobotDisplacementX);
+  frc::SmartDashboard::PutNumber("Y Displacement",  V_l_RobotDisplacementY);
+
   /* Set light control outputs here */
   do_CameraLightControl.Set(V_CameraLightCmndOn);
   m_vanityLightControler.Set(V_VanityLightCmnd);

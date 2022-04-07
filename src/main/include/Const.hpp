@@ -97,7 +97,7 @@ const double C_BlinkinLED_RainbowWithGlitter = -0.89;
 
 // Encoder / speed calculation related cals
 const double K_ReductionRatio = 8.31;
-const double K_WheelCircufrence = 12.566; // Circumferance of wheel, in inches
+const double K_WheelCircufrence = 0.3191764; // Circumferance of wheel, in inches
 
 
 
@@ -629,7 +629,7 @@ const double K_BallLauncherLowerSpeed[K_BallLauncherDistanceSz][K_BallLauncherAn
 
 
 /* Auton specific cals */
-const double K_k_AutonX_PID_Gx[E_PID_CalSz] = { 0.095,       // P Gx
+const double K_k_AutonX_PID_Gx[E_PID_CalSz] = { 0.18,       // P Gx
                                                 0.000001,    // I Gx
                                                 0.00012,      // D Gx
                                                 0.8,       // P UL
@@ -641,7 +641,7 @@ const double K_k_AutonX_PID_Gx[E_PID_CalSz] = { 0.095,       // P Gx
                                                 1.0,       // Max upper
                                                -1.0};      // Max lower
 
-const double K_k_AutonY_PID_Gx[E_PID_CalSz] = { 0.095,       // P Gx
+const double K_k_AutonY_PID_Gx[E_PID_CalSz] = { 0.18,       // P Gx
                                                 0.000001,    // I Gx
                                                 0.00012,      // D Gx
                                                 0.8,       // P UL
