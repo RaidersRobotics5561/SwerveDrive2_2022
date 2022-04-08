@@ -4,7 +4,7 @@
 #include <units/length.h>
 
 // Define the desired test state here: COMP (no test), BallHandlerTest, LiftXY_Test, DriveMotorTest, WheelAngleTest, ADAS_UT_Test, ADAS_BT_Test
-#define DriveMotorTest
+#define COMP
 // Define the bot type: CompBot, PracticeBot
 #define PracticeBot
 
@@ -264,10 +264,10 @@ const double K_SD_WheelOffsetAngle[E_RobotCornerSz] = {174.527239,   // E_FrontL
 
 /* K_SD_WheelOffsetAnglePractieBot: Offset angle for each respective corder of the swerve drive wheel.  This is the angle 
    reading from the absolute encoder that is indicated in order for the wheel to point straight.  For practice bot only. */
-const double K_SD_WheelOffsetAnglePractieBot[E_RobotCornerSz] = { -74.8834367,  // E_FrontLeft
-                                                                  -91.0615225,  // E_FrontRight
-                                                                  -11.771014,   // E_RearLeft
-                                                                 -145.722063};  // E_RearRight
+const double K_SD_WheelOffsetAnglePractieBot[E_RobotCornerSz] = { -177.8,  // E_FrontLeft
+                                                                  -339.7,  // E_FrontRight
+                                                                  -52.6,   // E_RearLeft
+                                                                 -98.7};  // E_RearRight
 
 /* K_SD_WheelGx: Gain multiplied by each calculated desired speed.  Intended to account for variation in wheel size. */
 const double K_SD_WheelGx[E_RobotCornerSz] = {1.0,    // E_FrontLeft

@@ -311,6 +311,13 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutNumber("V_WheelAngleConverted[E_RearRight]", V_WheelAngleConverted[E_RearRight]);
   frc::SmartDashboard::PutNumber("V_WheelAngleConverted[E_FrontLeft]", V_WheelAngleConverted[E_FrontLeft]);
   frc::SmartDashboard::PutNumber("V_WheelAngleConverted[E_RearLeft]", V_WheelAngleConverted[E_RearLeft]);
+
+  frc::SmartDashboard::PutNumber("V_WheelVelocity[E_FrontRight]", V_WheelVelocity[E_FrontRight]);
+  frc::SmartDashboard::PutNumber("V_WheelVelocity[E_RearRight]", V_WheelVelocity[E_RearRight]);
+  frc::SmartDashboard::PutNumber("V_WheelVelocity[E_FrontLeft]", V_WheelVelocity[E_FrontLeft]);
+  frc::SmartDashboard::PutNumber("V_WheelVelocity[E_RearLeft]", V_WheelVelocity[E_RearLeft]);
+
+
   frc::SmartDashboard::PutNumber("V_ADAS_BT_State", V_ADAS_BT_State);
   
   // frc::SmartDashboard::PutNumber("Lift postition YD", V_LiftPostitionYD);
@@ -490,10 +497,14 @@ void Robot::TeleopPeriodic()
   // Motor output commands:
   if (V_SD_DriveWheelsInPID == true)
     {
-    m_frontLeftDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kVelocity);
-    m_frontRightDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kVelocity);
-    m_rearLeftDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_RearLeft],     rev::ControlType::kVelocity);
-    m_rearRightDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_RearRight],   rev::ControlType::kVelocity);
+    // m_frontLeftDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kVelocity);
+    // m_frontRightDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kVelocity);
+    // m_rearLeftDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_RearLeft],     rev::ControlType::kVelocity);
+    // m_rearRightDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_RearRight],   rev::ControlType::kVelocity);
+    m_frontLeftDriveMotor.Set(0);
+    m_frontRightDriveMotor.Set(0);
+    m_rearLeftDriveMotor.Set(0);
+    m_rearRightDriveMotor.Set(0);
     }
   else
     {
@@ -507,6 +518,10 @@ void Robot::TeleopPeriodic()
   m_frontRightSteerMotor.Set(V_SD_WheelAngleCmnd[E_FrontRight]);
   m_rearLeftSteerMotor.Set(V_SD_WheelAngleCmnd[E_RearLeft]);
   m_rearRightSteerMotor.Set(V_SD_WheelAngleCmnd[E_RearRight]);
+  // m_frontLeftSteerMotor.Set(0);
+  // m_frontRightSteerMotor.Set(0);
+  // m_rearLeftSteerMotor.Set(0);
+  // m_rearRightSteerMotor.Set(0);
 
   if (V_BH_LauncherActive == true)
     {
