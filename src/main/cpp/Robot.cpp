@@ -307,7 +307,10 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutBoolean("Ball Detected Upper", V_BallDetectedUpper);
   frc::SmartDashboard::PutBoolean("Ball Detected Lower", V_BallDetectedLower);
   frc::SmartDashboard::PutBoolean("Lift Ready to Advance", V_Lift_WaitingForDriverINS);
-  frc::SmartDashboard::PutNumber("V_WheelAngleConverted[E_FrontRight]", V_WheelAngleConverted[E_FrontRight]);
+  frc::SmartDashboard::PutNumber("V_WheelAngleConverted[E_FrontRight]", V_WheelAngleConverted[E_FrontRight]); 
+  frc::SmartDashboard::PutNumber("V_WheelAngleConverted[E_RearRight]", V_WheelAngleConverted[E_RearRight]);
+  frc::SmartDashboard::PutNumber("V_WheelAngleConverted[E_FrontLeft]", V_WheelAngleConverted[E_FrontLeft]);
+  frc::SmartDashboard::PutNumber("V_WheelAngleConverted[E_RearLeft]", V_WheelAngleConverted[E_RearLeft]);
   frc::SmartDashboard::PutNumber("V_ADAS_BT_State", V_ADAS_BT_State);
   
   // frc::SmartDashboard::PutNumber("Lift postition YD", V_LiftPostitionYD);
