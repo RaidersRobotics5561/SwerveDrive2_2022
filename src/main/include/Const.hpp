@@ -4,9 +4,9 @@
 #include <units/length.h>
 
 // Define the desired test state here: COMP (no test), BallHandlerTest, LiftXY_Test, DriveMotorTest, WheelAngleTest, ADAS_UT_Test, ADAS_BT_Test
-#define COMP
+#define DriveMotorTest
 // Define the bot type: CompBot, PracticeBot
-#define CompBot
+#define PracticeBot
 
 // RoboRio controller execution time
 const double C_ExeTime = 0.02; // Set to match the the default controller loop time of 20 ms
@@ -291,6 +291,7 @@ const double K_SD_WheelMaxSpeed = 5800;
   If the absolute value of the command, wheels will transition to 0 power (but still in brake 
   mode).  There is a corresponding actual speed threshold. [in/sec] */
 const double K_SD_WheelMinCmndSpeed = 0.2;
+
 
 /* K_SD_WheelSpeedPID_V2_Gx: PID gains for the driven wheels that is within the motor controllers. */
 const double K_SD_WheelSpeedPID_V2_Gx[E_PID_SparkMaxCalSz] = { 0.000350, // kP
