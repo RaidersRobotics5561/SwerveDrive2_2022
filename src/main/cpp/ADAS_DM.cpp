@@ -216,7 +216,7 @@ bool ADAS_DM_Rotate180(double     *L_Pct_FwdRev,
 /******************************************************************************
  * Function:     ADAS_DM_RotateTo
  *
- * Description:  Rotate to the zeroed position
+ * Description:  Rotate to a given position (L_Deg_GyroAngleTarget)
  ******************************************************************************/
 bool ADAS_DM_RotateTo(double     *L_Pct_FwdRev,
                        double     *L_Pct_Strafe,
@@ -337,7 +337,7 @@ bool ADAS_DM_RotateTo(double     *L_Pct_FwdRev,
 
 
 /******************************************************************************
- * Function:     ADAS_DM_RotateTo
+ * Function:     ADAS_DM_FieldOrientRotate
  *
  * Description:  Rotate to the zeroed position
  ******************************************************************************/
@@ -630,6 +630,7 @@ bool ADAS_DM_PathFollower(double *L_Pct_FwdRev,
   double L_L_X_Error = 0.0;
   double L_L_Y_Error = 0.0;
   double L_Deg_RotateError = 0.0;
+  double L_Deg_RotateTarget = 0.0;
   bool L_timeEND = false;
 
   /* Set the things we are not using to off: */
@@ -676,6 +677,8 @@ bool ADAS_DM_PathFollower(double *L_Pct_FwdRev,
 
   L_Deg_RotateError = (L_Rad_TargetAngle - V_ADAS_DM_StartAngle - V_ADAS_DM_InitAngle) * C_RadtoDeg - L_Deg_GyroAngleDeg;
   
+  L_Deg_RotateTarget = (L_Rad_TargetAngle * C_RadtoDeg);
+
   V_ADAS_DM_StateTimer += C_ExeTime;
 
   /* Exit criteria: */
@@ -735,7 +738,20 @@ bool ADAS_DM_PathFollower(double *L_Pct_FwdRev,
                                    K_k_AutonY_PID_Gx[E_Max_Ul],
                                    K_k_AutonY_PID_Gx[E_Max_Ll]);
    
-     *L_Pct_Rotate = DesiredRotateSpeed(L_Deg_RotateError);
+     //*L_Pct_Rotate = DesiredRotateSpeed(L_Deg_RotateError);
+
+      ADAS_DM_FieldOrientRotate(L_Pct_FwdRev,
+                                L_Pct_Strafe,
+                                L_Pct_Rotate,
+                                L_RPM_Launcher,
+                                L_Pct_Intake,
+                                L_Pct_Elevator,
+                                L_CameraUpperLightCmndOn,
+                                L_CameraLowerLightCmndOn,
+                                L_SD_RobotOriented,
+                                L_Deg_GyroAngleDeg,
+                                L_Deg_RotateTarget);
+
     }
   else
     {
