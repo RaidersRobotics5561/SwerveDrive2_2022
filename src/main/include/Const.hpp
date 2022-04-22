@@ -264,10 +264,10 @@ const double K_SD_WheelOffsetAngle[E_RobotCornerSz] = {174.527239,   // E_FrontL
 
 /* K_SD_WheelOffsetAnglePractieBot: Offset angle for each respective corder of the swerve drive wheel.  This is the angle 
    reading from the absolute encoder that is indicated in order for the wheel to point straight.  For practice bot only. */
-const double K_SD_WheelOffsetAnglePractieBot[E_RobotCornerSz] = { -177.8,  // E_FrontLeft
-                                                                  -339.7,  // E_FrontRight
-                                                                  -52.6,   // E_RearLeft
-                                                                 -98.7};  // E_RearRight
+const double K_SD_WheelOffsetAnglePractieBot[E_RobotCornerSz] = {-177.9,  // E_FrontLeft 1.3  -176
+                                                                 -16.1,  // E_FrontRight 163.5
+                                                                 -127.1,   // E_RearLeft 230.8
+                                                                 96.9};  // E_RearRight 282.0
 
 /* K_SD_WheelGx: Gain multiplied by each calculated desired speed.  Intended to account for variation in wheel size. */
 const double K_SD_WheelGx[E_RobotCornerSz] = {1.0,    // E_FrontLeft
@@ -321,8 +321,8 @@ const double K_SD_WheelAnglePID_Gx[E_PID_CalSz] = { 0.0035,   // P Gx
 
 /* K_SD_WheelAnglePID_GxPracticeBot: PID gains for the angle of the swerve drive wheels on practice bot.  PID control is within the RoboRio.  */
 const double K_SD_WheelAnglePID_GxPracticeBot[E_PID_CalSz] = { 0.002,     // P Gx
-                                                               0.000001,  // I Gx
-                                                               0.0000005, // D Gx
+                                                               0.000001,  // I Gx 0.000001
+                                                               0.0000005, // D Gx 0.0000005
                                                                0.4,       // P UL
                                                               -0.4,       // P LL
                                                                0.12,      // I UL

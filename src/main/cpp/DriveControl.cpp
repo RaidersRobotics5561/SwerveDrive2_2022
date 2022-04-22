@@ -94,7 +94,7 @@ void SwerveDriveMotorConfigsInit(rev::SparkMaxPIDController m_frontLeftDrivePID,
       KV_SD_WheelAnglePID_Gx[L_Index2] = K_SD_WheelAnglePID_Gx[L_Index2];
 	  #endif
 	  #ifdef PracticeBot
-	  KV_SD_WheelAnglePID_Gx[L_Index2] = K_SD_WheelAnglePID_GxPracticeBot[L_Index2];
+	    KV_SD_WheelAnglePID_Gx[L_Index2] = K_SD_WheelAnglePID_GxPracticeBot[L_Index2];
 	  #endif
       }
 
@@ -494,4 +494,8 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       }
  
     V_SD_DriveWheelsInPID = L_SD_DriveWheelsPowered;
+
+    frc::SmartDashboard::PutNumber("L_WA[E_FrontLeft]", L_WA[E_FrontLeft]);
+    frc::SmartDashboard::PutNumber("V_SD_WheelAngleArb[E_FrontLeft]", V_SD_WheelAngleArb[E_FrontLeft]);
+    frc::SmartDashboard::PutNumber("L_WheelAngleCmnd[E_FrontLeft]", L_WheelAngleCmnd[E_FrontLeft]);
   }

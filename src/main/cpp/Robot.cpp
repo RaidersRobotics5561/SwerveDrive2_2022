@@ -303,10 +303,10 @@ void Robot::RobotPeriodic()
 
 /* Output all of the content to the dashboard here: */
   // frc::SmartDashboard::PutBoolean("XD Limit Detected", V_XD_LimitDetected);
-  // frc::SmartDashboard::PutBoolean("YD Limit Detected", V_YD_LimitDetected);
-  frc::SmartDashboard::PutBoolean("Ball Detected Upper", V_BallDetectedUpper);
-  frc::SmartDashboard::PutBoolean("Ball Detected Lower", V_BallDetectedLower);
-  frc::SmartDashboard::PutBoolean("Lift Ready to Advance", V_Lift_WaitingForDriverINS);
+  // // frc::SmartDashboard::PutBoolean("YD Limit Detected", V_YD_LimitDetected);
+  // frc::SmartDashboard::PutBoolean("Ball Detected Upper", V_BallDetectedUpper);
+  // frc::SmartDashboard::PutBoolean("Ball Detected Lower", V_BallDetectedLower);
+  // frc::SmartDashboard::PutBoolean("Lift Ready to Advance", V_Lift_WaitingForDriverINS);
   frc::SmartDashboard::PutNumber("V_WheelAngleConverted[E_FrontRight]", V_WheelAngleConverted[E_FrontRight]); 
   frc::SmartDashboard::PutNumber("V_WheelAngleConverted[E_RearRight]", V_WheelAngleConverted[E_RearRight]);
   frc::SmartDashboard::PutNumber("V_WheelAngleConverted[E_FrontLeft]", V_WheelAngleConverted[E_FrontLeft]);
@@ -318,24 +318,24 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutNumber("V_WheelVelocity[E_RearLeft]", V_WheelVelocity[E_RearLeft]);
 
 
-  frc::SmartDashboard::PutNumber("V_ADAS_BT_State", V_ADAS_BT_State);
+  // frc::SmartDashboard::PutNumber("V_ADAS_BT_State", V_ADAS_BT_State);
   
   // frc::SmartDashboard::PutNumber("Lift postition YD", V_LiftPostitionYD);
   // frc::SmartDashboard::PutNumber("Lift postition XD", V_LiftPostitionXD);
 
   // frc::SmartDashboard::PutNumber("Launcher Speed Cmnd",      V_ShooterRPM_Cmnd);
   // frc::SmartDashboard::PutNumber("Launcher Speed Actual",    V_ShooterSpeedCurr);
-  // frc::SmartDashboard::PutNumber("Front Left Speed Cmnd", m_encoderFrontLeftDrive.GetVelocity());
+  frc::SmartDashboard::PutNumber("V_SD_WheelAngleCmnd[E_FrontLeft]", V_SD_WheelAngleCmnd[E_FrontLeft]);
   frc::SmartDashboard::PutNumber("GYRO",            V_GyroYawAngleDegrees);
 
-  frc::SmartDashboard::PutBoolean("Top Target?",    V_VisionTargetAquired[E_CamTop]);
-  frc::SmartDashboard::PutNumber("Top Yaw",         V_VisionYaw[E_CamTop]);
-  frc::SmartDashboard::PutNumber("Top Distance",    V_VisionTargetDistanceMeters[E_CamTop]);
+  // frc::SmartDashboard::PutBoolean("Top Target?",    V_VisionTargetAquired[E_CamTop]);
+  // frc::SmartDashboard::PutNumber("Top Yaw",         V_VisionYaw[E_CamTop]);
+  // frc::SmartDashboard::PutNumber("Top Distance",    V_VisionTargetDistanceMeters[E_CamTop]);
     // frc::SmartDashboard::PutNumber("Cam1 Index",    float(V_VisionCameraIndex[E_Cam1]));
   // frc::SmartDashboard::PutNumber("Bottom Range",    V_VisionTargetDistanceMeters[E_CamBottom]);
-  frc::SmartDashboard::PutBoolean("Bottom Target?", V_VisionTargetAquired[E_CamBottom]);
-  frc::SmartDashboard::PutNumber("Bottom Yaw",      V_VisionYaw[E_CamBottom]);
-  frc::SmartDashboard::PutNumber("Cam2 Index",    float(V_VisionCameraIndex[E_Cam2])); 
+  // frc::SmartDashboard::PutBoolean("Bottom Target?", V_VisionTargetAquired[E_CamBottom]);
+  // frc::SmartDashboard::PutNumber("Bottom Yaw",      V_VisionYaw[E_CamBottom]);
+  // frc::SmartDashboard::PutNumber("Cam2 Index",    float(V_VisionCameraIndex[E_Cam2])); 
 // frc::SmartDashboard::PutNumber("V_VisionTopCamNumberTemp", V_VisionTopCamNumberTemp);
 
   // frc::SmartDashboard::PutNumber("Camera 1 Pipeline Index", float(pc_Camera1.GetPipelineIndex()));
@@ -377,11 +377,11 @@ void Robot::RobotPeriodic()
   // frc::SmartDashboard::PutNumber("Lift XD S8",  V_LiftMotorXD_MaxCurrent[E_S8_more_down_some_YD]);
   // frc::SmartDashboard::PutNumber("Lift XD S9",  V_LiftMotorXD_MaxCurrent[E_S9_back_rest_XD]);
   // frc::SmartDashboard::PutNumber("Lift XD S10", V_LiftMotorXD_MaxCurrent[E_S10_final_YD]);
-  frc::SmartDashboard::PutNumber("V_ADAS_UT_State",  float(V_ADAS_UT_State));
-  frc::SmartDashboard::PutBoolean("Robot Oriented Control?",    V_SD_DriverRobotOrientedRequestedLatched);
+  // frc::SmartDashboard::PutNumber("V_ADAS_UT_State",  float(V_ADAS_UT_State));
+  // frc::SmartDashboard::PutBoolean("Robot Oriented Control?",    V_SD_DriverRobotOrientedRequestedLatched);
 
-  frc::SmartDashboard::PutNumber("X Displacement",  V_l_RobotDisplacementX);
-  frc::SmartDashboard::PutNumber("Y Displacement",  V_l_RobotDisplacementY);
+  // frc::SmartDashboard::PutNumber("X Displacement",  V_l_RobotDisplacementX);
+  // frc::SmartDashboard::PutNumber("Y Displacement",  V_l_RobotDisplacementY);
 
   /* Set light control outputs here */
   do_CameraLightControl.Set(V_CameraLightCmndOn);
@@ -497,14 +497,14 @@ void Robot::TeleopPeriodic()
   // Motor output commands:
   if (V_SD_DriveWheelsInPID == true)
     {
-    // m_frontLeftDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kVelocity);
-    // m_frontRightDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kVelocity);
-    // m_rearLeftDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_RearLeft],     rev::ControlType::kVelocity);
-    // m_rearRightDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_RearRight],   rev::ControlType::kVelocity);
-    m_frontLeftDriveMotor.Set(0);
-    m_frontRightDriveMotor.Set(0);
-    m_rearLeftDriveMotor.Set(0);
-    m_rearRightDriveMotor.Set(0);
+    m_frontLeftDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kVelocity);
+    m_frontRightDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kVelocity);
+    m_rearLeftDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_RearLeft],     rev::ControlType::kVelocity);
+    m_rearRightDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_RearRight],   rev::ControlType::kVelocity);
+    // m_frontLeftDriveMotor.Set(0);
+    // m_frontRightDriveMotor.Set(0);
+    // m_rearLeftDriveMotor.Set(0);
+    // m_rearRightDriveMotor.Set(0);
     }
   else
     {

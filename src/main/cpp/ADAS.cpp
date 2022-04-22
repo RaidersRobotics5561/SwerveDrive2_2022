@@ -337,8 +337,6 @@ T_ADAS_ActiveFeature ADAS_ControlMain(double               *L_Pct_FwdRev,
     L_ADAS_ActiveFeature = E_ADAS_Disabled;
     }
 
-  frc::SmartDashboard::PutNumber("L_ADAS_ActiveFeature",  L_ADAS_ActiveFeature);
-
   if (L_ADAS_ActiveFeature == E_ADAS_Disabled)
     {
     /* Hmm, there was a transition, let's go ahead and reset all of the variables before we start: */
@@ -477,7 +475,5 @@ T_ADAS_ActiveFeature ADAS_ControlMain(double               *L_Pct_FwdRev,
       break;
     }
 
-  frc::SmartDashboard::PutNumber("GyroInit",  V_ADAS_DM_InitGyroAngle);
-  frc::SmartDashboard::PutNumber("Rotate180TargetAngle",  V_ADAS_DM_Rotate180TargetAngle);
   return (L_ADAS_ActiveFeature);
   }
