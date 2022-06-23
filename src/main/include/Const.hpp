@@ -276,16 +276,16 @@ const double K_SD_WheelGx[E_RobotCornerSz] = {1.0,    // E_FrontLeft
                                               0.99};  // E_RearRight 
 
 /* K_SD_MinGain: Min gain applied to the wheel speed for swerve drive. */
-const double K_SD_MinGain = 0.5;
+const double K_SD_MinGain = 0.2;
 
 /* K_SD_MaxGain: Max gain allowed for swerve drive control. */
-const double K_SD_MaxGain = 1.0;
+const double K_SD_MaxGain = 0.7;
 
 /* K_SD_AutoRotateGx: Gain applied to the rotate command for auto functionality. */
 const double K_SD_AutoRotateGx = 0.1;
 
 /* K_SD_WheelMaxSpeed: Max RPM speed of the swerve drive wheel motor.*/
-const double K_SD_WheelMaxSpeed = 5800;
+const double K_SD_WheelMaxSpeed = 2500;
 
 /* K_SD_WheelMinCmndSpeed: Min in/sec speed of the swerve drive wheel to keep it under PID control.  
   If the absolute value of the command, wheels will transition to 0 power (but still in brake 

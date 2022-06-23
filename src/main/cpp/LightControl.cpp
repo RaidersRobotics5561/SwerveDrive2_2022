@@ -88,14 +88,14 @@ bool CameraLightControl(bool                 L_Driver_CameraLight,
       }
   
   /* Flip the command as the camera light is inverted */
-  if (L_CameraLightCmndOn == true)
-    {
-    L_CameraLightCmndOn = false;
-    }
-  else
-    {
-    L_CameraLightCmndOn = true;
-    }
+  // if (L_CameraLightCmndOn == true)
+  //   {
+  //   L_CameraLightCmndOn = false;
+  //   }
+  // else
+  //   {
+  //   L_CameraLightCmndOn = true;
+  //   }
 
   return (L_CameraLightCmndOn);
   }

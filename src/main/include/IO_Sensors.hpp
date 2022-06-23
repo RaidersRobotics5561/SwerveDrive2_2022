@@ -17,4 +17,5 @@ void IO_SensorsInit();
 void Read_IO_Sensors(bool L_IR_SensorDetect,
                      bool L_BallSensorLower,
                      bool L_XD_LimitSwitch,
-                     bool L_XY_LimitSwitch);
+                     bool L_XY_LimitSwitch,
+                     bool L_TurretLimitDetected);

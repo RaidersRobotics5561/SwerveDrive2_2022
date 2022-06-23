@@ -425,10 +425,10 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       L_Gain = K_SD_MaxGain;
       }
 
-    L_WS[E_FrontRight] *= (K_SD_WheelMaxSpeed * L_Gain);
-    L_WS[E_FrontLeft]  *= (K_SD_WheelMaxSpeed * L_Gain);
+    L_WS[E_FrontRight] *= (K_SD_WheelMaxSpeed * (-L_Gain));
+    L_WS[E_FrontLeft]  *= (K_SD_WheelMaxSpeed * (-L_Gain));
     L_WS[E_RearLeft]   *= (K_SD_WheelMaxSpeed * L_Gain);
-    L_WS[E_RearRight]  *= (K_SD_WheelMaxSpeed * L_Gain);
+    L_WS[E_RearRight]  *= (K_SD_WheelMaxSpeed * (-L_Gain));
 
     /* Now we need to detrime if we want to keep the desired commanded angle or flip 180* and flip the direction of the wheel speed.  
        This is intended to find the quickest way to reach the commanded angle. */

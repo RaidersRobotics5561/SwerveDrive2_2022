@@ -165,7 +165,8 @@ void Robot::RobotPeriodic()
   Read_IO_Sensors(di_IR_Sensor.Get(),
                   di_BallSensorLower.Get(),
                   di_XD_LimitSwitch.Get(),
-                  di_XY_LimitSwitch.Get());
+                  di_XY_LimitSwitch.Get(),
+                  di_XY_LimitSwitch.Get());  // Temp, need to switch to turrent limit switch
 
   DtrmnSwerveBotLocation( V_GyroYawAngleRad,
                          &V_Rad_WheelAngleFwd[0],
