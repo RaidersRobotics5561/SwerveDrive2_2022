@@ -36,6 +36,67 @@ double                       V_MatchTimeRemaining = 0;
 
 
 /******************************************************************************
+ * Function:     RobotMotorCommands
+ *
+ * Description:  Contains the outputs for the motors.
+ ******************************************************************************/
+void Robot::RobotMotorCommands()
+  {
+  // Motor output commands:
+  // Swerve drive motors
+  if (V_SD_DriveWheelsInPID == true)
+    {
+    m_frontLeftDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kVelocity);
+    m_frontRightDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kVelocity);
+    m_rearLeftDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_RearLeft],     rev::ControlType::kVelocity);
+    m_rearRightDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_RearRight],   rev::ControlType::kVelocity);
+    }
+  else
+    {
+    m_frontLeftDriveMotor.Set(0);
+    m_frontRightDriveMotor.Set(0);
+    m_rearLeftDriveMotor.Set(0);
+    m_rearRightDriveMotor.Set(0);
+    }
+
+  // Swerve stear motors
+  m_frontLeftSteerMotor.Set(V_SD_WheelAngleCmnd[E_FrontLeft]);
+  m_frontRightSteerMotor.Set(V_SD_WheelAngleCmnd[E_FrontRight]);
+  m_rearLeftSteerMotor.Set(V_SD_WheelAngleCmnd[E_RearLeft]);
+  m_rearRightSteerMotor.Set(V_SD_WheelAngleCmnd[E_RearRight]);
+
+  // Ball launcher motors
+  if (V_BH_LauncherActive == true)
+    {
+    m_rightShooterpid.SetReference(V_ShooterRPM_Cmnd, rev::ControlType::kVelocity);
+    m_leftShooterpid.SetReference(-V_ShooterRPM_Cmnd, rev::ControlType::kVelocity);
+    }
+  else
+    {
+    m_rightShooterMotor.Set(0);
+    m_leftShooterMotor.Set(0);
+    }
+
+  // Intake motor commands
+  m_intake.Set(ControlMode::PercentOutput, V_IntakePowerCmnd); //must be positive (don't be a fool)
+  m_elevator.Set(ControlMode::PercentOutput, V_ElevatorPowerCmnd);
+
+  // XY XD lift motors
+  if (V_LiftInitialized == false)
+    {
+    m_liftMotorYD.Set(V_LiftYD_TestPowerCmnd);
+    m_liftMotorXD.Set(V_LiftXD_TestPowerCmnd);
+    }
+  else
+    {
+    m_liftpidYD.SetReference(V_lift_command_YD, rev::ControlType::kPosition); // positive is up
+    m_liftpidXD.SetReference(V_lift_command_XD, rev::ControlType::kPosition); // This is temporary.  We actually want to use position, but need to force this off temporarily
+    }
+  }
+
+
+
+/******************************************************************************
  * Function:     RobotInit
  *
  * Description:  Called during initialization of the robot.
@@ -166,7 +227,7 @@ void Robot::RobotPeriodic()
                   di_BallSensorLower.Get(),
                   di_XD_LimitSwitch.Get(),
                   di_XY_LimitSwitch.Get(),
-                  di_XY_LimitSwitch.Get());  // Temp, need to switch to turrent limit switch
+                  di_XY_LimitSwitch.Get());  // Temp, need to switch to turret limit switch
 
   DtrmnSwerveBotLocation( V_GyroYawAngleRad,
                          &V_Rad_WheelAngleFwd[0],
@@ -418,51 +479,7 @@ void Robot::AutonomousInit()
  ******************************************************************************/
 void Robot::AutonomousPeriodic()
   {
-  // Motor output commands:
-  if (V_SD_DriveWheelsInPID == true)
-    {
-    m_frontLeftDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kVelocity);
-    m_frontRightDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kVelocity);
-    m_rearLeftDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_RearLeft],     rev::ControlType::kVelocity);
-    m_rearRightDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_RearRight],   rev::ControlType::kVelocity);
-    }
-  else
-    {
-    m_frontLeftDriveMotor.Set(0);
-    m_frontRightDriveMotor.Set(0);
-    m_rearLeftDriveMotor.Set(0);
-    m_rearRightDriveMotor.Set(0);
-    }
-
-    m_frontLeftSteerMotor.Set(V_SD_WheelAngleCmnd[E_FrontLeft]);
-    m_frontRightSteerMotor.Set(V_SD_WheelAngleCmnd[E_FrontRight]);
-    m_rearLeftSteerMotor.Set(V_SD_WheelAngleCmnd[E_RearLeft]);
-    m_rearRightSteerMotor.Set(V_SD_WheelAngleCmnd[E_RearRight]);
-
-    if (V_BH_LauncherActive == true)
-      {
-      m_rightShooterpid.SetReference(V_ShooterRPM_Cmnd, rev::ControlType::kVelocity);
-      m_leftShooterpid.SetReference(-V_ShooterRPM_Cmnd, rev::ControlType::kVelocity);
-      }
-    else
-      {
-      m_rightShooterMotor.Set(0);
-      m_leftShooterMotor.Set(0);
-      }
-
-    m_intake.Set(ControlMode::PercentOutput, V_IntakePowerCmnd); //must be positive (don't be a fool)
-    m_elevator.Set(ControlMode::PercentOutput, V_ElevatorPowerCmnd);
-
-  if (V_LiftInitialized == false)
-    {
-    m_liftMotorYD.Set(V_LiftYD_TestPowerCmnd);
-    m_liftMotorXD.Set(V_LiftXD_TestPowerCmnd);
-    }
-  else
-    {
-    m_liftpidYD.SetReference(V_lift_command_YD, rev::ControlType::kPosition); // positive is up
-    m_liftpidXD.SetReference(V_lift_command_XD, rev::ControlType::kPosition); // This is temporary.  We actually want to use position, but need to force this off temporarily
-    }
+  RobotMotorCommands();
   }
 
 
@@ -495,59 +512,7 @@ void Robot::TeleopInit()
  ******************************************************************************/
 void Robot::TeleopPeriodic()
   {
-  // Motor output commands:
-  if (V_SD_DriveWheelsInPID == true)
-    {
-    m_frontLeftDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kVelocity);
-    m_frontRightDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_FrontRight], rev::ControlType::kVelocity);
-    m_rearLeftDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_RearLeft],     rev::ControlType::kVelocity);
-    m_rearRightDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_RearRight],   rev::ControlType::kVelocity);
-    // m_frontLeftDriveMotor.Set(0);
-    // m_frontRightDriveMotor.Set(0);
-    // m_rearLeftDriveMotor.Set(0);
-    // m_rearRightDriveMotor.Set(0);
-    }
-  else
-    {
-    m_frontLeftDriveMotor.Set(0);
-    m_frontRightDriveMotor.Set(0);
-    m_rearLeftDriveMotor.Set(0);
-    m_rearRightDriveMotor.Set(0);
-    }
-
-  m_frontLeftSteerMotor.Set(V_SD_WheelAngleCmnd[E_FrontLeft]);
-  m_frontRightSteerMotor.Set(V_SD_WheelAngleCmnd[E_FrontRight]);
-  m_rearLeftSteerMotor.Set(V_SD_WheelAngleCmnd[E_RearLeft]);
-  m_rearRightSteerMotor.Set(V_SD_WheelAngleCmnd[E_RearRight]);
-  // m_frontLeftSteerMotor.Set(0);
-  // m_frontRightSteerMotor.Set(0);
-  // m_rearLeftSteerMotor.Set(0);
-  // m_rearRightSteerMotor.Set(0);
-
-  if (V_BH_LauncherActive == true)
-    {
-    m_rightShooterpid.SetReference(V_ShooterRPM_Cmnd, rev::ControlType::kVelocity);
-    m_leftShooterpid.SetReference(-V_ShooterRPM_Cmnd, rev::ControlType::kVelocity);
-    }
-  else
-    {
-    m_rightShooterMotor.Set(0);
-    m_leftShooterMotor.Set(0);
-    }
-
-    m_intake.Set(ControlMode::PercentOutput, V_IntakePowerCmnd); //must be positive (don't be a fool)
-    m_elevator.Set(ControlMode::PercentOutput, V_ElevatorPowerCmnd);
-
-  if (V_LiftInitialized == false)
-    {
-    m_liftMotorYD.Set(V_LiftYD_TestPowerCmnd);
-    m_liftMotorXD.Set(V_LiftXD_TestPowerCmnd);
-    }
-  else
-    {
-    m_liftpidYD.SetReference(V_lift_command_YD, rev::ControlType::kPosition); // positive is up
-    m_liftpidXD.SetReference(V_lift_command_XD, rev::ControlType::kPosition); // This is temporary.  We actually want to use position, but need to force this off temporarily
-    }
+  RobotMotorCommands();
   }
 
 

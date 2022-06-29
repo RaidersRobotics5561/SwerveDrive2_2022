@@ -33,6 +33,7 @@ class Robot : public frc::TimedRobot {
   void TeleopInit() override;
   void TeleopPeriodic() override;
   void TestPeriodic() override;
+  void RobotMotorCommands();
 
   // Analog Inputs
   // Practice Bot Wheel Angle Encoders
