@@ -35,7 +35,7 @@ class Robot : public frc::TimedRobot {
   void TestPeriodic() override;
   void RobotMotorCommands();
 
-  // Analog Inputs
+  // Analog Inputs Test
   // Practice Bot Wheel Angle Encoders
   frc::AnalogInput a_encoderFrontLeftSteer{2};
   frc::AnalogInput a_encoderFrontRightSteer{1};
