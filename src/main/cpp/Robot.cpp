@@ -223,11 +223,11 @@ void Robot::RobotPeriodic()
 
   ReadGyro(V_Driver_zero_gyro);
 
-  Read_IO_Sensors(di_IR_Sensor.Get(),
+  Read_IO_Sensors(di_TurrentLimitSwitch.Get(),
                   di_BallSensorLower.Get(),
                   di_XD_LimitSwitch.Get(),
                   di_XY_LimitSwitch.Get(),
-                  di_XY_LimitSwitch.Get());  // Temp, need to switch to turret limit switch
+                  di_TurrentLimitSwitch.Get());
 
   DtrmnSwerveBotLocation( V_GyroYawAngleRad,
                          &V_Rad_WheelAngleFwd[0],
@@ -389,6 +389,8 @@ void Robot::RobotPeriodic()
   // frc::SmartDashboard::PutNumber("Launcher Speed Actual",    V_ShooterSpeedCurr);
   frc::SmartDashboard::PutNumber("V_SD_WheelAngleCmnd[E_FrontLeft]", V_SD_WheelAngleCmnd[E_FrontLeft]);
   frc::SmartDashboard::PutNumber("GYRO",            V_GyroYawAngleDegrees);
+
+  frc::SmartDashboard::PutBoolean("Turret",         VsRobotSensors.b_TurretZero);
 
   // frc::SmartDashboard::PutBoolean("Top Target?",    V_VisionTargetAquired[E_CamTop]);
   // frc::SmartDashboard::PutNumber("Top Yaw",         V_VisionYaw[E_CamTop]);

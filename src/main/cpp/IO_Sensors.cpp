@@ -11,11 +11,14 @@
 
  */
 
+#include "Enums.hpp"
+
 bool V_BallDetectedUpper;   // Detection of a ball based on the IR sensor.
 bool V_BallDetectedLower; // Detection of a ball in the lower part of elevator.
 bool V_XD_LimitDetected;  // XD travel is at the limit switch.
 bool V_YD_LimitDetected;  // YD travel is at the limit switch.
-bool V_Turret_LimitDetected;  // Turret limit detected.
+
+RobotSensor VsRobotSensors;  // Structure of all the processed robot sensor signals
 
 /******************************************************************************
  * Function:     IO_SensorsInit
@@ -29,7 +32,7 @@ void IO_SensorsInit()
   V_XD_LimitDetected = false;
   V_YD_LimitDetected = false;
   V_BallDetectedLower = false;
-  V_Turret_LimitDetected = false;
+  VsRobotSensors.b_TurretZero = false;
   }
 
 /******************************************************************************
@@ -75,7 +78,7 @@ void ReadLimitSwitchs(bool L_XD_LimitSwitch,
   {
     V_XD_LimitDetected = L_XD_LimitSwitch;
     V_YD_LimitDetected = L_YD_LimitSwitch;
-    V_Turret_LimitDetected = L_TurretLimitDetected;
+    VsRobotSensors.b_TurretZero = !L_TurretLimitDetected; // Invert switch
   }
 
 

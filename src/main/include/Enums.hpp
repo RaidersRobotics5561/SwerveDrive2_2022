@@ -198,4 +198,9 @@ typedef enum T_ADAS_ActiveAutonFeature
   E_ADAS_AutonDriveAndShootAuto3       // Drive into preplaced ball, intake, rotate 180*, shoot 2 balls, pickup 3rd and shoot
 } T_ADAS_ActiveAutonFeature;
 
+struct RobotSensor 
+{
+  bool b_TurretZero;
+};
+
 #endif

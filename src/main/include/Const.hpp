@@ -39,6 +39,8 @@ static const int C_intakeID = 14;
 static const int C_MagEncoderFL_ID = 2, C_MagEncoderFR_ID = 1, C_MagEncoderRL_ID = 3, C_MagEncoderRR_ID = 0;
 static const int C_XY_LimitSwitch_ID = 4, C_XD_LimitSwitch_ID = 6, C_IR_Sensor_ID = 9, C_CameraLightControl_ID = 7;
 static const int C_LowerBallSensorID = 5;
+static const int C_TurrentSensorID = 9;
+
 
 // PWM IDs:
 static const int C_VanityLight_ID = 0;
