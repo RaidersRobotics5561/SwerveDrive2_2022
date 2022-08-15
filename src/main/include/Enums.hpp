@@ -95,6 +95,13 @@ typedef enum T_LiftCmndDirection
   E_LiftCmndBack
 } T_LiftCmndDirection;
 
+typedef enum T_TurretCmndDirection
+{
+  E_TurrentCmndNone,
+  E_TurrentCmndLeft,
+  E_TurrentCmndRight
+} T_TurretCmndDirection;
+
 typedef enum T_LED_LightCmnd
 {
   E_LED_Red,
@@ -198,9 +205,42 @@ typedef enum T_ADAS_ActiveAutonFeature
   E_ADAS_AutonDriveAndShootAuto3       // Drive into preplaced ball, intake, rotate 180*, shoot 2 balls, pickup 3rd and shoot
 } T_ADAS_ActiveAutonFeature;
 
-struct RobotSensor 
+struct TsRobotSensor 
 {
   bool b_TurretZero;
+  bool b_XD_LimitDetected;
+  bool b_XY_LimitDetected;
+  bool b_BallDetectedLower;
+  bool b_BallDetectedUpper;
+};
+
+struct RobotUserInput
+{
+  bool                  b_LiftControl;
+  bool                  b_ZeroGyro;
+  bool                  b_StopShooterAutoClimbResetGyro;
+  bool                  b_AutoSetSpeedShooter;
+  bool                  b_ElevatorUp;
+  bool                  b_ElevatorDown;
+  double                pct_ManualShooterDesiredSpeed;
+  bool                  b_IntakeIn;
+  bool                  b_IntakeOut;
+  double                pct_SwerveForwardBack;
+  double                pct_SwerveStrafe;
+  double                deg_SwerveRotate;
+  double                v_SwerveSpeed;
+  bool                  b_SwerveGoalAutoCenter;
+  bool                  b_SwerveRotateTo0;
+  bool                  b_SwerveRotateTo90;
+  bool                  b_LiftYD_Up;
+  bool                  b_LiftYD_Down;
+  T_LiftCmndDirection   e_LiftCmndDirection;
+  bool                  b_CameraLight;
+  bool                  b_AutoIntake;
+  bool                  b_JoystickActive;
+  bool                  b_VisionDriverModeOverride;
+  bool                  b_RobotFieldOrientedReq;
+  T_TurretCmndDirection e_TurretCmndDirection;
 };
 
 #endif

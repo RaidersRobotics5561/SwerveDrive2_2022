@@ -271,7 +271,6 @@ double BallIntake(bool                 L_DriverIntakeInCmnd,
  * Description:  Contains the functionality for controlling the elevator 
  *               mechanism.
  *
- *               ToDo: What do we want to do with the IR sensor?
  ******************************************************************************/
 double BallElevator(bool L_BallDetected,
                     bool L_BallDetectedLower,

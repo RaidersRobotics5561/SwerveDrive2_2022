@@ -34,6 +34,7 @@ static const int C_liftYD_ID = 11;
 static const int C_liftXD_ID = 12;
 static const int C_elevatorID = 13;
 static const int C_intakeID = 14;
+static const int C_turretID = 15;
 
 // DIO IDs:
 static const int C_MagEncoderFL_ID = 2, C_MagEncoderFR_ID = 1, C_MagEncoderRL_ID = 3, C_MagEncoderRR_ID = 0;
@@ -101,6 +102,13 @@ const double C_BlinkinLED_RainbowWithGlitter = -0.89;
 const double K_ReductionRatio = 8.31;
 const double K_WheelCircufrence = 0.3191764; // Circumferance of wheel, in inches
 
+
+// Turret cals
+/* K_TurretTimeoutMs: Set to zero to skip waiting for confirmation, set to nonzero to wait and report to DS if action fails. */
+const double K_TurretTimeoutMs = 30;
+
+/* K_k_TurretEncoderScaler: Scalar multiplied against the encoder read to translate to degrees relative to turret. */
+const double K_k_TurretEncoderScaler = 0.025947816048;
 
 
 // Lift related cals

@@ -18,6 +18,7 @@
  extern double V_ShooterSpeedCurr;
  extern double V_LiftPostitionYD; // Position of the YD lift, in revolutions of the motor
  extern double V_LiftPostitionXD; // Position of the XD lift, in revolutions of the motor
+ extern double V_TurretPosition;
  
  void Read_Encoders(double                       L_encoderWheelAngleFrontLeftRaw,
                     double                       L_encoderWheelAngleFrontRightRaw,
@@ -34,7 +35,8 @@
                     rev::SparkMaxRelativeEncoder m_encoderrightShooter,
                     rev::SparkMaxRelativeEncoder m_encoderleftShooter,
                     rev::SparkMaxRelativeEncoder m_encoderLiftYD,
-                    rev::SparkMaxRelativeEncoder m_encoderLiftXD);
+                    rev::SparkMaxRelativeEncoder m_encoderLiftXD,
+                    double                       L_encoderTurretAngle);
 
 void EncodersLiftInit(rev::SparkMaxRelativeEncoder m_encoderLiftYD,
                       rev::SparkMaxRelativeEncoder m_encoderLiftXD);

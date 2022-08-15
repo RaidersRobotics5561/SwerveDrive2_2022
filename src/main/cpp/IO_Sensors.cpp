@@ -13,12 +13,7 @@
 
 #include "Enums.hpp"
 
-bool V_BallDetectedUpper;   // Detection of a ball based on the IR sensor.
-bool V_BallDetectedLower; // Detection of a ball in the lower part of elevator.
-bool V_XD_LimitDetected;  // XD travel is at the limit switch.
-bool V_YD_LimitDetected;  // YD travel is at the limit switch.
-
-RobotSensor VsRobotSensors;  // Structure of all the processed robot sensor signals
+TsRobotSensor VsRobotSensors;  // Structure of all the processed robot sensor signals
 
 /******************************************************************************
  * Function:     IO_SensorsInit
@@ -28,10 +23,10 @@ RobotSensor VsRobotSensors;  // Structure of all the processed robot sensor sign
  ******************************************************************************/
 void IO_SensorsInit()
   {
-  V_BallDetectedUpper = false;
-  V_XD_LimitDetected = false;
-  V_YD_LimitDetected = false;
-  V_BallDetectedLower = false;
+  VsRobotSensors.b_BallDetectedUpper = false;
+  VsRobotSensors.b_BallDetectedLower = false;
+  VsRobotSensors.b_XD_LimitDetected = false;
+  VsRobotSensors.b_XY_LimitDetected = false;
   VsRobotSensors.b_TurretZero = false;
   }
 
@@ -57,9 +52,9 @@ void BallDetectionSensor(bool L_IR_SensorDetect,
       L_BallDetectedLower = true;
       }
     
-    V_BallDetectedUpper = L_BallDetected;
+    VsRobotSensors.b_BallDetectedUpper = L_BallDetected;
 
-    V_BallDetectedLower = L_BallDetectedLower;
+    VsRobotSensors.b_BallDetectedLower = L_BallDetectedLower;
   }
 
 
@@ -76,8 +71,8 @@ void ReadLimitSwitchs(bool L_XD_LimitSwitch,
                       bool L_YD_LimitSwitch,
                       bool L_TurretLimitDetected)
   {
-    V_XD_LimitDetected = L_XD_LimitSwitch;
-    V_YD_LimitDetected = L_YD_LimitSwitch;
+    VsRobotSensors.b_XD_LimitDetected = L_XD_LimitSwitch;
+    VsRobotSensors.b_XY_LimitDetected = L_YD_LimitSwitch;
     VsRobotSensors.b_TurretZero = !L_TurretLimitDetected; // Invert switch
   }
 

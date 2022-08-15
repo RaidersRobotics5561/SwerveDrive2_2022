@@ -25,6 +25,7 @@ double V_Cnt_WheelDeltaDistanceInit[E_RobotCornerSz];
 double V_Delta_Angle[E_RobotCornerSz]; // The delta of the angle needed to align the wheels when the robot inits
 double V_LiftPostitionYD; // Position of the YD lift, in revolutions of the motor
 double V_LiftPostitionXD; // Position of the XD lift, in revolutions of the motor
+double V_TurretPosition;
 
 
 /******************************************************************************
@@ -139,7 +140,8 @@ void Read_Encoders(double                       L_encoderWheelAngleFrontLeftRaw,
                    rev::SparkMaxRelativeEncoder m_encoderrightShooter,
                    rev::SparkMaxRelativeEncoder m_encoderleftShooter,
                    rev::SparkMaxRelativeEncoder m_encoderLiftYD,
-                   rev::SparkMaxRelativeEncoder m_encoderLiftXD)
+                   rev::SparkMaxRelativeEncoder m_encoderLiftXD,
+                   double                       L_encoderTurretAngle)
   {
   T_RobotCorner index;
 
@@ -203,5 +205,7 @@ void Read_Encoders(double                       L_encoderWheelAngleFrontLeftRaw,
   V_WheelVelocity[E_RearLeft]   = ((m_encoderRearLeftDrive.GetVelocity()   / K_ReductionRatio) / 60) * K_WheelCircufrence;
 
   V_ShooterSpeedCurr = m_encoderrightShooter.GetVelocity(); // We use the right shooter as the reference as this is rotating in the positive direction
+
+  V_TurretPosition = L_encoderTurretAngle * (-K_k_TurretEncoderScaler); // Negative to rotate the output.  Positive is clockwise when viewed from top.
   }
 
