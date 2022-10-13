@@ -33,6 +33,7 @@
 T_RobotState                 V_RobotState        = E_Init;
 frc::DriverStation::Alliance V_AllianceColor     = frc::DriverStation::Alliance::kInvalid;
 double                       V_MatchTimeRemaining = 0;
+TsRobotMotorCmnd             VsRobotMotorCmnd;
 
 
 /******************************************************************************
@@ -147,13 +148,13 @@ void Robot::RobotInit()
   m_leftShooterMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kCoast);
 
   m_turret.ConfigFactoryDefault();
-  m_turret.ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative, 0, K_TurretTimeoutMs);
+  m_turret.ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative, 0, K_t_TurretTimeoutMs);
   m_turret.SetSensorPhase(true);
   m_turret.SetSelectedSensorPosition(0);
-  m_turret.ConfigNominalOutputForward(0, K_TurretTimeoutMs);
-  m_turret.ConfigNominalOutputReverse(0, K_TurretTimeoutMs);
-  m_turret.ConfigPeakOutputForward(1, K_TurretTimeoutMs);
-  m_turret.ConfigPeakOutputReverse(-1, K_TurretTimeoutMs);
+  m_turret.ConfigNominalOutputForward(0, K_t_TurretTimeoutMs);
+  m_turret.ConfigNominalOutputReverse(0, K_t_TurretTimeoutMs);
+  m_turret.ConfigPeakOutputForward(1, K_t_TurretTimeoutMs);
+  m_turret.ConfigPeakOutputReverse(-1, K_t_TurretTimeoutMs);
 
   SwerveDriveMotorConfigsInit(m_frontLeftDrivePID,
                               m_frontRightDrivePID,
@@ -531,11 +532,11 @@ void Robot::TeleopPeriodic()
     double L_Temp = 0;
   if (VsDriverInput.e_TurretCmndDirection == E_TurrentCmndLeft)
     {
-      L_Temp = -0.1;
+      L_Temp = -K_Pct_TurretOpenLoopCmnd;
     }
   else if (VsDriverInput.e_TurretCmndDirection == E_TurrentCmndRight)
     {
-      L_Temp = 0.1;
+      L_Temp = K_Pct_TurretOpenLoopCmnd;
     }
 
   frc::SmartDashboard::PutNumber("TurretCmnd",  L_Temp);

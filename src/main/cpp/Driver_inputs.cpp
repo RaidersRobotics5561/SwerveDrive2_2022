@@ -113,6 +113,6 @@ void Joystick_robot_mapping(bool    L_Driver2_buttonA,
     L_e_TurretCmndDirection = E_TurrentCmndNone;
     }
 
-  VsDriverInput.e_TurretCmndDirection = L_e_TurretCmndDirection;
+  // VsDriverInput.e_TurretCmndDirection = L_e_TurretCmndDirection;
   }
 

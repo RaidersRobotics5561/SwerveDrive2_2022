@@ -205,6 +205,36 @@ typedef enum T_ADAS_ActiveAutonFeature
   E_ADAS_AutonDriveAndShootAuto3       // Drive into preplaced ball, intake, rotate 180*, shoot 2 balls, pickup 3rd and shoot
 } T_ADAS_ActiveAutonFeature;
 
+typedef enum T_MotorControlType
+{
+  E_MotorControlDisabled,
+  E_MotorControlPctCmnd,
+  E_MotorControlPosition,
+  E_MotorControlSpeed
+} T_MotorControlType;
+
+typedef enum TeTurretInitialization
+{
+  E_TurretInitDisabled,
+  E_TurretInitOL_Right,
+  E_TurretInitOL_Left,
+  E_TurretInitLimitSwitch,
+  E_TurretInitRotateToZeroPosition,
+  E_TurretInitComplete,
+  E_TurretInitFaultDetected
+} TeTurretInitialization;
+
+typedef enum TeTurretState
+{
+  E_TurretDisabled,
+  E_TurretInitialization,
+  E_TurretCameraControl
+} TeTurretState;
+
+
+
+
+
 struct TsRobotSensor 
 {
   bool b_TurretZero;
@@ -241,6 +271,13 @@ struct RobotUserInput
   bool                  b_VisionDriverModeOverride;
   bool                  b_RobotFieldOrientedReq;
   T_TurretCmndDirection e_TurretCmndDirection;
+};
+
+struct TsRobotMotorCmnd
+{
+  T_MotorControlType    e_TurretControlType;
+  double                pct_TurretCmnd;
+  double                deg_TurretCmnd;
 };
 
 #endif

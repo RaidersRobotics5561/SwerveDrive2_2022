@@ -104,11 +104,23 @@ const double K_WheelCircufrence = 0.3191764; // Circumferance of wheel, in inche
 
 
 // Turret cals
-/* K_TurretTimeoutMs: Set to zero to skip waiting for confirmation, set to nonzero to wait and report to DS if action fails. */
-const double K_TurretTimeoutMs = 30;
+/* K_t_TurretTimeoutMs: Set to zero to skip waiting for confirmation, set to nonzero to wait and report to DS if action fails. */
+const double K_t_TurretTimeoutMs = 30;
+
+/* K_Pct_TurretOpenLoopCmnd: Percent motor command sent to turrent when in open loop control. */
+const double K_Pct_TurretOpenLoopCmnd = 0.1;
 
 /* K_k_TurretEncoderScaler: Scalar multiplied against the encoder read to translate to degrees relative to turret. */
 const double K_k_TurretEncoderScaler = 0.025947816048;
+
+/* K_deg_TurretMinDeltaOL: Minimum delta position change value expected when in OL control.  If this isn't met for a specific amount of time, it will advance to the next state. */
+const double K_deg_TurretMinDeltaOL = 0.05;
+
+/* K_t_TurretDebounceTimeout: Debounce time before the turret initialization will advance to the next step. */
+const double K_t_TurretDebounceTimeout = 0.5;
+
+/* K_t_TurretOL_Timeout: Max allowed time to be in OL state.  If this is reached, for the turret to be disabled. */
+const double K_t_TurretOL_Timeout = 5.0;
 
 
 // Lift related cals
