@@ -235,11 +235,11 @@ void Robot::RobotPeriodic()
 
   ReadGyro(VsDriverInput.b_ZeroGyro);
 
-  Read_IO_Sensors(false, // ball sensor upper - di_IR_Sensor.Get()
-                  false, // ball sensor lower - di_BallSensorLower.Get()
-                  false, // XD Limit - di_XD_LimitSwitch.Get()
-                  false, // XY Limit - di_XY_LimitSwitch.Get()
-                  di_TurrentLimitSwitch.Get());
+  Read_IO_Sensors(di_IR_Sensor.Get(), // ball sensor upper - di_IR_Sensor.Get()
+                  di_BallSensorLower.Get(), // ball sensor lower - di_BallSensorLower.Get()
+                  di_XD_LimitSwitch.Get(), // XD Limit - di_XD_LimitSwitch.Get()
+                  di_XY_LimitSwitch.Get(), // XY Limit - di_XY_LimitSwitch.Get()
+                  false); //di_TurrentLimitSwitch.Get());
 
   DtrmnSwerveBotLocation( V_GyroYawAngleRad,
                          &V_Rad_WheelAngleFwd[0],
@@ -390,7 +390,6 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutNumber("V_WheelVelocity[E_RearRight]", V_WheelVelocity[E_RearRight]);
   frc::SmartDashboard::PutNumber("V_WheelVelocity[E_FrontLeft]", V_WheelVelocity[E_FrontLeft]);
   frc::SmartDashboard::PutNumber("V_WheelVelocity[E_RearLeft]", V_WheelVelocity[E_RearLeft]);
-
 
   // frc::SmartDashboard::PutNumber("V_ADAS_BT_State", V_ADAS_BT_State);
   

@@ -12,6 +12,7 @@
  */
 
 #include "Enums.hpp"
+#include <frc/smartdashboard/SmartDashboard.h>
 
 TsRobotSensor VsRobotSensors;  // Structure of all the processed robot sensor signals
 
@@ -74,6 +75,7 @@ void ReadLimitSwitchs(bool L_XD_LimitSwitch,
     VsRobotSensors.b_XD_LimitDetected = L_XD_LimitSwitch;
     VsRobotSensors.b_XY_LimitDetected = L_YD_LimitSwitch;
     VsRobotSensors.b_TurretZero = !L_TurretLimitDetected; // Invert switch
+    frc::SmartDashboard::PutBoolean("XD_work_pls", VsRobotSensors.b_XD_LimitDetected);
   }
 
 

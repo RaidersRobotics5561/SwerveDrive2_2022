@@ -10,6 +10,7 @@
 #include "Lookup.hpp"
 #include <frc/Joystick.h>
 #include <math.h>
+#include <frc/smartdashboard/SmartDashboard.h>
 
 RobotUserInput VsDriverInput;
 
@@ -47,6 +48,7 @@ void Joystick_robot_mapping(bool    L_Driver2_buttonA,
   bool                  L_JoystickActive        = false;
   T_LiftCmndDirection   L_LiftCmndDirection     = E_LiftCmndNone;
   T_TurretCmndDirection L_e_TurretCmndDirection = E_TurrentCmndNone;
+
 
   VsDriverInput.b_ElevatorUp                    = L_Driver2_buttonA;                       //Controller 2, A button (1), (robot.cpp) Elevator goes up
   VsDriverInput.b_ElevatorDown                  = L_Driver2_buttonB;                     //Controller 2, B button (2), (robot.cpp) Elevator goes down
@@ -112,6 +114,11 @@ void Joystick_robot_mapping(bool    L_Driver2_buttonA,
     {
     L_e_TurretCmndDirection = E_TurrentCmndNone;
     }
+
+  
+  frc::SmartDashboard::PutNumber("elevator_carson_smells", VsDriverInput.b_ElevatorDown);
+  frc::SmartDashboard::PutNumber("intake", VsDriverInput.b_IntakeIn);
+  
 
   // VsDriverInput.e_TurretCmndDirection = L_e_TurretCmndDirection;
   }
