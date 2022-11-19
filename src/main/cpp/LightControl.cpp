@@ -42,13 +42,6 @@ bool CameraLightControl(bool                 L_Driver_CameraLight,
   {
     bool L_CameraLightCmndOn = false;
 
-    // if ((V_CameraLightLatch == false && L_Driver_CameraLight == true) ||
-    //     ())
-    //   {
-    //   L_CameraLightCmndOn = true;
-    //   V_CameraLightLatch = true;
-    //   }
-
     if (((L_ADAS_ActiveFeature > E_ADAS_Disabled) &&    /* Swerve drive targeting has been requested or is in process */
          (L_ADAS_CameraUpperLightCmndOn == true)) ||
         (L_Driver_CameraLight == true))  /* Driver override is present */
