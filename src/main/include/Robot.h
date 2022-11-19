@@ -49,11 +49,14 @@ class Robot : public frc::TimedRobot {
   frc::DutyCycleEncoder a_encoderWheelAngleRearLeft   {C_MagEncoderRL_ID};
   frc::DutyCycleEncoder a_encoderWheelAngleRearRight  {C_MagEncoderRR_ID};
 
+#ifdef CompBot
   frc::DigitalInput     di_XY_LimitSwitch     {C_XY_LimitSwitch_ID};
   frc::DigitalInput     di_XD_LimitSwitch     {C_XD_LimitSwitch_ID};
   frc::DigitalInput     di_IR_Sensor          {C_IR_Sensor_ID};
   frc::DigitalInput     di_BallSensorLower    {C_LowerBallSensorID};
-  //frc::DigitalInput     di_TurrentLimitSwitch {C_TurrentSensorID};
+#else //PracticeBot
+  frc::DigitalInput     di_TurrentLimitSwitch {C_TurretSensorID};
+#endif
 
   frc::DigitalOutput    do_CameraLightControl {C_CameraLightControl_ID};
 

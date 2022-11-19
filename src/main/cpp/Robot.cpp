@@ -235,11 +235,20 @@ void Robot::RobotPeriodic()
 
   ReadGyro(VsDriverInput.b_ZeroGyro);
 
+// ToDo: This is a temporary workaround, we need to put some sort of "glue" layter in to make switching between comp and practice cleaner
+#ifdef CompBot
   Read_IO_Sensors(di_IR_Sensor.Get(), // ball sensor upper - di_IR_Sensor.Get()
                   di_BallSensorLower.Get(), // ball sensor lower - di_BallSensorLower.Get()
                   di_XD_LimitSwitch.Get(), // XD Limit - di_XD_LimitSwitch.Get()
                   di_XY_LimitSwitch.Get(), // XY Limit - di_XY_LimitSwitch.Get()
                   false); //di_TurrentLimitSwitch.Get());
+#else
+  Read_IO_Sensors(false, // ball sensor upper - di_IR_Sensor.Get()
+                  false, // ball sensor lower - di_BallSensorLower.Get()
+                  false, // XD Limit - di_XD_LimitSwitch.Get()
+                  false, // XY Limit - di_XY_LimitSwitch.Get()
+                  di_TurrentLimitSwitch.Get()); //di_TurrentLimitSwitch.Get());
+#endif
 
   DtrmnSwerveBotLocation( V_GyroYawAngleRad,
                          &V_Rad_WheelAngleFwd[0],

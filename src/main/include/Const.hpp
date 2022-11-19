@@ -40,7 +40,7 @@ static const int C_turretID = 15;
 static const int C_MagEncoderFL_ID = 2, C_MagEncoderFR_ID = 1, C_MagEncoderRL_ID = 3, C_MagEncoderRR_ID = 0;
 static const int C_XY_LimitSwitch_ID = 4, C_XD_LimitSwitch_ID = 6, C_IR_Sensor_ID = 9, C_CameraLightControl_ID = 7;
 static const int C_LowerBallSensorID = 5;
-static const int C_TurrentSensorID = 9;
+static const int C_TurretSensorID = 9;
 
 
 // PWM IDs:
@@ -292,10 +292,10 @@ const double K_SD_WheelOffsetAnglePractieBot[E_RobotCornerSz] = {-177.9,  // E_F
                                                                  96.9};  // E_RearRight 282.0
 
 /* K_SD_WheelGx: Gain multiplied by each calculated desired speed.  Intended to account for variation in wheel size. */
-const double K_SD_WheelGx[E_RobotCornerSz] = {1.0,    // E_FrontLeft
-                                              0.99,   // E_FrontRight 
-                                              1.0,    // E_RearLeft
-                                              0.99};  // E_RearRight 
+const double K_SD_WheelGx[E_RobotCornerSz] = {1.0,  // E_FrontLeft
+                                              1.0,  // E_FrontRight 
+                                              1.0,  // E_RearLeft
+                                              1.0}; // E_RearRight 
 
 /* K_SD_MinGain: Min gain applied to the wheel speed for swerve drive. */
 const double K_SD_MinGain = 0.2;

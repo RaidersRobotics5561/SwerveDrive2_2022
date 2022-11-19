@@ -24,6 +24,8 @@ bool V_SD_DriverRobotOrientedRequested; // Requested driver mode override
 bool V_SD_DriverRobotOrientedRequestedLatched; // Latched state of the driver requested mode
 bool V_SD_DriverRobotOrientedRequestedPrev; // Requested driver mode override previous
 
+double V_deg_SD_RobotDesiredAngle;  // Desired angle of robot.
+
 double V_SD_WheelAngleError[E_RobotCornerSz];  // Error value for PID control.
 double V_SD_WheelAngleIntegral[E_RobotCornerSz];  // Integral value for PID control.
 double V_SD_WheelAngleArb[E_RobotCornerSz]; // This is the arbitrated wheel angle that is used in the PID controller
@@ -237,6 +239,8 @@ void DriveControlInit()
 
   V_SD_DriverRobotOrientedRequestedPrev = false;
   V_SD_DriverRobotOrientedRequestedLatched = false;
+
+  V_deg_SD_RobotDesiredAngle = 0;
   }
 
 
@@ -288,16 +292,16 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
                       bool                L_JoyStick1Button3, // auto rotate to 0 degrees
                       bool                L_JoyStick1Button4, // auto rotate to 90 degrees
                       bool                L_Driver_RobotFieldOrientedReq,
-                      T_ADAS_ActiveFeature L_ADAS_ActiveFeature,
-                      double               L_ADAS_Pct_SD_FwdRev,
-                      double               L_ADAS_Pct_SD_Strafe,
-                      double               L_ADAS_Pct_SD_Rotate,
-                      bool                 L_ADAS_SD_RobotOriented,
+                      T_ADAS_ActiveFeature L_ADAS_ActiveFeature,          // ADAS command
+                      double               L_ADAS_Pct_SD_FwdRev,          // ADAS command
+                      double               L_ADAS_Pct_SD_Strafe,          // ADAS command
+                      double               L_ADAS_Pct_SD_Rotate,          // ADAS command
+                      bool                 L_ADAS_SD_RobotOriented,       // ADAS command
                       double              L_GyroAngleDegrees,
                       double              L_GyroAngleRadians,
                       double             *L_WheelAngleFwd,
                       double             *L_WheelAngleRev,
-                      double             *L_WheelSpeedCmnd,
+                      double             *LaWheelSpeedCmnd,
                       double             *L_WheelAngleCmnd)
   {
   double L_FWD = 0;
@@ -318,6 +322,7 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
   double L_WA[E_RobotCornerSz];
   double L_WS[E_RobotCornerSz];
   bool   L_SD_DriveWheelsPowered = false;
+  double Le_SD_RobotAngleError = 0;
 
   /* Scale the joysticks based on a calibratable lookup when in teleop: */
   if (L_ADAS_ActiveFeature > E_ADAS_Disabled)
@@ -365,6 +370,16 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
         L_GyroAngleRadians = 0;
         }
     }
+
+    /* Let's determine what the "desired" angle of the robot is: */
+    // if (fabs(L_RCW) > 0)
+    //   {
+    //     /* The rotate command is non zero, we are trying to rotate.  Update the "desired" angle */
+    //     V_deg_SD_RobotDesiredAngle = L_GyroAngleDegrees;
+    //   }
+
+    // /* Determine the error between the desired commanded direction and the robots actual direction */
+    // Le_SD_RobotAngleError = 
 
     /* Swerve drive calculaltions: */
     L_temp =  L_FWD * cos(L_GyroAngleRadians) + L_STR * sin(L_GyroAngleRadians);
@@ -457,6 +472,33 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
         }
       }
 
+    /* Next, let's determine the amount of offset that needs to be applied to each wheel speed in order 
+       to help keep the bot pointing in the correct direction. */
+    for (L_Index = E_FrontLeft;
+         L_Index < E_RobotCornerSz;
+         L_Index = T_RobotCorner(int(L_Index) + 1))
+      {
+      L_WA_FWD = DtrmnEncoderRelativeToCmnd(L_WA[L_Index],
+                                            L_WheelAngleFwd[L_Index]);
+
+      L_WA_FWD_Delta = fabs(L_WA[L_Index] - L_WA_FWD);
+
+      L_WA_REV = DtrmnEncoderRelativeToCmnd(L_WA[L_Index],
+                                            L_WheelAngleRev[L_Index]);
+
+      L_WA_REV_Delta = fabs(L_WA[L_Index] - L_WA_REV);
+
+      if (L_WA_FWD_Delta <= L_WA_REV_Delta)
+        {
+          V_SD_WheelAngleArb[L_Index] = L_WA_FWD;
+        }
+      else
+        {
+          V_SD_WheelAngleArb[L_Index] = L_WA_REV;
+          L_WS[L_Index] *= (-1); // Need to flip sign of drive wheel to account for reverse direction
+        }
+      }
+
   /* Output the wheel speed and angle commands: */
     for (L_Index = E_FrontLeft;
          L_Index < E_RobotCornerSz;
@@ -481,11 +523,12 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
 
       /* Wheel speed control resides externally in the independent motor controlers.
       Don't send the final value, ramp to the desired final value to help prevent integral windup and overshoot. */
-      L_WheelSpeedCmnd[L_Index] = RampTo((L_WS[L_Index] * KV_SD_WheelGx[L_Index]), V_SD_WheelSpeedCmndPrev[L_Index], KV_SD_WheelSpeedRampRate);
+      // LaWheelSpeedCmnd[L_Index] = RampTo((L_WS[L_Index] * KV_SD_WheelGx[L_Index]), V_SD_WheelSpeedCmndPrev[L_Index], KV_SD_WheelSpeedRampRate);  ToDo: Remove once we know the auto correct works
+      LaWheelSpeedCmnd[L_Index] = RampTo(L_WS[L_Index], V_SD_WheelSpeedCmndPrev[L_Index], KV_SD_WheelSpeedRampRate);
 
-      V_SD_WheelSpeedCmndPrev[L_Index] = L_WheelSpeedCmnd[L_Index];
+      V_SD_WheelSpeedCmndPrev[L_Index] = LaWheelSpeedCmnd[L_Index];
 
-      if ((fabs(L_WheelSpeedCmnd[L_Index]) >= K_SD_WheelMinCmndSpeed))
+      if ((fabs(LaWheelSpeedCmnd[L_Index]) >= K_SD_WheelMinCmndSpeed))
         {
         /* Ok, so we have at least one wheel that is still trying to command a non zero speed. If not, we want to force it to a zero power 
            command to prevent locking of the wheels or swaying to try and hold a zero speed. */
