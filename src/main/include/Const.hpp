@@ -40,7 +40,7 @@ static const int C_turretID = 15;
 static const int C_MagEncoderFL_ID = 2, C_MagEncoderFR_ID = 1, C_MagEncoderRL_ID = 3, C_MagEncoderRR_ID = 0;
 static const int C_XY_LimitSwitch_ID = 4, C_XD_LimitSwitch_ID = 6, C_IR_Sensor_ID = 9, C_CameraLightControl_ID = 7;
 static const int C_LowerBallSensorID = 5;
-static const int C_TurrentSensorID = 9;
+static const int C_TurretSensorID = 9;
 
 
 // PWM IDs:
@@ -244,10 +244,10 @@ const double K_BH_LauncherSpeedAxis[4] = {2.52,  // 6 ft 6in
                                           13.5}; // 17 ft
 
 /* K_BH_LauncherSpeed: Launcher speed necessary for ball to reach target based on the estimated distance from the camera. */
-const double K_BH_LauncherSpeed[4] = {3300,  // 6 ft 6in
-                                      3650,  // 8 ft 6in
-                                      3900,  // 10 ft 6in
-                                      5000}; // 17 ft
+const double K_BH_LauncherSpeed[4] = {2000,  // 6 ft 6in 3300
+                                      2300,  // 8 ft 6in 3650
+                                      2600,  // 10 ft 6in 3900
+                                      3200}; // 17 ft 5000
 
 /* K_BH_LauncherManualDb: Deadband around the manual ball launcher axis. */
 const double K_BH_LauncherManualDb = 0.1;
@@ -292,10 +292,10 @@ const double K_SD_WheelOffsetAnglePractieBot[E_RobotCornerSz] = {-177.9,  // E_F
                                                                  96.9};  // E_RearRight 282.0
 
 /* K_SD_WheelGx: Gain multiplied by each calculated desired speed.  Intended to account for variation in wheel size. */
-const double K_SD_WheelGx[E_RobotCornerSz] = {1.0,    // E_FrontLeft
-                                              0.99,   // E_FrontRight 
-                                              1.0,    // E_RearLeft
-                                              0.99};  // E_RearRight 
+const double K_SD_WheelGx[E_RobotCornerSz] = {-1.0,  // E_FrontLeft
+                                              -1.0,  // E_FrontRight 
+                                              1.0,  // E_RearLeft
+                                              -1.0}; // E_RearRight 
 
 /* K_SD_MinGain: Min gain applied to the wheel speed for swerve drive. */
 const double K_SD_MinGain = 0.2;
