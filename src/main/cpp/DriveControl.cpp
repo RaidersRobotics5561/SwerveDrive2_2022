@@ -456,10 +456,10 @@ L_SD_AngleError = V_SD_StoredAngleDesired - L_GyroAngleDegrees;
                                                 KV_SD_WheelAnglePID_Gx[E_D_Ll],
                                                 KV_SD_WheelAnglePID_Gx[E_Max_Ul],
                                                 KV_SD_WheelAnglePID_Gx[E_Max_Ll]);
- L_GyroAngleDegrees
- V_SD_StoredAngleDesired
- V_SD_WheelAngleArb[]
-K_SD_CenterLocation[]
+ L_GyroAngleDegrees;
+ V_SD_StoredAngleDesired;
+ V_SD_WheelAngleArb[L_Index];
+// K_SD_CenterLocation[]
 
 
       /* Wheel speed control resides externally in the independent motor controlers.

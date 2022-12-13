@@ -230,8 +230,8 @@ void Robot::RobotPeriodic()
                 m_encoderrightShooter,
                 m_encoderleftShooter,
                 m_encoderLiftYD,
-                m_encoderLiftXD);
-                // m_turret.GetSelectedSensorPosition());  //m_turret.GetSelectedSensorPosition()
+                m_encoderLiftXD,
+                m_turret.GetSelectedSensorPosition());  //m_turret.GetSelectedSensorPosition()
 
   ReadGyro(VsDriverInput.b_ZeroGyro);
 
@@ -412,7 +412,7 @@ void Robot::RobotPeriodic()
 
   frc::SmartDashboard::PutBoolean("Turret",         VsRobotSensors.b_TurretZero);
   frc::SmartDashboard::PutNumber("TurretPosition",  V_TurretPosition);
-  frc::SmartDashboard::PutBoolean("Top Target?",    V_VisionTargetAquired[Cam1]);
+  // frc::SmartDashboard::PutBoolean("Top Target?",    V_VisionTargetAquired[Cam1]);
   // frc::SmartDashboard::PutNumber("Top Yaw",         V_VisionYaw[E_CamTop]);
   frc::SmartDashboard::PutNumber("Top Distance",    V_VisionTargetDistanceMeters[E_CamTop]);
     // frc::SmartDashboard::PutNumber("Cam1 Index",    float(V_VisionCameraIndex[E_Cam1]));

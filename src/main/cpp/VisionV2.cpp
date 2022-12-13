@@ -15,6 +15,15 @@
 #include "Const.hpp"
 #include "Filter.hpp"
 
+
+
+
+
+
+
+
+
+
 // all our favorite variables
 double         V_VisionTopCamNumberTemp = 1;
 int            V_VisionCameraIndex[E_CamSz];
