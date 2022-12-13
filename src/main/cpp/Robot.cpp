@@ -146,16 +146,16 @@ void Robot::RobotInit()
 
   m_rightShooterMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kCoast);
   m_leftShooterMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kCoast);
-
-  m_turret.ConfigFactoryDefault();
-  m_turret.ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative, 0, K_t_TurretTimeoutMs);
-  m_turret.SetSensorPhase(true);
-  m_turret.SetSelectedSensorPosition(0);
-  m_turret.ConfigNominalOutputForward(0, K_t_TurretTimeoutMs);
-  m_turret.ConfigNominalOutputReverse(0, K_t_TurretTimeoutMs);
-  m_turret.ConfigPeakOutputForward(1, K_t_TurretTimeoutMs);
-  m_turret.ConfigPeakOutputReverse(-1, K_t_TurretTimeoutMs);
-
+// #ifdef PracticeBot
+//   m_turret.ConfigFactoryDefault();
+//   m_turret.ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative, 0, K_t_TurretTimeoutMs);
+//   m_turret.SetSensorPhase(true);
+//   m_turret.SetSelectedSensorPosition(0);
+//   m_turret.ConfigNominalOutputForward(0, K_t_TurretTimeoutMs);
+//   m_turret.ConfigNominalOutputReverse(0, K_t_TurretTimeoutMs);
+//   m_turret.ConfigPeakOutputForward(1, K_t_TurretTimeoutMs);
+//   m_turret.ConfigPeakOutputReverse(-1, K_t_TurretTimeoutMs);
+// #end
   SwerveDriveMotorConfigsInit(m_frontLeftDrivePID,
                               m_frontRightDrivePID,
                               m_rearLeftDrivePID,
@@ -230,16 +230,25 @@ void Robot::RobotPeriodic()
                 m_encoderrightShooter,
                 m_encoderleftShooter,
                 m_encoderLiftYD,
-                m_encoderLiftXD,
-                m_turret.GetSelectedSensorPosition());
+                m_encoderLiftXD);
+                // m_turret.GetSelectedSensorPosition());  //m_turret.GetSelectedSensorPosition()
 
   ReadGyro(VsDriverInput.b_ZeroGyro);
 
+// ToDo: This is a temporary workaround, we need to put some sort of "glue" layter in to make switching between comp and practice cleaner
+#ifdef CompBot
   Read_IO_Sensors(di_IR_Sensor.Get(), // ball sensor upper - di_IR_Sensor.Get()
                   di_BallSensorLower.Get(), // ball sensor lower - di_BallSensorLower.Get()
                   di_XD_LimitSwitch.Get(), // XD Limit - di_XD_LimitSwitch.Get()
                   di_XY_LimitSwitch.Get(), // XY Limit - di_XY_LimitSwitch.Get()
                   false); //di_TurrentLimitSwitch.Get());
+#else
+  Read_IO_Sensors(false, // ball sensor upper - di_IR_Sensor.Get()
+                  false, // ball sensor lower - di_BallSensorLower.Get()
+                  false, // XD Limit - di_XD_LimitSwitch.Get()
+                  false, // XY Limit - di_XY_LimitSwitch.Get()
+                  di_TurrentLimitSwitch.Get()); //di_TurrentLimitSwitch.Get());
+#endif
 
   DtrmnSwerveBotLocation( V_GyroYawAngleRad,
                          &V_Rad_WheelAngleFwd[0],
@@ -403,10 +412,9 @@ void Robot::RobotPeriodic()
 
   frc::SmartDashboard::PutBoolean("Turret",         VsRobotSensors.b_TurretZero);
   frc::SmartDashboard::PutNumber("TurretPosition",  V_TurretPosition);
-
-  // frc::SmartDashboard::PutBoolean("Top Target?",    V_VisionTargetAquired[E_CamTop]);
+  frc::SmartDashboard::PutBoolean("Top Target?",    V_VisionTargetAquired[Cam1]);
   // frc::SmartDashboard::PutNumber("Top Yaw",         V_VisionYaw[E_CamTop]);
-  // frc::SmartDashboard::PutNumber("Top Distance",    V_VisionTargetDistanceMeters[E_CamTop]);
+  frc::SmartDashboard::PutNumber("Top Distance",    V_VisionTargetDistanceMeters[E_CamTop]);
     // frc::SmartDashboard::PutNumber("Cam1 Index",    float(V_VisionCameraIndex[E_Cam1]));
   // frc::SmartDashboard::PutNumber("Bottom Range",    V_VisionTargetDistanceMeters[E_CamBottom]);
   // frc::SmartDashboard::PutBoolean("Bottom Target?", V_VisionTargetAquired[E_CamBottom]);
@@ -516,7 +524,7 @@ void Robot::TeleopInit()
   VisionInit(V_AllianceColor);
   m_encoderrightShooter.SetPosition(0);
   m_encoderleftShooter.SetPosition(0);
-  m_turret.SetSelectedSensorPosition(0);
+  // m_turret.SetSelectedSensorPosition(0);
   }
 
 
@@ -540,7 +548,7 @@ void Robot::TeleopPeriodic()
 
   frc::SmartDashboard::PutNumber("TurretCmnd",  L_Temp);
   frc::SmartDashboard::PutNumber("TurretCmndRaw",  (double)c_joyStick.GetPOV());
-  m_turret.Set(ControlMode::PercentOutput, L_Temp);
+  // m_turret.Set(ControlMode::PercentOutput, L_Temp);
   }
 
 
@@ -593,7 +601,7 @@ void Robot::TestPeriodic()
 
   m_intake.Set(ControlMode::PercentOutput, 0);
   m_elevator.Set(ControlMode::PercentOutput, 0);
-  m_turret.SetSelectedSensorPosition(0);
+  // m_turret.SetSelectedSensorPosition(0);
   }
 
 

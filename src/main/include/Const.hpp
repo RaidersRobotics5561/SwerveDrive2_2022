@@ -398,8 +398,14 @@ const double K_SD_DesiredDriveSpeed[20] = {-1.00,  //-0.95
                                             0.88,  // 0.85
                                             1.00}; // 0.95
 
+/* RotateDeadBand: Check Rotation value approx 0 */
+const double K_SD_RotateDeadBand = 0.05; 
 
-
+/* K_SD_CenterLocation: Determines Center Location of Wheels relative to front of bot */
+const double K_SD_CenterLocation[E_RobotCornerSz] = {-45.0,  // E_FrontLeft
+                                              45.0,  // E_FrontRight 
+                                              -135.0,  // E_RearLeft
+                                              135.0}; // E_RearRight 
 /* ADAS Cals */
 /* Upper Targeting Cals (UT) */
 /* K_ADAS_UT_LightDelayTIme - Amount of time wait for the camera to have sufficent light before proceeding. [Seconds] */

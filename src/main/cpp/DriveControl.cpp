@@ -23,6 +23,7 @@
 bool V_SD_DriverRobotOrientedRequested; // Requested driver mode override
 bool V_SD_DriverRobotOrientedRequestedLatched; // Latched state of the driver requested mode
 bool V_SD_DriverRobotOrientedRequestedPrev; // Requested driver mode override previous
+double V_SD_StoredAngleDesired; // Requested angle from controller or ADAS
 
 double V_SD_WheelAngleError[E_RobotCornerSz];  // Error value for PID control.
 double V_SD_WheelAngleIntegral[E_RobotCornerSz];  // Integral value for PID control.
@@ -237,6 +238,7 @@ void DriveControlInit()
 
   V_SD_DriverRobotOrientedRequestedPrev = false;
   V_SD_DriverRobotOrientedRequestedLatched = false;
+  V_SD_StoredAngleDesired = 0;
   }
 
 
@@ -318,6 +320,7 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
   double L_WA[E_RobotCornerSz];
   double L_WS[E_RobotCornerSz];
   bool   L_SD_DriveWheelsPowered = false;
+  double L_SD_AngleError =0;
 
   /* Scale the joysticks based on a calibratable lookup when in teleop: */
   if (L_ADAS_ActiveFeature > E_ADAS_Disabled)
@@ -326,13 +329,6 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       L_FWD = -L_ADAS_Pct_SD_FwdRev;
       L_STR = L_ADAS_Pct_SD_Strafe;
       L_RCW = L_ADAS_Pct_SD_Rotate;
-
-      if (L_ADAS_SD_RobotOriented == true)
-        {
-        /* When true, we want to force the robot into robot orientation (i.e. don't use the gyro) */
-        L_GyroAngleDegrees = 0;
-        L_GyroAngleRadians = 0;
-        }
     }
   else /* In ADAS, just past through the commands: */
     {
@@ -340,31 +336,13 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       L_FWD = -L_JoyStick1Axis1Y;
       L_STR = L_JoyStick1Axis1X;
       L_RCW = L_JoyStick1Axis2X;
+    } 
+    if (fabs(L_RCW) >= K_SD_RotateDeadBand)
+    {
+      V_SD_StoredAngleDesired = L_GyroAngleDegrees;
+      }
 
-      /* Check to see what the driver wants for the driver mode: */
-      if (L_Driver_RobotFieldOrientedReq != V_SD_DriverRobotOrientedRequestedPrev && L_Driver_RobotFieldOrientedReq == true)
-        {
-        /* Ok, we seem to have experienced a button press.  Let's flip the latched state*/
-        if (V_SD_DriverRobotOrientedRequestedLatched == true)
-          {
-          V_SD_DriverRobotOrientedRequestedLatched = false; // When false, the driver is requesting to have the robot in field oriented mode
-          }
-        else
-          {
-          V_SD_DriverRobotOrientedRequestedLatched = true;  // When true, the driver is requesting to have the robot in robot oriented mode
-          }
-        }
-
-    /* Save the previous version to help determine when there is a transition in the driver button press. */
-      V_SD_DriverRobotOrientedRequestedPrev = L_Driver_RobotFieldOrientedReq;
-
-      if (V_SD_DriverRobotOrientedRequestedLatched == true)
-        {
-        /* When true, we want to force the robot into robot orientation (i.e. don't use the gyro) */
-        L_GyroAngleDegrees = 0;
-        L_GyroAngleRadians = 0;
-        }
-    }
+L_SD_AngleError = V_SD_StoredAngleDesired - L_GyroAngleDegrees;
 
     /* Swerve drive calculaltions: */
     L_temp =  L_FWD * cos(L_GyroAngleRadians) + L_STR * sin(L_GyroAngleRadians);
@@ -425,10 +403,10 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
       L_Gain = K_SD_MaxGain;
       }
 
-    L_WS[E_FrontRight] *= (K_SD_WheelMaxSpeed * (-L_Gain));
-    L_WS[E_FrontLeft]  *= (K_SD_WheelMaxSpeed * (-L_Gain));
-    L_WS[E_RearLeft]   *= (K_SD_WheelMaxSpeed * L_Gain);
-    L_WS[E_RearRight]  *= (K_SD_WheelMaxSpeed * (-L_Gain));
+    L_WS[E_FrontRight] *= (K_SD_WheelMaxSpeed * (L_Gain));
+    L_WS[E_FrontLeft]  *= (K_SD_WheelMaxSpeed * (L_Gain));
+    L_WS[E_RearLeft]   *= (K_SD_WheelMaxSpeed * (L_Gain));
+    L_WS[E_RearRight]  *= (K_SD_WheelMaxSpeed * (L_Gain));
 
     /* Now we need to detrime if we want to keep the desired commanded angle or flip 180* and flip the direction of the wheel speed.  
        This is intended to find the quickest way to reach the commanded angle. */
@@ -478,6 +456,11 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
                                                 KV_SD_WheelAnglePID_Gx[E_D_Ll],
                                                 KV_SD_WheelAnglePID_Gx[E_Max_Ul],
                                                 KV_SD_WheelAnglePID_Gx[E_Max_Ll]);
+ L_GyroAngleDegrees
+ V_SD_StoredAngleDesired
+ V_SD_WheelAngleArb[]
+K_SD_CenterLocation[]
+
 
       /* Wheel speed control resides externally in the independent motor controlers.
       Don't send the final value, ramp to the desired final value to help prevent integral windup and overshoot. */
