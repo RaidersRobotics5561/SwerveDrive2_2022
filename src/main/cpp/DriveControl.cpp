@@ -20,25 +20,28 @@
 #include "control_pid.hpp"
 #include "Lookup.hpp"
 
-bool V_SD_DriverRobotOrientedRequested; // Requested driver mode override
-bool V_SD_DriverRobotOrientedRequestedLatched; // Latched state of the driver requested mode
-bool V_SD_DriverRobotOrientedRequestedPrev; // Requested driver mode override previous
-double V_SD_StoredAngleDesired; // Requested angle from controller or ADAS
+double V_Deg_SD_StoredAngleDesired; // Requested angle from controller or ADAS
 
 double V_SD_WheelAngleError[E_RobotCornerSz];  // Error value for PID control.
-double V_SD_WheelAngleIntegral[E_RobotCornerSz];  // Integral value for PID control.
-double V_SD_WheelAngleArb[E_RobotCornerSz]; // This is the arbitrated wheel angle that is used in the PID controller
-double V_SD_WheelAngleCmnd[E_RobotCornerSz]; // Command sent to motor controller.  Command is power based.
+double V_k_SD_WheelAngleIntegral[E_RobotCornerSz];  // Integral value for PID control.
+double V_Deg_SD_WheelAngleArb[E_RobotCornerSz]; // This is the arbitrated wheel angle that is used in the PID controller
+double V_k_SD_WheelAngleCmnd[E_RobotCornerSz]; // Command sent to motor controller.  Command is power based, ranges from -1 to 1.
+
+double Ve_Deg_SD_AutoCorrectionError;  // Error value for auto correction PID control.
+double Ve_k_SD_AutoCorrectionIntegral;  // Integral value for auto correction PID control.
 
 double KV_SD_WheelAnglePID_Gx[E_PID_CalSz];
 
 double V_SD_WheelSpeedCmnd[E_RobotCornerSz]; // Command sent to motor controller   Command is either in power or speed request.
 double V_SD_WheelSpeedCmndPrev[E_RobotCornerSz];  // Previous wheel speed command.  Used for ramping of control.
-bool   V_SD_DriveWheelsInPID = false;  // flag indicating that PID control is currently active in the motor controller.
+bool   Ve_b_SD_DriveWheelsInPID = false;  // flag indicating that PID control is currently active in the motor controller.
+bool   Ve_b_SD_AutoCenterLatch = false;
+bool   Ve_b_SD_AutoCenterLatchPrev = false;
 
 double KV_SD_WheelSpeedPID_V2_Gx[E_PID_SparkMaxCalSz];
 double KV_SD_WheelSpeedRampRate = 0;
 double KV_SD_WheelGx[E_RobotCornerSz];
+
 
 /******************************************************************************
  * Function:     SwerveDriveMotorConfigsInit
@@ -230,15 +233,19 @@ void DriveControlInit()
            L_Index = T_RobotCorner(int(L_Index) + 1))
       {
         V_SD_WheelAngleError[L_Index] = 0;
-        V_SD_WheelAngleIntegral[L_Index] = 0;
-        V_SD_WheelAngleArb[L_Index] = 0;
-        V_SD_WheelSpeedCmndPrev[L_Index] = 0;
+        V_k_SD_WheelAngleIntegral[L_Index] = 0;
+        V_Deg_SD_WheelAngleArb[L_Index] = 0;
+        V_SD_WheelSpeedCmndPrev[L_Index] = 0; 
       }
-  V_SD_DriveWheelsInPID = false;
+  Ve_b_SD_DriveWheelsInPID = false;
 
-  V_SD_DriverRobotOrientedRequestedPrev = false;
-  V_SD_DriverRobotOrientedRequestedLatched = false;
-  V_SD_StoredAngleDesired = 0;
+  V_Deg_SD_StoredAngleDesired = 0;
+
+  Ve_Deg_SD_AutoCorrectionError = 0;
+  Ve_k_SD_AutoCorrectionIntegral = 0;
+
+  Ve_b_SD_AutoCenterLatch = false;
+  Ve_b_SD_AutoCenterLatchPrev = false;
   }
 
 
@@ -283,202 +290,302 @@ double DtrmnEncoderRelativeToCmnd(double          L_JoystickCmnd,
  *               Swerve srive calculations obtained from the following link:
  *               https://www.chiefdelphi.com/uploads/default/original/3X/e/f/ef10db45f7d65f6d4da874cd26db294c7ad469bb.pdf
  ************************************************************************************************************************/
-void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control forward/back
-                      double              L_JoyStick1Axis1X,  // swerve control strafe
-                      double              L_JoyStick1Axis2X,  // rotate the robot joystick
-                      double              L_JoyStick1Axis3,   // extra speed trigger
-                      bool                L_JoyStick1Button3, // auto rotate to 0 degrees
-                      bool                L_JoyStick1Button4, // auto rotate to 90 degrees
-                      bool                L_Driver_RobotFieldOrientedReq,
+void DriveControlMain(double               L_JoyStick1Axis1Y,  // swerve control forward/back
+                      double               L_JoyStick1Axis1X,  // swerve control strafe
+                      double               L_JoyStick1Axis2X,  // rotate the robot joystick
+                      double               L_JoyStick1Axis3,   // extra speed trigger
+                      bool                 L_JoyStick1Button3, // auto rotate to 0 degrees
+                      bool                 L_JoyStick1Button4, // auto rotate to 90 degrees
+                      bool                 L_Driver_RobotFieldOrientedReq,
                       T_ADAS_ActiveFeature L_ADAS_ActiveFeature,
                       double               L_ADAS_Pct_SD_FwdRev,
                       double               L_ADAS_Pct_SD_Strafe,
                       double               L_ADAS_Pct_SD_Rotate,
                       bool                 L_ADAS_SD_RobotOriented,
-                      double              L_GyroAngleDegrees,
-                      double              L_GyroAngleRadians,
-                      double             *L_WheelAngleFwd,
-                      double             *L_WheelAngleRev,
-                      double             *L_WheelSpeedCmnd,
-                      double             *L_WheelAngleCmnd)
+                      double               L_Deg_GyroAngle,
+                      double               L_Rad_GyroAngle,
+                      double              *L_Deg_WheelAngleFwd,
+                      double              *L_Deg_WheelAngleRev,
+                      double              *Le_RPM_SD_WheelSpeedCmnd,
+                      double              *L_k_SD_WheelAngleCmnd)
   {
-  double L_FWD = 0;
-  double L_STR = 0;
-  double L_RCW = 0;
+  double        L_FWD = 0;
+  double        L_STR = 0;
+  double        L_RCW = 0;
   T_RobotCorner L_Index = E_FrontLeft;
-  double L_temp;
-  double L_A = 0;
-  double L_B = 0;
-  double L_C = 0;
-  double L_D = 0;
-  double L_Gain = 0;
-  double L_Max = 0;
-  double L_WA_FWD = 0;
-  double L_WA_FWD_Delta = 0;
-  double L_WA_REV = 0;
-  double L_WA_REV_Delta = 0;
-  double L_WA[E_RobotCornerSz];
-  double L_WS[E_RobotCornerSz];
-  bool   L_SD_DriveWheelsPowered = false;
-  double L_SD_AngleError =0;
+  double        L_temp = 0;
+  double        L_A = 0;
+  double        L_B = 0;
+  double        L_C = 0;
+  double        L_D = 0;
+  double        L_k_SD_Gain = 0;
+  double        L_Max = 0;
+  double        L_Deg_SD_WA_FWD = 0;
+  double        L_Deg_SD_WA_FWD_Delta = 0;
+  double        L_Deg_SD_WA_REV = 0;
+  double        L_Deg_SD_WA_REV_Delta = 0;
+  double        L_Deg_SD_WA[E_RobotCornerSz];
+  double        L_RPM_SD_WS[E_RobotCornerSz];
+  bool          Le_b_SD_DriveWheelsPowered = false;
+  double        L_Deg_SD_AngleErrorRaw = 0;
+  double        L_Deg_SD_AngleError = 0;
+  double        Le_n_SD_Offset = 0;
+  double        La_n_SD_Offset[E_RobotCornerSz];
+  bool          Le_b_SD_Active = false;
+  double        La_k_SD_WheelIsFWD[E_RobotCornerSz];
+  double        Le_k_SD_RotateCorrectionGx = 0;
 
   /* Scale the joysticks based on a calibratable lookup when in teleop: */
   if (L_ADAS_ActiveFeature > E_ADAS_Disabled)
     {
     /* ADAS is active, pass throught the commands: */
-      L_FWD = -L_ADAS_Pct_SD_FwdRev;
-      L_STR = L_ADAS_Pct_SD_Strafe;
-      L_RCW = L_ADAS_Pct_SD_Rotate;
+    L_FWD = -L_ADAS_Pct_SD_FwdRev;
+    L_STR = L_ADAS_Pct_SD_Strafe;
+    L_RCW = L_ADAS_Pct_SD_Rotate;
     }
   else /* In ADAS, just past through the commands: */
     {
     /* ADAS is disabled, use the driver joysticks */
-      L_FWD = -L_JoyStick1Axis1Y;
-      L_STR = L_JoyStick1Axis1X;
-      L_RCW = L_JoyStick1Axis2X;
+    L_FWD = -L_JoyStick1Axis1Y;
+    L_STR = L_JoyStick1Axis1X;
+    L_RCW = L_JoyStick1Axis2X;
+
+    if (L_JoyStick1Button3 == true && Ve_b_SD_AutoCenterLatch == false && Ve_b_SD_AutoCenterLatch == Ve_b_SD_AutoCenterLatchPrev)
+      {
+      Ve_b_SD_AutoCenterLatch = true;
+      }
+    else if (L_JoyStick1Button3 == true && Ve_b_SD_AutoCenterLatch == true && Ve_b_SD_AutoCenterLatch == Ve_b_SD_AutoCenterLatchPrev)
+      {
+      Ve_b_SD_AutoCenterLatch = false;
+      }
+    else if (L_JoyStick1Button3 == false)
+      {
+      Ve_b_SD_AutoCenterLatchPrev = Ve_b_SD_AutoCenterLatch;
+      }
     } 
-    if (fabs(L_RCW) >= K_SD_RotateDeadBand)
+
+  // L_Deg_GyroAngle == -L_Deg_GyroAngle;
+
+  /* Here, we are attempting to determine if the drive/ADAS is attempting to turn the robot.  If we are 
+     attempting to rotate the robot, allow the "desired" angle to update to the current measured angle.  */
+  if (fabs(L_RCW) >= K_SD_RotateDeadBand)
     {
-      V_SD_StoredAngleDesired = L_GyroAngleDegrees;
-      }
+    V_Deg_SD_StoredAngleDesired = L_Deg_GyroAngle;
+    }
+  
+  if (fabs(L_FWD) >= K_SD_RotateDeadBand || fabs(L_STR) >= K_SD_RotateDeadBand || fabs(L_RCW) >= K_SD_RotateDeadBand)
+    {
+    Le_b_SD_Active = true;
+    }
+  else
+    {
+    Ve_Deg_SD_AutoCorrectionError = 0;
+    Ve_k_SD_AutoCorrectionIntegral = 0;
+    }
 
-L_SD_AngleError = V_SD_StoredAngleDesired - L_GyroAngleDegrees;
+  L_Deg_SD_AngleErrorRaw = V_Deg_SD_StoredAngleDesired - L_Deg_GyroAngle;
 
-    /* Swerve drive calculaltions: */
-    L_temp =  L_FWD * cos(L_GyroAngleRadians) + L_STR * sin(L_GyroAngleRadians);
-    L_STR  = -L_FWD * sin(L_GyroAngleRadians) + L_STR * cos(L_GyroAngleRadians);
-    L_FWD  =  L_temp;
+  if (L_Deg_SD_AngleErrorRaw < -180)
+    {
+    L_Deg_SD_AngleError = L_Deg_SD_AngleErrorRaw + 360;
+    }
+  else if (L_Deg_SD_AngleErrorRaw > 180)
+    {
+    L_Deg_SD_AngleError = L_Deg_SD_AngleErrorRaw - 360;
+    }
+  else
+    {
+    L_Deg_SD_AngleError = L_Deg_SD_AngleErrorRaw;
+    }
 
-    //Ws1: fr, Ws2: fl, ws3: rl, ws4: rr
-    L_A = L_STR - L_RCW * (C_SD_L/C_SD_R);
-    L_B = L_STR + L_RCW * (C_SD_L/C_SD_R);
-    L_C = L_FWD - L_RCW * (C_SD_W/C_SD_R);
-    L_D = L_FWD + L_RCW * (C_SD_W/C_SD_R);
+  Le_k_SD_RotateCorrectionGx =  Control_PID( L_Deg_SD_AngleError,
+                                             0.0,
+                                            &Ve_Deg_SD_AutoCorrectionError,
+                                            &Ve_k_SD_AutoCorrectionIntegral,
+                                             Ke_SD_AutoCorrectPID_Gx[E_P_Gx],
+                                             Ke_SD_AutoCorrectPID_Gx[E_I_Gx],
+                                             Ke_SD_AutoCorrectPID_Gx[E_D_Gx],
+                                             Ke_SD_AutoCorrectPID_Gx[E_P_Ul],
+                                             Ke_SD_AutoCorrectPID_Gx[E_P_Ll],
+                                             Ke_SD_AutoCorrectPID_Gx[E_I_Ul],
+                                             Ke_SD_AutoCorrectPID_Gx[E_I_Ll],
+                                             Ke_SD_AutoCorrectPID_Gx[E_D_Ul],
+                                             Ke_SD_AutoCorrectPID_Gx[E_D_Ll],
+                                             Ke_SD_AutoCorrectPID_Gx[E_Max_Ul],
+                                             Ke_SD_AutoCorrectPID_Gx[E_Max_Ll]);
 
-    L_WS[E_FrontRight] = pow((L_B * L_B + L_C * L_C), 0.5);
-    L_WS[E_FrontLeft]  = pow((L_B * L_B + L_D * L_D), 0.5);
-    L_WS[E_RearLeft]   = pow((L_A * L_A + L_D * L_D), 0.5);
-    L_WS[E_RearRight]  = pow((L_A * L_A + L_C * L_C), 0.5);
+  // Le_k_SD_RotateCorrectionGx = L_Deg_SD_AngleError;  // This needs to be smarter....
 
-    L_WA[E_FrontRight] = -atan2(L_B, L_C) *180/C_PI;
-    L_WA[E_FrontLeft]  = -atan2(L_B, L_D) *180/C_PI;
-    L_WA[E_RearLeft]   = -atan2(L_A, L_D) *180/C_PI;
-    L_WA[E_RearRight]  = -atan2(L_A, L_C) *180/C_PI;
+  /* Swerve drive calculaltions: */
+  L_temp =  L_FWD * cos(L_Rad_GyroAngle) + L_STR * sin(L_Rad_GyroAngle);
+  L_STR  = -L_FWD * sin(L_Rad_GyroAngle) + L_STR * cos(L_Rad_GyroAngle);
+  L_FWD  =  L_temp;
 
-    /* Normalized everything to a max value of 1 for wheel speeds: */
-    L_Max = L_WS[E_FrontRight];
+  //Ws1: fr, Ws2: fl, ws3: rl, ws4: rr
+  L_A = L_STR - L_RCW * (C_SD_L/C_SD_R);
+  L_B = L_STR + L_RCW * (C_SD_L/C_SD_R);
+  L_C = L_FWD - L_RCW * (C_SD_W/C_SD_R);
+  L_D = L_FWD + L_RCW * (C_SD_W/C_SD_R);
 
-    if (L_WS[E_FrontLeft] > L_Max)
-      {
-      L_Max = L_WS[E_FrontLeft];
-      }
-    if (L_WS[E_RearLeft] > L_Max)
-      {
-      L_Max = L_WS[E_RearLeft];
-      }
-    if (L_WS[E_RearRight] > L_Max)
-      {
-      L_Max = L_WS[E_RearRight];
-      }
+  L_RPM_SD_WS[E_FrontRight] = pow((L_B * L_B + L_C * L_C), 0.5);
+  L_RPM_SD_WS[E_FrontLeft]  = pow((L_B * L_B + L_D * L_D), 0.5);
+  L_RPM_SD_WS[E_RearLeft]   = pow((L_A * L_A + L_D * L_D), 0.5);
+  L_RPM_SD_WS[E_RearRight]  = pow((L_A * L_A + L_C * L_C), 0.5);
 
-    if (L_Max > 1)
-      {
-      L_WS[E_FrontRight] /= L_Max;
-      L_WS[E_FrontLeft]  /= L_Max;
-      L_WS[E_RearLeft]   /= L_Max;
-      L_WS[E_RearRight]  /= L_Max;
-      }
+  L_Deg_SD_WA[E_FrontRight] = -atan2(L_B, L_C) *180/C_PI;
+  L_Deg_SD_WA[E_FrontLeft]  = -atan2(L_B, L_D) *180/C_PI;
+  L_Deg_SD_WA[E_RearLeft]   = -atan2(L_A, L_D) *180/C_PI;
+  L_Deg_SD_WA[E_RearRight]  = -atan2(L_A, L_C) *180/C_PI;
 
-    /* Ok, now lets apply gains to the normalized wheel speeds to obtain the desired motor speed */
-    L_Gain = K_SD_MinGain;
+  /* Normalize everything to a max value of 1 for wheel speeds: */
+  L_Max = L_RPM_SD_WS[E_FrontRight];
+
+  if (L_RPM_SD_WS[E_FrontLeft] > L_Max)
+    {
+    L_Max = L_RPM_SD_WS[E_FrontLeft];
+    }
+  if (L_RPM_SD_WS[E_RearLeft] > L_Max)
+    {
+    L_Max = L_RPM_SD_WS[E_RearLeft];
+    }
+  if (L_RPM_SD_WS[E_RearRight] > L_Max)
+    {
+    L_Max = L_RPM_SD_WS[E_RearRight];
+    }
+
+  if (L_Max > 1)
+    {
+    L_RPM_SD_WS[E_FrontRight] /= L_Max;
+    L_RPM_SD_WS[E_FrontLeft]  /= L_Max;
+    L_RPM_SD_WS[E_RearLeft]   /= L_Max;
+    L_RPM_SD_WS[E_RearRight]  /= L_Max;
+    }
+
+  /* Ok, now lets apply gains to the normalized wheel speeds to obtain the desired motor speed */
+  L_k_SD_Gain = K_SD_MinGain;
     
-    if (L_JoyStick1Axis3 > L_Gain)
+  if (L_JoyStick1Axis3 > L_k_SD_Gain)
+    {
+    /* Additional speed trigger from driver: */
+    L_k_SD_Gain = L_JoyStick1Axis3;
+    }
+
+  if (L_k_SD_Gain >= K_SD_MaxGain)
+    {
+    L_k_SD_Gain = K_SD_MaxGain;
+    }
+
+  L_RPM_SD_WS[E_FrontRight] *= (K_SD_WheelMaxSpeed * (L_k_SD_Gain));
+  L_RPM_SD_WS[E_FrontLeft]  *= (K_SD_WheelMaxSpeed * (L_k_SD_Gain));
+  L_RPM_SD_WS[E_RearLeft]   *= (K_SD_WheelMaxSpeed * (L_k_SD_Gain));
+  L_RPM_SD_WS[E_RearRight]  *= (K_SD_WheelMaxSpeed * (L_k_SD_Gain));
+
+  /* Now we need to detrime if we want to keep the desired commanded angle or flip 180* and flip the direction of the wheel speed.  
+     This is intended to find the quickest way to reach the commanded angle. */
+  for (L_Index = E_FrontLeft;
+       L_Index < E_RobotCornerSz;
+       L_Index = T_RobotCorner(int(L_Index) + 1))
+    {
+    L_Deg_SD_WA_FWD = DtrmnEncoderRelativeToCmnd(L_Deg_SD_WA[L_Index],
+                                                 L_Deg_WheelAngleFwd[L_Index]);
+
+    L_Deg_SD_WA_FWD_Delta = fabs(L_Deg_SD_WA[L_Index] - L_Deg_SD_WA_FWD);
+
+    L_Deg_SD_WA_REV = DtrmnEncoderRelativeToCmnd(L_Deg_SD_WA[L_Index],
+                                                 L_Deg_WheelAngleRev[L_Index]);
+
+    L_Deg_SD_WA_REV_Delta = fabs(L_Deg_SD_WA[L_Index] - L_Deg_SD_WA_REV);
+
+    if (L_Deg_SD_WA_FWD_Delta <= L_Deg_SD_WA_REV_Delta)
       {
-      /* Additional speed trigger from driver: */
-      L_Gain = L_JoyStick1Axis3;
+        V_Deg_SD_WheelAngleArb[L_Index] = L_Deg_SD_WA_FWD;
+        La_k_SD_WheelIsFWD[L_Index] = 1;
+      }
+    else
+      {
+        V_Deg_SD_WheelAngleArb[L_Index] = L_Deg_SD_WA_REV;
+        L_RPM_SD_WS[L_Index] *= (-1); // Need to flip sign of drive wheel to account for reverse direction
+        La_k_SD_WheelIsFWD[L_Index] = -1;
       }
 
-    if (L_Gain >= K_SD_MaxGain)
+    if (Ve_b_SD_AutoCenterLatch == true && Le_b_SD_Active == true)
       {
-      L_Gain = K_SD_MaxGain;
+      Le_n_SD_Offset = (sin((-L_Deg_WheelAngleFwd[L_Index]) * (C_PI / 180)) * Ke_k_SD_SignX[L_Index] + cos((-L_Deg_WheelAngleFwd[L_Index]) * (C_PI / 180)) * Ke_k_SD_SignY[L_Index]) * Le_k_SD_RotateCorrectionGx * La_k_SD_WheelIsFWD[L_Index] * Ke_k_SD_CorrectionGx;
+      }
+    else
+      {
+      Le_n_SD_Offset = 0;
       }
 
-    L_WS[E_FrontRight] *= (K_SD_WheelMaxSpeed * (L_Gain));
-    L_WS[E_FrontLeft]  *= (K_SD_WheelMaxSpeed * (L_Gain));
-    L_WS[E_RearLeft]   *= (K_SD_WheelMaxSpeed * (L_Gain));
-    L_WS[E_RearRight]  *= (K_SD_WheelMaxSpeed * (L_Gain));
-
-    /* Now we need to detrime if we want to keep the desired commanded angle or flip 180* and flip the direction of the wheel speed.  
-       This is intended to find the quickest way to reach the commanded angle. */
-    for (L_Index = E_FrontLeft;
-         L_Index < E_RobotCornerSz;
-         L_Index = T_RobotCorner(int(L_Index) + 1))
-      {
-      L_WA_FWD = DtrmnEncoderRelativeToCmnd(L_WA[L_Index],
-                                            L_WheelAngleFwd[L_Index]);
-
-      L_WA_FWD_Delta = fabs(L_WA[L_Index] - L_WA_FWD);
-
-      L_WA_REV = DtrmnEncoderRelativeToCmnd(L_WA[L_Index],
-                                            L_WheelAngleRev[L_Index]);
-
-      L_WA_REV_Delta = fabs(L_WA[L_Index] - L_WA_REV);
-
-      if (L_WA_FWD_Delta <= L_WA_REV_Delta)
-        {
-          V_SD_WheelAngleArb[L_Index] = L_WA_FWD;
-        }
-      else
-        {
-          V_SD_WheelAngleArb[L_Index] = L_WA_REV;
-          L_WS[L_Index] *= (-1); // Need to flip sign of drive wheel to account for reverse direction
-        }
-      }
-
-  /* Output the wheel speed and angle commands: */
-    for (L_Index = E_FrontLeft;
-         L_Index < E_RobotCornerSz;
-         L_Index = T_RobotCorner(int(L_Index) + 1))
-      {
-      /* We do PID control within the Rio for angle control: */
-      L_WheelAngleCmnd[L_Index] =  Control_PID( L_WA[L_Index],
-                                                V_SD_WheelAngleArb[L_Index],
-                                               &V_SD_WheelAngleError[L_Index],
-                                               &V_SD_WheelAngleIntegral[L_Index],
-                                                KV_SD_WheelAnglePID_Gx[E_P_Gx],
-                                                KV_SD_WheelAnglePID_Gx[E_I_Gx],
-                                                KV_SD_WheelAnglePID_Gx[E_D_Gx],
-                                                KV_SD_WheelAnglePID_Gx[E_P_Ul],
-                                                KV_SD_WheelAnglePID_Gx[E_P_Ll],
-                                                KV_SD_WheelAnglePID_Gx[E_I_Ul],
-                                                KV_SD_WheelAnglePID_Gx[E_I_Ll],
-                                                KV_SD_WheelAnglePID_Gx[E_D_Ul],
-                                                KV_SD_WheelAnglePID_Gx[E_D_Ll],
-                                                KV_SD_WheelAnglePID_Gx[E_Max_Ul],
-                                                KV_SD_WheelAnglePID_Gx[E_Max_Ll]);
- L_GyroAngleDegrees;
- V_SD_StoredAngleDesired;
- V_SD_WheelAngleArb[L_Index];
-// K_SD_CenterLocation[]
-
+      La_n_SD_Offset[L_Index] = Le_n_SD_Offset;  // Save this for insturmentation, to verify that it is working as expected
 
       /* Wheel speed control resides externally in the independent motor controlers.
-      Don't send the final value, ramp to the desired final value to help prevent integral windup and overshoot. */
-      L_WheelSpeedCmnd[L_Index] = RampTo((L_WS[L_Index] * KV_SD_WheelGx[L_Index]), V_SD_WheelSpeedCmndPrev[L_Index], KV_SD_WheelSpeedRampRate);
+         Don't send the final value, ramp to the desired final value to help prevent integral windup and overshoot. */
+      Le_RPM_SD_WheelSpeedCmnd[L_Index] = RampTo(((L_RPM_SD_WS[L_Index] + La_n_SD_Offset[L_Index] * La_k_SD_WheelIsFWD[L_Index]) * KV_SD_WheelGx[L_Index]), V_SD_WheelSpeedCmndPrev[L_Index], KV_SD_WheelSpeedRampRate);
 
-      V_SD_WheelSpeedCmndPrev[L_Index] = L_WheelSpeedCmnd[L_Index];
+      V_SD_WheelSpeedCmndPrev[L_Index] = Le_RPM_SD_WheelSpeedCmnd[L_Index];
 
-      if ((fabs(L_WheelSpeedCmnd[L_Index]) >= K_SD_WheelMinCmndSpeed))
+      if ((fabs(Le_RPM_SD_WheelSpeedCmnd[L_Index]) >= Ke_RPM_SD_WheelMinCmndSpeed))
         {
         /* Ok, so we have at least one wheel that is still trying to command a non zero speed. If not, we want to force it to a zero power 
            command to prevent locking of the wheels or swaying to try and hold a zero speed. */
-        L_SD_DriveWheelsPowered = true;
+        Le_b_SD_DriveWheelsPowered = true;
         }
-      }
- 
-    V_SD_DriveWheelsInPID = L_SD_DriveWheelsPowered;
+    }
 
-    frc::SmartDashboard::PutNumber("L_WA[E_FrontLeft]", L_WA[E_FrontLeft]);
-    frc::SmartDashboard::PutNumber("V_SD_WheelAngleArb[E_FrontLeft]", V_SD_WheelAngleArb[E_FrontLeft]);
-    frc::SmartDashboard::PutNumber("L_WheelAngleCmnd[E_FrontLeft]", L_WheelAngleCmnd[E_FrontLeft]);
+  Ve_b_SD_DriveWheelsInPID = Le_b_SD_DriveWheelsPowered;
+
+  /* Output the wheel angle commands: */
+  for (L_Index = E_FrontLeft;
+       L_Index < E_RobotCornerSz;
+       L_Index = T_RobotCorner(int(L_Index) + 1))
+    {
+    if (Ve_b_SD_DriveWheelsInPID == true)
+      {
+      /* We do PID control within the Rio for angle control: */
+      L_k_SD_WheelAngleCmnd[L_Index] =  Control_PID( L_Deg_SD_WA[L_Index],
+                                                     V_Deg_SD_WheelAngleArb[L_Index],
+                                                    &V_SD_WheelAngleError[L_Index],
+                                                    &V_k_SD_WheelAngleIntegral[L_Index],
+                                                     KV_SD_WheelAnglePID_Gx[E_P_Gx],
+                                                     KV_SD_WheelAnglePID_Gx[E_I_Gx],
+                                                     KV_SD_WheelAnglePID_Gx[E_D_Gx],
+                                                     KV_SD_WheelAnglePID_Gx[E_P_Ul],
+                                                     KV_SD_WheelAnglePID_Gx[E_P_Ll],
+                                                     KV_SD_WheelAnglePID_Gx[E_I_Ul],
+                                                     KV_SD_WheelAnglePID_Gx[E_I_Ll],
+                                                     KV_SD_WheelAnglePID_Gx[E_D_Ul],
+                                                     KV_SD_WheelAnglePID_Gx[E_D_Ll],
+                                                     KV_SD_WheelAnglePID_Gx[E_Max_Ul],
+                                                     KV_SD_WheelAnglePID_Gx[E_Max_Ll]);
+      }
+    else
+      {
+      V_SD_WheelAngleError[L_Index] = 0.0;
+      V_k_SD_WheelAngleIntegral[L_Index] = 0.0;
+      }
+    }
+
+  frc::SmartDashboard::PutNumber("WheelAngleDesired[E_FrontLeft]", L_Deg_SD_WA[E_FrontLeft]);
+  frc::SmartDashboard::PutNumber("WheelAngleArb[E_FrontLeft]",  V_Deg_SD_WheelAngleArb[E_FrontLeft]);
+  frc::SmartDashboard::PutNumber("WheelAngleCmnd[E_FrontLeft]", L_k_SD_WheelAngleCmnd[E_FrontLeft]);
+  frc::SmartDashboard::PutNumber("WheelAngleError[E_FrontLeft]", V_SD_WheelAngleError[E_FrontLeft]);
+  frc::SmartDashboard::PutNumber("L_Deg_WheelAngleFwd[E_FrontLeft]", L_Deg_WheelAngleFwd[E_FrontLeft]);
+  frc::SmartDashboard::PutNumber("Gyro Degrees",   L_Deg_GyroAngle);
+  frc::SmartDashboard::PutNumber("SD Angle Error", L_Deg_SD_AngleError);
+  frc::SmartDashboard::PutNumber("Desired Angle", V_Deg_SD_StoredAngleDesired);
+
+  frc::SmartDashboard::PutNumber("Rotate Gx", Le_k_SD_RotateCorrectionGx);
+  
+  frc::SmartDashboard::PutBoolean("Latch",  Ve_b_SD_AutoCenterLatch);
+
+  frc::SmartDashboard::PutNumber("Offset[E_FrontLeft]",  La_n_SD_Offset[E_FrontLeft]);
+  frc::SmartDashboard::PutNumber("Offset[E_FrontRight]", La_n_SD_Offset[E_FrontRight]);
+  frc::SmartDashboard::PutNumber("Offset[E_RearLeft]",   La_n_SD_Offset[E_RearLeft]);
+  frc::SmartDashboard::PutNumber("Offset[E_RearRight]",  La_n_SD_Offset[E_RearRight]);
+
+  frc::SmartDashboard::PutNumber("WheelCmnd[E_FrontLeft]",  Le_RPM_SD_WheelSpeedCmnd[E_FrontLeft]);
+  frc::SmartDashboard::PutNumber("WheelCmnd[E_FrontRight]", Le_RPM_SD_WheelSpeedCmnd[E_FrontRight]);
+  frc::SmartDashboard::PutNumber("WheelCmnd[E_RearLeft]",   Le_RPM_SD_WheelSpeedCmnd[E_RearLeft]);
+  frc::SmartDashboard::PutNumber("WheelCmnd[E_RearRight]",  Le_RPM_SD_WheelSpeedCmnd[E_RearRight]);
   }

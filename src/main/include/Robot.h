@@ -44,6 +44,7 @@ class Robot : public frc::TimedRobot {
  
   
   //DIO - Inputs / Outputs
+  #ifdef CompBot
   frc::DutyCycleEncoder a_encoderWheelAngleFrontLeft  {C_MagEncoderFL_ID};
   frc::DutyCycleEncoder a_encoderWheelAngleFrontRight {C_MagEncoderFR_ID};
   frc::DutyCycleEncoder a_encoderWheelAngleRearLeft   {C_MagEncoderRL_ID};
@@ -51,9 +52,12 @@ class Robot : public frc::TimedRobot {
 
   frc::DigitalInput     di_XY_LimitSwitch     {C_XY_LimitSwitch_ID};
   frc::DigitalInput     di_XD_LimitSwitch     {C_XD_LimitSwitch_ID};
+
   frc::DigitalInput     di_IR_Sensor          {C_IR_Sensor_ID};
   frc::DigitalInput     di_BallSensorLower    {C_LowerBallSensorID};
-  //frc::DigitalInput     di_TurrentLimitSwitch {C_TurrentSensorID};
+  #endif
+
+  frc::DigitalInput     di_TurrentLimitSwitch {C_TurretSensorID};
 
   frc::DigitalOutput    do_CameraLightControl {C_CameraLightControl_ID};
 
@@ -69,17 +73,12 @@ class Robot : public frc::TimedRobot {
   rev::CANSparkMax                           m_rearLeftDriveMotor  {rearLeftDriveDeviceID,   rev::CANSparkMax::MotorType::kBrushless};
   rev::CANSparkMax                           m_rearRightSteerMotor {rearRightSteerDeviceID,  rev::CANSparkMax::MotorType::kBrushless};
   rev::CANSparkMax                           m_rearRightDriveMotor {rearRightDriveDeviceID,  rev::CANSparkMax::MotorType::kBrushless};
-                        
+#ifdef CompBot
   rev::CANSparkMax                           m_rightShooterMotor   {rightShooterID,          rev::CANSparkMax::MotorType::kBrushless};
   rev::CANSparkMax                           m_leftShooterMotor    {leftShooterID,           rev::CANSparkMax::MotorType::kBrushless};
                         
   rev::CANSparkMax                           m_liftMotorYD         {C_liftYD_ID,             rev::CANSparkMax::MotorType::kBrushless};
   rev::CANSparkMax                           m_liftMotorXD         {C_liftXD_ID,             rev::CANSparkMax::MotorType::kBrushless};
-
-  rev::SparkMaxPIDController                 m_frontLeftDrivePID      = m_frontLeftDriveMotor.GetPIDController();
-  rev::SparkMaxPIDController                 m_frontRightDrivePID     = m_frontRightDriveMotor.GetPIDController();
-  rev::SparkMaxPIDController                 m_rearLeftDrivePID       = m_rearLeftDriveMotor.GetPIDController();
-  rev::SparkMaxPIDController                 m_rearRightDrivePID      = m_rearRightDriveMotor.GetPIDController();
 
   rev::SparkMaxPIDController                 m_rightShooterpid        = m_rightShooterMotor.GetPIDController();
   rev::SparkMaxPIDController                 m_leftShooterpid         = m_leftShooterMotor.GetPIDController();
@@ -89,9 +88,16 @@ class Robot : public frc::TimedRobot {
 
   ctre::phoenix::motorcontrol::can::TalonSRX m_intake              {C_intakeID};
   ctre::phoenix::motorcontrol::can::TalonSRX m_elevator            {C_elevatorID};
+#endif
+  rev::SparkMaxPIDController                 m_frontLeftDrivePID      = m_frontLeftDriveMotor.GetPIDController();
+  rev::SparkMaxPIDController                 m_frontRightDrivePID     = m_frontRightDriveMotor.GetPIDController();
+  rev::SparkMaxPIDController                 m_rearLeftDrivePID       = m_rearLeftDriveMotor.GetPIDController();
+  rev::SparkMaxPIDController                 m_rearRightDrivePID      = m_rearRightDriveMotor.GetPIDController();
 
   // PWM Motor / Light Controllers
+  #ifdef CompBot
   frc::Spark                                 m_vanityLightControler {C_VanityLight_ID};
+  #endif
 
   // CAN Encoders
   rev::SparkMaxRelativeEncoder               m_encoderFrontLeftSteer  = m_frontLeftSteerMotor.GetEncoder();
@@ -103,18 +109,21 @@ class Robot : public frc::TimedRobot {
   rev::SparkMaxRelativeEncoder               m_encoderRearLeftDrive   = m_rearLeftDriveMotor.GetEncoder();
   rev::SparkMaxRelativeEncoder               m_encoderRearRightSteer  = m_rearRightSteerMotor.GetEncoder();
   rev::SparkMaxRelativeEncoder               m_encoderRearRightDrive  = m_rearRightDriveMotor.GetEncoder();
-
+#ifdef CompBot
   rev::SparkMaxRelativeEncoder               m_encoderrightShooter    = m_rightShooterMotor.GetEncoder();
   rev::SparkMaxRelativeEncoder               m_encoderleftShooter     = m_leftShooterMotor.GetEncoder();
 
   rev::SparkMaxRelativeEncoder               m_encoderLiftYD          = m_liftMotorYD.GetEncoder();
   rev::SparkMaxRelativeEncoder               m_encoderLiftXD          = m_liftMotorXD.GetEncoder();
+#endif
 
   WPI_TalonSRX                               m_turret{C_turretID};
-  
+
   // Driver Inputs
   frc::Joystick c_joyStick{0};
-  frc::Joystick c_joyStick2{1};
+#ifdef CompBot
+  // frc::Joystick c_joyStick2{1};
+#endif
 
 
   // Network tables

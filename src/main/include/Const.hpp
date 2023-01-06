@@ -6,7 +6,7 @@
 // Define the desired test state here: COMP (no test), BallHandlerTest, LiftXY_Test, DriveMotorTest, WheelAngleTest, ADAS_UT_Test, ADAS_BT_Test
 #define COMP
 // Define the bot type: CompBot, PracticeBot
-#define CompBot
+#define PracticeBot
 
 // RoboRio controller execution time
 const double C_ExeTime = 0.02; // Set to match the the default controller loop time of 20 ms
@@ -35,10 +35,13 @@ static const int C_liftXD_ID = 12;
 static const int C_elevatorID = 13;
 static const int C_intakeID = 14;
 static const int C_turretID = 15;
+static const int C_i_Gyro = 16;
+
+// Analog IDs:
+static const int C_MagEncoderFL_ID = 2, C_MagEncoderFR_ID = 1, C_MagEncoderRL_ID = 3, C_MagEncoderRR_ID = 0;
 
 // DIO IDs:
-static const int C_MagEncoderFL_ID = 2, C_MagEncoderFR_ID = 1, C_MagEncoderRL_ID = 3, C_MagEncoderRR_ID = 0;
-static const int C_XY_LimitSwitch_ID = 4, C_XD_LimitSwitch_ID = 6, C_IR_Sensor_ID = 9, C_CameraLightControl_ID = 7;
+static const int C_XY_LimitSwitch_ID = 4, C_XD_LimitSwitch_ID = 6, C_IR_Sensor_ID = 3, C_CameraLightControl_ID = 7;
 static const int C_LowerBallSensorID = 5;
 static const int C_TurretSensorID = 9;
 
@@ -97,6 +100,9 @@ const double C_BlinkinLED_LightChaseGray = -0.27;
 const double C_BlinkinLED_RainbowWithGlitter = -0.89;
 
 
+// Gyro cals
+/* K_t_GyroTimeoutMs: Set to zero to skip waiting for confirmation, set to nonzero to wait and report to DS if action fails. */
+const int K_t_GyroTimeoutMs = 30;
 
 // Encoder / speed calculation related cals
 const double K_ReductionRatio = 8.31;
@@ -303,16 +309,28 @@ const double K_SD_MinGain = 0.2;
 /* K_SD_MaxGain: Max gain allowed for swerve drive control. */
 const double K_SD_MaxGain = 0.7;
 
-/* K_SD_AutoRotateGx: Gain applied to the rotate command for auto functionality. */
-const double K_SD_AutoRotateGx = 0.1;
+
+/* Ke_SD_AutoCorrectPID_Gx: PID gains for the auto correct.  PID control is within the RoboRio.  */
+const double Ke_SD_AutoCorrectPID_Gx[E_PID_CalSz] = { 90.0,      // P Gx  0.002
+                                                       0.01,  // I Gx 0.000001
+                                                       0.0005, // D Gx 0.0000005
+                                                      300.0,       // P UL 0.6
+                                                     -300.0,       // P LL -0.4
+                                                     70.0,      // I UL 0.12
+                                                    -70.0,      // I LL -0.12
+                                                      1.0,       // D UL 0.5
+                                                     -1.0,       // D LL -0.5
+                                                     300.0,       // Max upper 0.9
+                                                    -300.0};      // Max lower -0.9
+
 
 /* K_SD_WheelMaxSpeed: Max RPM speed of the swerve drive wheel motor.*/
 const double K_SD_WheelMaxSpeed = 2500;
 
-/* K_SD_WheelMinCmndSpeed: Min in/sec speed of the swerve drive wheel to keep it under PID control.  
+/* Ke_RPM_SD_WheelMinCmndSpeed: Min RPM speed of the swerve drive wheel to keep it under PID control.  
   If the absolute value of the command, wheels will transition to 0 power (but still in brake 
-  mode).  There is a corresponding actual speed threshold. [in/sec] */
-const double K_SD_WheelMinCmndSpeed = 0.2;
+  mode).  There is a corresponding actual speed threshold. [RPM] */
+const double Ke_RPM_SD_WheelMinCmndSpeed = 0.2;
 
 
 /* K_SD_WheelSpeedPID_V2_Gx: PID gains for the driven wheels that is within the motor controllers. */
@@ -342,17 +360,17 @@ const double K_SD_WheelAnglePID_Gx[E_PID_CalSz] = { 0.0035,   // P Gx
                                                    -1.0};     // Max lower
 
 /* K_SD_WheelAnglePID_GxPracticeBot: PID gains for the angle of the swerve drive wheels on practice bot.  PID control is within the RoboRio.  */
-const double K_SD_WheelAnglePID_GxPracticeBot[E_PID_CalSz] = { 0.002,     // P Gx
+const double K_SD_WheelAnglePID_GxPracticeBot[E_PID_CalSz] = { 0.009,      // P Gx  0.002
                                                                0.000001,  // I Gx 0.000001
                                                                0.0000005, // D Gx 0.0000005
-                                                               0.4,       // P UL
-                                                              -0.4,       // P LL
-                                                               0.12,      // I UL
-                                                              -0.12,      // I LL
-                                                               0.5,       // D UL
-                                                              -0.5,       // D LL
-                                                               0.9,       // Max upper
-                                                              -0.9};      // Max lower
+                                                               0.9,       // P UL 0.6
+                                                              -0.9,       // P LL -0.4
+                                                               0.15,      // I UL 0.12
+                                                              -0.15,      // I LL -0.12
+                                                               0.7,       // D UL 0.5
+                                                              -0.7,       // D LL -0.5
+                                                               0.9,       // Max upper 0.9
+                                                              -0.9};      // Max lower -0.9
 
 /* K_SD_DesiredDriveSpeedAxis: Joystick scale axis for K_SD_DesiredDriveSpeed.  */
 const double K_SD_DesiredDriveSpeedAxis[20] = {-0.95,
@@ -401,11 +419,21 @@ const double K_SD_DesiredDriveSpeed[20] = {-1.00,  //-0.95
 /* RotateDeadBand: Check Rotation value approx 0 */
 const double K_SD_RotateDeadBand = 0.05; 
 
-/* K_SD_CenterLocation: Determines Center Location of Wheels relative to front of bot */
-const double K_SD_CenterLocation[E_RobotCornerSz] = {-45.0,  // E_FrontLeft
-                                              45.0,  // E_FrontRight 
-                                              -135.0,  // E_RearLeft
-                                              135.0}; // E_RearRight 
+/* Ke_k_SD_SignX: Determines sign of the calculation for the X component of the swerve drive offset. */
+const double Ke_k_SD_SignX[E_RobotCornerSz] = { 1.0,  // E_FrontLeft
+                                                1.0,  // E_FrontRight 
+                                               -1.0,  // E_RearLeft
+                                               -1.0}; // E_RearRight 
+
+/* Ke_k_SD_SignY: Determines sign of the calculation for the Y component of the swerve drive offset. */
+const double Ke_k_SD_SignY[E_RobotCornerSz] = { 1.0,  // E_FrontLeft
+                                               -1.0,  // E_FrontRight 
+                                                1.0,  // E_RearLeft
+                                               -1.0}; // E_RearRight 
+
+/* Ke_k_SD_CorrectionGx: Correction gain for swereve drive auto center. */
+const double Ke_k_SD_CorrectionGx = 1; 
+
 /* ADAS Cals */
 /* Upper Targeting Cals (UT) */
 /* K_ADAS_UT_LightDelayTIme - Amount of time wait for the camera to have sufficent light before proceeding. [Seconds] */

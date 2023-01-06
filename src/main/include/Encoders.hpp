@@ -9,9 +9,9 @@
   2022-02-15: Cleaned up file
 */
 
- extern double V_WheelAngleFwd[E_RobotCornerSz];
+ extern double V_Deg_WheelAngleFwd[E_RobotCornerSz];
  extern double V_Rad_WheelAngleFwd[E_RobotCornerSz]; 
- extern double V_WheelAngleRev[E_RobotCornerSz];
+ extern double V_Deg_WheelAngleRev[E_RobotCornerSz];
  extern double V_WheelVelocity[E_RobotCornerSz];
  extern double V_M_WheelDeltaDistance[E_RobotCornerSz];
  extern double V_WheelAngleConverted[E_RobotCornerSz];
@@ -38,6 +38,16 @@
                     rev::SparkMaxRelativeEncoder m_encoderLiftXD,
                     double                       L_encoderTurretAngle);
 
+void Read_Encoders2(double                       L_encoderWheelAngleFrontLeftRawPracticeBot,
+                    double                       L_encoderWheelAngleFrontRightRawPracticeBot,
+                    double                       L_encoderWheelAngleRearLeftRawPracticeBot,
+                    double                       L_encoderWheelAngleRearRightRawPracticeBot,
+                    rev::SparkMaxRelativeEncoder m_encoderFrontLeftDrive,
+                    rev::SparkMaxRelativeEncoder m_encoderFrontRightDrive,
+                    rev::SparkMaxRelativeEncoder m_encoderRearLeftDrive,
+                    rev::SparkMaxRelativeEncoder m_encoderRearRightDrive,
+                    double                       L_encoderTurretAngle);
+
 void EncodersLiftInit(rev::SparkMaxRelativeEncoder m_encoderLiftYD,
                       rev::SparkMaxRelativeEncoder m_encoderLiftXD);
                       
@@ -53,3 +63,18 @@ void EncodersInit(rev::SparkMaxRelativeEncoder m_encoderFrontRightSteer,
                   rev::SparkMaxRelativeEncoder m_encoderLiftXD,
                   rev::SparkMaxRelativeEncoder m_encoderrightShooter,
                   rev::SparkMaxRelativeEncoder m_encoderleftShooter);
+
+
+void EncodersInitCommon(rev::SparkMaxRelativeEncoder m_encoderFrontRightSteer,
+                        rev::SparkMaxRelativeEncoder m_encoderFrontLeftSteer,
+                        rev::SparkMaxRelativeEncoder m_encoderRearRightSteer,
+                        rev::SparkMaxRelativeEncoder m_encoderRearLeftSteer,
+                        rev::SparkMaxRelativeEncoder m_encoderFrontRightDrive,
+                        rev::SparkMaxRelativeEncoder m_encoderFrontLeftDrive,
+                        rev::SparkMaxRelativeEncoder m_encoderRearRightDrive,
+                        rev::SparkMaxRelativeEncoder m_encoderRearLeftDrive);
+
+void EncodersInitComp(rev::SparkMaxRelativeEncoder m_encoderLiftYD,
+                      rev::SparkMaxRelativeEncoder m_encoderLiftXD,
+                      rev::SparkMaxRelativeEncoder m_encoderrightShooter,
+                      rev::SparkMaxRelativeEncoder m_encoderleftShooter);

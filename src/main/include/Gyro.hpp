@@ -13,3 +13,4 @@ extern double V_GyroYawAngleRad;
 
 void GyroInit();
 void ReadGyro(bool L_DriverZeroGyroCmnd);
+void ReadGyro2(bool L_DriverZeroGyroCmnd);

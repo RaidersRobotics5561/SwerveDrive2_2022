@@ -9,10 +9,9 @@
    2022-02-15: Cleaned up file
  */
 
-extern double V_SD_WheelAngleCmnd[E_RobotCornerSz];
+extern double V_k_SD_WheelAngleCmnd[E_RobotCornerSz];
 extern double V_SD_WheelSpeedCmnd[E_RobotCornerSz];
-extern bool   V_SD_DriveWheelsInPID;
-extern bool   V_SD_DriverRobotOrientedRequestedLatched;
+extern bool   Ve_b_SD_DriveWheelsInPID;
 
 void SwerveDriveMotorConfigsInit(rev::SparkMaxPIDController m_frontLeftDrivePID,
                                  rev::SparkMaxPIDController m_frontRightDrivePID,
@@ -38,10 +37,10 @@ void DriveControlMain(double              L_JoyStick1Axis1Y,  // swerve control 
                       double               L_ADAS_Pct_SD_Strafe,
                       double               L_ADAS_Pct_SD_Rotate,
                       bool                 L_ADAS_SD_RobotOriented,
-                      double              L_GyroAngleDegrees,
-                      double              L_GyroAngleRadians,
-                      double             *L_WheelAngleFwd,
-                      double             *L_WheelAngleRev,
-                      double             *L_WheelSpeedCmnd,
-                      double             *L_WheelAngleCmnd);
+                      double              L_Deg_GyroAngle,
+                      double              L_Rad_GyroAngle,
+                      double             *L_Deg_WheelAngleFwd,
+                      double             *L_Deg_WheelAngleRev,
+                      double             *Le_RPM_SD_WheelSpeedCmnd,
+                      double             *L_k_SD_WheelAngleCmnd);
 
