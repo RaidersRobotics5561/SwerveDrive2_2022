@@ -59,3 +59,28 @@ void Joystick_robot_mapping(bool    L_Driver2_buttonA, //Controller 2, A button 
                             bool    L_Driver2_buttonback,
                             int     L_Driver1_POV);
  
+void Joystick1_robot_mapping(bool    L_Driver1_buttonback,
+                             bool    L_Driver1_buttonstart,
+                             double  L_Driver1_left_Axis_y,
+                             double  L_Driver1_left_Axis_x,
+                             double  L_Driver1_right_Axis_x,
+                             double  L_Driver1_left_trigger_Axis,
+                             bool    L_Driver1_buttonA,
+                             bool    L_Driver1_ButtonX,
+                             bool    L_Driver1_ButtonY,
+                             bool    L_Driver1_buttonRB,
+                             bool    L_Driver1_buttonB,
+                             bool    L_Driver1_ButtonLB,
+                             int     L_Driver1_POV);
+
+void Joystick2_robot_mapping(bool    L_Driver2_buttonA,
+                             bool    L_Driver2_buttonB,
+                             bool    L_Driver2_buttonRB,
+                             bool    L_Driver2_buttonLB,
+                             bool    L_Driver2_buttonstart,
+                             bool    L_Driver2_ButtonX,
+                             bool    L_Driver2_ButtonY,
+                             double  L_Driver2_left_Axis_y,
+                             double  L_Driver2_right_Axis_y,
+                             int     L_Driver2_POV,
+                             bool    L_Driver2_buttonback);

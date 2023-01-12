@@ -332,7 +332,6 @@ void DriveControlMain(double               L_JoyStick1Axis1Y,  // swerve control
   double        Le_n_SD_Offset = 0;
   double        La_n_SD_Offset[E_RobotCornerSz];
   bool          Le_b_SD_Active = false;
-  double        La_k_SD_WheelIsFWD[E_RobotCornerSz];
   double        Le_k_SD_RotateCorrectionGx = 0;
 
   /* Scale the joysticks based on a calibratable lookup when in teleop: */
@@ -499,18 +498,25 @@ void DriveControlMain(double               L_JoyStick1Axis1Y,  // swerve control
     if (L_Deg_SD_WA_FWD_Delta <= L_Deg_SD_WA_REV_Delta)
       {
         V_Deg_SD_WheelAngleArb[L_Index] = L_Deg_SD_WA_FWD;
-        La_k_SD_WheelIsFWD[L_Index] = 1;
       }
     else
       {
         V_Deg_SD_WheelAngleArb[L_Index] = L_Deg_SD_WA_REV;
         L_RPM_SD_WS[L_Index] *= (-1); // Need to flip sign of drive wheel to account for reverse direction
-        La_k_SD_WheelIsFWD[L_Index] = -1;
       }
 
     if (Ve_b_SD_AutoCenterLatch == true && Le_b_SD_Active == true)
       {
-      Le_n_SD_Offset = (sin((-L_Deg_WheelAngleFwd[L_Index]) * (C_PI / 180)) * Ke_k_SD_SignX[L_Index] + cos((-L_Deg_WheelAngleFwd[L_Index]) * (C_PI / 180)) * Ke_k_SD_SignY[L_Index]) * Le_k_SD_RotateCorrectionGx * La_k_SD_WheelIsFWD[L_Index] * Ke_k_SD_CorrectionGx;
+      Le_n_SD_Offset = (sin((-L_Deg_WheelAngleFwd[L_Index]) * (C_PI / 180)) * Ke_k_SD_SignX[L_Index] + cos((-L_Deg_WheelAngleFwd[L_Index]) * (C_PI / 180)) * Ke_k_SD_SignY[L_Index]) * Le_k_SD_RotateCorrectionGx;
+
+      if (Le_n_SD_Offset < 0 && L_RPM_SD_WS[L_Index] > 0 && ((-Le_n_SD_Offset) > (L_RPM_SD_WS[L_Index] * Ke_k_SD_AutoCorrectMaxWheelOffset)))
+        {
+        Le_n_SD_Offset = -L_RPM_SD_WS[L_Index] * Ke_k_SD_AutoCorrectMaxWheelOffset;
+        }
+      else if (Le_n_SD_Offset > 0 && L_RPM_SD_WS[L_Index] < 0 && Le_n_SD_Offset > ((-L_RPM_SD_WS[L_Index]) * Ke_k_SD_AutoCorrectMaxWheelOffset))
+        {
+        Le_n_SD_Offset = -L_RPM_SD_WS[L_Index] * Ke_k_SD_AutoCorrectMaxWheelOffset;
+        }
       }
     else
       {
@@ -521,7 +527,7 @@ void DriveControlMain(double               L_JoyStick1Axis1Y,  // swerve control
 
       /* Wheel speed control resides externally in the independent motor controlers.
          Don't send the final value, ramp to the desired final value to help prevent integral windup and overshoot. */
-      Le_RPM_SD_WheelSpeedCmnd[L_Index] = RampTo(((L_RPM_SD_WS[L_Index] + La_n_SD_Offset[L_Index] * La_k_SD_WheelIsFWD[L_Index]) * KV_SD_WheelGx[L_Index]), V_SD_WheelSpeedCmndPrev[L_Index], KV_SD_WheelSpeedRampRate);
+      Le_RPM_SD_WheelSpeedCmnd[L_Index] = RampTo(((L_RPM_SD_WS[L_Index] + Le_n_SD_Offset) * KV_SD_WheelGx[L_Index]), V_SD_WheelSpeedCmndPrev[L_Index], KV_SD_WheelSpeedRampRate);
 
       V_SD_WheelSpeedCmndPrev[L_Index] = Le_RPM_SD_WheelSpeedCmnd[L_Index];
 
@@ -577,7 +583,7 @@ void DriveControlMain(double               L_JoyStick1Axis1Y,  // swerve control
 
   frc::SmartDashboard::PutNumber("Rotate Gx", Le_k_SD_RotateCorrectionGx);
   
-  frc::SmartDashboard::PutBoolean("Latch",  Ve_b_SD_AutoCenterLatch);
+  frc::SmartDashboard::PutBoolean("SD Auto Correct",  Ve_b_SD_AutoCenterLatch);
 
   frc::SmartDashboard::PutNumber("Offset[E_FrontLeft]",  La_n_SD_Offset[E_FrontLeft]);
   frc::SmartDashboard::PutNumber("Offset[E_FrontRight]", La_n_SD_Offset[E_FrontRight]);

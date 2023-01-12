@@ -1,53 +1,53 @@
-// /*
-//   Turret.cpp
+/*
+  Turret.cpp
 
-//   Created on: Aug 15, 2022
-//   Author: Biggs
+  Created on: Aug 15, 2022
+  Author: Biggs
 
-//   This file contains functions related to control of the turret on the robot.
-//   This can include but is not limited to:
-//    - Turret initialization
-//    - Camera targeting
-//  */
+  This file contains functions related to control of the turret on the robot.
+  This can include but is not limited to:
+   - Turret initialization
+   - Camera targeting
+ */
 
-// #include "rev/CANSparkMax.h" // remove
-// #include "ctre/Phoenix.h"
-// #include <frc/smartdashboard/SmartDashboard.h>
-// #include <frc/DriverStation.h>
-// #include "Const.hpp"
-// #include "Lookup.hpp"
-// #include "Driver_inputs.hpp"
-// #include "Encoders.hpp"
+#include "rev/CANSparkMax.h" // remove
+#include "ctre/Phoenix.h"
+#include <frc/smartdashboard/SmartDashboard.h>
+#include <frc/DriverStation.h>
+#include "Const.hpp"
+#include "Lookup.hpp"
+#include "Driver_inputs.hpp"
+#include "Encoders.hpp"
 
-// /* V_e_TurretState: Indicates the state of turret control. */
-// TeTurretState V_e_TurretState = E_TurretDisabled;
+/* V_e_TurretState: Indicates the state of turret control. */
+TeTurretState V_e_TurretState = E_TurretDisabled;
 
-// /* V_e_TurretInitialization: Indicates the state of turret initizlization. */
-// TeTurretInitialization V_e_TurretInitialization = E_TurretInitDisabled;
+/* V_e_TurretInitialization: Indicates the state of turret initizlization. */
+TeTurretInitialization V_e_TurretInitialization = E_TurretInitDisabled;
 
-// /* V_t_TurretDebounceTimer: Indicates the debounce time of the current state. */
-// double V_t_TurretDebounceTimer = 0;
+/* V_t_TurretDebounceTimer: Indicates the debounce time of the current state. */
+double V_t_TurretDebounceTimer = 0;
 
-// /* V_t_TurretTimeOutTimer: Indicates the current time of the state. */
-// double V_t_TurretStateTimer = 0;
+/* V_t_TurretTimeOutTimer: Indicates the current time of the state. */
+double V_t_TurretStateTimer = 0;
 
-// /* V_deg_TurretPositionPrev: Indicates the previous indicated position of the turret. */
-// double V_deg_TurretPositionPrev = 0;
+/* V_deg_TurretPositionPrev: Indicates the previous indicated position of the turret. */
+double V_deg_TurretPositionPrev = 0;
 
 
-// /******************************************************************************
-//  * Function:     TurretInitialization
-//  *
-//  * Description:  Contains functionality for initailization of the turret.
-//  ******************************************************************************/
-// TeTurretInitialization TurretInitialization(TeTurretInitialization   L_e_TurretInitialization,
-//                                             TsRobotMotorCmnd        *LsRobotMotorCmnd)
-//   {
-//     TeTurretInitialization L_e_TurretInitialization = E_TurretInitDisabled;
+/******************************************************************************
+ * Function:     TurretInitialization
+ *
+ * Description:  Contains functionality for initailization of the turret.
+ ******************************************************************************/
+TeTurretInitialization TurretInitialization(TeTurretInitialization   L_e_TurretInitialization,
+                                            TsRobotMotorCmnd        *LsRobotMotorCmnd)
+  {
+    // TeTurretInitialization L_e_TurretInitialization = E_TurretInitDisabled;
 
     
-//     return(L_e_TurretInitialization);
-//   }
+    return(L_e_TurretInitialization);
+  }
 
 
 
@@ -92,89 +92,59 @@
 // #endif
 
 
-// /******************************************************************************
-//  * Function:     TurretMotorConfigsInit
-//  *
-//  * Description:  Contains the motor configurations for the lift motors.
-//  *               - XD and YD
-//  ******************************************************************************/
-// void TurretMotorConfigsInit(WPI_TalonSRX m_turretMotor)
-//   {
-//   T_Lift_State     L_Index1;
-//   T_Lift_Iteration L_Index2;
+/******************************************************************************
+ * Function:     TurretMotorConfigsInit
+ *
+ * Description:  Contains the motor configurations for the lift motors.
+ *               - XD and YD
+ ******************************************************************************/
+void TurretMotorConfigsInit(WPI_TalonSRX m_turretMotor)
+  {
+  // Configure motor and set PID coefficients
+  m_turretMotor.SetSelectedSensorPosition(0);
+  m_turretMotor.ConfigFactoryDefault();
+  m_turretMotor.ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative, 0, K_t_TurretTimeoutMs);
+  m_turretMotor.SetSensorPhase(true);
+  m_turretMotor.SetSelectedSensorPosition(0);
+  m_turretMotor.ConfigNominalOutputForward(0, K_t_TurretTimeoutMs);
+  m_turretMotor.ConfigNominalOutputReverse(0, K_t_TurretTimeoutMs);
+  m_turretMotor.ConfigPeakOutputForward(1, K_t_TurretTimeoutMs);
+  m_turretMotor.ConfigPeakOutputReverse(-1, K_t_TurretTimeoutMs);
+  m_turretMotor.Config_kD(1, 0.1);
+  m_turretMotor.Config_kP(1, 0.1);
+  m_turretMotor.Config_kI(1, 0.0001);
 
-//   // Configure motor and set PID coefficients
-//   m_turretMotor.SetSelectedSensorPosition(0);
-//   m_turretMotor.ConfigFactoryDefault();
-//   m_turretMotor.ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative, 0, K_t_TurretTimeoutMs);
-//   m_turretMotor.SetSensorPhase(true);
-//   m_turretMotor.SetSelectedSensorPosition(0);
-//   m_turretMotor.ConfigNominalOutputForward(0, K_t_TurretTimeoutMs);
-//   m_turretMotor.ConfigNominalOutputReverse(0, K_t_TurretTimeoutMs);
-//   m_turretMotor.ConfigPeakOutputForward(1, K_t_TurretTimeoutMs);
-//   m_turretMotor.ConfigPeakOutputReverse(-1, K_t_TurretTimeoutMs);
-//   m_turretMotor.Config_kD(1, 0.1);
-//   m_turretMotor.Config_kP(1, 0.1);
-//   m_turretMotor.Config_kI(1, 0.0001);
+  #ifdef Turret_Test
+  T_PID_SparkMaxCal L_Index = E_kP;
 
-//   // m_liftpidYD.SetP(K_LiftPID_Gx[E_kP]);
-//   // m_liftpidYD.SetI(K_LiftPID_Gx[E_kI]);
-//   // m_liftpidYD.SetD(K_LiftPID_Gx[E_kD]);
-//   // m_liftpidYD.SetIZone(K_LiftPID_Gx[E_kIz]);
-//   // m_liftpidYD.SetFF(K_LiftPID_Gx[E_kFF]);
-//   // m_liftpidYD.SetOutputRange(K_LiftPID_Gx[E_kMinOutput], K_LiftPID_Gx[E_kMaxOutput]);
-
-//   // m_liftpidXD.SetP(K_LiftPID_Gx[E_kP]);
-//   // m_liftpidXD.SetI(K_LiftPID_Gx[E_kI]);
-//   // m_liftpidXD.SetD(K_LiftPID_Gx[E_kD]);
-//   // m_liftpidXD.SetIZone(K_LiftPID_Gx[E_kIz]);
-//   // m_liftpidXD.SetFF(K_LiftPID_Gx[E_kFF]);
-//   // m_liftpidXD.SetOutputRange(K_LiftPID_Gx[E_kMinOutput], K_LiftPID_Gx[E_kMaxOutput]);
-
-//   for (L_Index2 = E_LiftIteration1;
-//        L_Index2 < E_LiftIterationSz;
-//        L_Index2 = T_Lift_Iteration(int(L_Index2) + 1))
-//       {
-//       for (L_Index1 = E_S0_BEGONE;
-//            L_Index1 < E_Lift_State_Sz;
-//            L_Index1 = T_Lift_State(int(L_Index1) + 1))
-//           {
-//           KV_LiftRampRateYD[L_Index1][L_Index2] = K_LiftRampRateYD[L_Index1][L_Index2];
-//           KV_LiftRampRateXD[L_Index1][L_Index2] = K_LiftRampRateXD[L_Index1][L_Index2];
-//           }
-//       }
+  for (L_Index = E_kP;
+       L_Index < E_PID_SparkMaxCalSz;
+       L_Index = T_PID_SparkMaxCal(int(L_Index) + 1))
+      {
+      V_LiftPID_Gx[L_Index] = K_LiftPID_Gx[L_Index];
+      }
   
-//   #ifdef LiftXY_Test
-//   T_PID_SparkMaxCal L_Index = E_kP;
+  // display PID coefficients on SmartDashboard
+  // frc::SmartDashboard::PutNumber("P Gain", K_LiftPID_Gx[E_kP]);
+  // frc::SmartDashboard::PutNumber("I Gain", K_LiftPID_Gx[E_kI]);
+  // frc::SmartDashboard::PutNumber("D Gain", K_LiftPID_Gx[E_kD]);
+  // frc::SmartDashboard::PutNumber("I Zone", K_LiftPID_Gx[E_kIz]);
+  // frc::SmartDashboard::PutNumber("Feed Forward", K_LiftPID_Gx[E_kFF]);
+  // frc::SmartDashboard::PutNumber("Max Output", K_LiftPID_Gx[E_kMaxOutput]);
+  // frc::SmartDashboard::PutNumber("Min Output", K_LiftPID_Gx[E_kMinOutput]);
 
-//   for (L_Index = E_kP;
-//        L_Index < E_PID_SparkMaxCalSz;
-//        L_Index = T_PID_SparkMaxCal(int(L_Index) + 1))
-//       {
-//       V_LiftPID_Gx[L_Index] = K_LiftPID_Gx[L_Index];
-//       }
-  
-//   // display PID coefficients on SmartDashboard
-//   // frc::SmartDashboard::PutNumber("P Gain", K_LiftPID_Gx[E_kP]);
-//   // frc::SmartDashboard::PutNumber("I Gain", K_LiftPID_Gx[E_kI]);
-//   // frc::SmartDashboard::PutNumber("D Gain", K_LiftPID_Gx[E_kD]);
-//   // frc::SmartDashboard::PutNumber("I Zone", K_LiftPID_Gx[E_kIz]);
-//   // frc::SmartDashboard::PutNumber("Feed Forward", K_LiftPID_Gx[E_kFF]);
-//   // frc::SmartDashboard::PutNumber("Max Output", K_LiftPID_Gx[E_kMaxOutput]);
-//   // frc::SmartDashboard::PutNumber("Min Output", K_LiftPID_Gx[E_kMinOutput]);
+  // display secondary coefficients
+  // frc::SmartDashboard::PutNumber("Set Position Y", 0);
+  // frc::SmartDashboard::PutNumber("Set Position X", 0);
 
-//   // display secondary coefficients
-//   // frc::SmartDashboard::PutNumber("Set Position Y", 0);
-//   // frc::SmartDashboard::PutNumber("Set Position X", 0);
-
-//   frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S0_BEGONE][E_LiftIteration1]",            K_LiftRampRateXD[E_S0_BEGONE][E_LiftIteration1]);
-//   frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S2_lift_down_YD][E_LiftIteration1]",      K_LiftRampRateXD[E_S2_lift_down_YD][E_LiftIteration1]);
-//   frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S3_move_forward_XD][E_LiftIteration1]",   K_LiftRampRateXD[E_S3_move_forward_XD][E_LiftIteration1]);
-//   frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S4_stretch_up_YD][E_LiftIteration1]",     K_LiftRampRateXD[E_S4_stretch_up_YD][E_LiftIteration1]);
-//   frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S5_more_forward_XD][E_LiftIteration1]",   K_LiftRampRateXD[E_S5_more_forward_XD][E_LiftIteration1]);
-//   frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S6_lift_up_more_YD][E_LiftIteration1]",   K_LiftRampRateXD[E_S6_lift_up_more_YD][E_LiftIteration1]);
-//   #endif
-//   }
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S0_BEGONE][E_LiftIteration1]",            K_LiftRampRateXD[E_S0_BEGONE][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S2_lift_down_YD][E_LiftIteration1]",      K_LiftRampRateXD[E_S2_lift_down_YD][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S3_move_forward_XD][E_LiftIteration1]",   K_LiftRampRateXD[E_S3_move_forward_XD][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S4_stretch_up_YD][E_LiftIteration1]",     K_LiftRampRateXD[E_S4_stretch_up_YD][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S5_more_forward_XD][E_LiftIteration1]",   K_LiftRampRateXD[E_S5_more_forward_XD][E_LiftIteration1]);
+  frc::SmartDashboard::PutNumber("K_LiftRampRateXD[E_S6_lift_up_more_YD][E_LiftIteration1]",   K_LiftRampRateXD[E_S6_lift_up_more_YD][E_LiftIteration1]);
+  #endif
+  }
 
 
 // /******************************************************************************
@@ -588,7 +558,7 @@
 
 
 // /******************************************************************************
-//  * Function:     Lift_Control_Dictator
+//  * Function:     TurretControlMain
 //  *
 //  * Description:  Main calling function for turret control.
 //  ******************************************************************************/

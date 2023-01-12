@@ -23,8 +23,6 @@
 #include "BallHandler.hpp"
 #include "LightControl.hpp"
 #include "VisionV2.hpp"
-#include "Auton.hpp"
-#include "AutoTarget.hpp"
 #include "ADAS.hpp"
 #include "ADAS_BT.hpp"
 #include "ADAS_UT.hpp"
@@ -45,6 +43,7 @@ void Robot::RobotMotorCommands()
   {
   // Motor output commands:
   // Swerve drive motors
+  // Swerve stear motors
   if (Ve_b_SD_DriveWheelsInPID == true)
     {
     m_frontLeftDrivePID.SetReference(V_SD_WheelSpeedCmnd[E_FrontLeft],   rev::ControlType::kVelocity);
@@ -68,7 +67,18 @@ void Robot::RobotMotorCommands()
     m_rearRightSteerMotor.Set(0);
     }
 
-  // Swerve stear motors
+  // Turret motor command
+  double L_Temp = 0;
+  if (VsDriverInput.e_TurretCmndDirection == E_TurrentCmndLeft)
+    {
+    L_Temp = -K_Pct_TurretOpenLoopCmnd;
+    }
+  else if (VsDriverInput.e_TurretCmndDirection == E_TurrentCmndRight)
+    {
+    L_Temp = K_Pct_TurretOpenLoopCmnd;
+    }
+
+  m_turret.Set(ControlMode::PercentOutput, L_Temp);
 
 
 #ifdef CompBot
@@ -149,13 +159,6 @@ void Robot::RobotInit()
   m_rearLeftDriveMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
   m_rearRightSteerMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
   m_rearRightDriveMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
-  #ifdef CompBot
-  m_liftMotorYD.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
-  m_liftMotorXD.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
-
-  m_rightShooterMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kCoast);
-  m_leftShooterMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kCoast);
-  #endif
 
   m_turret.ConfigFactoryDefault();
   m_turret.ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative, 0, K_t_TurretTimeoutMs);
@@ -165,6 +168,16 @@ void Robot::RobotInit()
   m_turret.ConfigNominalOutputReverse(0, K_t_TurretTimeoutMs);
   m_turret.ConfigPeakOutputForward(1, K_t_TurretTimeoutMs);
   m_turret.ConfigPeakOutputReverse(-1, K_t_TurretTimeoutMs);
+
+  #ifdef CompBot
+  m_liftMotorYD.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
+  m_liftMotorXD.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
+
+  m_rightShooterMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kCoast);
+  m_leftShooterMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kCoast);
+  #endif
+
+
 
   SwerveDriveMotorConfigsInit(m_frontLeftDrivePID,
                               m_frontRightDrivePID,
@@ -202,7 +215,6 @@ void Robot::RobotPeriodic()
   {
   V_MatchTimeRemaining = frc::Timer::GetMatchTime().value();
 
-// ToDo: This is a temporary workaround, we need to put some sort of "glue" layter in to make switching between comp and practice cleaner
 #ifdef CompBot
   Read_IO_Sensors(di_IR_Sensor.Get(), // ball sensor upper - di_IR_Sensor.Get()
                   di_BallSensorLower.Get(), // ball sensor lower - di_BallSensorLower.Get()
@@ -210,30 +222,17 @@ void Robot::RobotPeriodic()
                   di_XY_LimitSwitch.Get(), // XY Limit - di_XY_LimitSwitch.Get()
                   false); //di_TurrentLimitSwitch.Get());
   
-  Joystick_robot_mapping(false, // c_joyStick2.GetRawButton(1),
-                         false, // c_joyStick2.GetRawButton(2),
-                         false, // c_joyStick2.GetRawButton(6), 
-                         false, // c_joyStick2.GetRawButton(5),
-                         false, // c_joyStick2.GetRawButton(8),
-                         c_joyStick.GetRawButton(7),
-                         c_joyStick.GetRawButton(8),
-                         0, //c_joyStick2.GetRawButton(3),
-                         0, //c_joyStick2.GetRawButton(4),
-                         0, //c_joyStick2.GetRawAxis(1),
-                         0, //c_joyStick2.GetRawAxis(5),
-                         c_joyStick.GetRawAxis(1),
-                         c_joyStick.GetRawAxis(0),
-                         c_joyStick.GetRawAxis(4),
-                         c_joyStick.GetRawAxis(3),
-                         c_joyStick.GetRawButton(1),
-                         c_joyStick.GetRawButton(3),
-                         c_joyStick.GetRawButton(4),
-                         0, //c_joyStick2.GetPOV(),
-                         c_joyStick.GetRawButton(6),
-                         c_joyStick.GetRawButton(2),
-                         c_joyStick.GetRawButton(5),
-                         false, // c_joyStick2.GetRawButton(7),
-                         c_joyStick.GetPOV());
+  Joystick1_robot_mapping(c_joyStick2.GetRawButton(1),
+                          c_joyStick2.GetRawButton(2),
+                          c_joyStick2.GetRawButton(6), 
+                          c_joyStick2.GetRawButton(5),
+                          c_joyStick2.GetRawButton(8),
+                          c_joyStick2.GetRawButton(3),
+                          c_joyStick2.GetRawButton(4),
+                          c_joyStick2.GetRawAxis(1),
+                          c_joyStick2.GetRawAxis(5),
+                          c_joyStick2.GetPOV(),
+                          c_joyStick2.GetRawButton(7));
 
   Read_Encoders(a_encoderWheelAngleFrontLeft.Get().value(),
                 a_encoderWheelAngleFrontRight.Get().value(),
@@ -251,32 +250,21 @@ void Robot::RobotPeriodic()
                 m_encoderleftShooter,
                 m_encoderLiftYD,
                 m_encoderLiftXD,
-                m_turret.GetSelectedSensorPosition());  //m_turret.GetSelectedSensorPosition()
+                m_turret.GetSelectedSensorPosition(1));  //m_turret.GetSelectedSensorPosition()
 #else
-  Joystick_robot_mapping(false, // c_joyStick2.GetRawButton(1),
-                         false, // c_joyStick2.GetRawButton(2),
-                         false, // c_joyStick2.GetRawButton(6), 
-                         false, // c_joyStick2.GetRawButton(5),
-                         false, // c_joyStick2.GetRawButton(8),
-                         c_joyStick.GetRawButton(7),
-                         c_joyStick.GetRawButton(8),
-                         0, //c_joyStick2.GetRawButton(3),
-                         0, //c_joyStick2.GetRawButton(4),
-                         0, //c_joyStick2.GetRawAxis(1),
-                         0, //c_joyStick2.GetRawAxis(5),
-                         c_joyStick.GetRawAxis(1),
-                         c_joyStick.GetRawAxis(0),
-                         c_joyStick.GetRawAxis(4),
-                         c_joyStick.GetRawAxis(3),
-                         c_joyStick.GetRawButton(1),
-                         c_joyStick.GetRawButton(3),
-                         c_joyStick.GetRawButton(4),
-                         0, //c_joyStick2.GetPOV(),
-                         c_joyStick.GetRawButton(6),
-                         c_joyStick.GetRawButton(2),
-                         c_joyStick.GetRawButton(5),
-                         false, // c_joyStick2.GetRawButton(7),
-                         c_joyStick.GetPOV());
+  Joystick1_robot_mapping(c_joyStick.GetRawButton(7),
+                          c_joyStick.GetRawButton(8),
+                          c_joyStick.GetRawAxis(1),
+                          c_joyStick.GetRawAxis(0),
+                          c_joyStick.GetRawAxis(4),
+                          c_joyStick.GetRawAxis(3),
+                          c_joyStick.GetRawButton(1),
+                          c_joyStick.GetRawButton(3),
+                          c_joyStick.GetRawButton(4),
+                          c_joyStick.GetRawButton(6),
+                          c_joyStick.GetRawButton(2),
+                          c_joyStick.GetRawButton(5),
+                          c_joyStick.GetPOV());
 
   Read_Encoders2(a_encoderFrontLeftSteer.GetVoltage(),
                  a_encoderFrontRightSteer.GetVoltage(),
@@ -286,7 +274,7 @@ void Robot::RobotPeriodic()
                  m_encoderFrontRightDrive,
                  m_encoderRearLeftDrive,
                  m_encoderRearRightDrive,
-                 m_turret.GetSelectedSensorPosition());  //m_turret.GetSelectedSensorPosition()
+                 m_turret.GetSelectedSensorPosition(1)); 
 
   Read_IO_Sensors(false, // ball sensor upper - di_IR_Sensor.Get()
                   false, // ball sensor lower - di_BallSensorLower.Get()
@@ -510,19 +498,6 @@ void Robot::TeleopInit()
 void Robot::TeleopPeriodic()
   {
   RobotMotorCommands();
-    double L_Temp = 0;
-  if (VsDriverInput.e_TurretCmndDirection == E_TurrentCmndLeft)
-    {
-      L_Temp = -K_Pct_TurretOpenLoopCmnd;
-    }
-  else if (VsDriverInput.e_TurretCmndDirection == E_TurrentCmndRight)
-    {
-      L_Temp = K_Pct_TurretOpenLoopCmnd;
-    }
-
-  frc::SmartDashboard::PutNumber("TurretCmnd",  L_Temp);
-  frc::SmartDashboard::PutNumber("TurretCmndRaw",  (double)c_joyStick.GetPOV());
-  // m_turret.Set(ControlMode::PercentOutput, L_Temp);
   }
 
 

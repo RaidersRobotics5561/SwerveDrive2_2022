@@ -311,21 +311,23 @@ const double K_SD_MaxGain = 0.7;
 
 
 /* Ke_SD_AutoCorrectPID_Gx: PID gains for the auto correct.  PID control is within the RoboRio.  */
-const double Ke_SD_AutoCorrectPID_Gx[E_PID_CalSz] = { 90.0,      // P Gx  0.002
-                                                       0.01,  // I Gx 0.000001
-                                                       0.0005, // D Gx 0.0000005
+const double Ke_SD_AutoCorrectPID_Gx[E_PID_CalSz] = { 40.0,      // P Gx  75
+                                                       0.5,  // I Gx 0.03
+                                                       0.0005, // D Gx 0.0005
                                                       300.0,       // P UL 0.6
                                                      -300.0,       // P LL -0.4
-                                                     70.0,      // I UL 0.12
-                                                    -70.0,      // I LL -0.12
+                                                     300.0,      // I UL 0.12
+                                                    -300.0,      // I LL -0.12
                                                       1.0,       // D UL 0.5
                                                      -1.0,       // D LL -0.5
-                                                     300.0,       // Max upper 0.9
-                                                    -300.0};      // Max lower -0.9
+                                                     400.0,       // Max upper 0.9
+                                                    -400.0};      // Max lower -0.9
 
+/* Ke_k_SD_AutoCorrectMaxWheelOffset: Max percent offset of wheelspeed.*/
+const double Ke_k_SD_AutoCorrectMaxWheelOffset = 0.8;
 
 /* K_SD_WheelMaxSpeed: Max RPM speed of the swerve drive wheel motor.*/
-const double K_SD_WheelMaxSpeed = 2500;
+const double K_SD_WheelMaxSpeed = 6000;
 
 /* Ke_RPM_SD_WheelMinCmndSpeed: Min RPM speed of the swerve drive wheel to keep it under PID control.  
   If the absolute value of the command, wheels will transition to 0 power (but still in brake 
